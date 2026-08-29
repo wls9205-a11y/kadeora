@@ -20,6 +20,7 @@
  *   npx tsx scripts/permits-gate.ts --sigungu 31140  지정 시군구만
  */
 import { config } from 'dotenv';
+import { writeFileSync } from 'node:fs';
 import { normalizeServiceKey } from '../src/lib/cron/data-go-kr-key';
 import { BJDONG_BY_SIGUNGU } from '../src/lib/region/bjdong-data';
 import { labelOfLawdCode } from '../src/lib/region/lawd';
@@ -79,6 +80,12 @@ async function main() {
     arch: { items: 0, candidates: 0, empty: 0, riItems: 0, riCand: 0 },
   };
   const bySigungu = new Map<string, number>();
+  /** 후보 원문 — 중단점 A 리포트의 「인허가 검출 목록」이 된다. 세기만 하면 명단과 대조할 수 없다. */
+  const candidates: Array<Record<string, string | number | null>> = [];
+  /** ⚠️ 정체 모를 봉투는 «본문을 남긴다». 코드만 세면 무엇이었는지 영영 모른다. */
+  const oddBodies: Array<{ track: string; sgg: string; bjd: string; head: string }> = [];
+  /** arch 후보 유형 분석 — 폐지 vs 주기 차등 판단 입력. */
+  const archPurpose = new Map<string, number>();
   let mismatch = 0, apiCalls = 0, done = 0;
 
   for (const track of ['house', 'arch'] as PermitTrack[]) {
@@ -86,6 +93,9 @@ async function main() {
       const r = await fetchPermitPage(buildPermitUrl(track, key, { sigunguCd: sgg, bjdongCd: bjd, numOfRows: 100 }));
       apiCalls += r.calls;
       envelopes[r.ok ? 'OK' : r.code] = (envelopes[r.ok ? 'OK' : r.code] ?? 0) + 1;
+      if (!r.ok && r.code === 'NO_CODE' && oddBodies.length < 12) {
+        oddBodies.push({ track, sgg, bjd, head: r.body.slice(0, 200).replace(/\s+/g, ' ') });
+      }
       if (++done % 200 === 0) process.stdout.write(`  … ${done}/${pairs.length * 2} (호출 ${apiCalls})\n`);
       if (!r.ok) continue;
 
@@ -98,7 +108,23 @@ async function main() {
 
       for (const it of items) {
         if (it.sigunguCd && it.sigunguCd !== sgg) mismatch++;
-        if (isPermitCandidate(track, it)) { perTrack[track].candidates++; if (isRi) perTrack[track].riCand++; }
+        if (isPermitCandidate(track, it)) {
+          perTrack[track].candidates++;
+          if (isRi) perTrack[track].riCand++;
+          const purpose = (it.purpsCdNm ?? it.mainPurpsCdNm ?? '(미상)').trim();
+          if (track === 'arch') archPurpose.set(purpose, (archPurpose.get(purpose) ?? 0) + 1);
+          candidates.push({
+            track, sigungu: sgg, sigunguNm: labelOfLawdCode(sgg), bjdong: bjd, ri: isRi ? 1 : 0,
+            pk: it.mgmHsrgstPk ?? it.mgmPmsrgstPk ?? null,
+            name: (it.bldNm ?? '').trim() || null,
+            addr: (it.platPlc ?? '').trim() || null,
+            units: toInt(it.totHhldCnt ?? it.hhldCnt),
+            permitDay: it.apprvDay ?? it.archPmsDay ?? null,
+            stcnsSched: it.stcnsSchedDay ?? null,
+            expectedSale: permitToExpectedSalePeriod(it.stcnsSchedDay),
+            purpose,
+          });
+        }
         const hay = permitHaystack(it);
         for (const s of SAMPLES) {
           if (!s.needle.test(hay)) continue;
@@ -154,6 +180,21 @@ async function main() {
   console.log('── ④ 코드 불일치 (D5-4) ────────────────');
   console.log(`  ${mismatch} 건${mismatch ? '  ⚠️ 요청한 지역이 아닌 데이터가 온다' : '  (정상)'}`);
   console.log('');
+  console.log('── ⑤ arch 후보 유형 (폐지 vs 주기 차등 판단 입력) ──');
+  const arch = [...archPurpose.entries()].sort((a, b) => b[1] - a[1]);
+  console.log(`  arch 후보 ${perTrack.arch.candidates} · 주용도 ${arch.length}종`);
+  for (const [k, v] of arch.slice(0, 10)) console.log(`    ${String(v).padStart(5)}  ${k}`);
+
+  if (oddBodies.length) {
+    console.log('');
+    console.log('── ⑥ NO_CODE 본문 표본 ─────────────────');
+    for (const o of oddBodies.slice(0, 5)) console.log(`  [${o.track}] ${o.sgg}+${o.bjd}: ${o.head.slice(0, 140)}`);
+  }
+
+  const out = 'permits-candidates.json';
+  writeFileSync(out, JSON.stringify(candidates, null, 1), 'utf8');
+  console.log('');
+  console.log(`후보 ${candidates.length}건 → ${out} (명단 대조용)`);
   console.log('⛔ dry-run. DB 에 아무것도 쓰지 않았다.');
 }
 

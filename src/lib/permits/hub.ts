@@ -282,6 +282,10 @@ export function sampleVerdict(expect: PermitTrack, tracks: readonly PermitTrack[
  */
 export function readPermitEnvelope(text: string): { ok: boolean; code: string; msg: string } {
   const t = text.trimStart();
+  // ⚠️⚠️ HTTP 200 인데 «본문이 비어 있는» 응답이 실재한다(표본 패스 112건 중 9건).
+  //    이걸 「0건」으로 세면 그 법정동은 조용히 사라진다 — 우리가 계속 경계해 온 그 실패다.
+  //    빈 본문은 «실패» 이고, 재시도 대상이다.
+  if (t === '') return { ok: false, code: 'EMPTY_BODY', msg: '본문 없음(HTTP 200)' };
   if (t.startsWith('{')) {
     try {
       const j = JSON.parse(t) as { header?: { resultCode?: string; resultMsg?: string } };
@@ -297,11 +301,12 @@ export function readPermitEnvelope(text: string): { ok: boolean; code: string; m
 
 /**
  * 다시 걸어 볼 만한 실패인가.
- *   23 초당 요청제한 초과 · 05 서비스 연결실패 — 둘 다 «우리 잘못이 아니고 곧 풀린다».
+ *   23 초당 요청제한 초과 · 05 서비스 연결실패 · EMPTY_BODY 빈 본문(HTTP 200)
+ *   — 전부 «우리 잘못이 아니고 곧 풀린다».
  * ⛔ 30(키 미등록)·22(일 한도)는 재시도하지 않는다. 다시 걸어도 같은 답이고
  *    한도를 더 태울 뿐이다.
  */
-const RETRYABLE = new Set(['23', '05', 'HTTP_429', 'HTTP_503', 'FETCH_FAIL']);
+const RETRYABLE = new Set(['23', '05', 'HTTP_429', 'HTTP_503', 'FETCH_FAIL', 'EMPTY_BODY']);
 export function isRetryableEnvelope(code: string): boolean {
   return RETRYABLE.has(code);
 }

@@ -241,6 +241,18 @@ describe('봉투 — XML 과 JSON 을 «섞어서» 준다 (실측)', () => {
   it('망가진 JSON 을 «정상으로 세지 않는다»', () => {
     expect(readPermitEnvelope('{oops').ok).toBe(false);
   });
+
+  /**
+   * ⚠️⚠️ HTTP 200 인데 본문이 빈 응답이 실재한다 — 표본 패스 112건 중 «9건».
+   *    「0건」으로 세면 그 법정동이 조용히 사라진다. 실패로 세고 다시 건다.
+   */
+  it('빈 본문(HTTP 200)은 «실패» 이고 재시도 대상이다', () => {
+    const e = readPermitEnvelope('');
+    expect(e.ok).toBe(false);
+    expect(e.code).toBe('EMPTY_BODY');
+    expect(isRetryableEnvelope('EMPTY_BODY')).toBe(true);
+    expect(readPermitEnvelope(' 	 ').code).toBe('EMPTY_BODY');
+  });
 });
 
 describe('재시도 분류 — 한도를 더 태우지 않는다', () => {
