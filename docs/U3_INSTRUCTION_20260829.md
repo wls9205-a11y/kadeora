@@ -123,3 +123,50 @@ group by 1,2,3;
 **403 이 두 종류라는 것이 이번의 교훈이다.** `Invalid API-KEY`(키를 못 찾음)와
 `Invalid Signature`(키는 찾았고 서명이 틀림)를 같은 칸에 세면 전사 오류를 코드 버그로
 착각해 엉뚱한 곳을 판다. `classifyStatus` 가 그 둘을 가르고, 테스트가 잠갔다.
+
+---
+
+## 부록 2 — StatReport 실스펙 확정 (2026-08-29 · R-3 갱신)
+
+서명 통과 후 실호출로 확정했다. **§2-3 의 추정 셋이 틀렸다.**
+
+| 항목 | 지시서 추정 | 실측 |
+|---|---|---|
+| `ids` 형식 | JSON 배열 `["nkw-…"]` | ⛔ **400 (11001 유효하지 않은 ID 형식)**. bare 쉼표구분 또는 반복 파라미터라야 200 |
+| 대상 키워드 수 | 466± | **5,974** (캠페인 11 · 그룹 22). `ad_keywords` 는 5,478행이지만 **캠페인 1/11 · 그룹 12/22 의 부분 스냅샷**(8/26) |
+| 배치 한도 | 「1회 ids 개수」 | **개수가 아니라 URI 길이**다. 300개(≈8.6KB) 200 OK · 전량(5,974) **414 URI Too Long** |
+
+**`id`(단수)와 `ids`(복수)는 «다른 API» 다** — 이게 설계를 가른다:
+
+```
+GET /stats?id=<kw>&fields=[…]&timeRange={since,until}
+  → {"summary":{…}, "data":[{dateStart,dateEnd,impCnt,clkCnt,salesAmt,ctr,cpc,avgRnk}, …]}
+    ✅ «일자별» 행. ⛔ 키워드 하나뿐 → 5,974 호출/일
+
+GET /stats?ids=<kw1>,<kw2>,…&fields=[…]&timeRange={since,until}
+  → {"data":[{id,impCnt,clkCnt,salesAmt,ctr,cpc,avgRnk}, …], compTm, cycleBaseTm}
+    ✅ 키워드별 «기간 합계». ⛔ timeIncrement 미지원(「지원하지 않는 기능입니다」)
+    ⚠️ 노출 0 인 키워드는 «행이 아예 안 온다» — 100개 요청 → 26행
+```
+
+**채택: `ids` + `timeRange`의 since=until=하루.** 기간 합계가 곧 그날의 일별 행이 된다.
+호출 수 = ⌈5,974/250⌉ × 3일 ≈ **72회/실행** (+ 키워드 목록 34회). `id` 단수 방식(17,922회)의 1/250 이다.
+
+실값 확인 — 리드가 붙은 「아크로라로체」(`nkw-…8540645599`):
+`08-25 노출10 · 08-26 노출7 · 08-27 노출23 클릭1 지출81원 · 6일 합계 노출70 클릭3 지출236원`
+
+### ⚠️ ⑥ 뷰 설계에 영향 — `ad_keywords` 가 부분 스냅샷이다
+
+§3-1 의 뷰는 `ad_keywords` 에서 시작(`from ad_keywords k left join …`)한다. 그런데 그 표는
+**11개 캠페인 중 1개**만 담고 있어 나머지 10개 캠페인의 키워드가 통째로 안 보인다.
+지출은 `ad_stats_daily` 에 쌓이는데 뷰에서 사라지는 형태라, 「돈은 썼는데 표에 없다」가 된다.
+→ **판단 필요**: ①`ad_keywords` 를 ad-stats-sync 가 함께 갱신(목록 34호출은 이미 치른다)
+②뷰를 `ad_stats_daily` 기준으로 뒤집고 `ad_keywords` 는 이름 보강용 left join
+③현행 유지(1개 캠페인만 관측). **②를 권한다** — 수집한 것이 보이지 않는 구조를 만들지 않는다.
+
+### 적용 상태
+
+- `ad_stats_daily` **생성 완료**. 제약 2종(음수·클릭>노출) + 멱등 upsert + **리드조인**
+  (아크로라로체 keyword_id ↔ `leads.utm->>'n_keyword_id'`) 5항 스모크 통과 후 행 0 복귀.
+- ⚠️ `apply_migration` 이 「Failed to initialise history table」로 3회 연속 끊겨(DB 는 정상 —
+  읽기 즉답) `execute_sql` 로 적용했다. **정본 기록은 `supabase/migrations/u3_ad_stats_daily_2026-08-29.sql`.**
