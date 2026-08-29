@@ -14,6 +14,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties, ChangeEvent, FormEvent } from 'react';
 import SectionHeader from '@/components/apt/SectionHeader';
+import { SECTION_SCROLL_MARGIN } from '@/components/apt/SiteJumpBar';
 import { SITE_URL } from '@/lib/constants';
 import { leadCopy, leadCopyForHome } from '@/lib/apt/lead-copy';
 import { leadKind } from '@/lib/apt/lead-eligibility';
@@ -595,14 +596,25 @@ export default function LeadForm({
   // 엔드포인트가 없으면 폼만 덩그러니 보이고 제출이 실패하는 상태가 되므로 아예 렌더하지 않는다.
   if (!ENDPOINT) return null;
 
-  // 강조는 2px 테두리 하나로만 준다. 배경은 다른 카드와 같은 --bg-surface 를 유지한다.
-  // (그라디언트·그림자·애니메이션 없음. 빨강 계열도 쓰지 않는다 — 경고로 읽힌다.)
+  // ── U-1a — DS ④ CtaPanel «틴트 색면형» 으로 승격 ────────────────────────────
+  // 예전에는 「--bg-surface + 2px 강조 테두리」였다. 다른 카드와 배경이 같아 «면» 이
+  // 서지 않았고, 굵은 테두리 하나로 위계를 만들려다 보니 두께만 세졌다.
+  // S7-3 확정: 리드폼 = «틴트 색면» / 회원 CTA = «흰 카드». 그 둘이 면의 성격으로 갈린다.
+  //
+  // ⛔ 폼을 «이동하지 않는다». 이미 상단이고 그 자리는 A6 이 정한 것이다
+  //    (「최근 관측」을 읽고 바로 신청으로 이어지는 자리). 시각만 승격한다.
+  // ⛔ InterestRegisterHero(회원 CTA)와 «인접 배치하지 않는다»(S7-3) — 지금 배치가
+  //    이미 떨어져 있고, 이 커밋이 그것을 바꾸지 않는다.
+  // ⚠️ 빨강 계열은 여전히 쓰지 않는다 — 경고로 읽힌다.
   const shell: CSSProperties = {
-    background: 'var(--bg-surface)',
-    border: '2px solid var(--kd-accent-border)',
+    background: 'var(--brand-bg)',
+    border: '1px solid var(--brand-border)',
     borderRadius: 'var(--radius-card)',
     overflow: 'hidden',
     margin: '2rem 0',
+    // U-1a — 점프바 「신청」 칩의 착지점. 헤더(45) + 점프바(42) + 여유 8 만큼 띄운다.
+    // 없으면 폼 제목이 고정 바 «아래로 숨는다».
+    scrollMarginTop: SECTION_SCROLL_MARGIN,
   };
 
   // s-v2: 성공 화면의 '추가 정보 보내기'(2차 POST)는 제거했다.

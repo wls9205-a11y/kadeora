@@ -21,10 +21,9 @@ import { displayNameOf, regionedName, regionSuffix, stripDupRegionPrefix, swapLe
 import SiteJumpBar, { SECTION_SCROLL_MARGIN } from '@/components/apt/SiteJumpBar';
 // V15 B — 접이식 섹션. <details> 라 닫혀 있어도 자식이 DOM 에 남는다(색인 유지).
 import DetailSection from '@/components/apt/detail/DetailSection';
-import AccordionEnhancer from '@/components/apt/detail/AccordionEnhancer';
 import AptKeyMetrics from '@/components/apt/detail/AptKeyMetrics';
 import SiteDetailRail from '@/components/apt/SiteDetailRail';
-import LeadForm from '@/components/apt/LeadForm';
+import LeadForm, { LEAD_FORM_ID } from '@/components/apt/LeadForm';
 import RecentObservations from '@/components/apt/RecentObservations';
 import { siteEntity } from '@/lib/seo/entity';
 import FieldNote from '@/components/apt/FieldNote';
@@ -1132,6 +1131,11 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
           { id: 'price-group', label: '분양가', show: true },
           { id: 'odds-group',  label: '전망',   show: true },
           { id: 'more-group',  label: '더보기', show: true },
+          /* U-1a — 다섯째 칩. 리드폼은 «이동하지 않는다»(이미 상단·A6 배치 존중).
+             대신 어디서 스크롤하고 있든 «한 번에 돌아올 길» 을 준다.
+             ⚠️ show 는 폼이 실제로 렌더될 때만 true 다 — 눌러도 갈 곳이 없는 칩을
+                만들지 않는다(SiteActionBar 가 지키는 규칙과 같다). */
+          { id: LEAD_FORM_ID, label: '신청', show: showLeadForm },
         ]}
       />
 
@@ -2522,9 +2526,8 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
            280px 컬럼을 없애고 본문 폭으로 편다 — 남은 것은 같은 시공사 링크뿐이다. */}
       <AptSidebar slug={slug} builder={site?.builder ?? sub?.constructor_nm ?? null} isLoggedIn={isLoggedInApt} />
 
-      {/* V15 B · 접이식 점진 향상. open 속성만 건드린다 (콘텐츠는 손대지 않는다).
-           히어로가 LCP 라 그 근처가 아니라 여기서 마운트한다. */}
-      <AccordionEnhancer />
+      {/* ⚠️ U-1a — AccordionEnhancer 퇴역. 전 섹션이 펼쳐져 있어 「열어 줄 것」이 없다.
+           점프바 칩은 이제 «순수 앵커» 다(SiteJumpBar 참조). */}
 
       {/* 댓글 섹션 */}
       {site?.slug && <AptCommentSection slug={site.slug} siteName={name} />}
