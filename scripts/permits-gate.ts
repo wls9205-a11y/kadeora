@@ -20,7 +20,7 @@
  *   npx tsx scripts/permits-gate.ts --sigungu 31140  지정 시군구만
  */
 import { config } from 'dotenv';
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { normalizeServiceKey } from '../src/lib/cron/data-go-kr-key';
 import { BJDONG_BY_SIGUNGU } from '../src/lib/region/bjdong-data';
 import { labelOfLawdCode } from '../src/lib/region/lawd';
@@ -64,6 +64,12 @@ function targets(): string[] {
   return Object.keys(BJDONG_BY_SIGUNGU);
 }
 
+function argOf(name: string, dflt: string): string {
+  const argv = process.argv.slice(2);
+  const i = argv.indexOf(name);
+  return i >= 0 && argv[i + 1] ? argv[i + 1] : dflt;
+}
+
 async function main() {
   const key = normalizeServiceKey(process.env.PERMIT_API_KEY);
   if (!key) { console.error('⛔ PERMIT_API_KEY 가 없다.'); process.exit(1); }
@@ -72,6 +78,37 @@ async function main() {
   const pairs: Array<[string, string]> = [];
   for (const sgg of sigungus) for (const [cd] of BJDONG_BY_SIGUNGU[sgg] ?? []) pairs.push([sgg, cd]);
   console.log(`대상 시군구 ${sigungus.length} · 법정동 ${pairs.length} · 예상 호출 ${pairs.length * 2}`);
+
+  /**
+   * ⚠️ 산출물은 «누적» 이다. 시군구별로 나눠 도는 것이 정상 운용인데(일 한도 10,000 ·
+   *    초당 제한 350ms → 전수 5,668 발은 1시간 넘게 걸린다), 매번 덮어쓰면 마지막
+   *    배치만 남는다. 실제로 8/29 에 후보 177건이 뒤이은 8동 런에 지워졌다.
+   * ⛔ 처음부터 다시 세려면 --fresh 를 «명시» 한다. 기본은 병합이다.
+   */
+  const OUT = argOf('--out', 'permits-candidates.json');
+  const LEDGER = OUT.replace(/\.json$/, '') + '-progress.json';
+  const fresh = process.argv.includes('--fresh');
+  const keyOf = (c: Record<string, string | number | null>) =>
+    `${c.track}|${c.pk ?? `${c.sigungu}+${c.bjdong}|${c.name ?? ''}|${c.addr ?? ''}`}`;
+  const prior = new Map<string, Record<string, string | number | null>>();
+  /** 시군구별 완주 대장 — 「어디까지 훑었나」는 후보 목록에서 «읽을 수 없다» (0건 지역과 미주사가 같아 보인다). */
+  let ledger: Record<string, { dongs: number; items: number; candidates: number; at: string }> = {};
+  if (!fresh) {
+    try { for (const c of JSON.parse(readFileSync(OUT, 'utf8'))) prior.set(keyOf(c), c); } catch { /* 없으면 새로 */ }
+    try { ledger = JSON.parse(readFileSync(LEDGER, 'utf8')); } catch { /* 없으면 새로 */ }
+  }
+  const already = sigungus.filter((s) => ledger[s]);
+  console.log(`누적 후보 ${prior.size}건 적재 · 완주 기록 ${Object.keys(ledger).length}시군구`
+    + (already.length ? ` (이번 대상 중 ${already.length}곳은 이미 완주: ${already.map((s) => labelOfLawdCode(s)).join(', ')})` : ''));
+
+  /** ⚠️ 시군구 하나가 끝날 때마다 «디스크로 내린다». 죽어도 완주한 시군구는 남는다. */
+  function flush(sgg: string, dongs: number, items: number, cands: number) {
+    const merged = new Map(prior);
+    for (const c of candidates) merged.set(keyOf(c), c);
+    ledger[sgg] = { dongs, items, candidates: cands, at: new Date().toISOString() };
+    writeFileSync(OUT, JSON.stringify([...merged.values()], null, 1), 'utf8');
+    writeFileSync(LEDGER, JSON.stringify(ledger, null, 1), 'utf8');
+  }
 
   const envelopes: Record<string, number> = {};
   const found = new Map<string, Hit[]>();
@@ -88,8 +125,11 @@ async function main() {
   const archPurpose = new Map<string, number>();
   let mismatch = 0, apiCalls = 0, done = 0;
 
-  for (const track of ['house', 'arch'] as PermitTrack[]) {
-    for (const [sgg, bjd] of pairs) {
+  for (const sgg of sigungus) {
+   const dongs = (BJDONG_BY_SIGUNGU[sgg] ?? []).map((x) => x[0]);
+   const before = { items: perTrack.house.items + perTrack.arch.items, cand: perTrack.house.candidates + perTrack.arch.candidates };
+   for (const track of ['house', 'arch'] as PermitTrack[]) {
+    for (const bjd of dongs) {
       const r = await fetchPermitPage(buildPermitUrl(track, key, { sigunguCd: sgg, bjdongCd: bjd, numOfRows: 100 }));
       apiCalls += r.calls;
       envelopes[r.ok ? 'OK' : r.code] = (envelopes[r.ok ? 'OK' : r.code] ?? 0) + 1;
@@ -134,6 +174,10 @@ async function main() {
         }
       }
     }
+   }
+   flush(sgg, dongs.length,
+     perTrack.house.items + perTrack.arch.items - before.items,
+     perTrack.house.candidates + perTrack.arch.candidates - before.cand);
   }
 
   console.log('');
@@ -191,10 +235,11 @@ async function main() {
     for (const o of oddBodies.slice(0, 5)) console.log(`  [${o.track}] ${o.sgg}+${o.bjd}: ${o.head.slice(0, 140)}`);
   }
 
-  const out = 'permits-candidates.json';
-  writeFileSync(out, JSON.stringify(candidates, null, 1), 'utf8');
+  const total = new Map(prior);
+  for (const c of candidates) total.set(keyOf(c), c);
   console.log('');
-  console.log(`후보 ${candidates.length}건 → ${out} (명단 대조용)`);
+  console.log(`이번 런 후보 ${candidates.length}건 · 누적 ${total.size}건 → ${OUT} (명단 대조용)`);
+  console.log(`완주 시군구 ${Object.keys(ledger).length}/43 · 법정동 ${Object.values(ledger).reduce((a, b) => a + b.dongs, 0)}/2834 → ${LEDGER}`);
   console.log('⛔ dry-run. DB 에 아무것도 쓰지 않았다.');
 }
 

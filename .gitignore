@@ -56,3 +56,5 @@ supabase/.temp/
 # 빌드 산출물 — 원본은 public/sw.template.js 다 (scripts/inject-sw-version.mjs 가 생성).
 public/sw.js
 permits-candidates.json
+permits-candidates-progress.json
+permits-gate-run.log
