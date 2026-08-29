@@ -361,6 +361,13 @@ async function handler(_req: NextRequest) {
         if (tc >= 30) score += 3;
       }
       if (src.unsold_id) score += 8;
+      // PV-3 — 인허가(국토교통부 건축HUB) 유래. 공공 소스라 redev(15)에 준하되 한 단 낮춘다.
+      // ⚠️ 이 항목이 «없어서» permit 유래 신규 레코드가 33점에 머물렀다:
+      //    name10 + region10 + units10 + address3 = 33 → sitemap 편입선(25)은 넘고
+      //    noindex 컷(40)은 «못 넘는» 갭 구간에 정확히 떨어진다. 즉 sitemap 이
+      //    「와서 보라」고 부른 뒤 페이지가 「색인하지 마라」고 답하는 상태가 된다.
+      //    §6 「만들고 색인 안 되면 무의미」가 경고한 그것이다.
+      if (src.permit_id) score += 10;
 
       // 콘텐츠 풍부도 (최대 28)
       if (s.description && s.description.length >= 100) score += 10;
