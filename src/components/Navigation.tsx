@@ -8,6 +8,7 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
 import { haptic } from '@/lib/haptic';
 import { isTossMode } from '@/lib/toss-mode';
+import { isAptSiteDetailPath } from '@/lib/apt/is-site-detail';
 import LiveActivityIndicator from '@/components/LiveActivityIndicator';
 import UniversalSearchBar from '@/components/search/UniversalSearchBar';
 
@@ -510,7 +511,13 @@ export function Navigation() {
         </button>
       </nav>
 
-      {/* FAB 글쓰기 버튼 — 모바일 전용 */}
+      {/* FAB 글쓰기 버튼 — 모바일 전용.
+           ⚠️ B8-1: 현장 상세에서는 렌더하지 «않는다». 그 자리를 SiteFloatingActions
+              (공유 · 현장 댓글)가 쓴다. 컴포넌트를 지우는 게 아니라 그 한 화면에서만 끊는 것 —
+              ClientShell 이 홈에서 NoticeBanner 를 끊는 것과 같은 방식이다.
+           ⚠️ CSS 로 감추지 않는 이유: display:none 은 앵커를 DOM 에 남긴다.
+              /write 는 정리 예정 라우트라(H7-6) 보이지 않는 링크로 남기면 안 된다. */}
+      {!isAptSiteDetailPath(pathname ?? '') && (
       <Link href="/write" aria-label="글쓰기" onClick={() => haptic('medium')} className="md:hidden" style={{
         position:'fixed', bottom: 'calc(68px + env(safe-area-inset-bottom))', right: 16,
         zIndex: 99, width: 52, height: 52, borderRadius: '50%',
@@ -522,6 +529,7 @@ export function Navigation() {
       }}>
         <PenSquare size={22} strokeWidth={2.2} />
       </Link>
+      )}
       {moreOpen && (
         <div style={{ position:'fixed', inset:0, zIndex: 9999 }}>
           <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.5)' }} onClick={() => setMoreOpen(false)} />

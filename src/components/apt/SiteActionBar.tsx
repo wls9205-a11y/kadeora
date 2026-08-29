@@ -14,7 +14,7 @@
 // 하단 점유 요소 지도 (실측 — 여기가 유일한 원본이다. 새 고정 요소를 넣기 전에 갱신할 것):
 //   TossBottomBanner/TossTeaser  z-9999  bottom 0 전폭
 //   Navigation 하단 탭바          z-100   bottom 0 · 62px
-//   Navigation 글쓰기 FAB         z-99    상세에서는 «감춤» (SiteFloatingActions)
+//   Navigation 글쓰기 FAB         z-99    상세에서는 «미렌더» (Navigation · isAptSiteDetailPath)
 //   현장 댓글 / 공유 플로팅        z-99    bottom 68 / 124 · 48×48 · right 16
 //   이 바                         z-98    bottom 62 · 48px · left/right 12
 //   ScrollToTop                   z-98    상세에서는 bottom 180 (스택 위)

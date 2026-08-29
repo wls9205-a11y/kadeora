@@ -4,13 +4,13 @@
 //
 // 왜 있나: 이 자리에는 전역 「글쓰기 FAB」(/write) 가 떠 있었다. 현장 상세를 보는
 // 사람이 누르고 싶은 것은 피드 글쓰기가 아니라 «이 현장을 남에게 보내는 것» 과
-// «이 현장에 한마디 남기는 것» 이다. 그래서 상세에서만 FAB 를 감추고 두 버튼으로 바꾼다.
-// ⚠️ FAB 컴포넌트(Navigation.tsx)는 «지우지 않는다». 다른 화면에서는 그대로 쓴다 —
-//    여기서는 body 클래스 한 줄로 렌더만 끊는다.
+// «이 현장에 한마디 남기는 것» 이다. 그래서 상세에서만 FAB 를 걷고 두 버튼으로 바꾼다.
+// ⚠️ FAB 를 끊는 것은 Navigation.tsx 쪽이다(isAptSiteDetailPath). 컴포넌트는 그대로 두고
+//    그 한 화면에서만 렌더를 끊는다 — 여기서 CSS 로 감추면 앵커가 DOM 에 남는다.
 //
 // ── 하단 점유 요소 지도 (SiteActionBar.tsx 의 지도와 한 벌이다. 둘 다 고칠 것) ──
 //   이 파일이 «우하단 세로 스택» 의 유일한 CSS 소유자다.
-//   글쓰기 FAB(감춤) · 공유 · 현장 댓글 · ScrollToTop 의 bottom 은 전부 여기서 정한다.
+//   공유 · 현장 댓글 · ScrollToTop 의 bottom 은 전부 여기서 정한다.
 //   SiteActionBar 는 자기 바의 위치와 body.kd-has-action-bar 토글까지만 책임진다.
 //
 //   요소          바 없음   바 있음(+STACK_OFFSET)
@@ -62,7 +62,7 @@ export default function SiteFloatingActions({ commentKey, shareTitle, shareUrl }
   const { success } = useToast();
   const [count, setCount] = useState<number | null>(null);
 
-  // 상세에서만 글쓰기 FAB 를 감추고 ScrollToTop 을 스택 위로 올린다.
+  // 상세에서 ScrollToTop 을 스택 위로 올린다.
   // solo = 댓글 버튼이 없어 스택이 한 칸뿐인 상태. ScrollToTop 이 그만큼 내려온다.
   useEffect(() => {
     const solo = !commentKey;
@@ -159,9 +159,8 @@ export default function SiteFloatingActions({ commentKey, shareTitle, shareUrl }
   return (
     <>
       <style>{`
-        /* 상세에서만: 피드 글쓰기 FAB 를 감춘다 (컴포넌트는 그대로 둔다) */
-        body.kd-apt-detail a[aria-label="글쓰기"] { display: none !important; }
-        /* 스택 세로 자리 — 바 유무로 통째로 밀어 올린다 */
+        /* 스택 세로 자리 — 바 유무로 통째로 밀어 올린다.
+           글쓰기 FAB 는 여기서 감추지 않는다 — Navigation 이 상세에서 아예 렌더하지 않는다. */
         .kd-float-comment { bottom: calc(${COMMENT_BOTTOM}px + env(safe-area-inset-bottom, 0px)); }
         .kd-float-share   { bottom: calc(${SHARE_BOTTOM}px + env(safe-area-inset-bottom, 0px)); }
         body.kd-apt-detail button[aria-label="맨 위로 스크롤"] {
