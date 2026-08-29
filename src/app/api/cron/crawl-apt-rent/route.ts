@@ -1,7 +1,16 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
-import { LAWD_CODES, parseXmlItems, parseRegionSigungu } from '@/lib/lawd-codes';
+/* ⚠️ 2026-08-30 — LAWD 표를 `lib/lawd-codes.ts` 에서 «공유 모듈» 로 옮겼다.
+ *   그 파일은 라벨 1개에 코드 «하나» 였다 — 창원 5개 구 중 의창구(48121)만 긁혔다.
+ *   그리고 폐지된 코드를 들고 있었다: 42xxx(구 강원) 18 · 45xxx(구 전북) 14.
+ *   그것이 「강원·전북 0행」의 «원인» 이다 — 없는 코드로 물어보고 0을 받아 왔다.
+ *   실측 대조: 죽은 코드 32개 제거 · 실재 코드 52개 추가(51 강원 18 · 52 전북 15 ·
+ *   41 경기 일반구 11 · 48 창원 등 4 · 기타 4).
+ * ⛔ Object.entries 를 그대로 쓰면 «코드 배열» 이 값으로 온다. 반드시 flatMap 으로
+ *    [라벨, 코드] 로 편다 — 라벨 단위로 세면 창원 5구가 다시 1건이 된다. */
+import { parseXmlItems } from '@/lib/lawd-codes';
+import { SIGUNGU_LAWD_CODES, parseRegionSigungu } from '@/lib/region/lawd';
 
 export const maxDuration = 300;
 
@@ -27,7 +36,9 @@ export async function GET(req: NextRequest) {
     if (currentMonth > 1) months.push(`${currentYear}${String(currentMonth - 1).padStart(2, '0')}`);
     months.push(`${currentYear}${String(currentMonth).padStart(2, '0')}`);
 
-    const entries = Object.entries(LAWD_CODES);
+    /* 라벨 1개에 코드 여러 개다. 호출은 «코드» 단위로 편다. */
+    const entries: Array<[string, string]> = Object.entries(SIGUNGU_LAWD_CODES)
+      .flatMap(([label, codes]) => codes.map((code) => [label, code] as [string, string]));
     let totalInserted = 0;
     let totalSkipped = 0;
     const failed: string[] = [];
