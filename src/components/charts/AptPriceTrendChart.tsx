@@ -69,6 +69,9 @@ export default function AptPriceTrendChart({ aptName, region, sigungu, prefix }:
       />
     );
   }
+  // ⚠️ D-6 — 여기 도달하는 것은 «서버가 ≥2 로 판정했는데 API 가 0» 인 드문 경우다.
+  //    호출부가 자리를 미리 안 그리므로 흔한 빈 경우는 여기까지 오지 않는다.
+  //    ⛔ 빈 자리를 문구로 메우지 않는다(빈 섹션 규약).
   if (!trend.length) return null;
 
   // 차트 데이터 (시간순 정렬)

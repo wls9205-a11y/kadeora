@@ -1891,7 +1891,17 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
               </div>
             );
           })()}
-          <AptPriceTrendChart aptName={name} region={region} sigungu={sigungu} prefix={txPrefix} />
+          {/* D-6 — «자리 자체를» 서버가 판정한다(빈 섹션 규약 + CLS 동시 만족).
+               추이는 점이 «둘 이상» 이어야 성립하고, 그 판정에 필요한 값은 이미 서버에 있다(trades).
+               ⛔ 새 fetch 를 만들지 않는다(Rule #49 · 추가 fetch 0) — 같은 apt_transactions 를
+                  같은 현장 조건으로 이미 읽어 왔다.
+               ⚠️ 남는 잔여 1건: 서버 trades 는 nameVariants 로 넓게 맞추고 차트 API 는
+                  이름 정확일치 + sigungu 로 «더 좁게» 맞춘다. 그래서 「서버 ≥2 인데 API 0」이
+                  드물게 남고, 그때만 스켈레톤이 접힌다. 그 간극을 없애려면 서버가 차트와
+                  «같은 조건으로» 한 번 더 읽어야 하는데 그게 추가 fetch 라 하지 않았다. */}
+          {trades.length >= 2 && (
+            <AptPriceTrendChart aptName={name} region={region} sigungu={sigungu} prefix={txPrefix} />
+          )}
           {(() => {
             const tradeAmts = trades.slice(0, 10).map((t: any) => Number(t.deal_amount));
             const tradeMax = Math.max(...tradeAmts.filter((a: number) => a > 0), 1);

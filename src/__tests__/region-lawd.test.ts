@@ -51,21 +51,22 @@ describe('SIGUNGU_LAWD_CODES — 표 자체', () => {
   });
 
   /**
-   * 알려진 어긋남 «둘». 고치는 것은 수집 대상을 바꾸는 일이라 별건이고,
-   * 여기서는 «그 둘 말고는 없다» 만 지킨다. 새로 생기면 테스트가 깨진다.
-   *   경북 군위군 — 2023 대구 편입. regions.ts 는 '대구 군위군', 이 표는 아직 '경북 군위군'(47720).
+   * 알려진 어긋남 «하나». 여기서는 «그것 말고는 없다» 만 지킨다.
    *   충남 연기군 — 세종 출범으로 폐지된 지역이 남아 있다(44830).
+   *
+   * ⚠️ 2026-08-29 정정 — 군위군은 «해결됐다».
+   *    b85e9c6f 에서 경북 군위군(47720) → 대구 군위군(27720)으로 이관했고,
+   *    47720 은 StanReginCd 에서 이미 0행이라 «긁을 게 없는 코드» 였다.
+   *    이 단언이 낡은 채로 남아 있어 수리가 «실패» 로 보고되고 있었다 —
+   *    §4-1 그대로다: 죽은 규칙이 걸리기를 기대하는 단언은 버그를 정상으로 고정시킨다.
    */
-  it('regions.ts 의 시군구를 빠짐없이 덮는다 (알려진 2건 제외)', () => {
+  it('regions.ts 의 시군구를 빠짐없이 덮는다 (알려진 1건 제외)', () => {
     const expected = Object.entries(SIGUNGU_MAP).flatMap(([sido, gus]) =>
       gus.map((g) => (sido === '세종' ? '세종시' : `${sido} ${g}`)),
     );
     const have = new Set(LAWD_LABELS);
-    expect(expected.filter((label) => !have.has(label))).toEqual(['대구 군위군']);
-    expect(LAWD_LABELS.filter((label) => !expected.includes(label))).toEqual([
-      '충남 연기군',
-      '경북 군위군',
-    ]);
+    expect(expected.filter((label) => !have.has(label))).toEqual([]);
+    expect(LAWD_LABELS.filter((label) => !expected.includes(label))).toEqual(['충남 연기군']);
   });
 
   it('일반구를 가진 시는 구를 «전부» 들고 있다 — 첫 구만 넣던 것이 D5-3 의 원인', () => {
@@ -76,9 +77,12 @@ describe('SIGUNGU_LAWD_CODES — 표 자체', () => {
 });
 
 describe('수집 범위 — 줄어들면 깨진다', () => {
-  it('라벨 230 · 코드 251 (호출 예산의 전제)', () => {
+  it('라벨 230 · 코드 256 (호출 예산의 전제)', () => {
     expect(LAWD_LABELS).toHaveLength(230);
-    expect(LAWD_ENTRIES).toHaveLength(251);
+    // ⚠️ 251 → 256. 라벨은 그대로인데 «코드만» 늘었다 — 일반구를 첫 구만 넣고 있던
+    //    시가 둘 더 있었다: 경기 화성시 +3(4구) · 경기 부천시 +2(3구). D5-3 과 같은 병.
+    //    ⛔ 이 수를 «줄이는» 방향으로 고치지 않는다. 줄면 그 지역이 통째로 0건이 된다.
+    expect(LAWD_ENTRIES).toHaveLength(256);
   });
 
   it('부울경은 39개 시군구 · 43개 코드다', () => {
