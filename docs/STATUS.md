@@ -1,3 +1,36 @@
+## 🔖 PV-2 커밋 완료 — permits-sync + 표본 게이트 (2026-08-29 · CC 세션 A)
+
+**남은 것은 키 한 줄뿐.** 코드는 다 섰다 — 키가 들어오면 `npm run permits:gate` 로 판정, 배포 후 실적재.
+
+### 한 일
+- `src/lib/permits/hub.ts` — 엔드포인트·URL·파싱·정규화 순수 함수. 테스트 18검사.
+  오퍼레이션은 «무키 실측» 확정: house=`HsPmsHubService/getHpBasisOulnInfo`(⚠️ getHs 아님) ·
+  arch=`ArchPmsHubService/getApBasisOulnInfo`.
+- `api/cron/permits-sync` — 두 트랙 → `apt_permits` upsert. `?dry=1` · `?track=` · `?codes=` 지원.
+  ⛔ apt_sites 를 건드리지 않는다. 매칭·승격은 PV-3(D1·D4).
+  ⛔ 크론 «등록은 하지 않았다» — 표본 게이트가 중단점 A 를 통과한 뒤에 단다.
+- `scripts/permits-gate.ts` (`npm run permits:gate`) — dry-run 판정. DB 를 아예 열지 않는다.
+
+### 설계 판단 셋
+| 판단 | 이유 |
+|---|---|
+| **bjdongCd 를 «안 붙인다»** | 필수인지 모른다. 첫 실호출 봉투로 갈린다 — 필요 없을지 모르는 2만 행 표를 미리 만들지 않는다. 필수면 그때 lawd 모듈 확장. |
+| **세대수를 모르면 «버리지 않는다»** | 모르는 것과 30세대 미만은 다르다. 버리면 그 현장이 API 커버에 있었는지조차 모르게 된다. |
+| **게이트가 43코드를 «전부» 훑는다** | 표본 5건의 시군구 코드를 손으로 박으면, 틀렸을 때 「API 에 없다」와 구분되지 않는다. 86 호출은 일 한도 10,000 의 0.9% 다. |
+
+### 로컬 환경 실측
+- `SUPABASE_SERVICE_ROLE_KEY` 길이 **29** = placeholder. `CRON_SECRET` 부재.
+  → 로컬은 dry-run «만» 가능. 실적재는 배포 후 라우트.
+- 키 등록은 **2곳**: `.env.local`(게이트) + `vercel env add PERMIT_API_KEY production`(수집).
+
+### 배포 체크리스트
+1. `.env.local` 에 키 → `npm run permits:gate` → 봉투·표본·커버율·코드불일치 4항 판정
+2. `vercel env add PERMIT_API_KEY production`
+3. 대기 커밋 5개 1배포 → `?dry=1` 로 프로덕션 봉투 확인 → 실적재
+4. 통과 후 크론 등록(pg_cron) — vercel crons 78/100
+
+---
+
 ## 🔖 DS-2 완료 · 중단점 C 리뷰 준비 완료 (2026-08-29 · CC 세션 B)
 
 표준 8종 + `/admin/design` 프리뷰 + 뽀짝 A안 적용까지 끝났다. **리뷰는 중단점 A 통과 이후.**
