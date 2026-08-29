@@ -1,6 +1,20 @@
 /** apt_sites 시스템 타입 선언 — supabase gen types 전까지 임시 사용 */
 
+/** 분양예정시기의 출처. DB 의 apt_sites_expected_sale_source_chk 와 «같은 목록» 을 유지할 것. */
+export type ExpectedSaleSource = 'permit' | 'news' | 'builder' | 'announcement' | 'admin';
+
 export interface AptSite {
+  /**
+   * 분양예정시기 — 원문이 «말한 정밀도 그대로».
+   *   '2026' 연도만 · '2026H2' 반기 · '2026Q3' 분기 · '2026-09' 월 · null 미정
+   * ⛔ 상향 추정 금지(§7-1). 연도만 아는 현장에 반기를 지어내지 않는다.
+   * ⚠️ 표시할 때 이 문자열을 «가공하지 말 것» — 형식이 곧 우리가 아는 만큼이다.
+   */
+  expected_sale_period: string | null;
+  /** 시기의 출처. 시기가 있으면 «반드시» 있다(DB 제약). 근거·기준일은 confidence_note 에. */
+  expected_sale_source: ExpectedSaleSource | null;
+  /** 정렬 전용 파생값(버킷 시작 월, DB 생성 컬럼). ⛔ 화면에 쓰지 말 것. */
+  expected_sale_sort: string | null;
   id: string;
   slug: string;
   name: string;
