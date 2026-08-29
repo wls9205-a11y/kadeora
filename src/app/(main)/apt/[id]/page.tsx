@@ -111,7 +111,7 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
-  const APT_COLS = 'id,slug,name,display_name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,builder_normalized,developer,total_units,supply_units,complex_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,hero_license_tier,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url,tx_match_prefix,confidence,expected_sale_period,expected_sale_source';
+  const APT_COLS = 'id,slug,name,display_name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,builder_normalized,developer,total_units,supply_units,complex_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,hero_license_tier,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url,tx_match_prefix,confidence,confidence_note,expected_sale_period,expected_sale_source';
 
   // Phase 1: apt_sites — exact slug → multi-stage fuzzy fallback
   let { data: site } = await (sb as any).from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
@@ -1181,6 +1181,11 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
         receiptStart={sub?.rcept_bgnde ?? null}
         receiptEnd={sub?.rcept_endde ?? null}
         lifecycleStage={site?.lifecycle_stage ?? null}
+        /* U-1a §7-1 — 행 단위 확신도. 「수치별」이 아니라는 것을 컴포넌트가 문구로 밝힌다.
+           ⚠️ 광고 문맥(hideUnconfirmed)에서도 «감추지 않는다» — 등급을 숨기면
+              읽는 사람은 확정으로 읽는다(마스터 §2 와 같은 결). */
+        confidence={(site as any)?.confidence ?? null}
+        confidenceNote={(site as any)?.confidence_note ?? null}
       />
 
       {/* A6 — 본부장 노트. 히어로 텍스트 블록 «아래» 다. 담당이 직접 본 것이 먼저 읽혀야

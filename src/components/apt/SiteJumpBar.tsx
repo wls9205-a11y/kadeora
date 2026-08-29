@@ -65,12 +65,16 @@ export default function SiteJumpBar({ items }: { items: JumpItem[] }) {
           <a
             key={i.id}
             href={`#${i.id}`}
-            // ⚠️ 시각 30px · 히트 44px. minHeight 로 키우면 바가 다시 57 이 된다.
+            // ⚠️ 시각 «36px» · 히트 44px (실측 정정 — 30 이 안 되는 이유가 있다).
+            //    responsive.css 의 전역 규칙이 모바일 a[href] 에 min-height:36 을 걸고,
+            //    그건 @layer overrides 라 여기 height:30 을 «이긴다».
+            //    바 높이 42 는 지켜지고(36 + 상하 3) 히트 44 도 지켜진다.
+            //    ⛔ 전역 36 을 여기서 뒤집지 않는다 — 그 규칙은 모바일 «전 화면» 을 문다.
             className="touch-target"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              height: 30,
+              height: 30, // 전역 min-height:36 에 눌려 실제 36 이다(위 주석)
               padding: '0 var(--sp-md)',
               borderRadius: 'var(--radius-pill)',
               background: 'var(--bg-sunken)',

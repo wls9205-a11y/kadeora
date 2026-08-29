@@ -15,6 +15,7 @@
 // 첫 화면이 현장마다 달라진다 (규격화의 핵심 — s-v2 공급 정보 표와 같은 원칙).
 
 import { toDateKey, todayKST } from '@/lib/apt/subscription-status';
+import VerifiedBadge from '@/components/ds/VerifiedBadge';
 // V15 C-3: 세대수는 '분양 공급' 과 '단지 전체' 두 축이다. 어느 쪽인지 라벨이 밝힌다.
 import { unitCell, type UnitCounts } from '@/lib/apt/units';
 
@@ -44,6 +45,20 @@ type Props = {
   lifecycleStage?: string | null;
   /** 접수 시작일 — 아직 시작 전이면 '접수 시작까지' 를 센다. */
   receiptStart?: string | null;
+  /**
+   * U-1a §7-1 — 이 현장 정보의 확신도(`apt_sites.confidence`).
+   *
+   * ⚠️⚠️ **행 단위 값이다. 「수치별」이 아니다.**
+   *    스키마에 수치별 등급이 «없다» — confidence(행) · confidence_note(자유 텍스트) ·
+   *    coord_confidence(좌표 전용) · *_source(출처이지 등급이 아님) 뿐이다.
+   * ⛔ 그래서 네 칸에 «각각» 뱃지를 달지 않는다. 같은 행 등급을 넷에 복사해 붙이면
+   *    「분양가는 검증, 세대수는 추정」처럼 «수치마다 등급을 매긴 것으로» 읽힌다 —
+   *    데이터가 말하지 않은 것을 화면이 말하는 것이다(「인기 시리즈」와 같은 종류의 거짓).
+   * → 블록 «전체» 에 하나만 단다. 무엇을 가리키는 등급인지 문구로 밝힌다.
+   */
+  confidence?: string | null;
+  /** 판정 근거·기준일(자유 텍스트). 있으면 뱃지 옆에 «그대로» 낸다 — 요약하지 않는다. */
+  confidenceNote?: string | null;
 };
 
 /** 만원 → 억 표기. 1억 미만은 만원 그대로 둔다 (0.7억 은 읽기 어렵다). */
@@ -139,6 +154,7 @@ function Cell({ label, value, note, accent }: { label: string; value: string; no
 
 export default function AptKeyMetrics({
   priceMin, priceMax, units, moveInDate, receiptEnd, receiptStart, preAnnouncement = false, lifecycleStage,
+  confidence, confidenceNote,
 }: Props) {
   /* 청약 일정이 «아직 의미 있는» 단계. 이 밖이면 칸을 통째로 내리고 3칸으로 간다. */
   const SUBSCRIPTION_STAGES = new Set([
@@ -153,12 +169,13 @@ export default function AptKeyMetrics({
   const dday = ddayCell(receiptStart, receiptEnd);
 
   return (
+    <>
     <section
       aria-label="핵심 지표"
       style={{
         display: 'grid',
         gridTemplateColumns: `repeat(${showDday ? 4 : 3}, minmax(0, 1fr))`,
-        margin: '0 0 var(--sp-md)',
+        margin: 0,
         border: '1px solid var(--border)',
         borderRadius: 'var(--radius-md)',
         background: 'var(--bg-surface)',
@@ -185,5 +202,23 @@ export default function AptKeyMetrics({
       </div>
       )}
     </section>
+    {/* U-1a §7-1 — 확신도. «블록 하나» 에 대한 등급이라는 것을 문구가 밝힌다.
+        ⛔ 칸마다 달지 않는다(위 prop 주석 참조).
+        ⛔ 값이 없으면 줄을 내지 않는다 — 「미확인」을 굳이 붙여 소음을 만들지 않는다.
+           (상세 상단 히어로에는 이미 확신도가 떠 있다.) */}
+    {confidence ? (
+      <p style={{
+        display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--sp-xs)',
+        margin: 'var(--sp-xs) 0 var(--sp-md)', fontSize: 'var(--fs-2xs)',
+        color: 'var(--text-tertiary)', lineHeight: 1.5,
+      }}>
+        <VerifiedBadge confidence={confidence} />
+        <span>위 수치 전체에 대한 확신도입니다</span>
+        {confidenceNote && <span>· {confidenceNote}</span>}
+      </p>
+    ) : (
+      <div style={{ height: 'var(--sp-md)' }} aria-hidden="true" />
+    )}
+    </>
   );
 }
