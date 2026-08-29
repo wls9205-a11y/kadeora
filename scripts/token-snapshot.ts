@@ -15,7 +15,9 @@ import { chromium } from 'playwright';
 
 const URL = process.argv[2];
 const WIDTHS = [390, 480, 700, 768, 1024, 1280];  // 마스터·설계서 합집합(미합의 — 중단점 C 안건)
-const MODES = ['', 'font-small', 'font-large'];
+// ⚠️ toss-mode 는 <html> 에 붙는 스킨이다(Navigation·TossModeInit). 토큰을 갈아끼우므로
+//    같이 뜬다 — 안 뜨면 그 스킨에서만 뒤집히는 회귀를 못 본다.
+const MODES = ['', 'font-small', 'font-large', 'toss-mode', 'toss-mode font-large'];
 
 (async () => {
   const browser = await chromium.launch();

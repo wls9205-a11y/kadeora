@@ -573,3 +573,49 @@
     }
   }
 }
+
+
+/* ───────────────────────────────────────────────────────────────────────────
+   SKIN — 토스 앱인토스 미니앱  (DS-1b-3 · 2026-08-29 이동)
+
+   ⚠️ 원래 responsive.css 의 `@layer overrides` 에 있었다. overrides 는 «가장 높은»
+      레이어라 무조건 이겼다. tokens 로 내리면 승자가 «명시도 → 소스 순서» 로 바뀐다.
+
+   ⚠️ 명시도 근거 — `.toss-mode` = (0,1,1) > `:root` = (0,1,0).
+      이 파일의 기본 팔레트는 전부 `:root` 라 스킨이 그대로 이긴다.
+      `html.font-small`/`html.font-large` 도 (0,1,1) 로 «같지만», 그쪽은 크기 토큰만
+      건드리고 이 스킨은 색만 건드려 «겹치는 속성이 없다». 그래서 순서 다툼도 없다.
+      ⛔ 나중에 어느 한쪽이 상대 영역(색↔크기)으로 넘어가면 이 근거가 깨진다.
+         그때는 소스 순서가 승자를 정하므로 이 블록의 위치를 다시 봐야 한다.
+
+   ⚠️ 이 스킨은 라이트 단일 원칙(설계서 §2)과 «충돌하지 않는다» — 앱인토스 전용이고
+      메인 사이트에서는 html 에 클래스가 붙지 않아 한 줄도 적용되지 않는다.
+
+   ⚠️ 두 번째 출처가 있다 — TossModeInit.tsx 가 런타임에 unlayered !important 로
+      8건을 다시 주입하며 그중 둘은 값이 다르다. 중단점 C-4 안건.
+   ─────────────────────────────────────────────────────────────────────────── */
+@layer tokens {
+  .toss-mode {
+    --bg-base:       #FFFFFF;
+    --bg-surface:    #F7F8FA;
+    --bg-hover:      #F0F1F3;
+    --nav-bg:        #FFFFFF;
+    --text-primary:  #191F28;
+    --text-secondary: #4E5968;
+    --text-tertiary: #8B95A1;
+    --text-inverse:  #FFFFFF;
+    --border:        #E5E8EB;
+    --brand:         #3182F6;
+    --brand-hover:   #1B64DA;
+    --brand-light:   #E8F3FF;
+    --brand-bg:      rgba(49,130,246,0.08);
+    --brand-border:  rgba(49,130,246,0.15);
+    --accent-red:    #F04452;
+    --accent-blue:   #3182F6;
+    --accent-green:  #00C073;
+    --accent-yellow: #FFC400;
+    --success:       #00C073;
+    --success-bg:    rgba(0,192,115,0.08);
+    color-scheme: light;
+  }
+}

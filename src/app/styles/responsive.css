@@ -437,29 +437,15 @@
   .apt-pill-scroll::-webkit-scrollbar { display: none; }
 
   /* ═══ 토스 앱인토스 미니앱 라이트 모드 ═══ */
-  .toss-mode {
-    --bg-base:       #FFFFFF;
-    --bg-surface:    #F7F8FA;
-    --bg-hover:      #F0F1F3;
-    --nav-bg:        #FFFFFF;
-    --text-primary:  #191F28;
-    --text-secondary: #4E5968;
-    --text-tertiary: #8B95A1;
-    --text-inverse:  #FFFFFF;
-    --border:        #E5E8EB;
-    --brand:         #3182F6;
-    --brand-hover:   #1B64DA;
-    --brand-light:   #E8F3FF;
-    --brand-bg:      rgba(49,130,246,0.08);
-    --brand-border:  rgba(49,130,246,0.15);
-    --accent-red:    #F04452;
-    --accent-blue:   #3182F6;
-    --accent-green:  #00C073;
-    --accent-yellow: #FFC400;
-    --success:       #00C073;
-    --success-bg:    rgba(0,192,115,0.08);
-    color-scheme: light;
-  }
+  /* ⚠️ DS-1b-3 — 토스 스킨의 «토큰» 20건은 tokens.css 로 옮겼다(레이어 통일).
+     스킨 자체는 그대로다 — 존폐·값을 건드리지 않았다(Node 지시).
+     아래 `.toss-mode X { }` 요소 규칙들은 여기 남는다. 토큰이 아니다.
+     ⚠️ 이 스킨의 토큰에는 «두 번째 출처» 가 있다 — TossModeInit.tsx 가 런타임에
+        unlayered !important 로 8건(--bg-base·--bg-surface·--bg-hover·--text-primary·
+        --text-secondary·--text-tertiary·--border·--nav-bg)을 다시 주입하고,
+        그중 두 개는 값이 «다르다»(--bg-surface #F7F8FA vs #F5F6F8 ·
+        --bg-hover #F0F1F3 vs #EEEFF1). 토스 웹뷰 안에서는 런타임 쪽이 이긴다.
+        → 어느 쪽을 남길지는 중단점 C-4 안건. 여기서 임의로 정하지 않는다. */
   .toss-mode body {
     background: #FFFFFF !important;
     color: #191F28 !important;
