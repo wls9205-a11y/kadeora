@@ -11,6 +11,7 @@ import {
   describeCred,
   fetchSearchAd,
   parseStatRows,
+  kstDate,
   recentDates,
   type AdStatRow,
 } from '@/lib/ads/searchad';
@@ -26,7 +27,11 @@ const TIME_BUDGET_MS = 250_000;
  * ── 이 라우트가 «하지 않는» 것 ──────────────────────────────────────────────
  * ⛔ 광고 계정에 «쓰지» 않는다. 입찰·상태 변경은 P4(9/11) 소관이고, 이 코드에는
  *    그 호출이 아예 없다 — 만들어 두면 언젠가 눌린다.
- * ⛔ ad_keywords 를 건드리지 않는다(①은 다음 커밋. bid 등 8/26 수동 필드 보존이 조건).
+ * ⛔ ad_keywords 의 «기존 행을 덮어쓰지 않는다». 그 표의 유니크 키는 keyword_id 가 아니라
+ *    (snapshot_date, keyword_id) 다 — «일자별 스냅샷 이력» 이라는 뜻이다. 그래서 동기화는
+ *    오늘 날짜의 «새 세대» 를 넣는 방식이고, 8/26 수동 스냅샷은 그대로 남는다.
+ *    ⚠️ site_slug·landing_* 은 직전 스냅샷에서 «이어받는다». 광고 API 는 키워드별 랜딩을
+ *       주지 않으므로, 이어받지 않으면 사람이 붙여 둔 현장 연결이 세대마다 사라진다.
  *
  * ── 2026-08-29 실측으로 정해진 것 ───────────────────────────────────────────
  * `id`(단수)는 일자별 행을 주지만 키워드 하나뿐이라 5,974 호출/일이 든다.
@@ -45,6 +50,8 @@ async function handler(req: NextRequest) {
   const dryRun = sp.get('dry') === '1';
   const days = Math.max(1, Math.min(14, Number(sp.get('days')) || 3));
   const chunkLimit = Number(sp.get('limit')) || 0;
+  /** 키워드 사전 동기화(①). 끌 수 있게 둔다 — 통계만 다시 받고 싶을 때가 있다. */
+  const syncKeywords = sp.get('sync_keywords') !== '0';
 
   const cred = credFromEnv();
   const shape = describeCred(cred);
@@ -56,12 +63,14 @@ async function handler(req: NextRequest) {
 
   const started = Date.now();
   const errorCodes: Record<string, number> = {};
+  const sb = getSupabaseAdmin();
   let apiCalls = 0;
 
   // ── ① 키워드 목록 (캠페인 → 그룹 → 키워드) ───────────────────────────────
   // 계정의 «현재» 목록을 권위로 쓴다. ad_keywords 는 캠페인 1/11 의 부분 스냅샷이라
   // 그것을 기준으로 삼으면 나머지 10개 캠페인의 지출을 통째로 놓친다.
   const keywordIds: string[] = [];
+  const kwRows: Array<Record<string, unknown>> = [];
   let campaigns = 0, adgroups = 0;
   {
     const r = await fetchSearchAd(cred, 'GET', '/ncc/campaigns');
@@ -76,24 +85,68 @@ async function handler(req: NextRequest) {
       const g = await fetchSearchAd(cred, 'GET', '/ncc/adgroups', `nccCampaignId=${c.nccCampaignId}`);
       apiCalls += g.calls;
       if (!g.ok) { errorCodes[g.code] = (errorCodes[g.code] ?? 0) + 1; continue; }
-      const groups = JSON.parse(g.body) as Array<{ nccAdgroupId: string }>;
+      const groups = JSON.parse(g.body) as Array<{ nccAdgroupId: string; name?: string }>;
       adgroups += groups.length;
       for (const gg of groups) {
         const k = await fetchSearchAd(cred, 'GET', '/ncc/keywords', `nccAdgroupId=${gg.nccAdgroupId}`);
         apiCalls += k.calls;
         if (!k.ok) { errorCodes[k.code] = (errorCodes[k.code] ?? 0) + 1; continue; }
-        for (const x of JSON.parse(k.body) as Array<{ nccKeywordId: string }>) keywordIds.push(x.nccKeywordId);
+        for (const x of JSON.parse(k.body) as Array<Record<string, unknown>>) {
+          const id = String(x.nccKeywordId ?? '');
+          if (!id) continue;
+          keywordIds.push(id);
+          kwRows.push({
+            keyword_id: id,
+            keyword: x.keyword ?? null,
+            campaign_id: c.nccCampaignId,
+            adgroup_id: gg.nccAdgroupId,
+            adgroup_name: gg.name ?? null,
+            bid: typeof x.bidAmt === 'number' ? x.bidAmt : null,
+            status: x.status ?? null,
+          });
+        }
       }
     }
   }
   const ids = [...new Set(keywordIds)];
+
+  // ── ①-b 키워드 사전 동기화 (오늘 날짜의 «새 세대») ──────────────────────────
+  // ⛔ 8/26 스냅샷을 덮어쓰지 않는다. 유니크 키가 (snapshot_date, keyword_id) 이므로
+  //    오늘 행을 넣는 것이 이 표의 «설계된» 갱신 방식이다.
+  // ⚠️ site_slug·landing_* 은 직전 세대에서 이어받는다 — 광고 API 가 키워드별 랜딩을
+  //    주지 않으니, 이어받지 않으면 사람이 붙인 현장 연결이 세대마다 증발한다.
+  let kwInserted = 0, kwCarried = 0;
+  if (!dryRun && syncKeywords && kwRows.length > 0) {
+    const carry = new Map<string, { site_slug: unknown; landing_pc: unknown; landing_mobile: unknown }>();
+    const { data: prior } = await (sb as any)
+      .from('ad_keywords')
+      .select('keyword_id,site_slug,landing_pc,landing_mobile,snapshot_date')
+      .order('snapshot_date', { ascending: false })
+      .limit(20000);
+    for (const p of (prior ?? []) as Array<Record<string, unknown>>) {
+      const kid = String(p.keyword_id);
+      if (!carry.has(kid)) carry.set(kid, { site_slug: p.site_slug, landing_pc: p.landing_pc, landing_mobile: p.landing_mobile });
+    }
+    const today = kstDate();
+    const payload = kwRows.map((r) => {
+      const c = carry.get(String(r.keyword_id));
+      if (c?.site_slug) kwCarried++;
+      return { ...r, snapshot_date: today, site_slug: c?.site_slug ?? null, landing_pc: c?.landing_pc ?? null, landing_mobile: c?.landing_mobile ?? null };
+    });
+    for (let i = 0; i < payload.length; i += 500) {
+      const { error } = await (sb as any)
+        .from('ad_keywords')
+        .upsert(payload.slice(i, i + 500), { onConflict: 'snapshot_date,keyword_id' });
+      if (error) errorCodes.KEYWORD_SYNC_FAIL = (errorCodes.KEYWORD_SYNC_FAIL ?? 0) + 1;
+      else kwInserted += Math.min(500, payload.length - i);
+    }
+  }
 
   // ── ② 하루 × 배치 ────────────────────────────────────────────────────────
   const dates = recentDates(days);
   let chunks = chunkIdsByUri(ids);
   if (chunkLimit > 0) chunks = chunks.slice(0, chunkLimit);
 
-  const sb = getSupabaseAdmin();
   const rows: AdStatRow[] = [];
   const bad: string[] = [];
   let batches = 0, inserted = 0, emptyBatches = 0;
@@ -147,6 +200,7 @@ async function handler(req: NextRequest) {
       campaigns,
       adgroups,
       keywords: ids.length,
+      keyword_sync: syncKeywords ? { upserted: kwInserted, slug_carried: kwCarried } : 'skipped',
       dates,
       chunks: chunks.length,
       batches,
