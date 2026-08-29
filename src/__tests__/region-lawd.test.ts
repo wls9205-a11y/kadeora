@@ -48,6 +48,18 @@ describe('SIGUNGU_LAWD_CODES — 표 자체', () => {
     // ⚠️ 강원·전북은 51·52 다(특별자치도 신 코드). 42·45 로 되돌리면 그 지역이 통째로 0건이 된다 — D5-4.
     expect(SIDO_PREFIX.get('강원')).toBe('51');
     expect(SIDO_PREFIX.get('전북')).toBe('52');
+    // ⚠️ 광주·전남은 «라벨의 시도» 와 «코드의 시도» 가 다르다 — 둘 다 12(전남광주통합)다.
+    //    라벨을 그대로 둔 것은 DB 어휘를 한 벌로 지키기 위한 «의도» 다(lawd.ts 주석).
+    expect(SIDO_PREFIX.get('광주')).toBe('12');
+    expect(SIDO_PREFIX.get('전남')).toBe('12');
+  });
+
+  it('⛔ 폐지된 29·46 코드가 «다시 들어오지 않는다»', () => {
+    // 건축HUB·StanReginCd 둘 다 이 코드에 0을 준다. 되돌리면 광주·전남이 통째로 0건이 된다.
+    const dead = LAWD_ENTRIES.filter(([, c]) => c.startsWith('29') || c.startsWith('46'));
+    expect(dead).toEqual([]);
+    // 그리고 12 계열은 «실측 27개» 다 — 옛 광주 5구 + 전남 22곳.
+    expect(LAWD_ENTRIES.filter(([, c]) => c.startsWith('12'))).toHaveLength(27);
   });
 
   /**
