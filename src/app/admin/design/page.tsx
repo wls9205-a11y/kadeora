@@ -17,6 +17,12 @@ import type { Metadata } from 'next';
 import { Badge, Chip } from '@/components/ds/Badge';
 import VerifiedBadge from '@/components/ds/VerifiedBadge';
 import { CONFIDENCE, CONFIDENCE_UNKNOWN, TONE, type Tone } from '@/components/ds/tone';
+import CtaPanel, { KakaoActionButton } from '@/components/ds/CtaPanel';
+import { ACTION_SLOT } from '@/components/ds/ActionBar';
+// ① · ③ 은 «이미 있던 것을 표준으로 승격» 한다. 옮기지 않는다 — 옮기면 import 만 대량으로
+//    흔들리고 얻는 게 없다. 카탈로그에 실물을 세워 「이것이 표준이다」를 보이는 것으로 충분하다.
+import SiteRow from '@/components/apt/SiteRow';
+import SectionHeader from '@/components/apt/SectionHeader';
 
 export const metadata: Metadata = {
   title: 'DS 프리뷰',
@@ -116,9 +122,69 @@ export default function DesignPreviewPage() {
         </table>
       </Row>
 
+      <Row
+        title="① 행 — B7-1 공용 2줄 행 (표준 1호)"
+        note="같은 「현장 한 줄」을 /apt 두 덩어리 · 홈 · 「다른 현장」이 제각기 그리던 것을 하나로 모은 것.
+              null 은 «항목째» 사라진다 — 「해운대구 ·  · 」 같은 줄을 만들지 않는다."
+      >
+        <div className="kd-srows" style={{ width: '100%' }}>
+          <SiteRow item={{ slug: 'sample-a', name: '래미안 마크더스위트', region: '부산', sigungu: '남구', lifecycle_stage: 'subscription_open', total_units: 1256, dday: 3, date: '2026-08-30' }} />
+          <SiteRow item={{ slug: 'sample-b', name: '가야1구역 재개발', region: '부산', sigungu: '부산진구', lifecycle_stage: 'site_planning', total_units: null, date: null }} />
+        </div>
+      </Row>
+
+      <Row title="③ SectionHeader — 섹션 3단 리듬" note="eyebrow / H2 / 우측 meta. 제목에 이모지를 넣지 않는다.">
+        <div style={{ width: '100%' }}>
+          <SectionHeader eyebrow="FEATURED — 분양중" title="이번 주 모집공고" meta="부산 · 182곳 · 모집공고 기준" />
+        </div>
+      </Row>
+
+      <Row
+        title="④-a CTA 2종 — 틴트 색면 / 흰 카드"
+        note="⛔ 둘을 «인접 배치하지 않는다»(S7-3). 붙여 놓으면 「무엇을 눌러야 하나」가 생겨 둘 다 안 눌린다.
+              이 카탈로그에서는 «비교를 위해» 나란히 뒀다 — 개발 모드 콘솔에 경고가 찍히는 것이 정상이다."
+      >
+        <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', width: '100%' }}>
+          <CtaPanel
+            kind="lead"
+            band="분양 정보 안내 · 무료"
+            title="분양 정보 안내 신청"
+            lede="담당자가 직접 연락드려 잔여 세대·일정을 안내합니다."
+            action={
+              <button type="button" style={{ ...ACTION_SLOT, width: '100%', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', cursor: 'pointer' }}>
+                신청하기
+              </button>
+            }
+          />
+          <CtaPanel
+            kind="signup"
+            title="관심 현장 알림 받기"
+            lede="단계가 바뀌면 가장 먼저 알려드립니다."
+            action={<KakaoActionButton>카카오로 3초 만에 시작</KakaoActionButton>}
+          />
+        </div>
+      </Row>
+
+      <Row
+        title="④-b 하단 고정 2버튼 바 (B8 패턴)"
+        note="50/50 · 동일 높이 · 한 줄. 위계는 «크기» 가 아니라 «색과 자리» 로 준다.
+              아래는 고정 배치를 뗀 «형태만» 보여 주는 것이다 — 실물은 화면 하단에 고정된다."
+      >
+        <div style={{ display: 'flex', gap: 8, width: '100%', maxWidth: 420 }}>
+          <button type="button" style={{ ...ACTION_SLOT, background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', cursor: 'pointer' }}>
+            분양 정보 안내 신청
+          </button>
+          <a href="#none" style={{ ...ACTION_SLOT, background: 'var(--kakao-bg)', color: 'var(--kakao-text)', textDecoration: 'none' }}>
+            카카오톡방 입장
+          </a>
+        </div>
+      </Row>
+
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-2xl)', lineHeight: 1.7 }}>
-        남은 표준: ①행/카드(B7-1 SiteRow 승격) · ③SectionHeader · ④CTA 2종 + 하단 고정 2버튼 바(B8 패턴) ·
-        ⑤폼 필드 · ⑦관측 카드 · ⑧빈 상태·스켈레톤.
+        남은 표준(DS-2c): ⑤폼 필드 · ⑦관측 카드 · ⑧빈 상태·스켈레톤.
+        <br />
+        ⚠️ ④-b 는 «아직 어느 화면도 쓰지 않는다». 살아 있는 인스턴스는 SiteActionBar 이고,
+        그 교체는 /apt/[id] 를 만지는 일이라 U-1층 몫이다(설계서 §0 상세 동결).
       </p>
     </main>
   );
