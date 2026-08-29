@@ -17,8 +17,30 @@ describe('isLeadEligible — 반환값 회귀 방어 (M5 §F-3)', () => {
     }
   });
 
-  it('분양 13단계는 여전히 true 다', () => {
-    expect(LEAD_ELIGIBLE_STAGES).toHaveLength(13);
+  /**
+   * ⚠️ 예전에는 `toHaveLength(13)` 이었다. H6-1(82e85a50)이 `award_pending` 을 더해
+   *    14가 됐는데 이 숫자를 안 고쳐서 «빨간불인 채로» 커밋됐다.
+   *    숫자만 세면 두 가지를 못 잡는다 — 무엇이 늘었는지, 무엇이 «바뀌치기» 됐는지.
+   *    그래서 목록째 박는다. 단계를 더하거나 빼려면 여기도 «의도적으로» 고쳐야 한다.
+   */
+  it('분양 단계 목록이 그대로다', () => {
+    expect([...LEAD_ELIGIBLE_STAGES]).toEqual([
+      'site_planning',
+      'pre_announcement',
+      'subscription_open',
+      'award_pending', // H6-1 — 접수 마감·발표 전. 예비·미계약 물량이 남아 관심 등록이 유효하다
+      'award_announced',
+      'unsold_active',
+      'move_in_ready',
+      'move_in_started',
+      // ONESHOT §C0 — 정비사업 6단계
+      'union_established',
+      'constructor_selected',
+      'plan_approved',
+      'mgmt_approved',
+      'construction',
+      'contract_signing',
+    ]);
     for (const s of LEAD_ELIGIBLE_STAGES) expect(isLeadEligible(s)).toBe(true);
   });
 
