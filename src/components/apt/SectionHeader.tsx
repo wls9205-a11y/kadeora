@@ -31,7 +31,7 @@ export default function SectionHeader({ eyebrow, title, id, meta }: SectionHeade
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'space-between',
-        gap: 10,
+        gap: 'var(--sp-sm)',
         marginBottom: 10,
       }}
     >
@@ -102,7 +102,7 @@ export function SectionLink({ href, children }: SectionLinkProps) {
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: 4,
+          gap: 'var(--sp-xs)',
           fontSize: 'var(--fs-sm)',
           color: 'var(--text-secondary)',
           textDecoration: 'none',

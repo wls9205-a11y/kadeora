@@ -60,7 +60,7 @@ export default function AptCurationCard({ item, today }: { item: AptHubItem; tod
         </Link>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 7 }}>
         <span className={chip.tone ? `kd-lrow-k ${chip.tone}` : 'kd-lrow-k'} style={{ width: 'auto', padding: '4px 8px' }}>
           {chip.label}
         </span>
@@ -104,7 +104,7 @@ export default function AptCurationCard({ item, today }: { item: AptHubItem; tod
         />
       </div>
 
-      <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
         <SubscriptionAlertButton aptName={item.house_nm ?? name} compact />
         {checked && (
           <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>

@@ -41,7 +41,7 @@ export default function RecentMovesStrip({
 
   return (
     <section aria-labelledby="apt-moves-heading" style={{ padding: '0 6px', margin: '0 0 var(--sp-md)' }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 'var(--sp-sm)', marginBottom: 8 }}>
         <h2
           id="apt-moves-heading"
           style={{ margin: 0, fontSize: 'var(--fs-sm)', fontWeight: 600, letterSpacing: '-.0125em', color: 'var(--text-primary)' }}
@@ -56,7 +56,7 @@ export default function RecentMovesStrip({
       <ul
         style={{
           display: 'flex',
-          gap: 6,
+          gap: 'var(--sp-sm)',
           listStyle: 'none',
           margin: 0,
           padding: '0 0 4px',
@@ -80,17 +80,17 @@ export default function RecentMovesStrip({
                   display: 'block',
                   width: 172,
                   padding: '10px 11px',
-                  borderRadius: 10,
+                  borderRadius: 'var(--radius-md)',
                   border: '1px solid var(--border)',
                   background: 'var(--bg-surface)',
                   textDecoration: 'none',
                 }}
               >
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 5 }}>
                   <span
                     style={{
                       padding: '1.5px 5px',
-                      borderRadius: 3,
+                      borderRadius: 'var(--radius-xs)',
                       fontSize: 'var(--fs-xs)',
                       fontWeight: 500,
                       background: tone.bg,

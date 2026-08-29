@@ -45,7 +45,7 @@ export default function SubscriptionTimeline({
       <div
         style={{
           display: 'flex',
-          gap: 8,
+          gap: 'var(--sp-sm)',
           overflowX: 'auto',
           scrollSnapType: 'x mandatory',
           WebkitOverflowScrolling: 'touch',
@@ -66,14 +66,14 @@ export default function SubscriptionTimeline({
                 scrollSnapAlign: 'start',
                 display: 'block',
                 padding: '10px 11px',
-                borderRadius: 10,
+                borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border)',
                 background: 'var(--bg-surface)',
                 textDecoration: 'none',
                 color: 'var(--text-primary)',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, marginBottom: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--sp-sm)', marginBottom: 6 }}>
                 <span style={statusBadgeStyle(it.status)}>{statusLabel(it.status)}</span>
                 {dd ? <span style={ddayStyle(it.dday)}>{dd}</span> : null}
               </div>

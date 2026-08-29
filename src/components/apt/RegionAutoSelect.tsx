@@ -68,10 +68,10 @@ export default function RegionAutoSelect() {
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 8,
+        gap: 'var(--sp-sm)',
         margin: '0 6px 8px',
         padding: '7px 10px',
-        borderRadius: 8,
+        borderRadius: 'var(--radius-sm)',
         background: 'var(--bg-surface)',
         border: '1px solid var(--border)',
       }}
@@ -91,7 +91,7 @@ export default function RegionAutoSelect() {
           padding: '0 12px',
           borderRadius: 'var(--radius-pill)',
           background: 'var(--brand)',
-          color: '#FFFFFF',
+          color: 'var(--text-inverse)',
           fontSize: 'var(--fs-xs)',
           fontWeight: 500,
           textDecoration: 'none',

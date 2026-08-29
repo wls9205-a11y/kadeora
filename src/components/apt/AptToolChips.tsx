@@ -47,7 +47,7 @@ export default function AptToolChips({ region }: Props = {}) {
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-          gap: 8,
+          gap: 'var(--sp-sm)',
         }}
       >
         {tools.map((t) => (
@@ -57,10 +57,10 @@ export default function AptToolChips({ region }: Props = {}) {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 9,
+              gap: 'var(--sp-sm)',
               padding: '11px 12px',
               border: '1px solid var(--border)',
-              borderRadius: 10,
+              borderRadius: 'var(--radius-md)',
               background: 'var(--bg-surface)',
               color: 'var(--text-primary)',
               textDecoration: 'none',

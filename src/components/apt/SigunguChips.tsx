@@ -9,7 +9,7 @@ const CHIP: React.CSSProperties = {
   flexShrink: 0,
   display: 'inline-flex',
   alignItems: 'center',
-  gap: 4,
+  gap: 'var(--sp-xs)',
   minHeight: 32,
   padding: '0 11px',
   borderRadius: 'var(--radius-pill)',
@@ -55,7 +55,7 @@ export default function SigunguChips({
       className="apt-pill-scroll"
       style={{
         display: 'flex',
-        gap: 6,
+        gap: 'var(--sp-sm)',
         overflowX: 'auto',
         WebkitOverflowScrolling: 'touch',
         scrollbarWidth: 'none',

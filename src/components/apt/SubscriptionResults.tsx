@@ -29,7 +29,7 @@ export default function SubscriptionResults({ items }: { items: AptHubItem[] }) 
         meta={`최근 7일 · ${items.length}개 단지`}
       />
 
-      <div style={{ display: 'grid', gap: 7 }}>
+      <div style={{ display: 'grid', gap: 'var(--sp-sm)' }}>
         {items.map((it) => {
           const name = formatComplexName(it.region_nm, it.house_nm);
           const hasNumbers = it.competition_rate != null || it.min_score != null;
@@ -40,9 +40,9 @@ export default function SubscriptionResults({ items }: { items: AptHubItem[] }) 
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 9,
+                gap: 'var(--sp-sm)',
                 padding: '10px 11px',
-                borderRadius: 8,
+                borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border)',
                 background: 'var(--bg-surface)',
                 color: 'var(--text-primary)',
@@ -76,7 +76,7 @@ export default function SubscriptionResults({ items }: { items: AptHubItem[] }) 
                     </div>
                   ) : null}
                   {it.min_score != null ? (
-                    <div style={{ fontSize: 'var(--fs-xs)', color: '#1d4ed8', marginTop: 1 }}>가점컷 {it.min_score}점</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand-hover)', marginTop: 1 }}>가점컷 {it.min_score}점</div>
                   ) : null}
                 </div>
               ) : (

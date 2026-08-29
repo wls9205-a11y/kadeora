@@ -45,7 +45,7 @@ export default function AptHubRail({
 
       <div className="kd-rail-panel">
         <h2>지역 바로가기</h2>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-sm)', flexWrap: 'wrap' }}>
           {regions.map((r) => (
             <Link
               key={r.region}
@@ -54,13 +54,13 @@ export default function AptHubRail({
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 4,
+                gap: 'var(--sp-xs)',
                 minHeight: 32,
                 padding: '0 10px',
                 borderRadius: 'var(--radius-pill)',
                 border: '1px solid var(--border)',
                 background: r.region === region ? 'var(--brand)' : 'var(--bg-sunken)',
-                color: r.region === region ? '#FFFFFF' : 'var(--text-secondary)',
+                color: r.region === region ? 'var(--text-inverse)' : 'var(--text-secondary)',
                 fontSize: 'var(--fs-xs)',
                 fontWeight: r.region === region ? 600 : 500,
                 textDecoration: 'none',

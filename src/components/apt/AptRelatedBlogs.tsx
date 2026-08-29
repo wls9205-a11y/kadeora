@@ -22,7 +22,7 @@ export default function AptRelatedBlogs({ posts }: { posts: RelatedBlogPost[] })
         title="관련 청약 분석"
       />
 
-      <div style={{ display: 'grid', gap: 7 }}>
+      <div style={{ display: 'grid', gap: 'var(--sp-sm)' }}>
         {posts.map((p) => (
           <Link
             key={p.id}
@@ -30,9 +30,9 @@ export default function AptRelatedBlogs({ posts }: { posts: RelatedBlogPost[] })
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 9,
+              gap: 'var(--sp-sm)',
               padding: '10px 11px',
-              borderRadius: 8,
+              borderRadius: 'var(--radius-sm)',
               border: '1px solid var(--border)',
               background: 'var(--bg-surface)',
               color: 'var(--text-primary)',

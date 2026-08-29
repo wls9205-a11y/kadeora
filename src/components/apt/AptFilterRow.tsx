@@ -32,7 +32,7 @@ const CHIP: React.CSSProperties = {
   flex: '0 0 auto',
   display: 'inline-flex',
   alignItems: 'center',
-  gap: 3,
+  gap: 'var(--sp-xs)',
   minHeight: 30,
   padding: '0 9px',
   borderRadius: 'var(--radius-pill)',
@@ -49,7 +49,7 @@ const ACTIVE: React.CSSProperties = {
   ...CHIP,
   background: 'var(--brand)',
   borderColor: 'var(--brand)',
-  color: '#FFFFFF',
+  color: 'var(--text-inverse)',
   fontWeight: 500,
 };
 
@@ -64,7 +64,7 @@ function Count({ n, active }: { n: number; active: boolean }) {
         fontWeight: 500,
         opacity: active ? 1 : 0.75,   // ⚠️ 활성 0.85 는 흰글씨/--brand 합성 대비 4.19 로 하한 미달이었다(비활성 0.75 는 4.88 통과).
         //    건수의 종속감은 이미 fs-xs(칩 본문 fs-sm)가 낸다. 1 로 올려 5.17.
-        color: active ? '#FFFFFF' : 'var(--accent-red)',
+        color: active ? 'var(--text-inverse)' : 'var(--accent-red)',
       }}
     >
       {n}
@@ -135,7 +135,7 @@ export default function AptFilterRow({
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 2,
+        gap: 'var(--sp-xs)',
         overflowX: 'auto',
         WebkitOverflowScrolling: 'touch',
         scrollbarWidth: 'none',
