@@ -24,6 +24,47 @@
 
 **참고**: 직접 영향 워커 — `app/api/cron/blog-meta-rewrite-poll/route.ts`. 동일 패턴 워커 — `app/api/cron/blog-image-batch-poll/*`, `app/api/cron/apt-ai-batch-poll/*`.
 
+## Rule #116 — `scripts/` 의 판정·변환 로직은 lib 으로 꺼낸다 (PV-2 신설 · 전 트랙 공통)
+
+**`scripts/` 는 tsconfig 의 `exclude` 다. `npm run type-check` 가 «검사하지 않는다».**
+
+### 어떻게 드러났나 (2026-08-29 · 실측)
+
+PV-2 표본 게이트(`scripts/permits-gate.ts`)를 고치다 문자열 리터럴이 깨졌는데
+`npm run type-check` 가 **그대로 통과**했다. 깨진 것은 실행 시점에 esbuild 가 잡았다.
+
+```
+tsconfig.json  exclude: [node_modules, supabase/functions, appintoss-build, scripts]
+```
+
+⚠️ 위험이 큰 이유는 «언제 실행되는가» 다. 게이트 스크립트는 **키가 들어온 뒤에야
+   처음 돌아간다**. 그대로 뒀으면 사람이 키를 넣은 «바로 그 순간» 깨진 스크립트를
+   만났을 것이다. 사각지대는 「늦게 처음 실행되는 코드」에서 가장 비싸다.
+
+### 규칙
+
+- 스크립트의 **판정·변환 로직은 `src/lib/` 로 꺼내고 테스트를 붙인다.**
+  스크립트 본체는 «호출과 출력만» 한다.
+- 판정에 관여하는 것 = 무엇을 후보로 볼지 · 어떻게 정규화할지 · 무엇을 성공으로 셀지.
+  이런 것이 스크립트 안에 있으면 틀려도 아무도 모른다.
+- ⛔ `tsconfig` 의 exclude 를 푸는 것으로 «대신하지 않는다». scripts 는 Next 빌드
+  대상이 아니고, 넣으면 빌드가 느려지고 별개 문제(dotenv·top-level await)가 딸려온다.
+  꺼내는 쪽이 싸다.
+
+### 소급 적용은 하지 않는다
+
+⚠️ 이미 «실행으로 검증된» 스크립트를 이 규칙 때문에 되짚어 고치지 않는다
+   (실행이 곧 검증이었고, 손대는 것이 오히려 위험하다).
+   새로 쓰거나 손대는 스크립트부터 적용한다.
+
+### 적용 사례
+
+- `permits-gate.ts` → `permitHaystack` · `sampleVerdict` 를 `src/lib/permits/hub.ts` 로.
+  스크립트는 호출만. 테스트 5검사.
+- 전파 대상: 세션 B `token-snapshot.ts` (판정부 lib 화는 B 재량 — 위 소급 조항 적용).
+
+---
+
 ## Rule #115 — 값이 이상하면 «함수를 고치기 전에» 그 컬럼의 기록자를 전부 나열한다 (H7-2 신설)
 
 **Symptom**: 어떤 컬럼의 값이 틀렸다. 그 값을 만드는 함수를 찾아 고친다. 그런데 다음 날 또 틀려 있다.

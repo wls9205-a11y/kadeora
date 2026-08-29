@@ -1,3 +1,42 @@
+## 🔖 Rule #116 신설 — `scripts/` 는 tsc 사각지대다 (2026-08-29 · 전 트랙 공통)
+
+**세션 B 전파 항목.** `token-snapshot.ts` 도 같은 노출이다(판정부 lib 화는 B 재량 —
+이미 실행 검증된 스크립트의 «소급 강제는 하지 않는다»).
+
+### 실측
+`tsconfig.json` 의 `exclude` 에 `scripts` 가 있다. `npm run type-check` 가 그 폴더를
+**검사하지 않는다.** PV-2 게이트를 고치다 문자열 리터럴이 깨졌는데 tsc 가 통과했고,
+실행 시점에 esbuild 가 잡았다.
+
+⚠️ 비싼 이유는 «언제 처음 실행되는가» 다. 게이트는 키가 들어온 «뒤에야» 처음 돌아간다 —
+   그대로 뒀으면 사람이 키를 넣은 바로 그 순간 깨진 스크립트를 만났을 것이다.
+   사각지대는 「늦게 처음 실행되는 코드」에서 가장 비싸다.
+
+### 규칙 (docs/ARCHITECTURE_RULES.md #116)
+판정·변환 로직은 `src/lib/` 로 꺼내 테스트를 붙이고, 스크립트 본체는 «호출과 출력만».
+⛔ exclude 를 푸는 것으로 대신하지 않는다 — 빌드가 느려지고 별개 문제가 딸려온다.
+
+### 적용
+`permits-gate.ts` → `permitHaystack` · `sampleVerdict` 를 `lib/permits/hub.ts` 로 (테스트 5검사).
+
+---
+
+## 🔖 PV-2 대기 커밋 6개 — 키 투입만 남음 (2026-08-29)
+
+```
+5517e8a4  게이트 양쪽 트랙 (3갈래 판정 match/both/other)
+65a9df91  permits-sync + 표본 게이트
+842f876b  expected_sale_period
+94825cb8  upcoming_projects 폐기
+7f198ceb  lead-kind 수리
+3ba0afa9  serviceKey 정규화
+```
+
+489/489 · tsc 통과 · 미커밋 0. 키 투입 → `npm run permits:gate` → 4항 + 3갈래 보고.
+⚠️ `other` 판정은 «폴백 트리거» 로 읽는다 — 한 트랙만 도는 수집은 새고 있다는 뜻이다.
+
+---
+
 ## 🔖 PV-2 커밋 완료 — permits-sync + 표본 게이트 (2026-08-29 · CC 세션 A)
 
 **남은 것은 키 한 줄뿐.** 코드는 다 섰다 — 키가 들어오면 `npm run permits:gate` 로 판정, 배포 후 실적재.
