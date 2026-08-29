@@ -1,131 +1,128 @@
 /**
- * U-3층 ⑤ 게이트 — 검색광고 API «판정만» 한다 (호출·출력만, Rule #116).
+ * U-3층 ⑤ 게이트 — 지시서_U3 §2-4 의 4항 판정 (호출·출력만, Rule #116).
  *
- * 답해야 하는 것:
- *   ① 자격 모양 — 전사 오류인가 (스크린샷 경유라 I/l · O/0 혼동이 실제 위험)
- *   ② 서명이 통하는가 — 401 이면 «코드보다 전사» 를 먼저 의심한다
- *   ③ StatReport 실스펙 — 필드명·배치 한도·기간 제약. 추정과 다르면 «중단·보고»
- *   ④ 표본 키워드 실값 — 「아크로라로체」(리드 1건이 붙은 그 키워드)
+ *   ① 서명 통과
+ *   ② 표본 키워드 실값 (아크로라로체 포함 · 최근 7일)
+ *   ③ upsert 멱등 — ⛔ 로컬은 SERVICE_ROLE_KEY 가 placeholder 라 «여기서 못 한다».
+ *      배포 후 프로덕션 라우트를 2회 돌려 diff 0 으로 확인한다.
+ *   ④ 전량 1패스 — 키워드 수 · 배치 수 · 호출 수 · 소요 실측
  *
- * 실행: npx tsx scripts/adstats-gate.ts
- * ⛔ 읽기만 한다. 캠페인·입찰을 바꾸는 호출은 이 파일에 없다(P4 소관).
+ * 실행: npm run adstats:gate  (전량 ④까지)  ·  --quick (①②만)
+ * ⛔ 읽기만 한다. 광고 계정에 아무것도 쓰지 않는다.
  */
 import { config } from 'dotenv';
 import {
-  classifyStatus,
+  buildStatsUrl,
+  chunkIdsByUri,
+  credFromEnv,
   describeCred,
+  fetchSearchAd,
   kstDate,
-  searchAdHeaders,
-  searchAdUrl,
-  type SearchAdCred,
-  type SearchAdEnvelope,
+  parseStatRows,
+  STATS_PATH,
 } from '../src/lib/ads/searchad';
 
 config({ path: '.env.local' });
 
-async function call(cred: SearchAdCred, method: string, path: string, query?: Record<string, string | number>): Promise<SearchAdEnvelope> {
-  const url = searchAdUrl(path, query);
-  try {
-    const res = await fetch(url, { method, headers: searchAdHeaders(cred, method, path) });
-    const body = await res.text();
-    return { ok: res.ok, status: res.status, code: classifyStatus(res.status), body };
-  } catch (e) {
-    return { ok: false, status: 0, code: 'FETCH_FAIL', body: String(e).slice(0, 200) };
-  }
-}
-
-function head(s: string, n = 400) {
-  return s.replace(/\s+/g, ' ').slice(0, n);
-}
+/** 리드 1건이 붙어 있는 그 키워드 — 단가 축이 실재하는지 보는 표본이다. */
+const LEAD_KEYWORD_ID = 'nkw-a001-01-000008540645599'; // 아크로라로체 (leads.utm 실측)
 
 async function main() {
-  const cred: SearchAdCred = {
-    apiKey: process.env.SEARCHAD_API_KEY ?? '',
-    secret: process.env.SEARCHAD_SECRET ?? '',
-    customerId: process.env.SEARCHAD_CUSTOMER_ID ?? '',
-  };
+  const quick = process.argv.includes('--quick');
+  const cred = credFromEnv();
 
-  console.log('── ① 자격 모양 ─────────────────────────');
-  const d = describeCred(cred);
-  console.log(`  ${d.ready ? '✅' : '⛔'} ${d.note}`);
-  if (!d.ready) process.exit(1);
+  console.log('── ① 자격·서명 ─────────────────────────');
+  const shape = describeCred(cred);
+  console.log(`  ${shape.ready ? '✅' : '⛔'} ${shape.note}`);
+  if (!shape.ready) process.exit(1);
 
-  console.log('');
-  console.log('── ② 서명 (GET /ncc/campaigns · 읽기) ──');
-  const camp = await call(cred, 'GET', '/ncc/campaigns');
-  console.log(`  HTTP ${camp.status} · ${camp.code}`);
-  if (camp.code === 'SIGNATURE') {
-    console.log('  ⚠️ 401 — 코드보다 «전사» 를 먼저 의심한다. 스크린샷 경유 I/l · O/0 혼동.');
-    console.log(`  본문: ${head(camp.body, 200)}`);
-    process.exit(1);
-  }
+  const t0 = Date.now();
+  let calls = 0;
+  const camp = await fetchSearchAd(cred, 'GET', '/ncc/campaigns');
+  calls += camp.calls;
   if (!camp.ok) {
-    console.log(`  본문: ${head(camp.body, 300)}`);
+    console.log(`  ⛔ HTTP ${camp.status} · ${camp.code}`);
+    if (camp.code === 'FORBIDDEN' || camp.code === 'SIGNATURE') {
+      console.log('  ⚠️ 코드보다 «전사» 를 먼저 의심한다 — 화면의 I/l · O/0 은 구분되지 않는다.');
+    }
+    console.log(`  본문: ${camp.body.replace(/\s+/g, ' ').slice(0, 200)}`);
     process.exit(1);
   }
-  let campaigns: Array<Record<string, unknown>> = [];
-  try { campaigns = JSON.parse(camp.body); } catch { /* 배열이 아니면 아래에서 본문으로 본다 */ }
-  console.log(`  ✅ 서명 통과 · 캠페인 ${Array.isArray(campaigns) ? campaigns.length : '?'}개`);
-  if (Array.isArray(campaigns)) {
-    for (const c of campaigns.slice(0, 6)) console.log(`     ${c.nccCampaignId} · ${c.name} · ${c.campaignTp} · ${c.status}`);
+  const camps = JSON.parse(camp.body) as Array<{ nccCampaignId: string; name: string; status: string }>;
+  console.log(`  ✅ 서명 통과 · 캠페인 ${camps.length}개 (활성 ${camps.filter((c) => c.status === 'ELIGIBLE').length})`);
+
+  console.log('');
+  console.log('── ② 표본 키워드 실값 (최근 7일) ────────');
+  const since = kstDate(new Date(), -7);
+  const until = kstDate(new Date(), -1);
+  let sampleRows = 0;
+  for (const d of [until, kstDate(new Date(), -2), kstDate(new Date(), -3)]) {
+    const url = buildStatsUrl([LEAD_KEYWORD_ID], d);
+    const r = await fetchSearchAd(cred, 'GET', STATS_PATH, url.slice(url.indexOf('?') + 1));
+    calls += r.calls;
+    const p = parseStatRows(r.body, d);
+    sampleRows += p.rows.length;
+    const row = p.rows[0];
+    console.log(
+      `  ${d}  ${row ? `노출 ${row.imp_cnt} · 클릭 ${row.clk_cnt} · 지출 ${row.sales_amt}원 · 순위 ${row.avg_rnk ?? '-'}` : '행 없음 (그날 노출 0 — «수집 실패가 아니다»)'}`,
+    );
+  }
+  console.log(`  ⚠️ 「행 없음」은 정상이다 — 이 API 는 부재를 0 이 아니라 «무행» 으로 말한다.`);
+  console.log(`  표본 기간 ${since}~${until} · 행 ${sampleRows}`);
+
+  if (quick) {
+    console.log('');
+    console.log(`── ③④ 생략(--quick) · 호출 ${calls} · ${Date.now() - t0}ms`);
+    return;
   }
 
   console.log('');
-  console.log('── ③ StatReport 실스펙 대조 ────────────');
-  // ⚠️ 지시서의 경로·필드는 «추정» 이다. 실호출로 확정하고 다르면 R-3 로 문서를 갱신한다.
-  const yday = kstDate(new Date(), -1);
-  const probes: Array<{ label: string; path: string; query: Record<string, string> }> = [
-    {
-      label: 'GET /stats (ids + fields + timeRange)',
-      path: '/stats',
-      query: {
-        ids: '',                                  // 아래에서 키워드 ID 를 채운다
-        fields: JSON.stringify(['impCnt', 'clkCnt', 'salesAmt', 'ctr', 'cpc', 'avgRnk']),
-        timeRange: JSON.stringify({ since: yday, until: yday }),
-      },
-    },
-    {
-      label: 'GET /stats (datePreset)',
-      path: '/stats',
-      query: {
-        ids: '',
-        fields: JSON.stringify(['impCnt', 'clkCnt', 'salesAmt']),
-        datePreset: 'yesterday',
-      },
-    },
-  ];
-
-  // 표본 키워드 ID — 리드 1건이 붙어 있는 그 키워드가 최우선 표본이다.
-  const SAMPLE_KEYWORD_ID = 'nkw-a001-01-000008540645599'; // 아크로라로체 (leads.utm 실측)
-  let keywordIds: string[] = [SAMPLE_KEYWORD_ID];
-
-  // 그룹→키워드로 실제 ID 를 더 모아 본다(배치 한도 실측용).
-  if (Array.isArray(campaigns) && campaigns.length) {
-    const gid = await call(cred, 'GET', '/ncc/adgroups', { nccCampaignId: String(campaigns[0].nccCampaignId) });
-    if (gid.ok) {
-      try {
-        const groups = JSON.parse(gid.body) as Array<Record<string, unknown>>;
-        console.log(`  그룹 ${groups.length}개 (첫 캠페인)`);
-        if (groups.length) {
-          const kw = await call(cred, 'GET', '/ncc/keywords', { nccAdgroupId: String(groups[0].nccAdgroupId) });
-          if (kw.ok) {
-            const kws = JSON.parse(kw.body) as Array<Record<string, unknown>>;
-            console.log(`  키워드 ${kws.length}개 (첫 그룹) · 예: ${kws.slice(0, 3).map((k) => `${k.keyword}[${k.nccKeywordId}]`).join(' ')}`);
-            keywordIds = [...new Set([SAMPLE_KEYWORD_ID, ...kws.map((k) => String(k.nccKeywordId))])].slice(0, 30);
-          } else console.log(`  ⚠️ /ncc/keywords ${kw.status} ${kw.code}`);
-        }
-      } catch { console.log('  ⚠️ 그룹/키워드 본문 파싱 실패'); }
-    } else console.log(`  ⚠️ /ncc/adgroups ${gid.status} ${gid.code}`);
+  console.log('── ④ 전량 1패스 실측 ───────────────────');
+  const ids: string[] = [];
+  let groups = 0;
+  for (const c of camps) {
+    const g = await fetchSearchAd(cred, 'GET', '/ncc/adgroups', `nccCampaignId=${c.nccCampaignId}`);
+    calls += g.calls;
+    if (!g.ok) { console.log(`  ⚠️ 그룹 조회 실패 ${c.nccCampaignId} ${g.code}`); continue; }
+    const gs = JSON.parse(g.body) as Array<{ nccAdgroupId: string }>;
+    groups += gs.length;
+    for (const gg of gs) {
+      const k = await fetchSearchAd(cred, 'GET', '/ncc/keywords', `nccAdgroupId=${gg.nccAdgroupId}`);
+      calls += k.calls;
+      if (!k.ok) { console.log(`  ⚠️ 키워드 조회 실패 ${gg.nccAdgroupId} ${k.code}`); continue; }
+      for (const x of JSON.parse(k.body) as Array<{ nccKeywordId: string }>) ids.push(x.nccKeywordId);
+    }
   }
+  const uniq = [...new Set(ids)];
+  const chunks = chunkIdsByUri(uniq);
+  console.log(`  캠페인 ${camps.length} · 그룹 ${groups} · 키워드 ${uniq.length} · 배치 ${chunks.length}`);
+  console.log(`  목록 수집 호출 ${calls} 회`);
 
-  console.log(`  대상 키워드 ID ${keywordIds.length}개 · 기준일 ${yday}`);
-  for (const p of probes) {
-    const r = await call(cred, 'GET', p.path, { ...p.query, ids: JSON.stringify(keywordIds) });
-    console.log(`  ${r.ok ? '✅' : '⛔'} ${p.label} → HTTP ${r.status} ${r.code}`);
-    console.log(`     ${head(r.body, 500)}`);
-    if (r.ok) break;
+  const day = kstDate(new Date(), -1);
+  let rows = 0, empty = 0, spend = 0, clicks = 0, fails = 0;
+  const bad: string[] = [];
+  for (const chunk of chunks) {
+    const url = buildStatsUrl(chunk, day);
+    const r = await fetchSearchAd(cred, 'GET', STATS_PATH, url.slice(url.indexOf('?') + 1));
+    calls += r.calls;
+    if (!r.ok) { fails++; console.log(`  ⛔ 배치 실패 HTTP ${r.status} ${r.code}`); continue; }
+    const p = parseStatRows(r.body, day);
+    if (!p.parsed) { fails++; continue; }
+    if (p.rows.length === 0) empty++;
+    rows += p.rows.length;
+    bad.push(...p.bad);
+    for (const x of p.rows) { spend += x.sales_amt; clicks += x.clk_cnt; }
   }
+  const ms = Date.now() - t0;
+  console.log(`  ${day} 1일치 — 행 ${rows} · 행없는 배치 ${empty}/${chunks.length} · 실패 ${fails}`);
+  console.log(`  지출 ${spend.toLocaleString()}원 · 클릭 ${clicks} · 이상치(클릭>노출) ${bad.length}`);
+  console.log(`  총 호출 ${calls} · 소요 ${(ms / 1000).toFixed(1)}s`);
+  console.log(`  → 3일 재수집 시 예상 호출 ${calls + chunks.length * 2} · 예상 소요 ${((ms + chunks.length * 2 * (ms / Math.max(1, chunks.length))) / 1000).toFixed(0)}s (maxDuration 300)`);
 
+  console.log('');
+  console.log('── ③ upsert 멱등 ───────────────────────');
+  console.log('  ⛔ 로컬 SERVICE_ROLE_KEY 는 placeholder 다 — 여기서 적재할 수 없다.');
+  console.log('     배포 후 프로덕션 라우트를 2회 돌려 rows diff 0 으로 확인한다.');
   console.log('');
   console.log('⛔ 읽기만 했다. 광고 계정에 아무것도 쓰지 않았다.');
 }

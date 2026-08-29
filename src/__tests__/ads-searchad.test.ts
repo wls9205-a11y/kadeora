@@ -109,3 +109,75 @@ describe('URL·날짜', () => {
     expect(recentDates(3, new Date('2026-08-29T03:00:00Z'))).toEqual(['2026-08-27', '2026-08-28', '2026-08-29']);
   });
 });
+
+describe('StatReport — 실측으로 뒤집힌 것들 (R-3)', () => {
+  const IDS = Array.from({ length: 5 }, (_, i) => `nkw-a001-01-00000836635025${i}`);
+
+  it('ids 를 «쉼표» 로 잇고 인코딩하지 않는다 — JSON 배열은 400 이었다', async () => {
+    const { buildStatsUrl, STATS_PATH } = await import('@/lib/ads/searchad');
+    const u = buildStatsUrl(IDS.slice(0, 2), '2026-08-27');
+    expect(u).toContain(`${STATS_PATH}?ids=${IDS[0]},${IDS[1]}&`);
+    // ⚠️ ids «구간만» 본다. fields 는 JSON 배열이 «맞아서» %5B 로 인코딩된다 —
+    //    URL 전체에 대고 단언하면 정상인 fields 때문에 빨간불이 난다.
+    const idsSeg = u.slice(u.indexOf('ids='), u.indexOf('&fields='));
+    expect(idsSeg).not.toContain('%5B'); // ids 에 '[' 가 없어야 한다
+    expect(idsSeg).not.toContain('%2C'); // 쉼표를 인코딩하지 않는다
+    expect(idsSeg.split(',')).toHaveLength(2);
+  });
+
+  it('기간을 «하루» 로 좁힌다 — 그래야 합계가 곧 일별 행이 된다', async () => {
+    const { buildStatsUrl } = await import('@/lib/ads/searchad');
+    const u = decodeURIComponent(buildStatsUrl(IDS.slice(0, 1), '2026-08-27'));
+    expect(u).toContain('{"since":"2026-08-27","until":"2026-08-27"}');
+    // ⛔ timeIncrement 는 ids 와 함께 «지원되지 않는다». 붙이면 400 이다.
+    expect(u).not.toContain('timeIncrement');
+  });
+
+  it('배치는 «개수» 가 아니라 URI 길이로 끊는다', async () => {
+    const { chunkIdsByUri } = await import('@/lib/ads/searchad');
+    const many = Array.from({ length: 500 }, (_, i) => `nkw-a001-01-${String(i).padStart(15, '0')}`);
+    const chunks = chunkIdsByUri(many, 280); // ID 27자 + 쉼표 → 10개쯤에서 끊겨야 한다
+    expect(chunks.every((c) => c.join(',').length <= 280 || c.length === 1)).toBe(true);
+    expect(chunks.flat()).toHaveLength(500);
+    expect(new Set(chunks.flat()).size).toBe(500);
+  });
+});
+
+describe('⛔ 「행이 없다」는 «수집 실패가 아니다» — 세 번째 동형', () => {
+  it('노출 0 인 키워드는 «행이 아예 안 온다» — 빈 data 도 정상 파싱이다', async () => {
+    const { parseStatRows } = await import('@/lib/ads/searchad');
+    const r = parseStatRows('{"data":[],"compTm":"202608291642"}', '2026-08-27');
+    expect(r.parsed).toBe(true);   // 파싱은 «성공» 했다
+    expect(r.rows).toHaveLength(0);
+  });
+  it('본문이 깨졌을 때만 parsed=false 다 — 그 둘을 갈라야 한다', async () => {
+    const { parseStatRows } = await import('@/lib/ads/searchad');
+    expect(parseStatRows('<html>414</html>', '2026-08-27').parsed).toBe(false);
+    expect(parseStatRows('{"code":11001}', '2026-08-27').parsed).toBe(false);
+  });
+});
+
+describe('적재 행 변환', () => {
+  it('실응답을 그대로 옮긴다 (아크로라로체 08-27 실값)', async () => {
+    const { parseStatRows } = await import('@/lib/ads/searchad');
+    const body = JSON.stringify({ data: [{ ctr: 4.35, clkCnt: 1, cpc: 81, avgRnk: 3, id: 'nkw-a001-01-000008540645599', impCnt: 23, salesAmt: 81 }] });
+    const { rows } = parseStatRows(body, '2026-08-27');
+    expect(rows[0]).toMatchObject({
+      keyword_id: 'nkw-a001-01-000008540645599', stat_date: '2026-08-27',
+      imp_cnt: 23, clk_cnt: 1, sales_amt: 81, ctr: 4.35, cpc: 81, avg_rnk: 3,
+    });
+    expect(rows[0].raw).toBeTruthy(); // 원문 보존(D1 관례)
+  });
+  it('클릭>노출 인 행은 «위치를 남기고» 갈라 낸다 — UPSERT_FAIL 로만 남으면 원인을 못 찾는다', async () => {
+    const { parseStatRows } = await import('@/lib/ads/searchad');
+    const body = JSON.stringify({ data: [{ id: 'nkw-bad', impCnt: 5, clkCnt: 9, salesAmt: 0 }] });
+    const r = parseStatRows(body, '2026-08-27');
+    expect(r.rows).toHaveLength(0);
+    expect(r.bad[0]).toContain('nkw-bad');
+  });
+  it('없는 지표는 0/null 로 «지어내지 않는다»', async () => {
+    const { parseStatRows } = await import('@/lib/ads/searchad');
+    const { rows } = parseStatRows(JSON.stringify({ data: [{ id: 'nkw-x', impCnt: 3 }] }), '2026-08-27');
+    expect(rows[0]).toMatchObject({ imp_cnt: 3, clk_cnt: 0, sales_amt: 0, ctr: null, cpc: null, avg_rnk: null });
+  });
+});

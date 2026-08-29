@@ -114,3 +114,146 @@ export function kstDate(d = new Date(), offsetDays = 0): string {
 export function recentDates(days = 3, now = new Date()): string[] {
   return Array.from({ length: days }, (_, i) => kstDate(now, -i)).reverse();
 }
+
+// ── StatReport (2026-08-29 실측 확정 · R-3) ─────────────────────────────────
+/**
+ * ⚠️ 지시서 §2-3 의 추정 셋이 실호출에서 전부 뒤집혔다:
+ *   ① `ids` 는 JSON 배열이 «아니다» — ["nkw-…"] 는 400(11001). bare 쉼표구분이라야 200.
+ *   ② `id`(단수)와 `ids`(복수)는 «다른 API» 다.
+ *        id=  → 일자별 행 · 키워드 하나뿐(5,974 호출/일)
+ *        ids= → 키워드별 «기간 합계» · timeIncrement 미지원
+ *      ⛔ 그대로 쓰면 둘 다 못 쓴다. «기간을 하루로 좁히면 합계가 곧 일별 행» 이 된다.
+ *   ③ 배치 한도는 «개수» 가 아니라 «URI 길이» 다 — 전량(5,974)은 414 URI Too Long.
+ *
+ * ⚠️ 그리고 ids 는 «노출 0 인 키워드의 행을 아예 주지 않는다»(100개 요청 → 26행).
+ *    「행이 없다」는 «수집 실패가 아니다». 이 시스템의 API 들은 부재를 0 이 아니라
+ *    «무행» 으로 말한다 — NO_CODE · EMPTY_BODY 에 이어 세 번째 동형이다.
+ */
+export const STATS_PATH = '/stats';
+export const STATS_FIELDS = ['impCnt', 'clkCnt', 'salesAmt', 'ctr', 'cpc', 'avgRnk'] as const;
+/** URI 여유. 300개(≈8.6KB)까지 200 을 확인했고, 그 아래로 잡아 둔다. */
+export const STATS_URI_BUDGET = 6000;
+
+/** 키워드 ID 를 «URI 길이» 로 끊는다. 개수로 끊으면 ID 형식이 바뀔 때 조용히 414 가 난다. */
+export function chunkIdsByUri(ids: string[], budget = STATS_URI_BUDGET): string[][] {
+  const out: string[][] = [];
+  let cur: string[] = [];
+  let len = 0;
+  for (const id of ids) {
+    const add = id.length + 1; // 쉼표 한 자
+    if (cur.length && len + add > budget) { out.push(cur); cur = []; len = 0; }
+    cur.push(id); len += add;
+  }
+  if (cur.length) out.push(cur);
+  return out;
+}
+
+/**
+ * 하루치 배치 URL. ⚠️ 쉼표를 «인코딩하지 않는다» — 실호출로 통과를 확인한 형태 그대로다.
+ * nkw- ID 는 영숫자+하이픈이라 그대로 실어도 안전하다.
+ */
+export function buildStatsUrl(ids: string[], date: string, fields: readonly string[] = STATS_FIELDS): string {
+  const f = encodeURIComponent(JSON.stringify([...fields]));
+  const tr = encodeURIComponent(JSON.stringify({ since: date, until: date }));
+  return `${SEARCHAD_BASE}${STATS_PATH}?ids=${ids.join(',')}&fields=${f}&timeRange=${tr}`;
+}
+
+export interface AdStatRow {
+  keyword_id: string;
+  stat_date: string;
+  imp_cnt: number;
+  clk_cnt: number;
+  sales_amt: number;
+  ctr: number | null;
+  cpc: number | null;
+  avg_rnk: number | null;
+  raw: Record<string, unknown>;
+}
+
+const int = (v: unknown) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.round(n) : 0;
+};
+const num = (v: unknown) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+};
+
+/**
+ * 응답 → 적재 행. 판정 하나를 여기서 한다:
+ * ⛔ 클릭 > 노출인 행은 «버리지 않고 갈라 낸다». DB 제약이 어차피 막지만,
+ *    막힌 이유가 「어느 키워드였는지」 없이 UPSERT_FAIL 로만 남으면 원인을 못 찾는다.
+ */
+export function parseStatRows(body: string, date: string): { rows: AdStatRow[]; bad: string[]; parsed: boolean } {
+  let j: { data?: unknown };
+  try { j = JSON.parse(body); } catch { return { rows: [], bad: [], parsed: false }; }
+  if (!Array.isArray(j?.data)) return { rows: [], bad: [], parsed: false };
+  const rows: AdStatRow[] = [];
+  const bad: string[] = [];
+  for (const r of j.data as Array<Record<string, unknown>>) {
+    const id = typeof r.id === 'string' ? r.id : '';
+    if (!id) continue;
+    const imp = int(r.impCnt), clk = int(r.clkCnt);
+    if (clk > imp) { bad.push(`${id}:clk${clk}>imp${imp}`); continue; }
+    rows.push({
+      keyword_id: id,
+      stat_date: date,
+      imp_cnt: imp,
+      clk_cnt: clk,
+      sales_amt: int(r.salesAmt),
+      ctr: num(r.ctr),
+      cpc: num(r.cpc),
+      avg_rnk: num(r.avgRnk),
+      raw: r,
+    });
+  }
+  return { rows, bad, parsed: true };
+}
+
+/**
+ * 호출 한 곳. ⛔ 자격 실패(401·403)는 재시도하지 «않는다» — 같은 답이 오고 시간만 태운다.
+ * ⚠️ 게이트와 크론이 «다른 규칙» 으로 부르면 게이트 결과가 크론을 대변하지 못한다.
+ */
+export async function fetchSearchAd(
+  cred: SearchAdCred,
+  method: string,
+  path: string,
+  query = '',
+  opts: { retries?: number; throttleMs?: number; timeoutMs?: number } = {},
+): Promise<SearchAdEnvelope & { calls: number }> {
+  const retries = opts.retries ?? 2;
+  const throttle = opts.throttleMs ?? SEARCHAD_THROTTLE_MS;
+  const timeout = opts.timeoutMs ?? 20000;
+  let calls = 0;
+  let last: SearchAdEnvelope = { ok: false, status: 0, code: 'FETCH_FAIL', body: '' };
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    if (calls > 0 || attempt > 0) await new Promise((r) => setTimeout(r, throttle));
+    calls++;
+    const ac = new AbortController();
+    const t = setTimeout(() => ac.abort(), timeout);
+    try {
+      const res = await fetch(SEARCHAD_BASE + path + (query ? `?${query}` : ''), {
+        method,
+        headers: searchAdHeaders(cred, method, path),
+        signal: ac.signal,
+      });
+      const body = await res.text();
+      last = { ok: res.ok, status: res.status, code: classifyStatus(res.status), body };
+    } catch (e) {
+      last = { ok: false, status: 0, code: 'FETCH_FAIL', body: String(e).slice(0, 200) };
+    } finally {
+      clearTimeout(t);
+    }
+    if (last.ok || !isRetryable(last.code)) break;
+  }
+  return { ...last, calls };
+}
+
+/** 자격을 env 에서 «읽기만» 한다. 값을 로그로 흘리지 않는다. */
+export function credFromEnv(env: NodeJS.ProcessEnv = process.env): SearchAdCred {
+  return {
+    apiKey: env.SEARCHAD_API_KEY ?? '',
+    secret: env.SEARCHAD_SECRET ?? '',
+    customerId: env.SEARCHAD_CUSTOMER_ID ?? '',
+  };
+}
