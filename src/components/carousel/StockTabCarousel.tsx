@@ -86,7 +86,7 @@ export default function StockTabCarousel({
           padding: '8px 6px', margin: '0 -6px 4px',
           background: 'rgba(255,255,255,0.92)',
           backdropFilter: 'blur(8px)',
-          borderBottom: '1px solid #E5E7EB',
+          borderBottom: '1px solid var(--border)',
         }}
       >
         {tabs.map((t, i) => {
@@ -98,10 +98,13 @@ export default function StockTabCarousel({
               aria-selected={isActive}
               onClick={() => jumpTo(i)}
               style={{
-                padding: '5px 10px', borderRadius: 999,
+                padding: '5px 10px', borderRadius: 'var(--radius-pill)',
                 fontSize: 12, fontWeight: isActive ? 600 : 500,
-                background: isActive ? '#111827' : '#F3F4F6',
-                color: isActive ? '#FFFFFF' : '#374151',
+                // ⚠️ 선택 탭의 «어두운 면» 에 쓸 semantic 토큰이 없다(라이트 단일이라 어두운 surface 가 없다).
+                //    --text-primary 를 배경으로 쓰는 것은 «색은 정확하지만 의미는 어긋난» 흡수다.
+                //    --surface-inverse 신설은 DS-3 전 화면을 본 뒤 판단한다.
+                background: isActive ? 'var(--text-primary)' : 'var(--bg-elevated)',
+                color: isActive ? 'var(--text-inverse)' : 'var(--text-secondary)',
                 border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
               }}
             >

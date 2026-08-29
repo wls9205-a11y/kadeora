@@ -42,16 +42,16 @@ export default function StockIssueCardV2({ data, commentCount = 0, commentHot = 
         display: 'block',
         padding: '6px 9px',
         margin: 3,
-        borderRadius: 6,
-        background: '#FFFFFF',
+        borderRadius: 'var(--radius-sm)',
+        background: 'var(--bg-surface)',
         borderLeft: `3px solid ${bar}`,
-        boxShadow: '0 1px 1px rgba(0,0,0,0.04)',
+        boxShadow: 'var(--shadow-sm)',
         textDecoration: 'none',
-        color: '#111827',
+        color: 'var(--text-primary)',
       }}
     >
       {/* Row 1 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
         <IssueScoreBadge score={data.score} />
         <SparklineMini data={data.sparkline_5d ?? null} />
         <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
@@ -62,10 +62,10 @@ export default function StockIssueCardV2({ data, commentCount = 0, commentHot = 
             {data.market}{data.sector ? ` · ${data.sector}` : ''}
           </span>
         </span>
-        <span style={{ fontSize: 11.5, fontVariantNumeric: 'tabular-nums', color: '#374151', whiteSpace: 'nowrap' }}>
+        <span style={{ fontSize: 11.5, fontVariantNumeric: 'tabular-nums', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
           {fmtPrice(data.price)}
         </span>
-        <span style={{ ...chip, padding: '1px 6px', borderRadius: 3, fontSize: 11, lineHeight: 1.4, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+        <span style={{ ...chip, padding: '1px 6px', borderRadius: 'var(--radius-xs)', fontSize: 11, lineHeight: 1.4, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
           {formatChangePct(data.change_pct)}
         </span>
       </div>

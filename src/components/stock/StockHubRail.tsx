@@ -23,7 +23,7 @@ function MoverList({ rows }: { rows: MoverRow[] }) {
           <Link
             key={r.symbol}
             href={`/stock/${r.symbol}`}
-            style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+            style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}
           >
             <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {r.name}
@@ -101,7 +101,7 @@ export default function StockHubRail({
       {themes.length > 0 && (
         <div className="kd-rail-panel">
           <h2>테마</h2>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
             {themes.slice(0, 10).map((t) => (
               <Link
                 key={t}
@@ -115,7 +115,7 @@ export default function StockHubRail({
                   borderRadius: 'var(--radius-pill)',
                   border: '1px solid var(--border)',
                   background: params.theme === t ? 'var(--brand)' : 'var(--bg-sunken)',
-                  color: params.theme === t ? '#FFFFFF' : 'var(--text-secondary)',
+                  color: params.theme === t ? 'var(--text-inverse)' : 'var(--text-secondary)',
                   fontSize: 11,
                   fontWeight: params.theme === t ? 600 : 500,
                   textDecoration: 'none',

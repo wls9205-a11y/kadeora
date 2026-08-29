@@ -31,7 +31,7 @@ const CHIP: React.CSSProperties = {
 
 const chipStyle = (active: boolean): React.CSSProperties =>
   active
-    ? { ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 500 }
+    ? { ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: 'var(--text-inverse)', fontWeight: 500 }
     : { ...CHIP, background: 'var(--bg-surface)', color: 'var(--text-secondary)' };
 
 const ROW: React.CSSProperties = {
