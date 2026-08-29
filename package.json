@@ -15,7 +15,8 @@
     "check:bom": "grep -rlIP '\\xEF\\xBB\\xBF' --include='*.json' --include='*.ts' --include='*.tsx' --include='*.js' --include='*.mjs' . | grep -v node_modules && echo 'BOM 검출' && exit 1 || echo 'BOM 없음'",
     "smoke": "tsx scripts/smoke.ts",
     "permits:gate": "tsx scripts/permits-gate.ts",
-    "bjdong:sync": "tsx scripts/bjdong-sync.ts"
+    "bjdong:sync": "tsx scripts/bjdong-sync.ts",
+    "adstats:gate": "tsx scripts/adstats-gate.ts"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.48.0",
