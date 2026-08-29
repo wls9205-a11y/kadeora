@@ -40,20 +40,34 @@ function cleanAddress(addr: string): string {
     .trim();
 }
 
-async function kakao(path: string, query: string): Promise<{ lat: number; lng: number } | null> {
-  if (!KAKAO_KEY || !query) return null;
+/**
+ * ⛔ 실패를 «삼키지 않는다». 2026-08-29 에 이 함수의 첫 판이 `if (!res.ok) return null`
+ *    이었고, 그래서 「키가 거부됐다(403)」와 「결과가 없다」가 구분되지 않았다.
+ *    41/41 이 실패했는데 원인을 알 수 없었고, 프로덕션 응답만 보고는 데이터 탓으로 읽힌다.
+ *    ⚠️ 같은 병이 apt-enrich-location 에 있었고 «엿새 동안» success 로 보고됐다.
+ */
+type KakaoOut = { hit: { lat: number; lng: number } | null; err: string | null };
+
+async function kakao(path: string, query: string): Promise<KakaoOut> {
+  if (!KAKAO_KEY) return { hit: null, err: 'NO_KEY' };
+  if (!query) return { hit: null, err: null };
   try {
     const res = await fetch(`https://dapi.kakao.com/v2/local/search/${path}.json?query=${encodeURIComponent(query)}&size=1`, {
       headers: { Authorization: `KakaoAK ${KAKAO_KEY}` },
       signal: AbortSignal.timeout(6000),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const body = await res.text();
+      // 「서비스가 꺼져 있다」는 데이터 문제가 아니라 «사람이 콘솔에서 켜야 하는» 것이다.
+      const kind = /disabled .*service/i.test(body) ? 'SERVICE_DISABLED' : `HTTP_${res.status}`;
+      return { hit: null, err: kind };
+    }
     const j = await res.json();
     const d = j?.documents?.[0];
-    if (!d?.x || !d?.y) return null;
-    return { lat: Number(d.y), lng: Number(d.x) };
-  } catch {
-    return null;
+    if (!d?.x || !d?.y) return { hit: null, err: null };   // 진짜 «결과 없음»
+    return { hit: { lat: Number(d.y), lng: Number(d.x) }, err: null };
+  } catch (e) {
+    return { hit: null, err: String(e).slice(0, 40) };
   }
 }
 
@@ -81,22 +95,33 @@ async function handler(req: NextRequest) {
 
   const rows = (sites ?? []) as Array<{ id: string; slug: string; name: string; address: string }>;
   let filled = 0, byAddress = 0, byName = 0, missed = 0, calls = 0;
+  let blocked = false;
+  /** ⚠️ 「결과 없음」과 「호출이 거부됨」을 «가른다». 이 둘이 섞이면 데이터 탓으로 읽힌다. */
+  const apiErrors: Record<string, number> = {};
   const unresolved: string[] = [];
 
   for (const s of rows) {
     const addr = cleanAddress(s.address ?? '');
     // ① 지번/도로명 주소 → ② 앞 4토막(동까지) → ③ 현장명 키워드 검색
-    let hit = await kakao('address', addr); calls++;
+    let r = await kakao('address', addr); calls++;
+    if (r.err) apiErrors[r.err] = (apiErrors[r.err] ?? 0) + 1;
+    let hit = r.hit;
     let how: 'address' | 'name' = 'address';
     if (!hit && addr) {
-      await new Promise((r) => setTimeout(r, THROTTLE_MS));
-      hit = await kakao('address', addr.split(' ').slice(0, 4).join(' ')); calls++;
+      await new Promise((x) => setTimeout(x, THROTTLE_MS));
+      r = await kakao('address', addr.split(' ').slice(0, 4).join(' ')); calls++;
+      if (r.err) apiErrors[r.err] = (apiErrors[r.err] ?? 0) + 1;
+      hit = r.hit;
     }
     if (!hit) {
-      await new Promise((r) => setTimeout(r, THROTTLE_MS));
-      hit = await kakao('keyword', s.name); calls++;
+      await new Promise((x) => setTimeout(x, THROTTLE_MS));
+      r = await kakao('keyword', s.name); calls++;
+      if (r.err) apiErrors[r.err] = (apiErrors[r.err] ?? 0) + 1;
+      hit = r.hit;
       how = 'name';
     }
+    // ⛔ 자격·서비스 문제면 남은 현장을 계속 두드려 봐야 «같은 답» 이다. 즉시 멈춘다.
+    if (apiErrors.SERVICE_DISABLED || apiErrors.NO_KEY || (apiErrors.HTTP_401 ?? 0) > 0) { blocked = true; break; }
     if (!hit) {
       missed++;
       // ⚠️ 못 찾은 «위치» 를 남긴다. 세기만 하면 어느 현장이었는지 모른다.
@@ -126,7 +151,8 @@ async function handler(req: NextRequest) {
   return {
     processed: rows.length,
     created: filled,
-    failed: missed,
+    // ⚠️ 호출이 막힌 것은 «처리 실패» 다. 0 으로 보고하면 6일 내내 success 가 된다.
+    failed: missed + (blocked ? rows.length - filled - missed : 0),
     metadata: {
       dry_run: dryRun,
       candidates: rows.length,
@@ -137,6 +163,12 @@ async function handler(req: NextRequest) {
       unresolved,
       remaining_with_address: remaining ?? null,
       kakao_calls: calls,
+      // ⛔ 여기가 비어 있어야 「데이터가 안 잡힌다」로 읽을 수 있다.
+      api_errors: apiErrors,
+      blocked,
+      blocked_reason: apiErrors.SERVICE_DISABLED
+        ? '카카오 개발자 콘솔에서 OPEN_MAP_AND_LOCAL(로컬) 서비스가 꺼져 있다 — 사람이 켜야 한다'
+        : apiErrors.NO_KEY ? 'KAKAO_REST_API_KEY 미설정' : null,
     },
   };
 }
