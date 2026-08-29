@@ -49,6 +49,41 @@
               --kd-* · --stock-* · --blog-*
    ─────────────────────────────────────────────────────────────────────────── */
 
+
+/* ───────────────────────────────────────────────────────────────────────────
+   PRIMITIVE — 원값 팔레트  (DS-1b · 2026-08-29)
+
+   ⚠️ 이 계층은 «이름이 곧 색» 이다. 의미를 담지 않는다.
+      화면·컴포넌트가 여기를 «직접 참조하면 안 된다» — semantic 계층만 본다.
+      (--c-blue-600 을 컴포넌트가 쓰면 「파랑을 쓴 이유」가 코드에서 사라진다.)
+
+   ⚠️ 2회 이상 쓰인 원값만 승격했다. 한 번만 쓰이는 값은 semantic 안에 그대로 뒀다 —
+      승격하면 인디렉션만 늘고 「어디서 오는 값인가」 질문이 한 단계 깊어질 뿐이다.
+      (실측: 고유 hex 64종 중 «중복 12종» 이 34개 토큰에 걸쳐 있었다.)
+
+   ⛔ 같은 원값을 쓴다고 semantic 을 서로 «별칭» 으로 묶지 않았다.
+      --brand 와 --stock-down 은 오늘 둘 다 #2563EB 지만 이유가 다르다 —
+      전자는 브랜드고 후자는 «한국 증시에서 하락은 파랑» 이라는 관습이다.
+      한쪽으로 묶어 두면 브랜드 색을 바꾸는 순간 시세 색이 같이 뒤집힌다.
+      각자 primitive 를 «독립적으로» 참조한다. 나중에 갈라질 수 있어야 한다.
+   ─────────────────────────────────────────────────────────────────────────── */
+@layer tokens {
+  :root {
+    --c-blue-600: #2563EB;  /* 브랜드 파랑. --brand·--text-link·--info·--stock-down·--accent-blue 가 «각자» 참조한다 */
+    --c-white: #FFFFFF;  /* 흰색 */
+    --c-gray-900: #111827;  /* 가장 진한 먹 */
+    --c-gray-600: #757575;  /* 중간 회색 — 주식 «보합» 계열 */
+    --c-gray-300: #D4DAE3;  /* 테두리 회색 */
+    --c-red-700: #C62828;  /* 주식 «하락/약세» 계열(미국식)·강한 상승(한국식) */
+    --c-red-900: #991B1B;  /* 오류·경고 빨강 */
+    --c-green-700: #2E7D32;  /* 주식 «상승/강세» 계열(미국식) */
+    --c-emerald-900: #065F46;  /* 성공 초록 */
+    --c-amber-800: #854D0E;  /* 경고 앰버(텍스트 대비용 어두운 단) */
+    --c-amber-900: #7A4F0A;  /* 더 어두운 앰버 */
+    --c-amber-50: #FFF6E5;  /* 앰버 배경 틴트 */
+  }
+}
+
 @layer tokens {
   :root {
     --fs-xs: 14px;
@@ -230,7 +265,7 @@
     --z-toast: 100;
     --z-tooltip: 110;
     --z-overlay: 200;
-    --bg-surface:    #FFFFFF;
+    --bg-surface: var(--c-white);
     --bg-elevated:   #F0F2F5;
     --bg-sunken:     #E8ECF0;
     --bg-hover:      #EEF1F5;
@@ -238,18 +273,18 @@
     /* s273b: sticky/backdrop-blur 바 배경. 정의가 없어 소비처에서 rgba(255,255,255,.92)
        로 폴백되면서 다크 테마에 흰 배경 + 흰 글씨가 나오던 회귀 (Rule #94). */
     --bg-surface-translucent: rgba(255, 255, 255, 0.92);
-    --border:        #D4DAE3;
+    --border: var(--c-gray-300);
     --border-strong: #B8C2D0;
     --border-focus:  #4A8AF7;
-    --text-primary:   #111827;
+    --text-primary: var(--c-gray-900);
     --text-secondary: #374151;  /* s8: 6.74 → 9.19 */
     --text-tertiary:  #4B5563;  /* s8: 5.69 → 6.74. 회색 계열이 본문색의 2배(2,180건)라
                                    개별 대비가 통과해도 화면 전체가 흐리게 읽혔다.
                                    primary #111827 → secondary #374151 → tertiary #4B5563 3단 위계 유지 */
     --text-disabled:  #C8CDD4;
-    --text-inverse:   #FFFFFF;
-    --text-link:      #2563EB;
-    --brand:          #2563EB;
+    --text-inverse: var(--c-white);
+    --text-link: var(--c-blue-600);
+    --brand: var(--c-blue-600);
     --brand-hover:    #1D4ED8;
     --brand-light:    #EBF2FF;
     --brand-bg:       rgba(37,99,235,0.08);
@@ -259,32 +294,32 @@
     --brand-dark:     #1E40AF;
     --kakao-bg:       #FEE500;
     --kakao-text:     #191919;
-    --success:        #065F46;  /* s6: --accent-green 과 동일 값이었고 텍스트로 5곳 쓰인다 */
+    --success: var(--c-emerald-900);  /* s6: --accent-green 과 동일 값이었고 텍스트로 5곳 쓰인다 */
     --success-bg:     rgba(5,150,105,0.08);
     --warning:        #92400E;
     --warning-bg:     rgba(217,119,6,0.08);
-    --error:          #991B1B;
+    --error: var(--c-red-900);
     --error-bg:       rgba(220,38,38,0.08);
-    --info:           #2563EB;
+    --info: var(--c-blue-600);
     --info-bg:        rgba(37,99,235,0.08);
     --font-base:      15px;
     /* 주식 시세 */
     --stock-up:       #DC2626;
-    --stock-down:     #2563EB;
+    --stock-down: var(--c-blue-600);
     --stock-flat:     #B8CCDF;
     /* 시맨틱 액센트 (카테고리/상태별) — 세션70: 밝기 +10% */
-    --accent-green:   #065F46;
+    --accent-green: var(--c-emerald-900);
     --accent-green-bg: rgba(5,150,105,0.10);
     --accent-green-border: rgba(5,150,105,0.20);
     --accent-purple:  #7C3AED;
     --accent-purple-bg: rgba(124,58,237,0.10);
     --accent-orange:  #9A3412;
     --accent-orange-bg: rgba(234,88,12,0.10);
-    --accent-yellow:  #854D0E;
+    --accent-yellow: var(--c-amber-800);
     --accent-yellow-bg: rgba(202,138,4,0.10);
-    --accent-red:     #991B1B;
+    --accent-red: var(--c-red-900);
     --accent-red-bg:  rgba(220,38,38,0.10);
-    --accent-blue:    #2563EB;
+    --accent-blue: var(--c-blue-600);
     --accent-blue-bg: rgba(37,99,235,0.10);
     /* ── H5-D1 : 브랜드 네이비·골드 (2026-08-27, 「토큰 신설 금지」 예외 승인) ──
        왜 신설했나 — 이 색은 src/lib/og/brand.ts 에만 있었다. OG 썸네일은 satori 가
@@ -309,7 +344,7 @@
        var(--accent-amber) 5곳이 폴백을 타고 있었다. #f59e0b 는 흰 배경 대비
        2.15:1 로 하한 미달이다. 형제 토큰(--accent-yellow)과 «같은 값» 으로 맞춘다 —
        새 색을 만드는 게 아니라 이미 검증된 값에 이름을 붙이는 것이다. 6.85:1.  */
-    --accent-amber:        #854D0E;
+    --accent-amber: var(--c-amber-800);
     --accent-amber-bg:     rgba(202,138,4,0.10);
     --accent-amber-border: rgba(202,138,4,0.20);
     --accent-cyan:    #155E75;
@@ -317,19 +352,19 @@
     /* Stock colors — KR (빨강↑ 파랑↓) */
     --stock-kr-up:        #D32F2F;
     --stock-kr-up-bg:     rgba(211,47,47,0.08);
-    --stock-kr-up-strong: #C62828;
+    --stock-kr-up-strong: var(--c-red-700);
     --stock-kr-down:      #1976D2;
     --stock-kr-down-bg:   rgba(25,118,210,0.08);
     --stock-kr-down-strong:#1565C0;
     /* Stock colors — US (초록↑ 빨강↓) */
-    --stock-us-up:        #2E7D32;
+    --stock-us-up: var(--c-green-700);
     --stock-us-up-bg:     rgba(46,125,50,0.08);
     --stock-us-up-strong: #1B5E20;
-    --stock-us-down:      #C62828;
+    --stock-us-down: var(--c-red-700);
     --stock-us-down-bg:   rgba(198,40,40,0.08);
     --stock-us-down-strong:#B71C1C;
     /* Stock flat */
-    --stock-flat:         #757575;
+    --stock-flat: var(--c-gray-600);
     --stock-flat-bg:      rgba(117,117,117,0.06);
     /* Investor colors */
     /* ⚠️ #E65100 은 흰 배경 대비 3.79 로 하한 미달이었다 — 이 값은 «본문 글자색» 으로도 쓰인다
@@ -343,25 +378,25 @@
     --stock-retail:       #00838F;
     --stock-retail-bg:    rgba(0,131,143,0.06);
     /* AI signal & sentiment */
-    --stock-bullish:      #2E7D32;
+    --stock-bullish: var(--c-green-700);
     --stock-bullish-bg:   rgba(46,125,50,0.06);
-    --stock-bearish:      #C62828;
+    --stock-bearish: var(--c-red-700);
     --stock-bearish-bg:   rgba(198,40,40,0.06);
-    --stock-positive:     #2E7D32;
+    --stock-positive: var(--c-green-700);
     --stock-positive-bg:  rgba(46,125,50,0.06);
-    --stock-negative:     #C62828;
+    --stock-negative: var(--c-red-700);
     --stock-negative-bg:  rgba(198,40,40,0.06);
-    --stock-neutral:      #757575;
+    --stock-neutral: var(--c-gray-600);
     --stock-neutral-bg:   rgba(117,117,117,0.06);
     /* Market status */
-    --stock-market-open:  #2E7D32;
+    --stock-market-open: var(--c-green-700);
     --stock-market-open-bg: rgba(46,125,50,0.06);
-    --stock-market-closed:#757575;
+    --stock-market-closed: var(--c-gray-600);
     --stock-market-closed-bg: rgba(117,117,117,0.06);
     /* 네비게이션 */
-    --nav-bg:         #FFFFFF;
-    --nav-border:     #D4DAE3;
-    --nav-text:       #111827;
+    --nav-bg: var(--c-white);
+    --nav-border: var(--c-gray-300);
+    --nav-text: var(--c-gray-900);
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
     --shadow-md: 0 2px 8px rgba(0,0,0,0.10);
     --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
@@ -420,17 +455,17 @@
 
     /* 배경/보더 */
     --kd-bg-page: #FAFAF7;
-    --kd-bg-card: #FFFFFF;
+    --kd-bg-card: var(--c-white);
     --kd-bg-soft: #F5F5F2;
     --kd-border: #E5E5E0;
 
     /* 카더라 시그니처 노랑 (Phase 9: #FFC957) */
-    --kd-accent: #7A4F0A;
-    --kd-accent-soft: #FFF6E5;
+    --kd-accent: var(--c-amber-900);
+    --kd-accent-soft: var(--c-amber-50);
     --kd-accent-border: #F5D88A;
-    --kd-accent-bg: #FFF6E5;
+    --kd-accent-bg: var(--c-amber-50);
     --kd-success: #0A5F49;
-    --kd-warning: #7A4F0A;
+    --kd-warning: var(--c-amber-900);
     --kd-danger: #6B1F1F;
     --kd-live: #C92D2D;
   }
