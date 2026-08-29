@@ -14,7 +14,7 @@ import {
   type QueueSite,
   type RawClaim,
 } from '@/lib/verify/facts';
-import { tally } from '@/lib/net/outcome';
+import { fetchJson, tally, type Outcome } from '@/lib/net/outcome';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -51,20 +51,19 @@ interface SiteRow {
   source_ids: unknown; curated_copy: string | null;
 }
 
-async function naverSearch(kind: 'news' | 'webkr', query: string): Promise<Array<Record<string, string>>> {
+/**
+ * ⛔ 실패를 «세 갈래로» 돌려준다(중단점 B 판정 2). 이전 판은 전부 `[]` 로 접혀
+ *    「검색 결과 0건」과 「호출이 거부됨」이 구분되지 않았다 — 추출 실패 10건의
+ *    원인을 못 찾은 이유가 그것이다.
+ */
+async function naverSearch(kind: 'news' | 'webkr', query: string): Promise<Outcome<Array<Record<string, string>>>> {
   const id = process.env.NAVER_CLIENT_ID, sec = process.env.NAVER_CLIENT_SECRET;
-  if (!id || !sec) return [];
-  try {
-    const res = await fetch(
-      `https://openapi.naver.com/v1/search/${kind}?query=${encodeURIComponent(query)}&display=10&sort=sim`,
-      { headers: { 'X-Naver-Client-Id': id, 'X-Naver-Client-Secret': sec }, signal: AbortSignal.timeout(6000) },
-    );
-    if (!res.ok) return [];
-    const j = await res.json();
-    return Array.isArray(j?.items) ? j.items : [];
-  } catch {
-    return [];
-  }
+  if (!id || !sec) return { kind: 'bad_json', value: null, status: 0, detail: 'NAVER 자격 없음' };
+  return fetchJson<Array<Record<string, string>>>(
+    `https://openapi.naver.com/v1/search/${kind}?query=${encodeURIComponent(query)}&display=10&sort=sim`,
+    { headers: { 'X-Naver-Client-Id': id, 'X-Naver-Client-Secret': sec } },
+    { timeoutMs: 6000, retries: 1, pick: (j: any) => (Array.isArray(j?.items) ? j.items : null) },
+  );
 }
 
 /**
@@ -98,9 +97,10 @@ const strip = (s: string) => String(s ?? '').replace(/<[^>]*>/g, '').replace(/&[
 /** 추출 단계에서만 쓰는 형태 — 어느 «필드» 에 대한 주장인지를 달고 다닌다. */
 type ExtractedClaim = RawClaim;
 
-async function extractClaims(site: SiteRow, snippets: string[]): Promise<ExtractedClaim[] | null> {
+async function extractClaims(site: SiteRow, snippets: string[]): Promise<Outcome<ExtractedClaim[]>> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey || snippets.length === 0) return null;
+  if (!apiKey) return { kind: 'bad_json', value: null, status: 0, detail: 'ANTHROPIC 자격 없음' };
+  if (snippets.length === 0) return { kind: 'no_result', value: null, status: 200, detail: '검색 스니펫 0건' };
 
   const system = `당신은 한국 부동산 기사에서 «사실 주장» 만 뽑는 추출기입니다.
 판정하지 마세요. 점수도 매기지 마세요. 오직 «누가 무엇을 말했는가» 만 뽑습니다.
@@ -134,21 +134,25 @@ JSON 배열만 반환:
 검색 결과:
 ${snippets.slice(0, 12).map((s, i) => `[${i + 1}] ${s}`).join('\n')}`;
 
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const call = await fetchJson<string>(
+    'https://api.anthropic.com/v1/messages',
+    {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({ model: MODEL, max_tokens: 1500, system, messages: [{ role: 'user', content: user }] }),
-      signal: AbortSignal.timeout(45_000),
-    });
-    if (!res.ok) return null;
-    const j = await res.json();
-    const text = j?.content?.[0]?.text ?? '';
+    },
+    { timeoutMs: 45_000, retries: 1, pick: (j: any) => j?.content?.[0]?.text ?? null },
+  );
+  if (call.kind !== 'ok' || !call.value) return { ...call, value: null } as Outcome<ExtractedClaim[]>;
+
+  try {
+    const text = call.value;
     const m = text.match(/\[[\s\S]*\]/);
-    if (!m) return null;
+    // ⚠️ 「JSON 배열이 없다」는 호출 실패가 아니라 «읽을 수 없는 응답» 이다.
+    if (!m) return { kind: 'bad_json', value: null, status: call.status, detail: `배열 없음: ${text.slice(0, 80)}` };
     const arr = JSON.parse(m[0]) as Array<Record<string, unknown>>;
     const KINDS: OriginKind[] = ['disclosure', 'union', 'builder', 'announcement', 'permit', 'press'];
-    return arr
+    const parsed = arr
       .filter((x) => typeof x.field === 'string' && KINDS.includes(x.kind as OriginKind))
       .map((x) => ({
         field: x.field as string,
@@ -158,8 +162,11 @@ ${snippets.slice(0, 12).map((s, i) => `[${i + 1}] ${s}`).join('\n')}`;
         publishedAt: (x.publishedAt as string) ?? null,
         evidence: (x.evidence as string) ?? null,
       }));
-  } catch {
-    return null;
+    return parsed.length === 0
+      ? { kind: 'no_result', value: [], status: call.status, detail: '추출 0건' }
+      : { kind: 'ok', value: parsed, status: call.status, detail: '' };
+  } catch (e) {
+    return { kind: 'bad_json', value: null, status: call.status, detail: `JSON 파싱 실패: ${String(e).slice(0, 60)}` };
   }
 }
 
@@ -233,17 +240,18 @@ async function handler(req: NextRequest) {
 
     // §6: "{구역명} 시공사/단지명" 축으로 묻는다.
     const base = s.display_name || s.name;
-    const news = await naverSearch('news', `${base} 시공사`); naverCalls++;
+    const news = net.add(await naverSearch('news', `${base} 시공사`), `${s.slug} news`); naverCalls++;
     await new Promise((r) => setTimeout(r, NAVER_THROTTLE_MS));
-    const web = await naverSearch('webkr', `${base} 단지명 세대수`); naverCalls++;
+    const web = net.add(await naverSearch('webkr', `${base} 단지명 세대수`), `${s.slug} web`); naverCalls++;
     await new Promise((r) => setTimeout(r, NAVER_THROTTLE_MS));
 
-    const snippets = [...news, ...web]
+    const snippets = [...(news.value ?? []), ...(web.value ?? [])]
       .map((it) => `${strip(it.title)} — ${strip(it.description)}`)
       .filter((t) => t.length > 10);
 
-    const claims = await extractClaims(s, snippets);
-    if (claims === null) { extractFails++; continue; }
+    const ex = net.add(await extractClaims(s, snippets), `${s.slug} extract`);
+    if (ex.kind !== 'ok' || !ex.value) { extractFails++; continue; }
+    const claims = ex.value;
     claimsFound += claims.length;
 
     for (const field of FIELDS) {

@@ -68,7 +68,13 @@ export function sameBuilder(a: string | null | undefined, b: string | null | und
  *    conflicting 이 됐다 — 시공사 «입찰 경쟁» 기사에서 후보를 전부 뽑은 것이다.
  *    후보를 값으로 쓰면 경쟁이 치열한 현장일수록 판정이 더 나빠진다.
  */
-const SELECTED = ['선정', '수주', '계약', '시공사로', '낙찰', '우선협상', '지정'];
+// ⚠️ 2026-08-30 B′ 실측으로 보강 — 「시공사로」만 있어서 «시공 계열» 3건을 버렸다:
+//    「시공사인 BS한양」 「롯데건설(주)이 시공한」 「시공사는 GS건설의…」.
+//    「시공사인 A」는 명백한 선정 근거다. 「~로」 하나만 넣은 것이 좁았다.
+const SELECTED = [
+  '선정', '수주', '계약', '낙찰', '우선협상', '지정',
+  '시공사로', '시공사인', '시공사는', '시공사가', '시공한', '시공을 맡', '시공을맡', '시공사 선정',
+];
 const CANDIDATE = ['입찰', '참여', '후보', '경쟁', '제안', '설명회', '참가', '검토', '유력'];
 
 export type BuilderRole = 'selected' | 'candidate' | 'unknown';
@@ -96,14 +102,18 @@ export function acceptAsBuilder(evidence: string | null | undefined): boolean {
  * ⛔ 「78」 같은 맨숫자를 세대수로 받지 «않는다».
  *    PV-5 첫 배치에서 양정4 가 78 vs 849 로 갈렸다 — 78 은 세대수가 아니었다.
  *    숫자와 「세대」가 «결합» 된 것만 값으로 본다.
- * ⚠️ 「849세대」 「849 세대」 「총 849세대」 는 통과, 「78」 「78억」 「78㎡」 는 탈락.
+ * ⚠️ 「849세대」 「849 세대」 「총 849세대」 「1,000가구」 는 통과,
+ *    「78」 「78억」 「78㎡」 는 탈락. ⛔ 「호」는 받지 않는다 — 오피스텔 호실과 섞인다.
  */
 export function parseUnits(raw: string | number | null | undefined): number | null {
   if (raw === null || raw === undefined) return null;
   const t = String(raw);
   // 숫자만 온 경우 — 결합 근거가 없으므로 버린다.
   if (/^\s*[\d,]+\s*$/.test(t)) return null;
-  const m = t.match(/([\d,]{2,7})\s*세대/);
+  // ⚠️ 2026-08-30 B′ 실측 — 「세대」만 받아 「1,000가구」·「1850가구」·「299가구」를 버렸다.
+  //    한국 기사에서 아파트 세대수는 「세대」만큼이나 «가구» 로 쓴다. 둘 다 받는다.
+  //    ⛔ 「호」는 넣지 않는다 — 오피스텔·호실 수와 섞인다(다른 사실이다).
+  const m = t.match(/([\d,]{2,7})\s*(?:세대|가구)/);
   if (!m) return null;
   const n = Number(m[1].replace(/,/g, ''));
   // 30세대 미만·현실 밖 값은 세대수로 보지 않는다(§6 필터와 같은 결).

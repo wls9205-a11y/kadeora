@@ -95,7 +95,8 @@ export function tally() {
   const counts: Record<OutcomeKind, number> = { ok: 0, no_result: 0, bad_json: 0, call_failed: 0 };
   const samples: string[] = [];
   return {
-    add(o: Outcome<unknown>, label?: string) {
+    /** ⚠️ 제네릭이라야 호출부가 값의 «타입을 잃지 않는다». */
+    add<T>(o: Outcome<T>, label?: string): Outcome<T> {
       counts[o.kind]++;
       if (o.kind !== 'ok' && o.kind !== 'no_result' && samples.length < 10) {
         samples.push(`${label ? label + ' ' : ''}${o.kind}(${o.status}) ${o.detail}`);

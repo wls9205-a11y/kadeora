@@ -58,6 +58,15 @@ describe('② 역할 구분 — 「입찰 후보」는 값이 아니다', () => 
   it('⚠️ 둘이 섞이면 안전한 쪽(candidate)으로 접는다', () => {
     expect(builderRole('입찰에 참여해 선정됐다')).toBe('candidate');
   });
+  it('⭐ 고정 케이스 — 「시공사인 A」는 선정이다 (B′ 유실 3건의 원인)', () => {
+    // 2026-08-30 B′: SELECTED 에 「시공사로」만 있어서 아래 셋을 전부 버렸다.
+    for (const e of ['시공사인 BS한양', '롯데건설(주)이 시공한', '시공사는 GS건설의 자회사인 자이S&D']) {
+      expect(acceptAsBuilder(e)).toBe(true);
+    }
+  });
+  it('⚠️ 「시공」이 들어가도 입찰 문맥이면 여전히 버린다', () => {
+    expect(acceptAsBuilder('시공사 선정 입찰에 참여')).toBe(false);
+  });
   it('근거가 없으면 unknown — 채택하지 않는다', () => {
     expect(acceptAsBuilder(null)).toBe(false);
     expect(builderRole('')).toBe('unknown');
@@ -83,6 +92,16 @@ describe('③ 수치 결합 — 맨숫자를 세대수로 받지 않는다', () 
     expect(parseUnits(78)).toBeNull();
     expect(parseUnits('78억')).toBeNull();
     expect(parseUnits('84㎡')).toBeNull();
+  });
+  it('⭐ 고정 케이스 — 「1,000가구」는 세대수다 (B′ 유실 3건의 원인)', () => {
+    // 2026-08-30 B′: 「세대」만 받아 1,000가구·1850가구·299가구를 버렸다.
+    expect(parseUnits('1,000가구')).toBe(1000);
+    expect(parseUnits('1850가구')).toBe(1850);
+    expect(parseUnits('299가구')).toBe(299);
+    expect(parseUnits('총 849 가구 규모')).toBe(849);
+  });
+  it('⛔ 「호」는 받지 않는다 — 오피스텔 호실과 섞인다', () => {
+    expect(parseUnits('299호')).toBeNull();
   });
   it('현실 밖 값은 세대수가 아니다', () => {
     expect(parseUnits('12세대')).toBeNull();      // 30 미만
