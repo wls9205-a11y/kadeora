@@ -11,48 +11,27 @@
 //    광고 랜딩에서는 아예 confirmed 만 넘긴다 (lib/apt/site-events.ts · confirmedOnly).
 
 import { lifecycleLabel } from '@/lib/apt/lifecycle-label';
+import VerifiedBadge from '@/components/ds/VerifiedBadge';
 import type { AptSiteEvent } from '@/lib/apt/site-events';
 
 /**
- * 등급 표기. 색은 전부 기존 토큰 — 새 CSS 변수를 만들지 않는다.
- * 점 색은 확정만 --brand 다. 추정·카더라를 브랜드 색으로 찍으면
- * 눈금만 훑고 확정으로 읽는다.
+ * 눈금 «점» 색만 여기서 정한다. 라벨·톤은 DS 표준(ds/tone.ts)이 원본이다.
+ *
+ * ⚠️⚠️ U-1a 정정 — 이 파일은 자체 CONFIDENCE 표를 들고 있었고 «3값뿐» 이었다
+ *    (confirmed · estimated · rumor). 그래서 `verified` 와 `conflicting` 이벤트가
+ *    폴백에 걸려 **「미확인」으로 그려지고 있었다** — 독립 출처 두 곳이 확인한 사건이
+ *    화면에서는 등급 없는 것으로 보였다는 뜻이다.
+ * ⛔ 어휘를 두 벌 두면 «한쪽만» 늘어난다. 라벨은 VerifiedBadge 하나로 간다.
+ *
+ * ⚠️ 점 색은 «확정 계열만» 브랜드다. 추정·카더라·충돌을 브랜드 색으로 찍으면
+ *    눈금만 훑는 사람이 전부 확정으로 읽는다(원래 주석의 의도를 그대로 지킨다).
  */
-const CONFIDENCE: Record<
-  string,
-  { label: string; dot: string; ring: string; badgeBg: string; badgeFg: string }
-> = {
-  confirmed: {
-    label: '확정',
-    dot: 'var(--brand)',
-    ring: 'var(--brand-bg)',
-    badgeBg: 'var(--accent-green-bg)',
-    badgeFg: 'var(--accent-green)',
-  },
-  estimated: {
-    label: '추정',
-    dot: 'var(--text-tertiary)',
-    ring: 'var(--bg-sunken)',
-    badgeBg: 'var(--accent-orange-bg)',
-    badgeFg: 'var(--accent-orange)',
-  },
-  rumor: {
-    label: '카더라',
-    dot: 'var(--text-tertiary)',
-    ring: 'var(--bg-sunken)',
-    badgeBg: 'var(--bg-sunken)',
-    badgeFg: 'var(--text-tertiary)',
-  },
-  // ⚠️ 등급이 비어 있는 이벤트가 실측 13건 있다 (트리거가 현장의 null confidence 를 그대로 옮긴다).
-  //    이걸 '확정' 으로 그리면 근거 없는 정보에 확정 딱지를 붙이게 된다.
-  unknown: {
-    label: '미확인',
-    dot: 'var(--text-tertiary)',
-    ring: 'var(--bg-sunken)',
-    badgeBg: 'var(--bg-sunken)',
-    badgeFg: 'var(--text-tertiary)',
-  },
-};
+function dotStyle(confidence: string | null | undefined): { dot: string; ring: string } {
+  const strong = confidence === 'confirmed' || confidence === 'verified';
+  return strong
+    ? { dot: 'var(--brand)', ring: 'var(--brand-bg)' }
+    : { dot: 'var(--text-tertiary)', ring: 'var(--bg-sunken)' };
+}
 
 /**
  * source 는 기계용 문자열이다. 사람이 읽을 값만 드러낸다.
@@ -108,8 +87,8 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
     <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
       {events.map((e, i) => {
         const { title, detail } = describe(e);
-        // 모르는 값·빈 값은 '미확인' 이다. 확정으로 떨어뜨리지 않는다.
-        const grade = CONFIDENCE[e.confidence ?? ''] ?? CONFIDENCE.unknown;
+        // 모르는 값·빈 값은 '미확인' 이다(VerifiedBadge 가 판정). 확정으로 떨어뜨리지 않는다.
+        const grade = dotStyle(e.confidence);
         const src = sourceLabel(e.source);
         const isLast = i === events.length - 1;
 
@@ -207,21 +186,9 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
                 </span>
               )}
 
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 3 }}>
-                <span
-                  style={{
-                    flexShrink: 0,
-                    padding: '1.5px 5px',
-                    borderRadius: 3,
-                    fontSize: 'var(--fs-xs)',
-                    fontWeight: 500,
-                    lineHeight: 1.4,
-                    background: grade.badgeBg,
-                    color: grade.badgeFg,
-                  }}
-                >
-                  {grade.label}
-                </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginTop: 3 }}>
+                {/* DS ⑥ 표준. 5값 + null 을 전부 안다 — 이 파일의 옛 표는 3값뿐이었다. */}
+                <VerifiedBadge confidence={e.confidence} />
                 {src && (
                   <span
                     style={{

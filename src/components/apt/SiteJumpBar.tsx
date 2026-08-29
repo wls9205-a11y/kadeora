@@ -28,6 +28,9 @@ export const HEADER_HEIGHT = 45;
  *    본문이 길어졌으므로 상단 고정물이 차지하는 자리를 줄이는 쪽이 맞다.
  */
 export const JUMP_BAR_HEIGHT = 42;
+// ⛔ 이 값을 바꾸면 components.css 의 `.kd-detail-rail { --rail-top }` «도» 바꿀 것.
+//    레일이 멈추는 자리 = 헤더 45 + 이 값 + 여유 16 이다. CSS 라 자동으로 안 따라온다.
+//    (U-1a 에서 57→42 로 바꾸면서 실제로 한 번 갈렸다.)
 /** 섹션 앵커의 scroll-margin-top. 헤더 + 점프바 + 여유 8. */
 export const SECTION_SCROLL_MARGIN = HEADER_HEIGHT + JUMP_BAR_HEIGHT + 8;
 
