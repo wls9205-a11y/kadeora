@@ -28,7 +28,7 @@ function MoverList({ rows }: { rows: MoverRow[] }) {
             <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {r.name}
             </span>
-            <span style={{ flexShrink: 0, fontSize: 11.5, fontWeight: 700, color: chipFg, fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ flexShrink: 0, fontSize: 'var(--fs-2xs)', fontWeight: 700, color: chipFg, fontVariantNumeric: 'tabular-nums' }}>
               {formatChangePct(r.change_pct)}
             </span>
           </Link>
@@ -56,7 +56,7 @@ export default function StockHubRail({
       {/* ① 시장 지수 — 지수 레벨은 DB 에 없어 등락 종목 수로 낸다 (StockIndexStrip 주석 참조) */}
       <div className="kd-rail-panel">
         <h2>시장</h2>
-        <div style={{ display: 'grid', gap: 6, fontSize: 12 }}>
+        <div style={{ display: 'grid', gap: 6, fontSize: 'var(--fs-2xs)' }}>
           {([
             { label: '코스피', b: strip.kospi, key: 'kospi' as const },
             { label: '코스닥', b: strip.kosdaq, key: 'kosdaq' as const },
@@ -68,7 +68,7 @@ export default function StockHubRail({
               style={{ display: 'flex', alignItems: 'center', gap: 8, borderBottom: 0, padding: '4px 0' }}
             >
               <span style={{ flex: 1, minWidth: 0 }}>{label}</span>
-              <span style={{ flexShrink: 0, fontSize: 11.5, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+              <span style={{ flexShrink: 0, fontSize: 'var(--fs-2xs)', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
                 <span style={{ color: 'var(--accent-red)' }}>▲{b.up}</span>
                 <span style={{ marginLeft: 5, color: 'var(--accent-blue)' }}>▼{b.down}</span>
               </span>
@@ -76,7 +76,7 @@ export default function StockHubRail({
           ))}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', color: 'var(--text-secondary)' }}>
             <span style={{ flex: 1, minWidth: 0 }}>원/달러</span>
-            <span style={{ flexShrink: 0, fontSize: 11.5, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ flexShrink: 0, fontSize: 'var(--fs-2xs)', fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
               {strip.usdkrw ? strip.usdkrw.toLocaleString('ko-KR', { maximumFractionDigits: 1 }) : '—'}
             </span>
           </div>
@@ -116,7 +116,7 @@ export default function StockHubRail({
                   border: '1px solid var(--border)',
                   background: params.theme === t ? 'var(--brand)' : 'var(--bg-sunken)',
                   color: params.theme === t ? 'var(--text-inverse)' : 'var(--text-secondary)',
-                  fontSize: 11,
+                  fontSize: 'var(--fs-2xs)',
                   fontWeight: params.theme === t ? 600 : 500,
                   textDecoration: 'none',
                   borderBottom: params.theme === t ? '1px solid var(--brand)' : '1px solid var(--border)',

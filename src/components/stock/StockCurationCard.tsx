@@ -35,10 +35,10 @@ export default function StockCurationCard({ data }: { data: StockIssueScore }) {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-        <span className={display >= 80 ? 'kd-lrow-k is-hot' : 'kd-lrow-k'} style={{ width: 'auto', padding: '4px 9px', fontSize: 12 }}>
+        <span className={display >= 80 ? 'kd-lrow-k is-hot' : 'kd-lrow-k'} style={{ width: 'auto', padding: '4px 9px', fontSize: 'var(--fs-2xs)' }}>
           {display}
         </span>
-        <span style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--text-tertiary)' }}>이슈 점수</span>
+        <span style={{ fontSize: 'var(--fs-3xs)', fontWeight: 600, color: 'var(--text-tertiary)' }}>이슈 점수</span>
         <WarningLabel warning={data.warning} />
       </div>
 
@@ -56,7 +56,7 @@ export default function StockCurationCard({ data }: { data: StockIssueScore }) {
         <span style={{ fontSize: 13, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: 'var(--text-primary)' }}>
           {data.price != null ? Number(data.price).toLocaleString() : '-'}
         </span>
-        <span style={{ fontSize: 11.5, fontWeight: 700, color: chipFg }}>
+        <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: chipFg }}>
           {formatChangePct(data.change_pct)}
         </span>
       </div>
@@ -65,7 +65,7 @@ export default function StockCurationCard({ data }: { data: StockIssueScore }) {
       {grounds.length > 0 && (
         <ul style={{ margin: 'auto 0 0', padding: 0, listStyle: 'none', display: 'grid', gap: 4 }}>
           {grounds.map(g => (
-            <li key={g.tag} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10.5, color: 'var(--text-tertiary)' }}>
+            <li key={g.tag} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-3xs)', color: 'var(--text-tertiary)' }}>
               <span style={{ flexShrink: 0, width: 34, fontWeight: 500, color: 'var(--text-secondary)' }}>
                 {REASON_LABELS[g.tag]}
               </span>

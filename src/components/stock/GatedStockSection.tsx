@@ -189,7 +189,7 @@ export default function GatedStockSection({ sectionKey, pageType = 'symbol', chi
           boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
         }}
       >
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6 }}>
+        <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginBottom: 6 }}>
           🔒 {isPremium ? '프리미엄 회원 전용' : '로그인 후 전체 열람'}
         </div>
         <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 14, color: 'var(--text-primary)', wordBreak: 'keep-all' }}>
@@ -207,7 +207,7 @@ export default function GatedStockSection({ sectionKey, pageType = 'symbol', chi
         >
           {isPremium ? '프리미엄 가입하기' : '카카오로 1초 로그인'}
         </button>
-        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 10 }}>
+        <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 10 }}>
           가입 즉시 100P 지급 · 언제든 해지 가능
         </div>
       </div>

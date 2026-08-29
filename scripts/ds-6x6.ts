@@ -22,7 +22,9 @@ import { chromium } from 'playwright';
 const BASE = (process.argv[2] || 'https://kadeora.app').replace(/\/$/, '');
 /** 합집합 6폭 — 마스터·STATUS(390·480·700·1024·1280) ∪ 설계서(768). 중단점 C-1 안건. */
 const WIDTHS = [390, 480, 700, 768, 1024, 1280];
-const MODES = ['', 'font-small'];
+// ⚠️ font-large 를 «반드시» 넣는다. 조밀 표는 글자가 커질 때 깨진다 —
+//    작아질 때(font-small)만 보면 정작 위험한 쪽을 안 본 것이다(부대조건 ③).
+const MODES = ['', 'font-small', 'font-large'];
 const PAGES = ['/', '/apt', '/blog', '/stock', '/apt/busan', '/apt/region/부산'];
 
 let fails = 0;

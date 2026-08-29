@@ -87,6 +87,21 @@
 @layer tokens {
   :root {
     --fs-xs: 14px;
+    /* ⚠️ 데이터 «조밀 표» 전용 하단 연장 (DS-3-1 · 2026-08-29 중단점 C 승인).
+       ⛔ 본문·일반 UI 라벨에 쓰지 말 것. 이 둘은 시세 행·지표 스트립처럼
+          「숫자가 빽빽한 표」를 위한 단이다. 일반 화면에서 --fs-xs 아래로 내려갈
+          이유는 «없다» — 작게 쓰고 싶다는 이유는 이유가 아니다.
+       ⛔ 10px 미만을 만들지 않는다. 이 사다리의 바닥이다.
+   ⚠️ 그 바닥 때문에 «모드 간 한 단 차이가 모바일에서 무너진다» — 알고 두는 것이다.
+      모바일에서 --fs-xs 는 :root 13 / font-small 12 로 1px 차이뿐이라, 그 아래
+      두 단을 각각 벌릴 여유가 «없다»(13→11→10 / 12→11→10). 그래서 두 모드의
+      --fs-2xs 가 «둘 다 11px» 이 된다. --sp-xs 가 4px 바닥에서 겹친 것과 같은 현상이다.
+      ⛔ 이걸 피하려고 9px 를 만들지 않는다 — 바닥을 깨는 대가가 더 크다.
+      데스크탑에서는 여유가 있어 정상 분리된다(:root 14/12/10 · small 12/11/10 · large 15/13/11).
+       ⚠️ 대비 하한은 그대로 4.5:1 이다. WCAG 의 3:1 완화는 «큰 글씨» 전용이라
+          작을수록 오히려 완화가 «없다». contrast-audit 의 MIN 이 이미 그 값이다. */
+    --fs-2xs: 12px;
+    --fs-3xs: 10px;
     --fs-sm: 16px;
     --fs-base: 18px;
     --fs-md: 19px;
@@ -124,6 +139,8 @@
 @layer tokens {
   html.font-small {
     --fs-xs: 12px;
+    --fs-2xs: 11px;
+    --fs-3xs: 10px;
     --fs-sm: 14px;
     --fs-base: 16px;
     --fs-md: 17px;
@@ -139,6 +156,8 @@
 @layer tokens {
   html.font-medium {
     --fs-xs: 14px;
+    --fs-2xs: 12px;
+    --fs-3xs: 10px;
     --fs-sm: 16px;
     --fs-base: 18px;
     --fs-md: 19px;
@@ -154,6 +173,8 @@
 @layer tokens {
   html.font-large {
     --fs-xs: 15px;
+    --fs-2xs: 13px;
+    --fs-3xs: 11px;
     --fs-sm: 17px;
     --fs-base: 20px;
     --fs-md: 21px;
@@ -539,6 +560,8 @@
   @media (max-width: 767.98px) {
     html.font-large {
       --fs-xs: 14px;
+      --fs-2xs: 12px;
+      --fs-3xs: 10px;
       --fs-sm: 16px;
       --fs-base: 19px;
       --fs-md: 20px;
@@ -553,6 +576,8 @@
     }
     html.font-small {
       --fs-xs: 12px;
+      --fs-2xs: 11px;
+      --fs-3xs: 10px;
       --fs-sm: 14px;
       --fs-base: 16px;
       --fs-md: 17px;
@@ -563,6 +588,8 @@
     /* 새 기본값 모바일 보정 */
     :root {
       --fs-xs: 13px;
+      --fs-2xs: 11px;
+      --fs-3xs: 10px;
       --fs-sm: 15px;
       --fs-base: 17px;
       --fs-md: 18px;

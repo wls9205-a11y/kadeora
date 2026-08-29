@@ -55,7 +55,7 @@ export default function IssueGateCard({
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>
             전체 이슈 종목 보기
           </div>
-          <div style={{ fontSize: 11.5, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+          <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
             {subtitle}
           </div>
         </div>
@@ -65,7 +65,7 @@ export default function IssueGateCard({
             color: 'var(--kakao-text)',
             padding: '6px 12px',
             borderRadius: 'var(--radius-sm)',
-            fontSize: 12,
+            fontSize: 'var(--fs-2xs)',
             fontWeight: 500,
             whiteSpace: 'nowrap',
           }}

@@ -22,7 +22,7 @@ const CHIP: React.CSSProperties = {
   minHeight: 32,
   padding: '0 11px',
   borderRadius: 'var(--radius-pill)',
-  fontSize: 11.5,
+  fontSize: 'var(--fs-2xs)',
   fontWeight: 600,
   textDecoration: 'none',
   border: '1px solid var(--border)',

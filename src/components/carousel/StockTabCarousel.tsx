@@ -99,7 +99,7 @@ export default function StockTabCarousel({
               onClick={() => jumpTo(i)}
               style={{
                 padding: '5px 10px', borderRadius: 'var(--radius-pill)',
-                fontSize: 12, fontWeight: isActive ? 600 : 500,
+                fontSize: 'var(--fs-2xs)', fontWeight: isActive ? 600 : 500,
                 // ⚠️ 선택 탭의 «어두운 면» 에 쓸 semantic 토큰이 없다(라이트 단일이라 어두운 surface 가 없다).
                 //    --text-primary 를 배경으로 쓰는 것은 «색은 정확하지만 의미는 어긋난» 흡수다.
                 //    --surface-inverse 신설은 DS-3 전 화면을 본 뒤 판단한다.
