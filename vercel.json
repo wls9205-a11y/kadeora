@@ -323,6 +323,10 @@
     {
       "path": "/api/cron/apt-geocode",
       "schedule": "40 18 * * *"
+    },
+    {
+      "path": "/api/cron/verify-facts",
+      "schedule": "50 19 * * *"
     }
   ],
   "headers": [
