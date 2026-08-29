@@ -168,12 +168,16 @@
 }
 @layer tokens {
   :root {
-    --sp-xs: 6px;
-    --sp-sm: 10px;
-    --sp-md: 14px;
-    --sp-lg: 18px;
-    --sp-xl: 22px;
-    --sp-2xl: 28px;
+    /* ── 뽀짝 A안 · 촘촘 리듬 (2026-08-29 확정 · DS-2d-2) ────────────────────
+       4의 배수 사다리. 이전 6/10/14/18/22/28 은 «4의 배수가 아니었다» —
+       설계서 §2 가 말한 리듬이 애초에 없었다는 뜻이다.
+       ⛔ --card-p · --btn-h · --touch-min 은 «건드리지 않았다»(중단점 C-2 동결). */
+    --sp-xs: 4px;
+    --sp-sm: 8px;
+    --sp-md: 12px;
+    --sp-lg: 16px;
+    --sp-xl: 20px;
+    --sp-2xl: 24px;
     --btn-h: 46px;
     --card-p: 16px;
     --touch-min: 46px;
@@ -212,12 +216,18 @@
 }
 @layer tokens {
   html.font-small {
+    /* ⚠️ 모드의 불변식은 «절대값» 이 아니라 「base 보다 한 단 조밀」이라는 «상대 관계» 다.
+       base 가 촘촘해지면서 이 값(4/8/12/16/20/24)이 base 와 «같아졌고»,
+       그러면 「작은 글씨」를 고른 사용자가 간격에서는 아무 이득을 못 받는다.
+       → 한 단씩 내려 상대 관계를 되살린다.
+       ⚠️ xs 만은 4px 로 «base 와 같다». 4px 이 이 사다리의 바닥이고 그 아래는
+          간격이라기보다 붙은 것이다. 여기만 불변식이 안 지켜진다 — 알고 두는 것이다. */
     --sp-xs: 4px;
-    --sp-sm: 8px;
-    --sp-md: 12px;
-    --sp-lg: 16px;
-    --sp-xl: 20px;
-    --sp-2xl: 24px;
+    --sp-sm: 6px;
+    --sp-md: 8px;
+    --sp-lg: 12px;
+    --sp-xl: 16px;
+    --sp-2xl: 20px;
     --btn-h: 40px;
     --card-p: 14px;
     --touch-min: 44px;
