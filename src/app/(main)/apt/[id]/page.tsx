@@ -52,6 +52,7 @@ import AptBlogStack from '@/components/apt/AptBlogStack';
 import AptCompareTable from '@/components/apt/AptCompareTable';
 import TalkInlineLink from '@/components/banner/TalkInlineLink';
 import SiteActionBar from '@/components/apt/SiteActionBar';
+import SiteFloatingActions from '@/components/apt/SiteFloatingActions';
 import AptSidebar from '@/components/apt/AptSidebar';
 import AptPriceTrendCard from '@/components/apt/AptPriceTrendCard';
 import AptLocationMini from '@/components/apt/detail/AptLocationMini';
@@ -2546,6 +2547,10 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
            리드폼이 뷰포트에 들어오면 스스로 숨는다.
            하단 탭바(z-100)·글쓰기 FAB(z-99)와의 겹침은 컴포넌트 안에서 처리한다. */}
       <SiteActionBar siteSlug={slug} showLeadForm={showLeadForm} lifecycleStage={lc} />
+      {/* B8-1: 우하단 플로팅 스택 — 피드 글쓰기 FAB 자리를 「공유 · 현장 댓글」이 받는다.
+           ⚠️ 공유 URL 은 generateMetadata 의 canonical 과 «같은 문자열» 이어야 한다
+              (`${SITE_URL}/apt/${slug}`). 파라미터를 붙이지 않는다. */}
+      <SiteFloatingActions commentKey={site?.slug ?? null} shareTitle={displayName} shareUrl={`${SITE_URL}/apt/${slug}`} />
       {/* Nearby sites (internal linking SEO) */}
       {nearbySites.length > 0 && <section aria-labelledby="apt-sec-h8" className="apt-card kd-lg-hide"><SectionHeader id="apt-sec-h8" title={`${sigungu || region} 다른 현장`} /><div className="kd-srows">{/* B7-1 — 2열 카드 격자에서 공용 2줄 행으로. ⚠️ 「· {세대수} · 」 사이에 값이 없으면
                      구분점만 남던 자리다(세대수 null 현장이 흔하다). SiteRow 는 항목째 지운다. */}

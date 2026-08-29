@@ -23,8 +23,11 @@ export interface LeadCopy {
   inquiryType: string;
   /**
    * 하단 액션바 버튼 문구. 안 주면 cta 를 그대로 쓴다.
-   * ⚠️ cta 는 폼 «제목» 이자 버튼이다. 둘이 달라야 하는 경우에만 이걸 쓴다 —
-   *    기존 네 종류는 한 문장이 양쪽에 다 맞아서 지정하지 않는다.
+   * ⚠️ cta 는 폼 «제목» 이자 버튼이다. 둘이 달라야 하는 경우에만 이걸 쓴다.
+   * ⚠️ B8-2 이후 액션바는 «50/50 두 칸» 이다. 한 칸이 화면 폭의 절반(360px 폰에서
+   *    약 164px)뿐이라 폼 제목 길이(「이 지역 분양 정보 안내 신청」 15자)는 두 줄로 접힌다.
+   *    그래서 pre_notice·existing 도 여기서 «짧은 한 줄» 을 따로 준다.
+   *    소비처는 SiteActionBar 하나다 — 레일·폼 제목은 cta 를 계속 쓴다.
    */
   button?: string;
 }
@@ -63,6 +66,8 @@ const COPY: Record<LeadCopyKind, Omit<LeadCopy, 'cta'> & { cta: (name: string) =
     lede: '단계가 바뀌거나 시공사·세대수가 확정되면 알려드립니다. 분양가와 일정은 모집공고가 나와야 확정됩니다.',
     // 아직 분양이 아니다. 미처리 경보의 '분양상담' 집계와 섞이면 응대 우선순위가 흐려진다.
     inquiryType: '진행상황알림',
+    // 여기에 '분양' 을 쓰지 않는 규칙은 짧은 문구에서도 그대로다.
+    button: '진행 상황 알림',
   },
   offering: {
     band: '분양 정보 안내 · 무료',
@@ -75,6 +80,8 @@ const COPY: Record<LeadCopyKind, Omit<LeadCopy, 'cta'> & { cta: (name: string) =
     cta: () => '이 지역 분양 정보 안내 신청',
     lede: '이 단지는 입주가 끝난 단지입니다. 같은 지역에서 새로 나오는 분양 정보를 안내해 드립니다.',
     inquiryType: '분양상담',
+    // 「이 지역」은 폼 제목에서 말한다. 반 칸짜리 버튼에서는 동작만 남긴다.
+    button: '분양 정보 안내 신청',
   },
   /**
    * M5 §A — 기축 매물·시세.
