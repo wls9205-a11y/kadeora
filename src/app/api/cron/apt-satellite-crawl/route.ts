@@ -1,7 +1,12 @@
 /**
  * [CI-v1 Task 7] apt-satellite-crawl — VWorld 위성사진 → Storage 업로드 → apt_sites 링크
  *
- * 30m. apt_sites WHERE satellite_image_url IS NULL AND latitude/longitude NOT NULL LIMIT 30/run
+ * ⚠️ 주기 정정(2026-08-29): 주석은 「30m」였지만 실제는 pg_cron `apt_satellite_crawl`
+ *    schedule `0 5 * * 1` = «주 1회(월)» 다. 문서와 실제가 달랐다.
+ * apt_sites WHERE satellite_image_url IS NULL AND latitude/longitude NOT NULL LIMIT 30/run
+ * ⛔ 좌표가 없으면 이 크론의 «대상에 애초에 들지 않는다». 좌표를 채우는 것은
+ *    apt-geocode 이고, 그것이 이 파이프라인의 첫 칸이다(2026-08-29 신설).
+ *    그 크론이 없어서 636 현장이 좌표 없이 쌓였고 위성도 못 받았다.
  * VWorld WMTS Satellite zoom 17 단일 타일 PNG fetch → sharp webp 변환 → Storage: satellite/{id}.webp
  * → UPDATE apt_sites.satellite_image_url = public URL
  */
