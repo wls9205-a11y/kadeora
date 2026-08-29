@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { SkeletonChart } from '@/components/Skeleton';
 
 interface TrendPoint { deal_date: string; price: number; area: number; price_per_pyeong: number; }
 interface Stats { count: number; max: number; min: number; avg: number; latest: number; }
@@ -16,6 +15,17 @@ function fmtPrice(n: number) {
  *    그래도 같은 «정확한» 이름이 여러 시도·시군구에 있다 — `현대` 는 최근 1년 부산에만
  *    9개 시군구 180건이다. 지역 둘을 다 줘야 한 단지가 된다.
  *    실측: sigungu 를 더해도 매칭이 줄지 않는다(부울경 기축 631곳 → 631곳). */
+/**
+ * ⚠️ U-1a §6 (CLS 0) — 이 셋은 «스켈레톤과 SVG 가 같이» 써야 한다.
+ *    예전엔 스켈레톤이 height=180 고정이고 SVG 는 viewBox 600×160 + width:100% 였다.
+ *    390px 화면에서 실제 높이는 ≈96px 이라 로딩이 끝나는 순간 «84px 이 밀렸다».
+ * ⛔ 한쪽만 고치지 말 것. 비율이 갈리는 순간 CLS 가 그대로 돌아온다.
+ */
+const W = 600;
+const H = 160;
+/** 스켈레톤·SVG 공용 종횡비. viewBox 와 «같은 값» 이어야 한다. */
+const CHART_RATIO = `${W} / ${H}`;
+
 export default function AptPriceTrendChart({ aptName, region, sigungu, prefix }: { aptName: string; region?: string; sigungu?: string | null; prefix?: boolean }) {
   const [trend, setTrend] = useState<TrendPoint[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -43,7 +53,22 @@ export default function AptPriceTrendChart({ aptName, region, sigungu, prefix }:
       .finally(() => setLoading(false));
   }, [aptName, region, sigungu, prefix]);
 
-  if (loading) return <SkeletonChart height={180} />;
+  // ⚠️ 로딩 자리는 «완성 후와 같은 크기» 여야 한다 — 그래야 도착 순간 안 밀린다.
+  //    prefers-reduced-motion 은 DS ⑧ Skeleton 규칙과 같이 «움직이지 않는다».
+  if (loading) {
+    return (
+      <div
+        role="status"
+        aria-label="가격 추이 불러오는 중"
+        style={{
+          width: '100%',
+          aspectRatio: CHART_RATIO,
+          borderRadius: 'var(--radius-md)',
+          background: 'var(--bg-hover)',
+        }}
+      />
+    );
+  }
   if (!trend.length) return null;
 
   // 차트 데이터 (시간순 정렬)
@@ -54,7 +79,7 @@ export default function AptPriceTrendChart({ aptName, region, sigungu, prefix }:
   const range = maxVal - minVal || 1;
 
   // SVG 차트
-  const W = 600, H = 160, PAD = 30;
+  const PAD = 30;
   const chartW = W - PAD * 2;
   const chartH = H - PAD * 2;
 

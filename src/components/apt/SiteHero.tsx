@@ -56,6 +56,8 @@ export type SiteHeroProps = {
   region: string;
   /** 출처 표기 — 우하단. */
   credit: string;
+  /** I-3 — 성격 라벨이 들어간 alt. 화면 출처 줄과 «같은 말» 이어야 한다. */
+  alt?: string;
   /** 좌상단 배지 묶음. */
   badges?: React.ReactNode;
   /**
@@ -78,7 +80,7 @@ export type SiteHeroProps = {
   children: React.ReactNode;
 };
 
-export default function SiteHero({ src, name, region, credit, badges, variant = 'photo', sources, children }: SiteHeroProps) {
+export default function SiteHero({ src, name, region, credit, alt, badges, variant = 'photo', sources, children }: SiteHeroProps) {
   const [lightbox, setLightbox] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -153,7 +155,9 @@ export default function SiteHero({ src, name, region, credit, badges, variant = 
               ))}
               <img
                 src={url}
-                alt={isCard ? `${name} ${region} 분양 정보 카드` : `${name} ${region} 현장 이미지`}
+                /* I-3 — 호출부가 성격 라벨이 들어간 alt 를 준다. 없으면 예전 문구로 폴백하되
+                   ⛔ 폴백을 «기본 경로로 두지 말 것» — 성격을 말하지 않는 alt 다. */
+                alt={alt ?? (isCard ? `${name} ${region} 분양 정보 카드` : `${name} ${region} 현장 이미지`)}
                 width={isCard ? 1200 : 1280}
                 height={isCard ? 900 : 720}
                 className="kd-hero-img"
@@ -245,7 +249,7 @@ export default function SiteHero({ src, name, region, credit, badges, variant = 
 
       {lightbox && hasImage && (
         <ImageLightbox
-          images={[{ url, caption: credit || `${name} 현장 이미지` }]}
+          images={[{ url, caption: credit || alt || `${name} 현장 이미지` }]}
           initialIndex={0}
           onClose={() => setLightbox(false)}
         />

@@ -19,6 +19,7 @@ import Disclaimer from '@/components/Disclaimer';
 import SiteHero from '@/components/apt/SiteHero';
 import VerifiedBadge from '@/components/ds/VerifiedBadge';
 import { salePeriodText } from '@/lib/apt/sale-period';
+import { heroImageCaption } from '@/lib/apt/image-caption';
 import { saleSourceLabel } from '@/lib/apt/sale-source';
 import { displayNameOf, regionedName, regionSuffix, stripDupRegionPrefix, swapLeadingName } from '@/lib/apt/seo-name';
 import SiteJumpBar, { SECTION_SCROLL_MARGIN } from '@/components/apt/SiteJumpBar';
@@ -1048,11 +1049,16 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
           : '';
 
         const heroIsDeveloper = (site as any)?.hero_image_source === 'developer' && !!devHeroSrc;
-        // 위성 사진이지 조감도가 아니다 — 표기를 섞지 않는다. 카드는 사진이 아니라 출처 표기가 없다.
-        const heroCredit =
-          heroKind === 'card' ? ''
-          : heroIsDeveloper ? ((site as any)?.hero_image_credit || name)
-          : '항공 이미지 · 국토교통부 공간정보 오픈플랫폼(VWorld)';
+        /* I-3 — 이미지 «성격 라벨». 판정은 lib 에 있고 테스트로 잠겨 있다.
+           ⚠️ 예전 문구는 「항공 이미지 …」였다 — 바로 위 주석은 「위성 사진」이라 말하면서.
+              한 화면 안에서 같은 것을 두 이름으로 부르고 있었다. I-3 어휘로 통일한다.
+           ⚠️ alt 도 «같은 말» 이어야 한다(I-3) — 화면과 스크린리더가 다른 말을 하면 안 된다. */
+        const heroCaption = heroImageCaption(heroKind, {
+          name,
+          region,
+          developerCredit: heroIsDeveloper ? (site as any)?.hero_image_credit : null,
+        });
+        const heroCredit = heroCaption.credit ?? '';
         const lifecycleBadge = stageLabel((site as any)?.lifecycle_stage);
         const badgeEl = (
           /* ⚠️ H6-3 — 이미지가 없으면 히어로가 «흐름 배치» 네이비 카드다.
@@ -1102,6 +1108,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
               name={displayName}
               region={region}
               credit={heroCredit}
+              alt={heroCaption.alt}
               badges={badgeEl}
               variant={heroKind === 'card' ? 'card' : 'photo'}
               sources={heroKind === 'card' ? [{ media: '(min-width: 768px)', src: cardSrcWide }] : undefined}
