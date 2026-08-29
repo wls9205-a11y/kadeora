@@ -25,7 +25,11 @@ const WIDTHS = [390, 480, 700, 768, 1024, 1280];
 // ⚠️ font-large 를 «반드시» 넣는다. 조밀 표는 글자가 커질 때 깨진다 —
 //    작아질 때(font-small)만 보면 정작 위험한 쪽을 안 본 것이다(부대조건 ③).
 const MODES = ['', 'font-small', 'font-large'];
-const PAGES = ['/', '/apt', '/blog', '/stock', '/apt/busan', '/apt/region/부산'];
+// U-1a — 상세 두 곳을 «넣는다». 이 커밋이 바꾼 화면이 거기다.
+//   그랑라크(verified·분양예정 있음) · 대연 푸르지오(기축·분양예정 없음) — 두 경로가 다르다.
+const PAGES = ['/', '/apt', '/blog', '/stock',
+  '/apt/%EA%B7%B8%EB%9E%91%EB%9D%BC%ED%81%AC-%EC%97%90%EC%9D%BC%EB%A6%B0%EC%9D%98-%EB%9C%B0',
+  '/apt/%EB%8C%80%EC%97%B0-%ED%91%B8%EB%A5%B4%EC%A7%80%EC%98%A4-%ED%81%B4%EB%9D%BC%EC%84%BC%ED%8A%B8'];
 
 let fails = 0;
 

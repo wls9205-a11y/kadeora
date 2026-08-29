@@ -28,7 +28,7 @@
 import { chromium } from 'playwright';
 
 const BASE = (process.argv[2] || 'http://localhost:3111').replace(/\/$/, '');
-const PATHS = ['/', '/apt', '/blog'];
+const PATHS = ['/', '/apt', '/blog', '/apt/%EA%B7%B8%EB%9E%91%EB%9D%BC%ED%81%AC-%EC%97%90%EC%9D%BC%EB%A6%B0%EC%9D%98-%EB%9C%B0'];
 /** 좁은 화면 + 글꼴모드 3종. font-small 이 가장 촘촘하다. */
 const MODES = ['', 'font-small', 'font-large'];
 
