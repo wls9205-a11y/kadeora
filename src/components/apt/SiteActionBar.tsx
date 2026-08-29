@@ -1,6 +1,6 @@
 'use client';
 
-// v3 커밋2 — 현장 상세 모바일 하단 고정 바.
+// v3 커밋2 — 현장 상세 하단 고정 바 (<1024px · 레일과 XOR).
 //
 // 좌 리드폼 / 우 카톡. 카톡 주 / 폼 보조였던 이전 바를 대체한다.
 // 오픈채팅 URL 은 파라미터를 못 받아 '누가·어느 현장에서' 를 남기는 경로가 폼뿐이다.
@@ -16,7 +16,7 @@
 //   Navigation 하단 탭바          z-100   bottom 0 · 62px
 //   Navigation 글쓰기 FAB         z-99    상세에서는 «미렌더» (Navigation · isAptSiteDetailPath)
 //   현장 댓글 / 공유 플로팅        z-99    bottom 68 / 124 · 48×48 · right 16
-//   이 바                         z-98    bottom 62 · 48px · left/right 12
+//   이 바                         z-98    bottom 62 · 48px · left/right 12 (<1024px)
 //   ScrollToTop                   z-98    상세에서는 bottom 180 (스택 위)
 //   InstallBanner/SmartPushPrompt z-90    bottom 0
 //
@@ -133,19 +133,22 @@ export default function SiteActionBar({ siteSlug, showLeadForm = false, lifecycl
       {/* 바가 본문 끝을 덮지 않도록 flow 에서 자리를 확보한다 */}
       <div
         aria-hidden="true"
-        className="md:hidden"
+        className="kd-site-action-bar-spacer"
         style={{ height: visible ? SITE_ACTION_BAR_HEIGHT + 12 : 0 }}
       />
 
       <div
-        className="md:hidden"
+        className="kd-site-action-bar"
         style={{
           position: 'fixed',
           left: 12,
           right: 12,
           bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px))`,
           zIndex: 98,
-          display: visible ? 'flex' : 'none',
+          // ⛔ 보일 때 display 를 인라인으로 주지 않는다 — 인라인은 유틸리티·레이어를
+          //    «항상» 이겨서 데스크탑 숨김(components.css · ≥1024)을 무력화한다.
+          //    감출 때만 인라인으로 덮는다(그 방향은 이겨야 맞다).
+          display: visible ? undefined : 'none',
           gap: 8,
         }}
       >

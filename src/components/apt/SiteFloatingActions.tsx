@@ -1,6 +1,6 @@
 'use client';
 
-// B8-1 — 현장 상세 우하단 플로팅 스택 (모바일 전용).
+// B8-1 — 현장 상세 우하단 플로팅 스택 (<1024px 전용 — 레일이 뜨는 지점에서 물러난다).
 //
 // 왜 있나: 이 자리에는 전역 「글쓰기 FAB」(/write) 가 떠 있었다. 현장 상세를 보는
 // 사람이 누르고 싶은 것은 피드 글쓰기가 아니라 «이 현장을 남에게 보내는 것» 과
@@ -12,6 +12,9 @@
 //   이 파일이 «우하단 세로 스택» 의 유일한 CSS 소유자다.
 //   공유 · 현장 댓글 · ScrollToTop 의 bottom 은 전부 여기서 정한다.
 //   SiteActionBar 는 자기 바의 위치와 body.kd-has-action-bar 토글까지만 책임진다.
+//
+//   보이는 구간은 하단 액션바와 «같다»(<1024px). 경계값은 components.css 가 한 곳에서
+//   정한다 — .kd-float-stack / .kd-site-action-bar / .kd-detail-rail 이 한 벌이다.
 //
 //   요소          바 없음   바 있음(+STACK_OFFSET)
 //   현장 댓글      68        122
@@ -148,7 +151,8 @@ export default function SiteFloatingActions({ commentKey, shareTitle, shareUrl }
     background: 'var(--bg-elevated)',
     border: '1px solid var(--border)',
     color: 'var(--text-secondary)',
-    display: 'flex',
+    // ⛔ display 는 여기서 주지 않는다 — .kd-float-stack(components.css)이 준다.
+    //    인라인 display 는 ≥1024 숨김 규칙을 항상 이긴다(B8 실측).
     alignItems: 'center',
     justifyContent: 'center',
     padding: 0,
@@ -192,7 +196,7 @@ export default function SiteFloatingActions({ commentKey, shareTitle, shareUrl }
         type="button"
         onClick={jumpToComments}
         aria-label={count && count > 0 ? `현장 댓글 ${count}개 보기` : '현장 댓글 남기기'}
-        className="md:hidden kd-float-comment"
+        className="kd-float-stack kd-float-comment"
         style={fabStyle}
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
@@ -220,7 +224,7 @@ export default function SiteFloatingActions({ commentKey, shareTitle, shareUrl }
         type="button"
         onClick={share}
         aria-label="이 현장 공유하기"
-        className={`md:hidden ${shareSlot}`}
+        className={`kd-float-stack ${shareSlot}`}
         style={fabStyle}
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">

@@ -399,7 +399,24 @@
      그대로 두면 폼이 두 번, 카톡이 두 번 나온다. */
   .kd-detail-rail { display: none; }
 
+  /* ⚠️ B8 실측(2026-08-29) — 위 XOR 의 «반대쪽» 이 실제로는 안 걸려 있었다.
+     하단 액션바는 className="md:hidden" 을 달고 있었지만 «데스크탑에서도 떴다».
+       ① 인라인 style 의 display 가 유틸리티 클래스를 «항상» 이긴다(레이어 무관).
+          바깥 div 가 display: visible ? 'flex' : 'none' 을 인라인으로 주고 있었다.
+       ② 설령 걸렸어도 md(768)는 레일이 뜨는 1024 와 «다른 지점» 이라
+          768~1023 구간에는 레일도 바도 없는 «CTA 공백 띠» 가 생긴다.
+     → display 를 인라인에서 걷고, 경계를 레일과 «같은 1024» 로 맞춘다.
+     ⛔ 아래 세 줄과 .kd-detail-rail 은 한 벌이다. 한쪽만 고치면
+        「폼이 두 번, 카톡이 두 번」이 그대로 되돌아온다. */
+  .kd-site-action-bar        { display: flex; }
+  .kd-site-action-bar-spacer { display: block; }
+  .kd-float-stack            { display: flex; }
+
   @media (min-width: 1024px) {
+    .kd-site-action-bar,
+    .kd-site-action-bar-spacer,
+    .kd-float-stack { display: none; }
+
     .kd-detail {
       max-width: var(--container-grid);
       display: grid;
