@@ -23,6 +23,9 @@ import { ACTION_SLOT } from '@/components/ds/ActionBar';
 //    흔들리고 얻는 게 없다. 카탈로그에 실물을 세워 「이것이 표준이다」를 보이는 것으로 충분하다.
 import SiteRow from '@/components/apt/SiteRow';
 import SectionHeader from '@/components/apt/SectionHeader';
+import RecentObservations from '@/components/apt/RecentObservations';
+import Field from '@/components/ds/Field';
+import EmptyState, { Skeleton } from '@/components/ds/EmptyState';
 
 export const metadata: Metadata = {
   title: 'DS 프리뷰',
@@ -180,8 +183,73 @@ export default function DesignPreviewPage() {
         </div>
       </Row>
 
+      <Row
+        title="⑤ 폼 필드"
+        note="입력 글자는 16px 하한이다 — iOS 사파리는 16px 미만 입력에 포커스가 가면 화면을 «확대» 한다.
+              폼이 화면 밖으로 밀리고 사용자는 자기가 뭘 잘못 눌렀는지 모른 채 떠난다. 리드폼에서는 곧 전환 손실이다.
+              에러는 색으로만 말하지 않는다 — 문장 + aria-invalid + role=alert."
+      >
+        <div style={{ display: 'grid', gap: 14, width: '100%', maxWidth: 420 }}>
+          <Field label="이름" placeholder="홍길동" required />
+          <Field label="휴대폰" placeholder="01012345678" inputMode="numeric" hint="- 없이 숫자만 입력해 주세요" />
+          <Field
+            label="휴대폰"
+            defaultValue="0101234"
+            error="휴대폰 번호를 - 없이 11자리로 입력해 주세요"
+          />
+        </div>
+      </Row>
+
+      <Row
+        title="⑦ 관측 카드 (A6 승격)"
+        note="사실 한 줄씩. ⛔ 「오늘·어제」를 쓰지 않고 줄 끝에 «기준일» 을 날짜로 적는다.
+              0건이면 «렌더하지 않는다» — 빈 섹션은 「여기 뭔가 있어야 하는데 없다」로 읽힌다."
+      >
+        <div style={{ width: '100%' }}>
+          <RecentObservations
+            items={[
+              { id: 1, kind: 'trade', title: '남구 대연동 전용 84㎡ 9억 2,000만원', link_path: '/apt/area/부산/남구', observed_at: '2026-08-28' },
+              { id: 2, kind: 'stage', title: '가야1구역 조합설립인가', link_path: '/apt/sample-b', observed_at: '2026-08-26' },
+            ]}
+          />
+        </div>
+      </Row>
+
+      <Row
+        title="⑧ 빈 상태 — 「비어 있음」과 「못 불러옴」은 다른 상태다"
+        note="⛔ 사과하지 않는다. ⛔ 「데이터가 없습니다」로 뭉치지 않는다 — 없는 것인지 못 불러온 것인지를 안 가른다.
+              ✅ 다음 행동을 말하고, 가능하면 그 길을 같이 준다."
+      >
+        <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', width: '100%' }}>
+          <EmptyState
+            kind="search"
+            title="「해운대 아이파크」로 찾은 현장이 없습니다"
+            hint="이름 대신 지역으로 찾으면 더 많이 나옵니다."
+            action={<Chip href="#none">부산 현장 보기</Chip>}
+          />
+          <EmptyState
+            kind="error"
+            title="목록을 불러오지 못했습니다"
+            hint="잠시 뒤 다시 시도하면 대부분 해결됩니다."
+            action={<Chip>다시 불러오기</Chip>}
+          />
+        </div>
+      </Row>
+
+      <Row
+        title="⑧ 스켈레톤 — 올 것의 «모양» 을 그린다"
+        note="스피너를 쓰지 않는다. 스피너는 「얼마나 남았나」도 「무엇이 올까」도 안 알려 준다.
+              도착 순간 레이아웃이 흔들리지 않는 것이 실제 이득이다(CLS).
+              prefers-reduced-motion 에서는 움직이지 않는다."
+      >
+        <div style={{ width: '100%', maxWidth: 420 }}>
+          <Skeleton rows={3} />
+        </div>
+      </Row>
+
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-2xl)', lineHeight: 1.7 }}>
-        남은 표준(DS-2c): ⑤폼 필드 · ⑦관측 카드 · ⑧빈 상태·스켈레톤.
+        표준 8종 완성. 다음은 <strong>DS-2d — 뽀짝 A안 스케일 적용</strong>(라운드 8/12/16 · 촘촘 리듬,
+        예외 하단 CTA 바 48px). 토큰 «값만» 바꾸고 약 2,200곳이 따라오는지가 이 트랙의 성공 판정이다.
         <br />
         ⚠️ ④-b 는 «아직 어느 화면도 쓰지 않는다». 살아 있는 인스턴스는 SiteActionBar 이고,
         그 교체는 /apt/[id] 를 만지는 일이라 U-1층 몫이다(설계서 §0 상세 동결).
