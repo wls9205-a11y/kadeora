@@ -25,7 +25,9 @@ function highlightTitle(title: string, query: string): React.ReactNode {
   const parts = title.split(new RegExp(`(${escaped})`, 'gi'));
   return parts.map((part, i) =>
     part.toLowerCase() === query.toLowerCase()
-      ? <mark key={i} style={{ background: 'rgba(37,99,235,0.15)', color: 'var(--brand)', borderRadius: 4, padding: '0 2px' }}>{part}</mark>
+      ? // ⚠️ 하이라이트 틴트는 0.15 로 «남긴다». --brand-bg 는 0.08 이라 검색어 강조가
+        //    본문에 묻힌다 — 표면 틴트와 강조 틴트는 «용도가 다른 값» 이다.
+        <mark key={i} style={{ background: 'rgba(37,99,235,0.15)', color: 'var(--brand)', borderRadius: 'var(--radius-xs)', padding: '0 2px' }}>{part}</mark>
       : part
   );
 }
@@ -453,7 +455,11 @@ export default async function BlogPage({ searchParams }: Props) {
 
   const hasMore = (posts ?? []).length === perPage;
 
-  // 인기 시리즈 (1페이지, 카테고리 전체일 때만)
+  // 글이 많은 시리즈 (1페이지, 카테고리 전체일 때만)
+  // ⚠️ DS-3-2 (구 H7-5 인수) — 예전 라벨은 「인기 시리즈」였다. 그런데 정렬 키가
+  //    post_count 다 — «읽힌 횟수가 아니라 글 개수» 다. 「인기」는 데이터가
+  //    뒷받침하지 않는 주장이었다(「인기순」·「많이 보는 현장」과 «같은 종류» 의 결함).
+  // ⛔ 라벨을 데이터에 맞춘다. 정렬을 조회수로 바꾸지 «않는다» — 그 컬럼이 합성값이다.
   let topSeries: any[] = [];
   if (pageNum === 1 && category === 'all') {
     try {
@@ -521,7 +527,7 @@ export default async function BlogPage({ searchParams }: Props) {
           <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.5px' }}>블로그</h1>
           <p className="blog-summary" style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '2px 0 0', letterSpacing: '0.3px' }}>매일 업데이트되는 투자 인사이트 · {totalCount.toLocaleString()}편</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
           <SectionShareButton section="blog" label="투자 정보 블로그 7,600편+" pagePath="/blog" />
 
         </div>
@@ -549,7 +555,7 @@ export default async function BlogPage({ searchParams }: Props) {
            ⚠️ 「인기」 라벨을 쓰지 않는다 — 순위를 만들 신호가 없다.
            ⚠️ 시도 «타일 그리드» 는 넣지 않는다. 글 수 편중이 그대로 드러난다
               (서울 592 대 세종 11). 부동산 탭의 타일과 역할이 다르다. */}
-      <nav aria-label="빠른 분류" className="apt-pill-scroll" style={{ display: 'flex', gap: 5, marginBottom: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none' }}>
+      <nav aria-label="빠른 분류" className="apt-pill-scroll" style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none' }}>
         {[
           { k: '', label: '전체', cat: '' },
           ...SIDO_LIST.map((r) => ({ k: r, label: r, cat: '' })),
@@ -570,6 +576,9 @@ export default async function BlogPage({ searchParams }: Props) {
               aria-current={on ? 'true' : undefined}
               style={{
                 flexShrink: 0,
+                // ⚠️ DS-3-2 — 누를 수 있는 칩은 44px 이상(DS ② Chip 표준).
+                //    시각 높이는 padding 이 정하고, «터치 높이» 는 minHeight 가 보장한다.
+                minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 padding: '5px 11px',
                 borderRadius: 'var(--radius-pill)',
                 fontSize: 'var(--fs-xs)', fontWeight: 500, letterSpacing: 0,
@@ -618,15 +627,16 @@ export default async function BlogPage({ searchParams }: Props) {
           >
             현장별로 모아 보기
           </h2>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)' }}>
             {aptGroups.map((g) => (
               <Link
                 key={g.slug}
                 href={`/apt/${encodeURIComponent(g.slug)}`}
                 style={{
+                  minHeight: 44, display: 'inline-flex', alignItems: 'center',
                   padding: '5px 10px',
                   borderRadius: 'var(--radius-pill)',
-                  fontSize: 12.5, fontWeight: 400, letterSpacing: 0,
+                  fontSize: 'var(--fs-2xs)', fontWeight: 400, letterSpacing: 0,
                   background: 'var(--bg-surface)',
                   border: '1px solid var(--border)',
                   color: 'var(--text-secondary)',
@@ -775,9 +785,10 @@ export default async function BlogPage({ searchParams }: Props) {
         </summary>
       {/* 서브카테고리 칩 */}
       {subChips && (
-        <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none' }}>
           <Link href={`/blog?category=${category}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
             style={{
+              minHeight: 44, display: 'inline-flex', alignItems: 'center',
               padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: !sub ? 600 : 500,
               background: !sub ? 'var(--brand)' : 'var(--bg-hover)',
               color: !sub ? 'var(--text-inverse)' : 'var(--text-tertiary)',
@@ -788,13 +799,14 @@ export default async function BlogPage({ searchParams }: Props) {
           {subChips.map(sc => (
             <Link key={sc.key} href={`/blog?category=${category}&sub=${sc.key}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
               style={{
+                minHeight: 44, display: 'inline-flex', alignItems: 'center',
                 padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: sub === sc.key ? 600 : 500,
                 background: sub === sc.key ? 'var(--brand)' : 'var(--bg-hover)',
                 color: sub === sc.key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
                 textDecoration: 'none', flexShrink: 0, border: 'none',
               }}>
               {sc.label}
-              <span style={{ marginLeft: 4, fontSize: 10, opacity: 0.65 }}>{sc.cnt}</span>
+              <span style={{ marginLeft: 4, fontSize: 'var(--fs-3xs)', opacity: 0.65 }}>{sc.cnt}</span>
             </Link>
           ))}
         </div>
@@ -809,9 +821,10 @@ export default async function BlogPage({ searchParams }: Props) {
           ].map(s => (
             <Link key={s.key} href={`/blog?${category !== 'all' ? `category=${category}&` : ''}sort=${s.key}${q ? `&q=${q}` : ''}`}
               style={{
-                padding: '4px 10px', borderRadius: 'var(--radius-xs)', fontSize: 11, fontWeight: 600,
+                minHeight: 44, display: 'inline-flex', alignItems: 'center',
+                padding: '4px 10px', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-2xs)', fontWeight: 600,
                 background: sort === s.key ? 'var(--brand)' : 'transparent',
-                color: sort === s.key ? '#fff' : 'var(--text-tertiary)',
+                color: sort === s.key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
                 textDecoration: 'none', border: sort === s.key ? 'none' : '1px solid var(--border)',
               }}>
               {s.label}
@@ -823,7 +836,8 @@ export default async function BlogPage({ searchParams }: Props) {
           <div className="kd-lg-hide" style={{ display: 'flex', gap: 'var(--sp-xs)', overflow: 'hidden' }}>
             {popularTags.slice(0, 4).map((t: any) => (
               <Link key={t.tag} href={`/blog?q=${encodeURIComponent(t.tag)}`}
-                style={{ fontSize: 10, color: 'var(--text-tertiary)', padding: '3px 8px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', whiteSpace: 'nowrap', textDecoration: 'none' }}>
+                style={{ minHeight: 44, display: 'inline-flex', alignItems: 'center',
+                  fontSize: 'var(--fs-3xs)', color: 'var(--text-tertiary)', padding: '3px 8px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', whiteSpace: 'nowrap', textDecoration: 'none' }}>
                 #{t.tag}
               </Link>
             ))}
@@ -860,7 +874,7 @@ export default async function BlogPage({ searchParams }: Props) {
       {topSeries.length > 0 && (
         <div style={{ marginTop: 'var(--sp-2xl)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
-            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>📚 인기 시리즈</span>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>📚 글이 많은 시리즈</span>
             <Link href="/blog/series" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>전체 보기 →</Link>
           </div>
           <div style={{ display: 'flex', gap: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>

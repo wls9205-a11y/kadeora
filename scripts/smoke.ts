@@ -118,10 +118,10 @@ async function common(
   expect(where, status < 500, `응답 ${status} (5xx 아님)`);
   const html = chrome(await page.content(), stripArticle);
   for (const [label, re] of FORBIDDEN) {
-    // 「인기 시리즈」 라벨 하나가 남아 있고 그것은 H7-5 몫이다. 그 외 「인기」는 즉시 실패.
-    const onlySeries =
-      label === '「인기」' && /인기 시리즈/.test(html) && (html.match(/인기/g) || []).length === 1;
-    expect(where, !re.test(html), `${label} 0건`, onlySeries ? 'DS-3' : undefined);
+    // ⚠️ 2026-08-29 — 「인기 시리즈」 예외를 «지웠다». DS-3-2 가 그 라벨을
+    //    「글이 많은 시리즈」로 고쳤다(정렬 키가 post_count 라 「인기」는 근거 없는 주장이었다).
+    //    owner 규약대로 담당 커밋이 끝났으니 다시 «즉시 실패» 로 올린다.
+    expect(where, !re.test(html), `${label} 0건`);
   }
   expect(
     where,
