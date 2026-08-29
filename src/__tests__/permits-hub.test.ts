@@ -16,6 +16,8 @@ import {
   toInt,
   toIsoDate,
   toPermitInsert,
+  permitHaystack,
+  sampleVerdict,
 } from '@/lib/permits/hub';
 
 // 무키 실측(2026-08-29)으로 확정한 오퍼레이션. 바뀌면 「돌았는데 0건」이 된다.
@@ -163,5 +165,29 @@ describe('정규화', () => {
     const row = toPermitInsert('arch', { mgmBldrgstPk: 'X1', sigunguCd: '99999' }, { sigunguCd: '99999' })!;
     expect(row.sido).toBeNull();
     expect(row.sigungu).toBeNull();
+  });
+});
+
+describe('표본 판정 — 가설을 «필터로 쓰지 않는다»', () => {
+  it('건초더미는 이름·지번·도로명을 합친다 (빈 값은 빠진다)', () => {
+    expect(permitHaystack({ bldNm: '그랑라크', platPlc: '울산 남구 신정동 1' }))
+      .toBe('그랑라크 울산 남구 신정동 1');
+    expect(permitHaystack({})).toBe('');
+  });
+
+  it('가설 트랙에서만 잡히면 match', () => {
+    expect(sampleVerdict('house', ['house'])).toBe('match');
+  });
+
+  it('양쪽에서 잡히면 both — 중복 제거가 PV-3 의 일이 된다', () => {
+    expect(sampleVerdict('house', ['house', 'arch'])).toBe('both');
+  });
+
+  it('가설과 다른 트랙에서만 잡히면 other — 한 트랙만 도는 수집은 «샌다»', () => {
+    expect(sampleVerdict('arch', ['house'])).toBe('other');
+  });
+
+  it('같은 트랙이 중복돼도 match 다 (지역이 달라 두 번 잡히는 경우)', () => {
+    expect(sampleVerdict('arch', ['arch', 'arch'])).toBe('match');
   });
 });

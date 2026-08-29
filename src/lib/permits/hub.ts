@@ -194,3 +194,28 @@ export function toPermitInsert(
     use_approval_expected: toIsoDate(item.useInsptSchedDay),
   };
 }
+
+/**
+ * 표본 대조용 건초더미. 이름·지번·도로명을 한 문자열로 합친다.
+ * ⚠️ 스크립트 안에 두지 «않는다». scripts/ 는 tsconfig 밖이라 tsc 가 검사하지 않는다 —
+ *    실제로 이 파일을 고치다 스크립트의 문자열이 깨졌는데 tsc 가 통과했다.
+ *    판정에 관여하는 것은 테스트가 있는 쪽에 둔다.
+ */
+export function permitHaystack(item: Record<string, string>): string {
+  return [item.bldNm, item.platPlc, item.newPlatPlc].filter(Boolean).join(' ');
+}
+
+export type SampleVerdict = 'match' | 'both' | 'other';
+
+/**
+ * 이원 소스 가설(대단지=house · 소형=arch)의 판정.
+ *   match  가설 트랙에서만 잡혔다
+ *   both   «양쪽» 에서 잡혔다 — 중복 제거가 PV-3 의 일이 된다
+ *   other  가설과 «다른» 트랙에서만 잡혔다 — 한 트랙만 도는 수집은 샌다
+ * ⚠️ both·other 는 실패가 아니라 «발견» 이다. 가설을 필터로 쓰지 않았기에 볼 수 있다.
+ */
+export function sampleVerdict(expect: PermitTrack, tracks: readonly PermitTrack[]): SampleVerdict {
+  const uniq = new Set(tracks);
+  if (uniq.size > 1) return 'both';
+  return uniq.has(expect) ? 'match' : 'other';
+}

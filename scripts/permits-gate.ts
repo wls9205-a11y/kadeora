@@ -25,7 +25,9 @@ import {
   isPermitCandidate,
   parsePermitItems,
   parseTotalCount,
+  permitHaystack,
   permitToExpectedSalePeriod,
+  sampleVerdict,
   toInt,
   type PermitTrack,
 } from '../src/lib/permits/hub';
@@ -34,16 +36,24 @@ config({ path: '.env.local' });
 
 /**
  * 표본 5건. 지시서 §③.
+ *
  * ⚠️ 시군구 코드를 «미리 박지 않는다» — 부울경 43코드를 전부 훑고 이름·지번으로 찾는다.
  *    코드를 손으로 적으면 그게 틀렸을 때 「API 에 없다」와 구분되지 않는다.
+ *
+ * ⚠️ `expect` 는 «가설이지 필터가 아니다». 두 트랙을 «전부» 훑어 어디서 잡히는지 본다 —
+ *    가설대로 걸러 버리면 「대단지=Hs · 소형=Arch」가 참인지 영원히 확인할 수 없고,
+ *    한쪽에만 있는 현장을 놓쳤을 때 폴백이 필요한지도 판단할 수 없다.
+ *    가설과 실측이 갈리는 것이 이 게이트가 «찾는» 정보다.
  */
-const SAMPLES: { label: string; track: PermitTrack; needle: RegExp }[] = [
-  { label: '그랑라크 에일린의 뜰', track: 'house', needle: /그랑라크|에일린/ },
-  { label: '문수로 비스타 더파크', track: 'house', needle: /문수로|비스타/ },
-  { label: '화정동 638-3', track: 'arch', needle: /화정동\s*638-?3/ },
-  { label: '옥교동 224', track: 'arch', needle: /옥교동\s*224/ },
-  { label: '범천동 1090-61', track: 'arch', needle: /범천동\s*1090-?61/ },
+const SAMPLES: { label: string; expect: PermitTrack; needle: RegExp }[] = [
+  { label: '그랑라크 에일린의 뜰', expect: 'house', needle: /그랑라크|에일린/ },
+  { label: '문수로 비스타 더파크', expect: 'house', needle: /문수로|비스타/ },
+  { label: '화정동 638-3', expect: 'arch', needle: /화정동\s*638-?3/ },
+  { label: '옥교동 224', expect: 'arch', needle: /옥교동\s*224/ },
+  { label: '범천동 1090-61', expect: 'arch', needle: /범천동\s*1090-?61/ },
 ];
+
+interface Hit { track: PermitTrack; code: string; row: Record<string, string> }
 
 async function main() {
   const key = normalizeServiceKey(process.env.PERMIT_API_KEY);
@@ -57,7 +67,8 @@ async function main() {
   if (useBjdong) console.log('⚠️ --bjdong: 아직 미구현 — ① 판정 결과를 보고 법정동 매핑을 넣는다.');
 
   const envelopes: Record<string, number> = {};
-  const found = new Map<string, { code: string; row: Record<string, string> }>();
+  /** 표본 → 검출된 «모든» 트랙. 두 트랙에서 다 잡히는 것 자체가 결과다. */
+  const found = new Map<string, Hit[]>();
   const perTrack: Record<PermitTrack, { items: number; candidates: number; empty: string[] }> = {
     house: { items: 0, candidates: 0, empty: [] },
     arch: { items: 0, candidates: 0, empty: [] },
@@ -89,11 +100,13 @@ async function main() {
       for (const it of items) {
         if (it.sigunguCd && it.sigunguCd !== code) mismatch++;
         if (isPermitCandidate(it)) perTrack[track].candidates++;
-        const hay = `${it.bldNm ?? ''} ${it.platPlc ?? ''} ${it.newPlatPlc ?? ''}`;
+        const hay = permitHaystack(it);
         for (const s of SAMPLES) {
-          if (s.track === track && !found.has(s.label) && s.needle.test(hay)) {
-            found.set(s.label, { code, row: it });
-          }
+          // 가설 트랙으로 «거르지 않는다». 양쪽 다 본다.
+          if (!s.needle.test(hay)) continue;
+          const hits = found.get(s.label) ?? [];
+          if (!hits.some((h) => h.track === track)) hits.push({ track, code, row: it });
+          found.set(s.label, hits);
         }
       }
     }
@@ -107,15 +120,31 @@ async function main() {
     process.exit(2);
   }
 
-  console.log('\n── ② 표본 5건 ──────────────────────────');
+  console.log('');
+  console.log('── ② 표본 5건 · 검출 트랙 ───────────────');
+  let hypothesisOk = 0;
   for (const s of SAMPLES) {
-    const hit = found.get(s.label);
-    if (!hit) { console.log(`  ❌ ${s.label} — 못 찾음 (${s.track})`); continue; }
-    const r = hit.row;
-    console.log(`  ✅ ${s.label} — ${hit.code} · 세대 ${toInt(r.totHhldCnt) ?? '?'} · `
-      + `승인 ${r.apprvDay ?? '-'} · 착공예정 ${r.stcnsSchedDay ?? '-'} `
-      + `→ 분양예정 ${permitToExpectedSalePeriod(r.stcnsSchedDay) ?? '미정'}`);
+    const hits = found.get(s.label) ?? [];
+    if (hits.length === 0) {
+      console.log(`  ❌ ${s.label} — 양쪽 트랙 어디에도 없음 (가설 ${s.expect})`);
+      continue;
+    }
+    const tracks = hits.map((h) => h.track);
+    if (sampleVerdict(s.expect, tracks) === 'match') hypothesisOk++;
+    for (const h of hits) {
+      const r = h.row;
+      console.log(`  ✅ ${s.label} — [${h.track}] ${h.code} · 세대 ${toInt(r.totHhldCnt) ?? '?'} · `
+        + `승인 ${r.apprvDay ?? '-'} · 착공예정 ${r.stcnsSchedDay ?? '-'} `
+        + `→ 분양예정 ${permitToExpectedSalePeriod(r.stcnsSchedDay) ?? '미정'}`);
+    }
+    const v = sampleVerdict(s.expect, tracks);
+    const verdict = v === 'both' ? '⚠️ 양쪽 모두'
+      : v === 'match' ? '가설 일치'
+      : '⚠️ 가설과 «다른» 트랙';
+    console.log(`     └ 가설 ${s.expect} / 실측 ${tracks.join('+')} → ${verdict}`);
   }
+  console.log(`  이원 소스 가설(대단지=Hs · 소형=Arch): ${hypothesisOk}/${SAMPLES.length} 일치`);
+  console.log('  ⚠️ 「가설과 다른 트랙」·「양쪽 모두」가 나오면 한 트랙만 도는 수집은 «새는» 것이다 — 폴백 판단 입력.');
 
   console.log('\n── ③ 커버율 ────────────────────────────');
   for (const t of ['house', 'arch'] as PermitTrack[]) {
