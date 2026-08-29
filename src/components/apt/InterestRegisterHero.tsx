@@ -69,10 +69,10 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
         padding: '14px 16px',
         background: 'var(--bg-surface)',
         border: '1px solid var(--border)',
-        borderRadius: 12,
+        borderRadius: 'var(--radius-md)',
         display: 'flex',
         alignItems: 'center',
-        gap: 12,
+        gap: 'var(--sp-md)',
         flexWrap: 'wrap',
       }}
     >
@@ -84,7 +84,7 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
               style={{
                 marginLeft: 8,
                 padding: '2px 8px',
-                borderRadius: 999,
+                borderRadius: 'var(--radius-pill)',
                 background: 'var(--brand-bg)',
                 color: 'var(--brand)',
                 fontSize: 'var(--fs-xs)',
@@ -105,7 +105,7 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
         disabled={loading || done}
         style={{
           padding: '10px 18px',
-          borderRadius: 999,
+          borderRadius: 'var(--radius-pill)',
           background: done ? 'var(--brand-bg)' : 'var(--kakao-bg)',
           color: done ? 'var(--brand)' : 'var(--kakao-text)',
           fontWeight: 500,
@@ -138,7 +138,7 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
       )}
       {/* Phase 5 B2: 등록 완료 후 가점 매칭 follow-up CTA */}
       {done && isLoggedIn && (
-        <div style={{ width: '100%', marginTop: 4, padding: '8px 10px', background: 'rgba(250,199,117,0.08)', border: '1px solid rgba(250,199,117,0.3)', borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ width: '100%', marginTop: 4, padding: '8px 10px', background: 'rgba(250,199,117,0.08)', border: '1px solid rgba(250,199,117,0.3)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--sp-sm)', flexWrap: 'wrap' }}>
           {/* ⚠️ #FAC775 는 제 8% 틴트 배경 위에서 대비 1.50 이었다(★·링크 둘 다).
                같은 배경에서 기존 토큰 --kd-accent(#7A4F0A)는 6.87. 새 토큰은 만들지 않았다. */}
           <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', fontWeight: 600 }}>

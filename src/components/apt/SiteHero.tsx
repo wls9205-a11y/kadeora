@@ -37,7 +37,7 @@ const WatermarkSm = () => (
     aria-hidden="true"
     style={{
       position: 'absolute', bottom: 8, left: 12, opacity: 0.55, pointerEvents: 'none',
-      display: 'flex', alignItems: 'center', gap: 4, zIndex: 2,
+      display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', zIndex: 2,
     }}
   >
     <svg width="13" height="13" viewBox="0 0 72 72">

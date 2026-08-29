@@ -208,7 +208,7 @@ export default function SiteFloatingActions({ commentKey, shareTitle, shareUrl }
             style={{
               position: 'absolute', top: -2, right: -2,
               minWidth: 18, height: 18, padding: '0 5px',
-              borderRadius: 9, background: 'var(--brand)', color: 'var(--text-inverse)',
+              borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: 'var(--text-inverse)',
               fontSize: 11, fontWeight: 600, lineHeight: '18px', textAlign: 'center',
               boxSizing: 'border-box',
             }}

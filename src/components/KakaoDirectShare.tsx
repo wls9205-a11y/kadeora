@@ -43,7 +43,7 @@ export default function KakaoDirectShare({ title, description, pagePath }: Props
 
   return (
     <button onClick={handleShare} aria-label="카카오톡으로 공유" style={{
-      display: 'inline-flex', alignItems: 'center', gap: 4,
+      display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-xs)',
       padding: '6px 12px', borderRadius: 'var(--radius-sm)',
       background: '#FEE500', color: '#191919', border: 'none',
       fontSize: 'var(--fs-xs)', fontWeight: 500, whiteSpace: 'nowrap', flexShrink: 0,

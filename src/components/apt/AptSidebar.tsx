@@ -52,7 +52,7 @@ export default async function AptSidebar({ slug, builder, isLoggedIn = false }: 
   const nearby = ((nearbyRes as any)?.data ?? []) as NearbyRow[];
   const siblings = ((siblingsRes as any)?.data ?? []) as SiblingRow[];
 
-  const cardCss: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, margin: '0 0 12px' };
+  const cardCss: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p)', margin: '0 0 12px' };
   const titleCss: React.CSSProperties = { fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: 0.5, marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
 
   return (
@@ -64,7 +64,7 @@ export default async function AptSidebar({ slug, builder, isLoggedIn = false }: 
         <div style={titleCss}><span>알림 받기</span></div>
         {isLoggedIn ? (
           <>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
               {ALERT_TYPES.map(a => (
                 <div key={a.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 'var(--fs-xs)' }}>
                   <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
@@ -99,10 +99,10 @@ export default async function AptSidebar({ slug, builder, isLoggedIn = false }: 
             <span>{builder}</span>
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>다른 단지</span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
             {siblings.map(s => (
               <Link key={s.sibling_slug} href={`/apt/${encodeURIComponent(s.sibling_slug)}`} style={{ textDecoration: 'none' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--sp-sm)' }}>
                   <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {s.sibling_name}
                   </span>

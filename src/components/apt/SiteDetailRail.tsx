@@ -102,7 +102,7 @@ export default function SiteDetailRail({
         rel="noopener noreferrer"
         onClick={() => trackTalkClick('rail', { site_slug: siteSlug })}
         aria-label="부동산 정보 공유 카톡방을 새 창으로 엽니다"
-        style={{ ...panel, display: 'flex', alignItems: 'center', gap: 10, minHeight: 44, textDecoration: 'none' }}
+        style={{ ...panel, display: 'flex', alignItems: 'center', gap: 'var(--sp-md)', minHeight: 44, textDecoration: 'none' }}
       >
         <span
           aria-hidden="true"
@@ -157,7 +157,7 @@ export default function SiteDetailRail({
       {(region || sigungu) && (
         <div style={panel}>
           <h2 style={panelTitle}>바로가기</h2>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 'var(--sp-sm)', flexWrap: 'wrap' }}>
             {region && (
               <Link href={`/apt/region/${encodeURIComponent(region)}`} style={chip}>{region} 부동산</Link>
             )}
@@ -177,7 +177,7 @@ export default function SiteDetailRail({
               여기서 하는 것은 내부 링크 추가뿐이고 라우트·사이트맵은 건드리지 않는다. */}
       <div style={panel}>
         <h2 style={panelTitle}>계산기</h2>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-sm)', flexWrap: 'wrap' }}>
           <Link href="/calc/real-estate" style={chip}>부동산</Link>
           <Link href="/calc/property-tax" style={chip}>부동산 세금</Link>
           <Link href="/calc/loan" style={chip}>대출</Link>

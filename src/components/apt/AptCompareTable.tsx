@@ -100,7 +100,7 @@ export default async function AptCompareTable({ slug, currentSite }: Props) {
     <section
       aria-label="인근 단지 비교"
       className="apt-compare-table"
-      style={{ margin: '0 0 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}
+      style={{ margin: '0 0 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}
     >
       <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: 0.5 }}>인근 단지 비교</span>

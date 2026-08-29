@@ -127,9 +127,9 @@ export default function SectionShareButton({ section, label, text, pagePath }: P
 
   return (
     <>
-      <div style={{ display: 'inline-flex', gap: 4, alignItems: 'center' }}>
+      <div style={{ display: 'inline-flex', gap: 'var(--sp-xs)', alignItems: 'center' }}>
         <button onClick={shareKakao} aria-label="카카오톡으로 공유" title="카카오톡으로 공유하기" style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
+          display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-sm)',
           padding: '6px 10px', borderRadius: 'var(--radius-md)',
           background: 'var(--kakao-bg)', border: '1px solid rgba(25,25,25,0.1)',
           color: 'var(--kakao-text)', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 500,
@@ -137,7 +137,7 @@ export default function SectionShareButton({ section, label, text, pagePath }: P
           💬 카카오톡
         </button>
         <button onClick={handleShare} aria-label={`${label || '이 섹션'} 공유`} title="다른 곳에 공유하기" style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
+          display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-sm)',
           padding: '6px 8px', borderRadius: 'var(--radius-md)',
           background: 'var(--bg-hover)',
           border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 600,
@@ -146,7 +146,7 @@ export default function SectionShareButton({ section, label, text, pagePath }: P
         </button>
       </div>
       <BottomSheet open={open} onClose={() => setOpen(false)} title="공유하기" maxWidth={480}>
-        <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 'var(--sp-lg)' }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-xl)', justifyContent: 'center', flexWrap: 'wrap', marginBottom: 'var(--sp-lg)' }}>
           {PLATFORMS.map(p => (
             <button key={p.id} onClick={() => sharePlatform(p.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--sp-sm)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, minWidth: 56 }}>
               <div style={{ width: 52, height: 52, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.id === 'copy' && copied ? 'var(--accent-green)' : p.bg, color: p.color, fontSize: 'var(--fs-lg)', fontWeight: 500 }}>

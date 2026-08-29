@@ -149,7 +149,7 @@ export default function SiteActionBar({ siteSlug, showLeadForm = false, lifecycl
           //    «항상» 이겨서 데스크탑 숨김(components.css · ≥1024)을 무력화한다.
           //    감출 때만 인라인으로 덮는다(그 방향은 이겨야 맞다).
           display: visible ? undefined : 'none',
-          gap: 8,
+          gap: 'var(--sp-sm)',
         }}
       >
         {/* 주 — 리드폼. 좌측 · 브랜드 블루로 위계를 유지한다(B8-2).
@@ -182,7 +182,7 @@ export default function SiteActionBar({ siteSlug, showLeadForm = false, lifecycl
           aria-label="부동산 정보 공유 카톡방을 새 창으로 엽니다"
           style={{
             ...SLOT,
-            gap: 6,
+            gap: 'var(--sp-sm)',
             background: 'var(--kakao-bg)',
             color: 'var(--kakao-text)',
             textDecoration: 'none',

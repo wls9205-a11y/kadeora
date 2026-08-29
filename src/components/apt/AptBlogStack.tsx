@@ -46,13 +46,13 @@ export default async function AptBlogStack({ slug }: Props) {
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: 0.5 }}>관련 블로그</span>
-        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 999, background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--text-tertiary)', padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
           7,961 자산
         </span>
       </div>
       <div
         className="apt-blog-stack"
-        style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollSnapType: 'x mandatory', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }}
+        style={{ display: 'flex', gap: 'var(--sp-sm)', overflowX: 'auto', scrollSnapType: 'x mandatory', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', paddingBottom: 'var(--sp-xs)' }}
       >
         {blogs.map(b => {
           const c = colorFor(b);
@@ -60,9 +60,9 @@ export default async function AptBlogStack({ slug }: Props) {
             <Link
               key={b.blog_slug}
               href={`/blog/${encodeURIComponent(b.blog_slug)}`}
-              style={{ flex: '0 0 auto', width: 110, scrollSnapAlign: 'start', textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}
+              style={{ flex: '0 0 auto', width: 110, scrollSnapAlign: 'start', textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}
             >
-              <div style={{ width: 110, height: 56, borderRadius: 8, background: c.bg, color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 500, letterSpacing: 0 }}>
+              <div style={{ width: 110, height: 56, borderRadius: 'var(--radius-sm)', background: c.bg, color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 500, letterSpacing: 0 }}>
                 {c.label}
               </div>
               <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>

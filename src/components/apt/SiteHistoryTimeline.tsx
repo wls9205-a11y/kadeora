@@ -98,7 +98,7 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
             style={{
               display: 'grid',
               gridTemplateColumns: '68px 14px minmax(0, 1fr)',
-              gap: 8,
+              gap: 'var(--sp-sm)',
               alignItems: 'start',
               paddingBottom: isLast ? 0 : 14,
             }}
@@ -112,7 +112,7 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
                 color: 'var(--text-tertiary)',
                 fontVariantNumeric: 'tabular-nums',
                 whiteSpace: 'nowrap',
-                paddingTop: 3,
+                paddingTop: 'var(--sp-xs)',
               }}
             >
               {fmtDate(e.occurred_at)}

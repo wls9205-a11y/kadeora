@@ -78,8 +78,8 @@ export default function LoginGate({ children, feature, title, description, blurH
   const altUrl = `/login?redirect=${encodeURIComponent(pathname)}&source=login_gate_${feature}_alt`;
 
   return (
-    <div style={{ borderRadius: 14, padding: '18px 16px', margin: '18px 0', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
-      <span style={{ display: 'inline-block', fontSize: 'var(--fs-xs)', padding: '2px 7px', borderRadius: 5, background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.28)', marginBottom: 8 }}>
+    <div style={{ borderRadius: 'var(--radius-lg)', padding: '18px 16px', margin: '18px 0', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+      <span style={{ display: 'inline-block', fontSize: 'var(--fs-xs)', padding: '2px 7px', borderRadius: 'var(--radius-sm)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.28)', marginBottom: 8 }}>
         회원 전용
       </span>
       <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: '#ccc7bf', marginBottom: 3 }}>
@@ -90,11 +90,11 @@ export default function LoginGate({ children, feature, title, description, blurH
       </div>
 
       {/* 블러 미리보기 + 오버레이 */}
-      <div style={{ borderRadius: 10, padding: '10px 12px', background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.03)', position: 'relative', overflow: 'hidden', marginBottom: 14 }}>
+      <div style={{ borderRadius: 'var(--radius-md)', padding: '10px 12px', background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.03)', position: 'relative', overflow: 'hidden', marginBottom: 14 }}>
         <div style={{ filter: 'blur(5px)', userSelect: 'none', pointerEvents: 'none', maxHeight: blurHeight, overflow: 'hidden' }}>
           {children}
         </div>
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(11,17,32,0.6)', borderRadius: 10 }}>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(11,17,32,0.6)', borderRadius: 'var(--radius-md)' }}>
           <span style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.35)' }}>
             {overlayText || '가입하면 바로 확인할 수 있어요'}
           </span>
@@ -106,7 +106,7 @@ export default function LoginGate({ children, feature, title, description, blurH
         type="button"
         onClick={() => trackCtaAndNavigate({ href: loginUrl, ctaName: `login_gate_${feature}`, pagePath: pathname, router })}
         style={{
-          display: 'flex', width: '100%', height: 48, borderRadius: 12,
+          display: 'flex', width: '100%', height: 48, borderRadius: 'var(--radius-md)',
           background: '#FEE500', alignItems: 'center', justifyContent: 'center',
           position: 'relative', textDecoration: 'none', boxSizing: 'border-box',
           border: 'none', cursor: 'pointer', padding: 0,

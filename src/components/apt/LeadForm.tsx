@@ -781,7 +781,7 @@ export default function LeadForm({
           />
 
           <div style={{ marginBottom: 10 }}>
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-sm)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={consent}
@@ -791,7 +791,7 @@ export default function LeadForm({
                 }}
                 style={{ width: 18, height: 18, marginTop: 1, flexShrink: 0, accentColor: 'var(--brand)' }}
               />
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', flexWrap: 'wrap', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                 <span style={{ ...badgeBase, background: 'var(--error-bg)', color: 'var(--error)' }}>필수</span>
                 <a
                   href="/privacy"
@@ -808,14 +808,14 @@ export default function LeadForm({
           </div>
 
           <div style={{ marginBottom: 14 }}>
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-sm)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={marketingOk}
                 onChange={e => setMarketingOk(e.target.checked)}
                 style={{ width: 18, height: 18, marginTop: 1, flexShrink: 0, accentColor: 'var(--brand)' }}
               />
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', flexWrap: 'wrap', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                 <span style={{ ...badgeBase, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>선택</span>
                 분양 정보 문자 수신 동의
               </span>

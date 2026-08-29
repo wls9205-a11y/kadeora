@@ -146,7 +146,7 @@ export default function LifecycleRail({
       className="lc-rail"
       style={{ display: 'flex', flexDirection: 'column', gap: size === 'full' ? 6 : 4 }}
     >
-      <div style={{ display: 'flex', gap: 3 }} aria-hidden="true">
+      <div style={{ display: 'flex', gap: 'var(--sp-xs)' }} aria-hidden="true">
         {CELLS.map((c, i) => (
           <span
             key={c}
@@ -154,7 +154,7 @@ export default function LifecycleRail({
             style={{
               flex: 1,
               height,
-              borderRadius: 1,
+              borderRadius: 1, // ⚠️ 사다리의 «단» 이 아니라 1px 막대의 모서리다. --radius-sm(8)로 올리면 막대가 캡슐이 된다.
               background:
                 i < active
                   ? 'var(--rail-done)'

@@ -96,7 +96,7 @@ export interface SectionLinkProps {
  */
 export function SectionLink({ href, children }: SectionLinkProps) {
   return (
-    <div style={{ borderTop: '1px solid var(--border)', marginTop: 12, paddingTop: 9 }}>
+    <div style={{ borderTop: '1px solid var(--border)', marginTop: 12, paddingTop: 'var(--sp-md)' }}>
       <Link
         href={href}
         style={{

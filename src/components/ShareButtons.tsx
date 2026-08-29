@@ -262,7 +262,7 @@ export default function ShareButtons({ title, postId, content, compact, category
   return (
     <>
       <button onClick={() => setOpen(true)} aria-label="공유" style={{
-        display: 'inline-flex', alignItems: 'center', gap: 6,
+        display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-sm)',
         padding: '8px 16px', borderRadius: 'var(--radius-md)',
         background: 'linear-gradient(135deg, rgba(59,123,246,0.08) 0%, rgba(96,165,250,0.08) 100%)',
         border: '1px solid rgba(59,123,246,0.2)',
@@ -283,14 +283,14 @@ export default function ShareButtons({ title, postId, content, compact, category
 
 function ShareGrid({ platforms, share, copied }: { platforms: Platform[]; share: (id: string) => void; copied: boolean }) {
   return (
-    <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 'var(--sp-lg)' }}>
+    <div style={{ display: 'flex', gap: 'var(--sp-lg)', justifyContent: 'center', flexWrap: 'wrap', marginBottom: 'var(--sp-lg)' }}>
       {platforms.map(p => (
         <button key={p.id} onClick={() => share(p.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--sp-sm)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, minWidth: 56, position: 'relative' }}>
           <div style={{ width: 52, height: 52, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.id === 'copy' && copied ? 'var(--accent-green)' : p.bg, color: p.color, fontSize: p.id === 'naver-blog' || p.id === 'naver-cafe' || p.id === 'daum-cafe' ? 18 : 'var(--fs-lg)', fontWeight: 500, transition: 'transform 0.12s' }}>
             {p.id === 'copy' && copied ? '✓' : p.emoji}
           </div>
           <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>{p.id === 'copy' && copied ? '복사됨!' : p.label}</span>
-          {p.isNew && <span style={{ position: 'absolute', top: -4, right: -4, fontSize: 'var(--fs-xs)', background: 'var(--accent-red)', color: '#fff', padding: '1px 4px', borderRadius: 4, fontWeight: 500 }}>N</span>}
+          {p.isNew && <span style={{ position: 'absolute', top: -4, right: -4, fontSize: 'var(--fs-xs)', background: 'var(--accent-red)', color: '#fff', padding: '1px 4px', borderRadius: 'var(--radius-sm)', fontWeight: 500 }}>N</span>}
         </button>
       ))}
     </div>

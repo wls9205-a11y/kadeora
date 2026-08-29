@@ -17,13 +17,13 @@ export default function CheongakMatchCard({ isLoggedIn, myScore, aptName }: Prop
         style={{
           background: 'var(--kd-accent-soft)',
           border: '1px solid var(--kd-accent-border)',
-          borderRadius: 12,
+          borderRadius: 'var(--radius-md)',
           padding: '14px 16px',
           margin: '0 0 12px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          gap: 10,
+          gap: 'var(--sp-md)',
           flexWrap: 'wrap',
         }}
       >
@@ -40,7 +40,7 @@ export default function CheongakMatchCard({ isLoggedIn, myScore, aptName }: Prop
           href="/profile/cheongak"
           style={{
             padding: '8px 14px',
-            borderRadius: 999,
+            borderRadius: 'var(--radius-pill)',
             background: 'var(--kd-accent)',
             // ⚠️ 하드코딩 #1A1A18 은 --kd-accent(#7A4F0A) 위에서 대비 2.45 였다. TY1-3 에서 이 버튼을
             //    800→500 으로 낮추니 더 불리해진다. 기존 토큰 --text-inverse 로 바꿔 7.12. 새 토큰은 만들지 않았다.
@@ -64,13 +64,13 @@ export default function CheongakMatchCard({ isLoggedIn, myScore, aptName }: Prop
         style={{
           background: 'var(--kd-accent-soft)',
           border: '1px solid var(--kd-accent-border)',
-          borderRadius: 12,
+          borderRadius: 'var(--radius-md)',
           padding: '14px 16px',
           margin: '0 0 12px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          gap: 10,
+          gap: 'var(--sp-md)',
           flexWrap: 'wrap',
         }}
       >
@@ -82,7 +82,7 @@ export default function CheongakMatchCard({ isLoggedIn, myScore, aptName }: Prop
         </div>
         <Link
           href="/profile/cheongak"
-          style={{ padding: '8px 14px', borderRadius: 999, background: 'var(--kd-accent)', color: 'var(--text-inverse)', fontWeight: 500, fontSize: 'var(--fs-xs)', textDecoration: 'none', whiteSpace: 'nowrap' }}
+          style={{ padding: '8px 14px', borderRadius: 'var(--radius-pill)', background: 'var(--kd-accent)', color: 'var(--text-inverse)', fontWeight: 500, fontSize: 'var(--fs-xs)', textDecoration: 'none', whiteSpace: 'nowrap' }}
         >
           가점 입력 →
         </Link>
@@ -104,7 +104,7 @@ export default function CheongakMatchCard({ isLoggedIn, myScore, aptName }: Prop
       style={{
         background: 'var(--kd-accent-soft)',
         border: '1px solid var(--kd-accent-border)',
-        borderRadius: 12,
+        borderRadius: 'var(--radius-md)',
         padding: '14px 16px',
         margin: '0 0 12px',
       }}
@@ -113,7 +113,7 @@ export default function CheongakMatchCard({ isLoggedIn, myScore, aptName }: Prop
         <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--kd-accent)', letterSpacing: 0.5 }}>PHASE 5</span>
         <Link href="/profile/cheongak" style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textDecoration: 'none', fontWeight: 500 }}>가점 수정 →</Link>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-lg)' }}>
         <div>
           <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 500, letterSpacing: 0.5 }}>내 가점</div>
           <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: -0.5, lineHeight: 1.1 }}>

@@ -45,18 +45,18 @@ export default function RelatedContentCard({ type, entityName, showSignup }: Pro
 
   return (
     <div style={{
-      marginTop: 16, padding: 14, borderRadius: 'var(--radius-card)',
+      marginTop: 16, padding: 'var(--card-p)', borderRadius: 'var(--radius-card)',
       background: 'var(--bg-surface)', border: '1px solid var(--border)',
     }}>
       <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>
         📊 함께 보면 좋은 콘텐츠
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
         {links.map((l, i) => (
           <Link key={i} href={l.href}
             onClick={() => trackClick('related_content', { from: pathname, to: l.href, type })}
             style={{
-              display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
+              display: 'flex', alignItems: 'center', gap: 'var(--sp-md)', padding: '10px 12px',
               borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', textDecoration: 'none',
               border: '1px solid var(--border)', transition: 'border-color 0.15s',
             }}>
@@ -72,7 +72,7 @@ export default function RelatedContentCard({ type, entityName, showSignup }: Pro
       {showSignup && (
         <Link href={`/login?redirect=${encodeURIComponent(pathname)}&source=related_card`}
           style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--sp-sm)',
             marginTop: 10, padding: '10px', borderRadius: 'var(--radius-md)',
             background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.12)',
             fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--brand)', textDecoration: 'none',
