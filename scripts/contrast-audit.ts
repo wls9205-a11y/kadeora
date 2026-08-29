@@ -25,47 +25,14 @@
  */
 import { chromium } from 'playwright';
 import { TONE } from '../src/components/ds/tone';
+// Rule #116 — 판정 로직은 src/lib 에 있고 테스트가 붙어 있다(ds-contrast.test.ts 12검사).
+// scripts/ 는 tsc 사각지대라, 여기 계산식을 두면 «틀려도 아무도 모른다».
+import { toneContrast, AA_NORMAL } from '../src/lib/ds/contrast';
 
 const URL = process.argv[2] || 'https://kadeora.app/';
-const MIN = 4.5;
+const MIN = AA_NORMAL;
 /** 색 스킨. 기본과 토스 스킨은 팔레트가 다르다 — 한쪽만 재면 다른 쪽이 샌다. */
 const SKINS = ['', 'toss-mode'];
-
-type RGB = [number, number, number];
-
-function parse(css: string): { rgb: RGB; a: number } | null {
-  const m = css.trim().match(/^rgba?\(([^)]+)\)$/i);
-  if (m) {
-    const p = m[1].split(/[,\s/]+/).filter(Boolean).map(Number);
-    if (p.length >= 3 && p.slice(0, 3).every((n) => !Number.isNaN(n))) {
-      return { rgb: [p[0], p[1], p[2]], a: p.length > 3 ? p[3] : 1 };
-    }
-  }
-  const h = css.trim().match(/^#([0-9a-f]{6})$/i);
-  if (h) {
-    const n = parseInt(h[1], 16);
-    return { rgb: [(n >> 16) & 255, (n >> 8) & 255, n & 255], a: 1 };
-  }
-  return null;
-}
-
-/** src 를 dst 위에 알파 합성. 이 한 줄이 없어서 1.24 짜리 배지가 나갔다. */
-function over(src: { rgb: RGB; a: number }, dst: RGB): RGB {
-  return [0, 1, 2].map((i) => src.rgb[i] * src.a + dst[i] * (1 - src.a)) as RGB;
-}
-
-function lum(c: RGB): number {
-  const f = c.map((v) => {
-    const s = v / 255;
-    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
-  });
-  return 0.2126 * f[0] + 0.7152 * f[1] + 0.0722 * f[2];
-}
-
-function ratio(a: RGB, b: RGB): number {
-  const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
-  return (x + 0.05) / (y + 0.05);
-}
 
 /**
  * 아직 «결정되지 않은» 조합. smoke.ts 의 owner 장치와 «같은 규약» 이다 —
@@ -108,18 +75,13 @@ let warns = 0;
     );
 
     for (const [tone, t] of Object.entries(TONE)) {
-      const fg = parse(vals[t.fg]);
-      const bgRaw = parse(vals[t.bg]);
-      const onRaw = parse(vals[t.on]);
-      if (!fg || !bgRaw || !onRaw) {
-        console.log(`  ⚠️  ${tone} — 토큰 해석 실패 (fg=${vals[t.fg]} bg=${vals[t.bg]} on=${vals[t.on]})`);
+      const r = toneContrast(vals[t.fg], vals[t.bg], vals[t.on]);
+      if (r === null) {
+        // ⛔ 못 읽은 것을 «통과» 로 세지 않는다. 모르면 실패다.
+        fails++;
+        console.log(`  ❌ ${tone} — 토큰 해석 실패 (fg=${vals[t.fg]} bg=${vals[t.bg]} on=${vals[t.on]})`);
         continue;
       }
-      // 바탕도 반투명일 수 있다. 흰 종이 위로 한 번 더 내린다.
-      const on = over(onRaw, [255, 255, 255]);
-      const bg = over(bgRaw, on);
-      const fgSolid = over(fg, bg);
-      const r = ratio(fgSolid, bg);
       const line = `${tone.padEnd(8)} fg ${vals[t.fg]} on ${vals[t.bg]} over ${vals[t.on]} → ${r.toFixed(2)}:1`;
       const owner = OPEN[`${skin || 'default'}/${tone}`];
       if (r >= MIN) {
