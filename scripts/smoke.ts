@@ -38,9 +38,12 @@ function bad(where: string, msg: string, level: Level = 'fail') {
  * `owner` 를 주면 실패가 «경고» 가 된다 — 「그 커밋이 고칠 예정인 것」이라는 뜻이다.
  *
  * ⚠️ 무시가 아니다. 요약에 담당 커밋과 함께 «반드시» 찍히고, 그 커밋이 끝나면
- *    owner 를 지워 다시 fail 로 올린다. 이 장치가 없으면 2차 몫(H7-5·H7-6) 때문에
- *    1차 커밋이 영구히 빨간불이라 게이트가 아무 말도 못 하게 된다.
+ *    owner 를 지워 다시 fail 로 올린다. 이 장치가 없으면 이월 몫 때문에
+ *    앞선 커밋이 영구히 빨간불이라 게이트가 아무 말도 못 하게 된다.
  * ⛔ 「지금 고치기 귀찮다」는 owner 사유가 아니다. 지시서에 그 커밋이 있어야 한다.
+ * ⚠️ **담당이 옮겨가면 owner 문자열도 같이 옮긴다.** 옛 이름이 남으면 「끝났는지」를
+ *    아무도 판정할 수 없어 경고가 영구화된다 — owner 장치가 죽는 유일한 방식이다.
+ *    2026-08-29 재배정(마스터 §부록 C): H7-5·H7-6 → DS-3 / H7-3 → PV-4(세션 A).
  */
 function expect(where: string, cond: boolean, msg: string, owner?: string) {
   if (cond) return ok(where, msg);
@@ -118,7 +121,7 @@ async function common(
     // 「인기 시리즈」 라벨 하나가 남아 있고 그것은 H7-5 몫이다. 그 외 「인기」는 즉시 실패.
     const onlySeries =
       label === '「인기」' && /인기 시리즈/.test(html) && (html.match(/인기/g) || []).length === 1;
-    expect(where, !re.test(html), `${label} 0건`, onlySeries ? 'H7-5' : undefined);
+    expect(where, !re.test(html), `${label} 0건`, onlySeries ? 'DS-3' : undefined);
   }
   expect(
     where,
@@ -158,11 +161,12 @@ async function imagesLoad(where: string, page: Page) {
     where,
     dead.length === 0,
     dead.length ? `깨진 이미지 ${dead.length}/${uniq.length}: ${dead[0]}` : `이미지 ${uniq.length}장 전부 200`,
-    dead.length ? 'H7-3' : undefined,
+    dead.length ? 'PV-4' : undefined,
   );
 }
 
-/** 죽은 링크·빈 버튼 — H7-6 이 정리할 대상을 상시로 잡는다. */
+/** 죽은 링크·빈 버튼 — DS-3 이 정리할 대상을 상시로 잡는다(구 H7-6).
+    ⚠️ /apt/[id] 몫은 이미 빠졌다 — Navigation 이 상세에서 글쓰기 FAB 를 렌더하지 않는다. */
 async function deadControls(where: string, page: Page) {
   const bad0 = await page.evaluate(() => {
     const anchorsNoHref = [...document.querySelectorAll('a')].filter(
@@ -181,7 +185,7 @@ async function deadControls(where: string, page: Page) {
     where,
     bad0.closed.length === 0,
     bad0.closed.length ? `닫힌 라우트 링크 ${bad0.closed.length}종: ${bad0.closed.join(', ')}` : '닫힌 라우트 링크 0',
-    bad0.closed.length ? 'H7-6' : undefined,
+    bad0.closed.length ? 'DS-3' : undefined,
   );
   // ⚠️ 버튼은 React 가 onclick 프로퍼티를 쓰지 않아 오탐이 난다. 경고로만 남긴다.
   if (bad0.buttonsInert > 0) {
