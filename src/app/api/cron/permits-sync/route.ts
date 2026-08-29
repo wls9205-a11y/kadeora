@@ -29,6 +29,14 @@ export const maxDuration = 300;
 const TIME_BUDGET_MS = 240_000;
 /** 한 번의 실행이 훑을 단위 수. 실측 ≈1.05s/단위 → 240 단위 ≈ 250초. */
 const DEFAULT_LIMIT = 220;
+/** 한 장의 크기. 100 이 응답 상한이라 그 이상은 의미가 없다. */
+const PAGE_SIZE = 100;
+/**
+ * ⚠️ house 는 후보 수율이 5.6% 라 깊이 판다. arch 는 96,920 원문에 후보 33건(0.03%)이라
+ *    깊이 파도 얻는 게 없고 호출만 태운다 — 1장에서 멈추고 «잘렸다는 사실만» 남긴다.
+ */
+const HOUSE_MAX_PAGES = 10;
+const ARCH_MAX_PAGES = 1;
 
 /**
  * PV-2 — 인허가 수집. 건축HUB 두 트랙을 apt_permits 스테이징에 «옮기기만» 한다.
@@ -118,42 +126,68 @@ async function handler(req: NextRequest) {
   const holes: string[] = [];
   const cursorRows: Array<Record<string, unknown>> = [];
   let apiCalls = 0, items = 0, candidates = 0, inserted = 0, codeMismatch = 0;
+  let truncatedUnits = 0;
+  const truncatedList: string[] = [];
   let stoppedBy: 'plan' | 'time' | 'daily_quota' = 'plan';
 
   for (const unit of plan) {
     if (Date.now() - started > TIME_BUDGET_MS) { stoppedBy = 'time'; break; }
     reasons[unit.reason] = (reasons[unit.reason] ?? 0) + 1;
 
-    const r = await fetchPermitPage(
-      buildPermitUrl(unit.track, key, { sigunguCd: unit.sigungu, bjdongCd: unit.bjdong, numOfRows: 100 }),
-    );
-    apiCalls += r.calls;
-
+    // ── 페이징 ──
+    // ⚠️ 2026-08-29: numOfRows 100 만 부르고 «다음 장을 안 넘겼다». 그래서 커서에
+    //    items 100 이 반복해 찍혔는데, 100 은 데이터의 수가 아니라 «상한의 지문» 이다.
+    //    울산 남구 달동이 그 때문에 「후보 0」으로 보였다 — 101번째부터를 못 본 것이다.
+    // ⛔ 다 못 가져온 것을 «0건과 같은 칸» 에 넣지 않는다. total_count·truncated 로 남긴다.
     let unitItems = 0;
     let unitCands = 0;
-    let unitOk = r.ok;
-    let unitCode = r.code;
-    if (r.ok) {
+    let unitOk = false;
+    let unitCode = 'NEVER_RAN';
+    let unitTotal: number | null = null;
+    let unitPages = 0;
+    let unitTruncated = false;
+    const maxPages = unit.track === 'house' ? HOUSE_MAX_PAGES : ARCH_MAX_PAGES;
+    const pageRows: Array<Record<string, unknown>> = [];
+
+    for (let page = 1; page <= maxPages; page++) {
+      const r = await fetchPermitPage(
+        buildPermitUrl(unit.track, key, { sigunguCd: unit.sigungu, bjdongCd: unit.bjdong, pageNo: page, numOfRows: PAGE_SIZE }),
+      );
+      apiCalls += r.calls;
+      unitPages = page;
+      unitOk = r.ok;
+      unitCode = r.code;
+      if (!r.ok) break;
+
       const parsed = parsePermitItems(r.body);
-      unitItems = parsed.length;
+      if (page === 1) unitTotal = parseTotalCount(r.body) ?? 0;
+      unitItems += parsed.length;
       items += parsed.length;
+
       // ⚠️ 「파싱 0 인데 totalCount 는 0 이 아니다」는 «0건» 이 아니라 «판독 실패» 다.
-      //    그 둘을 섞으면 파서가 깨진 날 커버율이 조용히 「데이터가 없다」로 보고된다.
-      const total = parseTotalCount(r.body) ?? 0;
-      if (parsed.length === 0 && total > 0) {
+      if (page === 1 && parsed.length === 0 && (unitTotal ?? 0) > 0) {
         unitOk = false;
         unitCode = 'PARSE_MISS';
         errorCodes.PARSE_MISS = (errorCodes.PARSE_MISS ?? 0) + 1;
-        if (holes.length < 50) holes.push(`${unit.track}:${unit.sigungu}+${unit.bjdong}:PARSE_MISS(total ${total})`);
+        if (holes.length < 50) holes.push(`${unit.track}:${unit.sigungu}+${unit.bjdong}:PARSE_MISS(total ${unitTotal})`);
+        break;
       }
 
-      const rows = [];
       for (const item of parsed) {
         if (item.sigunguCd && item.sigunguCd !== unit.sigungu) codeMismatch++;
         if (!isPermitCandidate(unit.track, item)) continue;
         const row = toPermitInsert(unit.track, item, { sigunguCd: unit.sigungu, bjdongCd: unit.bjdong });
-        if (row) rows.push(row);
+        if (row) pageRows.push(row as unknown as Record<string, unknown>);
       }
+
+      if (parsed.length < PAGE_SIZE) break;                 // 마지막 장
+      if (unitItems >= (unitTotal ?? 0)) break;             // 다 가져왔다
+      if (page === maxPages && unitItems < (unitTotal ?? 0)) unitTruncated = true;
+      if (Date.now() - started > TIME_BUDGET_MS) { unitTruncated = unitItems < (unitTotal ?? 0); break; }
+    }
+
+    {
+      const rows = pageRows;
       candidates += rows.length;
       unitCands = rows.length;
 
@@ -167,9 +201,14 @@ async function handler(req: NextRequest) {
         if (error) errorCodes.UPSERT_FAIL = (errorCodes.UPSERT_FAIL ?? 0) + 1;
         else inserted += rows.length;
       }
-    } else {
-      errorCodes[r.code] = (errorCodes[r.code] ?? 0) + 1;
-      if (holes.length < 50) holes.push(`${unit.track}:${unit.sigungu}+${unit.bjdong}:${r.code}`);
+    }
+    if (!unitOk) {
+      errorCodes[unitCode] = (errorCodes[unitCode] ?? 0) + 1;
+      if (holes.length < 50) holes.push(`${unit.track}:${unit.sigungu}+${unit.bjdong}:${unitCode}`);
+    }
+    if (unitTruncated) {
+      truncatedUnits++;
+      if (truncatedList.length < 20) truncatedList.push(`${unit.track}:${unit.sigungu}+${unit.bjdong}:${unitItems}/${unitTotal}`);
     }
 
     const next = toCursorRow(unit, { ok: unitOk, code: unitCode, items: unitItems }, ledger.get(keyOf(unit)));
@@ -177,12 +216,13 @@ async function handler(req: NextRequest) {
       track: next.track, sigungu: next.sigungu, bjdong: next.bjdong,
       last_run_at: next.lastRunAt, last_status: next.lastStatus, last_error_code: next.lastErrorCode,
       items: unitItems, candidates: unitCands,
+      total_count: unitTotal, pages: unitPages, truncated: unitTruncated,
       skip_until: next.skipUntil, retry_after: next.retryAfter, attempts: next.attempts,
     });
 
     // ⛔ 일 한도(22)를 만나면 «즉시» 멈춘다. 계속 쏘면 남은 한도만 태우고
     //    같은 답을 받는다 — 그리고 대장에 「못 물어봤다」가 잔뜩 쌓인다.
-    if (!r.ok && r.code === '22') { stoppedBy = 'daily_quota'; break; }
+    if (!unitOk && unitCode === '22') { stoppedBy = 'daily_quota'; break; }
   }
 
   // ⛔ dry-run 은 커서를 «전진시키지 않는다». 세어 보기만 하려다 회전을 앞당기면
@@ -219,6 +259,9 @@ async function handler(req: NextRequest) {
       coverage_before: before,
       holes: holes.slice(0, 20),
       hole_count: holes.length,
+      // ⚠️ 「다 못 가져왔다」는 0건과 «다른 사실» 이다. 페이지 상한에 걸린 곳을 따로 센다.
+      truncated_units: truncatedUnits,
+      truncated: truncatedList,
       error_codes: errorCodes,
     },
   };
