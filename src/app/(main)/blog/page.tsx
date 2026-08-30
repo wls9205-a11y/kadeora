@@ -664,27 +664,26 @@ export default async function BlogPage({ searchParams }: Props) {
         </section>
       )}
 
-      {/* 카테고리 탭 — 밑줄 스타일 */}
-      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 'var(--sp-md)', overflowX: 'auto', scrollbarWidth: 'none' }}>
+      {/* 카테고리 탭 — V4 언더라인 문법(.kd-utabs / .kd-utab).
+          ⚠️ 이건 «필터가 아니라 뷰 전환» 이다(증분6 의미론). 아래 주석이 말하듯
+             「색인된 URL 을 지고 있는 주 내비게이션」이라 접지도 않는다 — 탭이 맞다.
+          ⚠️ V4-3 이 여기를 «놓쳤다». 여백만 회수하고 활성색은 --brand(파랑) 언더라인으로
+             남겨 둬서, 같은 화면에 파랑 언더라인(탭)과 네이비(서브칩)가 같이 서 있었다.
+             활성색 인벤토리(증분10 ①)를 돌리다 잡혔다.
+          활성 = 네이비 텍스트 + 600 + 골드 언더라인 2px «3중 신호» 를 .kd-utab 이 진다. */}
+      <div className="kd-utabs" style={{ marginBottom: 'var(--sp-md)' }}>
         {CATS.map(c => (
           <Link key={c.key} href={`/blog${c.key !== 'all' ? `?category=${c.key}` : ''}${sort !== 'latest' ? `${c.key !== 'all' ? '&' : '?'}sort=${sort}` : ''}${q ? `${c.key !== 'all' || sort !== 'latest' ? '&' : '?'}q=${q}` : ''}`}
-            style={{
-              padding: 'var(--sp-sm) var(--sp-lg)', minHeight: 'var(--touch-min)', fontSize: 'var(--fs-sm)', fontWeight: activeTab === c.key ? 600 : 500,
-              color: activeTab === c.key ? 'var(--brand)' : 'var(--text-tertiary)',
-              textDecoration: 'none', flexShrink: 0,
-              borderBottom: activeTab === c.key ? '2px solid var(--brand)' : '2px solid transparent',
-              display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', transition: 'all var(--transition-fast)',
-            }}>
+            className="kd-utab"
+            aria-current={activeTab === c.key ? 'true' : undefined}
+            style={{ fontSize: 'var(--fs-sm)', gap: 'var(--sp-xs)' }}>
             {c.label}
             <span style={{ fontSize: 'var(--fs-xs)', opacity: 0.6 }}>{tabCount(c.key)}</span>
           </Link>
         ))}
-        <Link href="/blog/series" style={{
-          padding: 'var(--sp-sm) var(--sp-lg)', minHeight: 'var(--touch-min)', fontSize: 'var(--fs-sm)', fontWeight: 500,
-          color: 'var(--brand)', textDecoration: 'none', flexShrink: 0,
-          borderBottom: '2px solid transparent',
-          display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)',
-        }}>
+        {/* 시리즈는 «탭이 아니라 다른 화면으로 나가는 링크» 다 — 활성 상태를 갖지 않는다.
+            그래서 aria-current 를 주지 않는다(줄 수도 없다). 같은 줄에 서지만 성격이 다르다. */}
+        <Link href="/blog/series" className="kd-utab" style={{ fontSize: 'var(--fs-sm)', gap: 'var(--sp-xs)' }}>
           📚 시리즈
         </Link>
       </div>
