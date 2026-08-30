@@ -83,7 +83,10 @@ export default async function AptSidebar({ slug, builder, isLoggedIn = false }: 
           </>
         ) : (
           <p style={{ margin: 0, fontSize: 'var(--fs-xs)', lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-            모델하우스 오픈 · 청약 D-3 · 분양가 변동 알림을 받을 수 있습니다.{' '}
+            {/* ⚠️ 예전엔 「청약 D-3」이었다 — «모든 현장에 같은 숫자» 가 떴다.
+                 알림 «종류» 를 설명하는 문구인데 특정 숫자를 쓰면 이 현장의 상태로 읽힌다.
+                 D-day 는 「일정」 섹션이 도래 전 최근접 1곳에만 붙인다(U-1b 판정). */}
+            모델하우스 오픈 · 청약 D-day · 분양가 변동 알림을 받을 수 있습니다.{' '}
             <Link href="/login" style={{ color: 'var(--kd-accent)', fontWeight: 500, textDecoration: 'none' }}>로그인 →</Link>
           </p>
         )}
