@@ -19,6 +19,7 @@ import Disclaimer from '@/components/Disclaimer';
 import SiteHero from '@/components/apt/SiteHero';
 import VerifiedBadge from '@/components/ds/VerifiedBadge';
 import { salePeriodDisplay } from '@/lib/apt/sale-period';
+import { buildSchedule } from '@/lib/apt/schedule';
 import { heroImageCaption } from '@/lib/apt/image-caption';
 import { saleSourceLabel } from '@/lib/apt/sale-source';
 import { displayNameOf, regionedName, regionSuffix, stripDupRegionPrefix, swapLeadingName } from '@/lib/apt/seo-name';
@@ -790,6 +791,13 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
   // 마스터 §2: 광고 문맥이면 확정 이력만 남긴다. 추정·카더라·등급 없음은 렌더하지 않는다.
   const siteEvents = hideUnconfirmed ? confirmedOnly(siteEventsRaw) : siteEventsRaw;
 
+  /* U-1b 「일정」 — 절차 일정 전체를 한 곳에서 만든다.
+     ⚠️ 「오늘」은 «여기서 한 번만» 찍는다. 렌더 중에 여러 번 부르면 한 화면 안에서
+        기준이 갈려 D-day 가 행마다 다른 날을 기준으로 계산될 수 있다.
+     ⚠️ KST 기준이다 — 사용자도 공고도 한국 날짜로 말한다. */
+  const todayKST = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+  const schedule = buildSchedule({ site: site as any, sub: sub as any, today: todayKST });
+
   // 시공사도 페이지 전체가 한 벌을 쓴다 (여섯 곳에 흩어져 있던 것을 모았다).
   // ⚠️ 마스터 §2: 현장 행 등급이 미확정이면 별칭 크론이 채웠을 수 있어 쓰지 않는다.
   //    모집공고(sub)의 시공사는 공고 원문이라 등급과 무관하게 남긴다.
@@ -1171,7 +1179,10 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
           { id: 'location-section', label: '입지',      show: true },
           { id: 'history-section',  label: '검증',      show: siteEvents.length > 0 },
           { id: 'faq-section',      label: 'FAQ',       show: faq.length > 0 },
-          { id: 'related-section',  label: '주변 비교', show: relatedPosts.length > 0 || relatedBlogs.length > 0 },
+          /* ⚠️ 시안 E 의 여섯째는 「주변 비교」다. 그런데 «비교표(AptCompareTable)» 는
+                병합 후 「공급 · 분양가」 안에 있고, 이 섹션이 담는 것은 커뮤니티 글과 관련 분석이다.
+                칩이 가리키는 곳과 이름이 다르면 그건 «틀린 이름» 이다 — 데이터에 맞춘다. */
+          { id: 'related-section',  label: '커뮤니티', show: relatedPosts.length > 0 || relatedBlogs.length > 0 },
         ]}
         cta={{ id: LEAD_FORM_ID, label: '관심고객 등록', show: showLeadForm }}
       />
@@ -1315,7 +1326,89 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
 
       {/* s2: 공급 정보 스펙 표 — 시공사/위치/규모/일반분양/분양가/입주/상태를 여기 한 곳에서만 쓴다.
            이전에는 히어로·KPI·분양일정·모집공고요약에 세대수가 5회, 일정이 3벌 흩어져 있었다. */}
-      {(() => {
+      {/* ⚠️ 「오늘」을 렌더 안에서 여러 번 찍지 않는다 — 한 화면에서 기준이 갈린다. */}
+      {/* ── U-1b 「일정」 — 청약 접수만이 아니라 «절차 일정» 전체다 (판정 2026-08-30) ──
+           이 페이지는 현장의 일대기이므로 «시간 정보의 귀속처는 하나» 다.
+           ⛔ 지난 행을 지우지 않는다 — 지우면 일대기가 아니다. 완료 톤으로 남긴다.
+           ⚠️ D-day 는 «도래 전 최근접 한 곳» 에만 붙는다. 여러 곳에 붙으면 어느 것이
+              다음인지 화면이 말하지 못한다. 그 판정은 lib/apt/schedule.ts 가 하고
+              테스트로 잠겨 있다(Rule #116).
+           ⚠️ 분양유형·분양가상한제는 «일정이 아니라 조건» 이라 여기 두지 않았다
+              — 아래 시세·분양가 섹션으로 옮겼다. */}
+      {schedule.length > 0 && (
+        <DetailSection id="movein-section" title="일정" meta={`${schedule.length}건`} openOnDesktop>
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {schedule.map((r) => (
+              <li
+                key={r.key}
+                style={{
+                  display: 'flex', alignItems: 'baseline', gap: 'var(--sp-sm)', flexWrap: 'wrap',
+                  minHeight: 42, padding: 'var(--sp-sm) 0',
+                  borderBottom: '1px solid var(--border)',
+                  // 완료 톤 — 잉크-3. ⛔ 지운 것이 아니라 «지났다» 는 표시다.
+                  color: r.state === 'past' ? 'var(--text-tertiary)' : 'var(--text-primary)',
+                }}
+              >
+                <span style={{ minWidth: 92, fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{r.label}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: r.state === 'past' ? 500 : 700 }}>{r.text}</span>
+                {r.dday !== null && (
+                  /* 골드 = 행동(강조색 3역할 고정). 도래 전 최근접 1곳뿐이다. */
+                  <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)', color: 'var(--kd-accent)', fontSize: 'var(--fs-3xs)', fontWeight: 800 }}>
+                    {r.dday === 0 ? 'D-DAY' : `D-${r.dday}`}
+                  </span>
+                )}
+                <VerifiedBadge confidence={r.confidence} />
+                {r.source && (
+                  <span style={{ fontSize: 'var(--fs-3xs)', color: 'var(--text-tertiary)' }}>
+                    출처: {r.source}{r.asof ? ` · ${r.asof} 기준` : ''}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </DetailSection>
+      )}
+
+
+      {/* Share + Bookmark — 바이럴 액션 바 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)', padding: '8px 12px', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--brand-bg), var(--accent-purple-bg))', border: '1px solid var(--brand-bg)' }}>
+        {/* 카카오톡 직접 공유 */}
+        <KakaoDirectShare title={`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`} description={`${region} ${name} 상세 정보를 카더라에서 확인하세요`} pagePath={`/apt/${slug}`} />
+        <ShareButtons title={`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`} contentType="apt" contentRef={slug} />
+        <div style={{ flex: 1 }} />
+        {sub?.id && <AptBookmarkButton aptId={String(sub.id)} aptName={name} />}
+      </div>
+
+      {/* Key metrics — 시각 강화 대시보드 */}
+      {/* v10-B2: KPI 타일 5개(분양가·입주예정·조회수·댓글·관심)와 '단지 규모' 블록 삭제.
+           분양가·입주는 §3 지표 4칸이 대신하고, 조회수·댓글은 값이 0~한 자리라 §B-3 로 걷었다.
+           단지 규모는 '단지 전체 총세대수 = 확인중' 이고 '이번 분양 공급세대수' 는 지표 4칸과 같은 값이었다. */}
+
+      <AptLocationMini address={site?.address ?? sub?.hssply_adres ?? undefined} latitude={site?.latitude ?? undefined} longitude={site?.longitude ?? undefined} nearbyStation={site?.nearby_station ?? sub?.nearest_station ?? undefined} schoolDistrict={site?.school_district ?? sub?.nearest_school ?? undefined} />
+
+
+
+
+
+
+      {/* 납부 일정 — 모집공고 핵심 요약 섹션 내부로 통합 (중복 제거) */}
+
+      {/* s-v2 A-4: 죽은 섹션 정리 — school_district·nearby_station 채움률 0%.
+           남은 실값(sub.schools[]·sub.stations[])은 4번 블록 위치 정보 표로 흡수했다. */}
+
+
+
+      {/* ── M6 A-1 · ② 얼마인가 ──
+           점프바 '얼마' 칩의 목적지. 높이 0 앵커라 레이아웃에 끼어들지 않는다. */}
+      <div id="price-group" aria-hidden="true" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }} />
+
+      {/* ── v10 §8 · 시세 트렌드 · 분양가 분포 · 인근 단지 비교 ──
+           V15 B: 한 아코디언으로 묶는다. 셋 다 '얼마인가' 를 다루는 같은 질문이다. */}
+      {/* U-1b — E 안의 「타입·분양가」 자리. 공급 정보 섹션을 여기로 «병합» 했다(8 → 7).
+           ⚠️ 제목에 「타입」을 넣지 않았다 — 화면에 면적 타입표가 «아직 없다».
+              세션 A 의 pngtypGbNm 적재가 붙는 날 「타입·공급·분양가」로 승격한다. */}
+      <DetailSection id="price-section" title="공급 · 분양가" openOnDesktop>
+        {(() => {
         const types = Array.isArray(sub?.house_type_info) ? sub.house_type_info : [];
         const gen = types.reduce((s: number, t: any) => s + (t.supply || 0), 0);
         const priceStr = (() => {
@@ -1342,13 +1435,18 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
           ['분양 공급', units.supply ? `${units.supply.toLocaleString()}세대` : null],
           ['일반분양', generalUnits > 0 ? `${generalUnits.toLocaleString()}세대` : null],
           ['분양가', priceStr],
-          ['입주', fmtYM(site?.move_in_date || sub?.mvn_prearnge_ym) || null],
+          /* ⛔ U-1b — '입주' 행을 뺐다. 일정 값의 귀속처는 「일정」 섹션 하나다(판정).
+               ⚠️ 히어로 지표 4칸의 «요약» 표기(1순위 청약일·입주예정)는 요약이므로 중복을 허용한다 —
+                  그건 「어디서 보나」가 아니라 「한눈에」의 몫이다. 여기 표는 그 예외가 아니다. */
           ['상태', subSt ? SB[subSt].label : tLabel[sType]],
         ];
         // 첫 번째 빈 행에서만 노출을 센다 — 행마다 세면 한 페이지에서 노출이 부풀려진다.
         const firstEmpty = rows.find((r) => !r[1])?.[0] ?? null;
         return (
-          <DetailSection id="supply-section" title="공급 정보" defaultOpen>
+          <>
+            {/* ⚠️ 앵커는 살려 둔다 — `#supply-section` 을 가리키는 바깥 링크가 있을 수 있고,
+                 끊어진 앵커는 «눌러도 아무 일이 없는» 길이 된다. 높이 0 이라 레이아웃에 안 낀다. */}
+            <div id="supply-section" aria-hidden="true" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }} />
             {/* ── V15 C-3 · 세대수 근거 블록 ──
                 표보다 위다. 두 숫자가 왜 다른지 먼저 말하지 않으면 표가 틀린 것으로 읽힌다.
                 ⚠️ complex_units 가 없으면 숫자를 지어내지 말고 '미확인' 으로 둔다.
@@ -1416,91 +1514,21 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
                 <TalkInlineLink slot="supply_table" siteSlug={slug} field={firstEmpty} countView label="방에서 물어보기 →" />
               </p>
             )}
-          </DetailSection>
+          </>
         );
       })()}
-
-      {/* Share + Bookmark — 바이럴 액션 바 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)', padding: '8px 12px', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--brand-bg), var(--accent-purple-bg))', border: '1px solid var(--brand-bg)' }}>
-        {/* 카카오톡 직접 공유 */}
-        <KakaoDirectShare title={`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`} description={`${region} ${name} 상세 정보를 카더라에서 확인하세요`} pagePath={`/apt/${slug}`} />
-        <ShareButtons title={`${name} ${tLabel[sType]} — 분양가·청약일정·모집공고 한눈에`} contentType="apt" contentRef={slug} />
-        <div style={{ flex: 1 }} />
-        {sub?.id && <AptBookmarkButton aptId={String(sub.id)} aptName={name} />}
-      </div>
-
-      {/* Key metrics — 시각 강화 대시보드 */}
-      {/* v10-B2: KPI 타일 5개(분양가·입주예정·조회수·댓글·관심)와 '단지 규모' 블록 삭제.
-           분양가·입주는 §3 지표 4칸이 대신하고, 조회수·댓글은 값이 0~한 자리라 §B-3 로 걷었다.
-           단지 규모는 '단지 전체 총세대수 = 확인중' 이고 '이번 분양 공급세대수' 는 지표 4칸과 같은 값이었다. */}
-
-      <AptLocationMini address={site?.address ?? sub?.hssply_adres ?? undefined} latitude={site?.latitude ?? undefined} longitude={site?.longitude ?? undefined} nearbyStation={site?.nearby_station ?? sub?.nearest_station ?? undefined} schoolDistrict={site?.school_district ?? sub?.nearest_school ?? undefined} />
-
-      {/* Location */}
-      <DetailSection id="location-section" title="위치 정보" openOnDesktop>
-        {/* r4-P6: 흩어져 있던 라벨-값 표를 SpecTable 한 벌로.
-             s-v2: keepEmpty 로 규칙을 반전 — 행을 빼지 않고 `미공개` 로 채운다.
-             s-v2 A-4: '입지 분석 — 학군·교통' 별도 섹션을 없애고 여기로 흡수했다.
-               school_district·nearby_station 은 채움률 0% 였고, 실제 값은
-               모집공고 파생인 sub.schools[]·sub.stations[] 에만 있었다. */}
-        {(() => {
-          const schools = Array.isArray(sub?.schools) ? (sub.schools as { name: string; distance?: string }[]) : [];
-          const stations = Array.isArray(sub?.stations) ? (sub.stations as { name: string; walk_min?: number }[]) : [];
-          const schoolText = schools.length > 0
-            ? schools.slice(0, 3).map(s => [s.name, s.distance].filter(Boolean).join(' ')).join(' · ')
-            : (site?.school_district || sub?.nearest_school || null);
-          const stationText = stations.length > 0
-            ? stations.slice(0, 3).map(s => [s.name, s.walk_min ? `도보 ${s.walk_min}분` : ''].filter(Boolean).join(' ')).join(' · ')
-            : (site?.nearby_station || sub?.nearest_station || null);
-          return (
-            <SpecTable
-              keepEmpty
-              emptyValue={() => <span style={{ color: 'var(--text-tertiary)' }}>미공개</span>}
-              rows={[
-                { label: '주소', value: site?.address || sub?.hssply_adres || redev?.address },
-                { label: '최근접역', value: stationText },
-                { label: '학군', value: schoolText },
-                // 비고는 재개발 현장에만 있는 항목이라 고정 7행 규칙 밖에 둔다.
-                ...(redev?.notes ? [{ label: '비고', value: redev.notes as React.ReactNode }] : []),
-              ]}
-            />
-          );
-        })()}
-        <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 10 }}>
-          <a href={`https://map.kakao.com/?q=${encodeURIComponent(site?.address || sub?.hssply_adres || redev?.address || name)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 카카오맵</a>
-          <a href={`https://map.naver.com/p/search/${encodeURIComponent(site?.address || sub?.hssply_adres || redev?.address || name)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 네이버지도</a>
-        </div>
-      </DetailSection>
-
-
-
-
-
-      {/* 납부 일정 — 모집공고 핵심 요약 섹션 내부로 통합 (중복 제거) */}
-
-      {/* s-v2 A-4: 죽은 섹션 정리 — school_district·nearby_station 채움률 0%.
-           남은 실값(sub.schools[]·sub.stations[])은 4번 블록 위치 정보 표로 흡수했다. */}
-
-      {sub && (() => { 
-        // s2: 일정은 이 표 1벌만 남긴다. 진행 상태는 상단 풀 레일이,
-        // 시공사/시행사/입주/총공급은 공급 정보 표가 이미 담당한다.
-        const rows = [['분양유형', sub.mdatrgbn_nm], ['특별공급', sub.spsply_rcept_bgnde ? `${sub.spsply_rcept_bgnde} ~ ${sub.spsply_rcept_endde || ''}` : null], ['1순위', sub.rcept_bgnde], ['2순위', sub.rcept_endde && sub.rcept_endde !== sub.rcept_bgnde ? sub.rcept_endde : null], ['당첨자발표', sub.przwner_presnatn_de], ['계약', sub.cntrct_cncls_bgnde ? `${sub.cntrct_cncls_bgnde} ~ ${sub.cntrct_cncls_endde}` : null], ['분양가상한제', sub.is_price_limit ? '적용' : '미적용']].filter(r => r[1]);
-        return (
-          <DetailSection id="movein-section" title="분양 일정" openOnDesktop>
-            {/* 상세 행 */}
-            <SpecTable rows={rows.map(([l, v]) => ({ label: l as string, value: v as React.ReactNode }))} />
-          </DetailSection>
-        ); 
-      })()}
-
-
-      {/* ── M6 A-1 · ② 얼마인가 ──
-           점프바 '얼마' 칩의 목적지. 높이 0 앵커라 레이아웃에 끼어들지 않는다. */}
-      <div id="price-group" aria-hidden="true" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }} />
-
-      {/* ── v10 §8 · 시세 트렌드 · 분양가 분포 · 인근 단지 비교 ──
-           V15 B: 한 아코디언으로 묶는다. 셋 다 '얼마인가' 를 다루는 같은 질문이다. */}
-      <DetailSection id="price-section" title="시세 · 분양가" openOnDesktop>
+        {/* U-1b — 「분양유형·분양가상한제」는 «일정이 아니라 조건» 이라 여기로 옮겼다.
+             예전엔 일정 표 안에 섞여 있어, 일정만 보러 온 사람이 조건을 일정으로 읽었다.
+             ⛔ 「미적용」도 값이다 — 상한제가 안 걸린 것은 «모르는 것» 과 다르다.
+                다만 sub 가 없으면 아예 모르는 것이므로 줄을 내지 않는다. */}
+        {sub && (sub.mdatrgbn_nm || typeof sub.is_price_limit === 'boolean') && (
+          <p style={{ display: 'flex', gap: 'var(--sp-md)', flexWrap: 'wrap', margin: '0 0 var(--sp-md)', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>
+            {sub.mdatrgbn_nm && <span>분양유형 <b style={{ color: 'var(--text-primary)' }}>{sub.mdatrgbn_nm}</b></span>}
+            {typeof sub.is_price_limit === 'boolean' && (
+              <span>분양가상한제 <b style={{ color: 'var(--text-primary)' }}>{sub.is_price_limit ? '적용' : '미적용'}</b></span>
+            )}
+          </p>
+        )}
         <AptPriceTrendCard
           region={site?.region ?? region}
           sigungu={site?.sigungu ?? sigungu}
@@ -1547,30 +1575,360 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
               </div>
             );
           })()}
-          {/* D-day 카운트다운 */}
-          {sub && (() => {
-            const now = new Date();
-            const milestones = [
-              { label: '청약접수', date: sub.rcept_bgnde },
-              { label: '당첨발표', date: sub.przwner_presnatn_de },
-              { label: '계약시작', date: sub.cntrct_cncls_bgnde },
-              { label: '입주예정', date: sub.mvn_prearnge_ym ? `${sub.mvn_prearnge_ym.slice(0, 4)}-${sub.mvn_prearnge_ym.slice(4, 6)}-01` : null },
-            ].filter(m => m.date);
-            const next = milestones.find(m => m.date && new Date(m.date) >= now) || milestones[milestones.length - 1];
-            if (!next?.date) return null;
-            const dday = Math.ceil((new Date(next.date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          {/* ⛔ U-1b — D-day 카운트다운을 «여기서 뺐다»(판정 2026-08-30).
+               청약접수·당첨발표·계약시작·입주예정을 이 자리에서 «다시» 계산하고 있었다.
+               같은 일정이 두 곳에서 각자 계산되면 한쪽만 고치는 날 서로 다른 날을 말한다.
+               ⚠️ 실제로 이 블록은 렌더 안에서 new Date() 를 직접 불렀다 —
+                  일정 섹션과 «기준 시각이 갈리는» 구조였다.
+               → 일정은 「일정」 섹션 하나로 귀속하고, D-day 는 도래 전 최근접 1곳에만 붙는다. */}
+        </div>
+      )}
+        {sub && (
+          <>
+            {/* ⚠️ 앵커를 살려 둔다 — `#notice-section` 을 가리키는 바깥 링크가 끊기면
+                 눌러도 아무 일이 없는 길이 된다. 높이 0 이라 레이아웃에 안 낀다. */}
+            <div id="notice-section" aria-hidden="true" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }} />
+            <h3 style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, margin: 'var(--sp-lg) 0 var(--sp-sm)' }}>모집공고 핵심 요약</h3>
+          <div>
+
+          {/* AI 분석 — 상단 히어로에 이미 표시되므로 중복 제거 */}
+
+          {/* 핵심 지표 시각 분석 — 기존 데이터 최대 활용 */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
+            {/* ⛔ U-1b — 「입주까지 남은 기간」을 뺐다(판정 2026-08-30).
+                 입주예정은 「일정」 섹션이 말한다. 여기서는 그 값을 다시 «계산» 하고 있었고,
+                 렌더 안에서 new Date() 를 직접 불러 일정 섹션과 «기준 시각이 갈렸다». */}
+          </div>
+
+          {/* 시행 유형 뱃지 */}
+          {(() => {
+            const dev = sub.developer_nm || site?.developer || '';
+            const isJohap = dev.includes('조합') || dev.includes('정비');
+            const isPublic = dev.includes('공사') || dev.includes('LH') || dev.includes('SH');
+            const devType = isJohap ? { label: '재개발/재건축 조합', color: 'var(--accent-orange)' } : isPublic ? { label: '공공 시행', color: 'var(--accent-green)' } : null;
+            if (!devType) return null;
             return (
-              <div style={{ background: dday <= 7 ? 'var(--accent-red-bg)' : dday <= 30 ? 'var(--accent-yellow-bg)' : 'var(--bg-surface)', border: `1px solid ${dday <= 7 ? 'var(--accent-red-bg)' : dday <= 30 ? 'var(--accent-yellow-bg)' : 'var(--border)'}`, borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>{next.label}까지</div>
-                <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 700, color: dday <= 0 ? 'var(--accent-green)' : dday <= 7 ? 'var(--accent-red)' : dday <= 30 ? 'var(--accent-yellow)' : 'var(--brand)' }}>
-                  {dday <= 0 ? '진행중' : `D-${dday}`}
-                </div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{next.date}</div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)', padding: '4px 10px', borderRadius: 'var(--radius-xs)', background: `${devType.color}12`, fontSize: 'var(--fs-xs)' }}>
+                <span style={{ color: devType.color, fontWeight: 500 }}>{devType.label}</span>
               </div>
             );
           })()}
-        </div>
-      )}
+
+          {/* 분양 조건 — RegulationBadges 컴포넌트로 상단에 표시 (중복 제거) */}
+
+          {/* 단지 개요 행 — 건물 스펙 (시공사/시행사는 상단 헤더에 표시) */}
+          {(() => {
+            const rows = [
+              ['브랜드', sub.brand_name],
+              ['사업유형', (sub as any).project_type],
+              ['동수', (sub.total_dong_count || sub.total_dong_co) ? `${sub.total_dong_count || sub.total_dong_co}개 동` : null],
+              ['층수', sub.max_floor ? `지상 ${sub.max_floor}층${sub.min_floor ? ` / 지하 ${sub.min_floor}층` : ''}` : null],
+              ['주차', sub.parking_total || sub.parking_co ? `${Number(sub.parking_total || sub.parking_co).toLocaleString()}대${sub.parking_ratio ? ` (세대당 ${sub.parking_ratio}대)` : ''}` : null],
+              ['난방', sub.heating_type],
+              ['구조', sub.structure_type],
+              ['외장재', sub.exterior_finish],
+            ].filter(r => r[1]);
+            if (!rows.length) return null;
+            return (
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--sp-md)' }}>
+                {rows.map(([l, v], i) => (
+                  <div key={l as string} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 'var(--fs-sm)' }}>
+                    <span style={{ color: 'var(--text-tertiary)' }}>{l}</span>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)', textAlign: 'right', maxWidth: '60%' }}>{v}</span>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+
+          {/* 면적/용적 정보 */}
+          {(sub.land_area || sub.floor_area_ratio) && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'var(--sp-xs)', marginTop: 8 }}>
+              {sub.land_area > 0 && <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>대지면적</div><div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500 }}>{Number(sub.land_area).toLocaleString()}㎡</div></div>}
+              {sub.building_area > 0 && <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>건축면적</div><div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500 }}>{Number(sub.building_area).toLocaleString()}㎡</div></div>}
+              {sub.floor_area_ratio > 0 && <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>용적률</div><div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500 }}>{sub.floor_area_ratio}%</div></div>}
+              {sub.building_coverage > 0 && <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>건폐율</div><div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500 }}>{sub.building_coverage}%</div></div>}
+            </div>
+          )}
+
+          {/* 납부일정 — 통합 (payment_schedule 우선, down_payment_pct 폴백) */}
+          {(sub.payment_schedule || sub.down_payment_pct || sub.interim_count) && (() => {
+            const fmtA = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
+            const colors: Record<string, string> = { deposit: 'var(--brand)', interim: 'var(--accent-purple)', balance: 'var(--accent-green)' };
+            let steps: { key: string; label: string; pct: number; amount?: number; loan?: string }[] = [];
+
+            if (sub.payment_schedule) {
+              const ps = typeof sub.payment_schedule === 'string' ? JSON.parse(sub.payment_schedule) : sub.payment_schedule;
+              steps = ['deposit', 'interim', 'balance'].map(k => ps[k] ? { key: k, label: ps[k].label, pct: ps[k].pct, amount: ps[k].amount, loan: ps[k].loan } : null).filter(Boolean) as typeof steps;
+            } else {
+              const down = sub.down_payment_pct || 10;
+              const interim = sub.interim_count || 6;
+              const interimPct = sub.balance_pct ? (100 - down - sub.balance_pct) : 60;
+              const balance = sub.balance_pct || (100 - down - interimPct);
+              steps = [
+                { key: 'deposit', label: '계약금', pct: down },
+                { key: 'interim', label: `중도금 (${interim}회)`, pct: interimPct },
+                { key: 'balance', label: '잔금', pct: balance },
+              ];
+            }
+            if (steps.length === 0) return null;
+            return (
+              <div style={{ marginTop: 10, paddingTop: 'var(--sp-md)', borderTop: '1px solid var(--border)' }}>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>납부일정{sub.payment_schedule ? ' (최고 분양가 기준)' : ''}</div>
+                <div style={{ display: 'flex', height: 22, borderRadius: 'var(--radius-xs)', overflow: 'hidden', marginBottom: 8 }}>
+                  {steps.map((s, i) => (
+                    <div key={s.key} style={{ flex: s.pct, background: colors[s.key] || 'var(--text-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', color: 'var(--text-inverse)', fontWeight: 500, borderRight: i < steps.length - 1 ? '2px solid var(--bg-surface)' : 'none' }}>
+                      {s.pct}%
+                    </div>
+                  ))}
+                </div>
+                {steps.map(s => (
+                  <div key={s.key} style={{ marginBottom: 4 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', marginBottom: 2 }}>
+                      <span style={{ color: 'var(--text-tertiary)' }}>{s.label} ({s.pct}%){s.loan ? ` — ${s.loan}` : ''}</span>
+                      {s.amount && <span style={{ fontWeight: 700, color: colors[s.key] || 'var(--text-primary)' }}>{fmtA(s.amount)}</span>}
+                    </div>
+                    <div style={{ height: 3, borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${s.pct}%`, background: colors[s.key] || 'var(--text-tertiary)', borderRadius: 'var(--radius-xs)' }} />
+                    </div>
+                  </div>
+                ))}
+                {sub.acquisition_tax_estimate > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', marginTop: 4, padding: '4px 0', borderTop: '1px solid var(--border)' }}>
+                    <span style={{ color: 'var(--text-tertiary)' }}>예상 취득세</span>
+                    <span style={{ fontWeight: 700, color: 'var(--accent-red)' }}>약 {fmtA(sub.acquisition_tax_estimate)}</span>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* 청약 조건 (RegulationBadges에 없는 고유 항목만 표시) */}
+          {(sub.savings_requirement || sub.priority_supply_area || sub.balcony_extension !== undefined) && (
+            <div style={{ marginTop: 10, paddingTop: 'var(--sp-md)', borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>청약 조건</div>
+              {[
+                sub.balcony_extension !== undefined && ['발코니확장', sub.balcony_extension ? '가능' : '불가', sub.balcony_extension ? 'var(--accent-green)' : 'var(--text-tertiary)'],
+                sub.savings_requirement && ['청약저축', sub.savings_requirement, 'var(--brand)'],
+                sub.priority_supply_area && ['우선공급', sub.priority_supply_area, 'var(--accent-purple)'],
+              ].filter(Boolean).map(([l, v, c]: any) => (
+                <div key={l} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', fontSize: 'var(--fs-xs)', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ color: 'var(--text-tertiary)' }}>{l}</span>
+                  <span style={{ fontWeight: 500, color: c, textAlign: 'right', maxWidth: '60%' }}>{v}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ⛔ U-1b — 「사업일정」 블록을 뺐다. 실측이 근거다(2026-08-30):
+                 사업승인 **0** · 착공 **0** · 준공예정 **10/2,857**(0.35%).
+                 거의 언제나 «빈 블록» 이었고, 일정 값의 귀속처는 「일정」 섹션 하나다.
+               ⚠️ 준공예정 10건은 «버린 것이 아니다» — 판정이 준 행 목록에 없는 항목이라
+                  임의로 늘리지 않았다. 「절차 일정 전체」 정의에는 들어맞으므로 별건 안건이다. */}
+
+          {/* 커뮤니티 시설 */}
+          {(sub.community_facilities?.length > 0 || (Array.isArray(sub.community_list) && sub.community_list.length > 0)) && (() => {
+                    const categoryLabels: Record<string, string> = { fitness: '피트니스', sports: '스포츠', kids: '키즈', senior: '경로', common: '공용' };
+            const pdfList = Array.isArray(sub.community_list) ? sub.community_list as { name: string; category: string }[] : [];
+            const oldList = sub.community_facilities || [];
+            return (
+              <div style={{ marginTop: 10, paddingTop: 'var(--sp-md)', borderTop: '1px solid var(--border)' }}>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>커뮤니티 시설</div>
+                {pdfList.length > 0 ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 'var(--sp-xs)' }}>
+                    {pdfList.map((f, i) => (
+                      <div key={i} style={{ padding: '6px 8px', borderRadius: 'var(--radius-sm)', background: f.category === 'fitness' ? 'var(--accent-red-bg)' : f.category === 'kids' ? 'var(--accent-orange-bg)' : f.category === 'sports' ? 'var(--accent-green-bg)' : 'var(--bg-hover)', border: '1px solid var(--border)', textAlign: 'center' }}>
+                        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>{f.name}</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
+                    {oldList.map((f: string) => (
+                      <span key={f} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>{f}</span>
+                    ))}
+                  </div>
+                )}
+                {/* 핵심 시설 요약 뱃지 */}
+                {(sub.has_fitness || sub.has_daycare) && (
+                  <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginTop: 6 }}>
+                    {sub.has_fitness && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-red-bg)', color: 'var(--accent-red)', fontWeight: 600 }}>피트니스 있음</span>}
+                    {sub.has_daycare && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-orange-bg)', color: 'var(--warning)', fontWeight: 600 }}>어린이집 있음</span>}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* 견본주택 */}
+          {sub.model_house_addr && (
+            <div style={{ marginTop: 'var(--sp-sm)', padding: '8px 10px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', wordBreak: 'keep-all' }}>
+              견본주택: {sub.model_house_addr}
+            </div>
+          )}
+
+          {/* 단지 스펙 */}
+          {(sub.architect || sub.energy_grade || sub.ceiling_height || sub.entrance_type || sub.elevator_count || sub.estimated_mgmt_fee || sub.special_features || sub.landscape_designer) && (
+            <div style={{ marginTop: 10, paddingTop: 'var(--sp-md)', borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>단지 스펙</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 'var(--sp-sm)' }}>
+                {sub.architect && (
+                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>설계</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--text-primary)', marginTop: 2 }}>{sub.architect}</div>
+                  </div>
+                )}
+                {sub.landscape_designer && (
+                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>조경</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--text-primary)', marginTop: 2 }}>{sub.landscape_designer}</div>
+                  </div>
+                )}
+                {sub.ceiling_height && (
+                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>천장고</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: Number(sub.ceiling_height) >= 2.4 ? 'var(--accent-green)' : 'var(--text-primary)', marginTop: 2 }}>{sub.ceiling_height}m{Number(sub.ceiling_height) >= 2.5 ? ' ' : ''}</div>
+                  </div>
+                )}
+                {sub.entrance_type && (
+                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>현관 구조</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: sub.entrance_type === '계단식' ? 'var(--accent-green)' : 'var(--text-primary)', marginTop: 2 }}>{sub.entrance_type}</div>
+                  </div>
+                )}
+                {sub.energy_grade && (
+                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>에너지 효율</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--accent-green)', marginTop: 2 }}>{sub.energy_grade}</div>
+                  </div>
+                )}
+                {sub.zero_energy_cert && (
+                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--accent-green-bg)', border: '1px solid var(--accent-green-bg)' }}>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>제로에너지</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--accent-green)', marginTop: 2 }}>{sub.zero_energy_cert}</div>
+                  </div>
+                )}
+                {sub.estimated_mgmt_fee && (
+                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>예상 관리비</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--text-primary)', marginTop: 2 }}>{Number(sub.estimated_mgmt_fee).toLocaleString()}원/월</div>
+                  </div>
+                )}
+              </div>
+              {sub.special_features && (
+                <div style={{ marginTop: 6, fontSize: 'var(--fs-xs)', color: 'var(--accent-purple)', padding: '4px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--accent-purple-bg)' }}>
+                  특화설계: {sub.special_features}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 평형별 공급 정보 — 정확한 데이터 테이블 */}
+          {sub.house_type_info && (() => {
+            const types = Array.isArray(sub.house_type_info) ? sub.house_type_info : [];
+            if (!types.length) return null;
+            const hasPrice = types.some((t: any) => Number(t.lttot_top_amount || 0) > 0);
+            const totalGen = types.reduce((s: number, t: any) => s + Number(t.supply || 0), 0);
+            const totalSpe = types.reduce((s: number, t: any) => s + Number(t.spsply_hshldco || 0), 0);
+            return (
+              <div style={{ marginTop: 10, paddingTop: 'var(--sp-md)', borderTop: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)' }}>평형별 공급 · 분양가</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>일반{totalGen} · 특별{totalSpe}</span>
+                </div>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', fontSize: 'var(--fs-xs)', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1.5px solid var(--border)' }}>
+                        <th style={{ padding: '5px 6px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600 }}>타입</th>
+                        <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>전용(㎡)</th>
+                        <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>공급(㎡)</th>
+                        <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>일반</th>
+                        <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>특별</th>
+                        <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>합계</th>
+                        {hasPrice && <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>최고분양가</th>}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {types.map((t: any, i: number) => {
+                        const typeLabel = t.type || '';
+                        const exclusiveArea = parseFloat((typeLabel || '0').replace(/[A-Za-z]/g, ''));
+                        const supplyArea = parseFloat(t.area || '0');
+                        const supply = Number(t.supply || 0);
+                        const spsply = Number(t.spsply_hshldco || 0);
+                        const total = supply + spsply;
+                        const price = Number(t.lttot_top_amount || 0);
+                        const priceMin = Number(t.lttot_min_amount || 0);
+                        const priceAvg = Number(t.lttot_avg_amount || 0);
+                        const displayPrice = priceAvg || price;
+                        const ppyeong = displayPrice > 0 && exclusiveArea > 10 ? Math.round(displayPrice / (exclusiveArea / 3.3058)) : 0;
+                        const typeEstimated = !t.price_source || t.price_source !== 'regex';
+                        const useRate = exclusiveArea > 0 && supplyArea > 0 ? Math.round(exclusiveArea / supplyArea * 100) : 0;
+                        return (
+                          <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                            <td style={{ padding: '6px', fontWeight: 500, color: 'var(--text-primary)' }}>{typeLabel || '-'}</td>
+                            <td style={{ padding: '6px', textAlign: 'right', color: 'var(--text-secondary)' }}>{exclusiveArea > 0 ? exclusiveArea.toFixed(1) : '-'}</td>
+                            <td style={{ padding: '6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>{supplyArea > 0 ? <>{supplyArea.toFixed(1)}{useRate > 0 && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-green)' }}>전용률 {useRate}%</div>}</> : '-'}</td>
+                            <td style={{ padding: '6px', textAlign: 'right', color: 'var(--brand)', fontWeight: 600 }}>{supply}</td>
+                            <td style={{ padding: '6px', textAlign: 'right', color: 'var(--accent-purple)' }}>{spsply}</td>
+                            <td style={{ padding: '6px', textAlign: 'right', fontWeight: 500, color: 'var(--text-primary)' }}>{total}</td>
+                            {hasPrice && <td style={{ padding: '6px', textAlign: 'right' }}>
+                              <div style={{ fontWeight: 700, color: 'var(--accent-blue)' }}>{priceMin > 0 && priceMin !== price ? <><span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{priceMin >= 10000 ? `${(priceMin / 10000).toFixed(1)}억` : `${priceMin.toLocaleString()}`}~</span>{price >= 10000 ? `${(price / 10000).toFixed(1)}억` : `${price.toLocaleString()}만`}</> : price >= 10000 ? `${(price / 10000).toFixed(1)}억` : `${price.toLocaleString()}만`}</div>
+                              {ppyeong > 0 && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-purple)' }}>평당 {ppyeong.toLocaleString()}만 <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>({priceAvg > 0 ? '평균' : '최고가'})</span>{priceMin > 0 && typeEstimated && sub?.price_source === 'estimated' ? <span style={{ fontSize: 'var(--fs-xs)', marginLeft: 3, padding: '0px 3px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-orange-bg)', color: 'var(--warning)', fontWeight: 600 }}>추정</span> : null}</div>}
+                            </td>}
+                          </tr>
+                        );
+                      })}
+                      <tr style={{ borderTop: '1.5px solid var(--brand)', background: 'var(--bg-hover)' }}>
+                        <td style={{ padding: '6px', fontWeight: 600, color: 'var(--text-primary)' }}>합계</td>
+                        <td></td>
+                        <td></td>
+                        <td style={{ padding: '6px', textAlign: 'right', fontWeight: 500, color: 'var(--brand)' }}>{totalGen}</td>
+                        <td style={{ padding: '6px', textAlign: 'right', fontWeight: 500, color: 'var(--accent-purple)' }}>{totalSpe}</td>
+                        <td style={{ padding: '6px', textAlign: 'right', fontWeight: 500, color: 'var(--text-primary)' }}>{totalGen + totalSpe}</td>
+                        {hasPrice && <td></td>}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 6 }}>출처: 청약홈 모집공고 · 최고 분양가 기준 (만원)</div>
+              </div>
+            );
+          })()}
+
+
+          {/* 같은 시공사 분양가 비교 */}
+          {sameBuilderSites.length > 0 && (
+            <div style={{ marginTop: 10, paddingTop: 'var(--sp-md)', borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>{(sub.constructor_nm || site?.builder || '').split('(')[0].split('주식')[0].trim()} 분양가 비교</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)' }}>
+                {sameBuilderSites.slice(0, 4).map((sb2: any) => {
+                  const hti = Array.isArray(sb2.house_type_info) ? sb2.house_type_info : [];
+                  const prices = hti.map((t: any) => Number(t.lttot_top_amount || 0)).filter((p: number) => p > 0);
+                  const pMin = prices.length > 0 ? Math.min(...prices) : 0;
+                  const pMax = prices.length > 0 ? Math.max(...prices) : 0;
+                  return (
+                  <Link key={sb2.id} href={`/apt/${sb2.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 10px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', border: '1px solid var(--border)', textDecoration: 'none' }}>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 'var(--fs-xs)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sb2.house_nm}</div>
+                      <div style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>{sb2.region_nm} · {sb2.tot_supply_hshld_co}세대</div>
+                    </div>
+                    {pMax > 0 && <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-blue)', flexShrink: 0, marginLeft: 8 }}>{fmtAmount(pMin)}{pMax !== pMin ? `~${fmtAmount(pMax)}` : ''}</div>}
+                  </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* 하단 CTA: 공유 + 청약홈 */}
+          <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 'var(--sp-md)', paddingTop: 'var(--sp-md)', borderTop: '1px solid var(--border)' }}>
+            <SectionShareButton section="announcement" label={`${name} 모집공고 요약`} text={`${name} 입주자모집공고 핵심 요약 — ${sub.constructor_nm || site?.builder || ''} 시공, ${sub.tot_supply_hshld_co || site?.total_units || ''}세대`} pagePath={`/apt/${slug}`} />
+            {sub.pblanc_url && <a href={sub.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '8px 16px', borderRadius: 'var(--radius-md)', background: 'var(--accent-green-bg)', border: '1px solid var(--accent-green-border)', color: 'var(--accent-green)', fontSize: 'var(--fs-sm)', fontWeight: 500, textDecoration: 'none' }}>청약홈 원문</a>}
+          </div>
+          </div>
+          </>
+        )}
         <AptCompareTable
           slug={slug}
           currentSite={{
@@ -1583,6 +1941,42 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
           }}
         />
         <AptBlogStack slug={slug} />
+      </DetailSection>
+
+      {/* Location */}
+      <DetailSection id="location-section" title="입지" openOnDesktop>
+        {/* r4-P6: 흩어져 있던 라벨-값 표를 SpecTable 한 벌로.
+             s-v2: keepEmpty 로 규칙을 반전 — 행을 빼지 않고 `미공개` 로 채운다.
+             s-v2 A-4: '입지 분석 — 학군·교통' 별도 섹션을 없애고 여기로 흡수했다.
+               school_district·nearby_station 은 채움률 0% 였고, 실제 값은
+               모집공고 파생인 sub.schools[]·sub.stations[] 에만 있었다. */}
+        {(() => {
+          const schools = Array.isArray(sub?.schools) ? (sub.schools as { name: string; distance?: string }[]) : [];
+          const stations = Array.isArray(sub?.stations) ? (sub.stations as { name: string; walk_min?: number }[]) : [];
+          const schoolText = schools.length > 0
+            ? schools.slice(0, 3).map(s => [s.name, s.distance].filter(Boolean).join(' ')).join(' · ')
+            : (site?.school_district || sub?.nearest_school || null);
+          const stationText = stations.length > 0
+            ? stations.slice(0, 3).map(s => [s.name, s.walk_min ? `도보 ${s.walk_min}분` : ''].filter(Boolean).join(' ')).join(' · ')
+            : (site?.nearby_station || sub?.nearest_station || null);
+          return (
+            <SpecTable
+              keepEmpty
+              emptyValue={() => <span style={{ color: 'var(--text-tertiary)' }}>미공개</span>}
+              rows={[
+                { label: '주소', value: site?.address || sub?.hssply_adres || redev?.address },
+                { label: '최근접역', value: stationText },
+                { label: '학군', value: schoolText },
+                // 비고는 재개발 현장에만 있는 항목이라 고정 7행 규칙 밖에 둔다.
+                ...(redev?.notes ? [{ label: '비고', value: redev.notes as React.ReactNode }] : []),
+              ]}
+            />
+          );
+        })()}
+        <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 10 }}>
+          <a href={`https://map.kakao.com/?q=${encodeURIComponent(site?.address || sub?.hssply_adres || redev?.address || name)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 카카오맵</a>
+          <a href={`https://map.naver.com/p/search/${encodeURIComponent(site?.address || sub?.hssply_adres || redev?.address || name)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>🗺️ 네이버지도</a>
+        </div>
       </DetailSection>
 
       {/* 지역 시세 비교 — 이 현장이 지역에서 어디 위치하는지 */}
@@ -2004,7 +2398,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
              ⚠️ 0건이면 섹션을 렌더하지 않는다 — 지금은 대부분 0건이다.
              ⚠️ 등급(확정·추정·카더라)을 반드시 함께 낸다. 감추면 표시·광고법 문제가 된다. */}
         {siteEvents.length > 0 && (
-          <DetailSection id="history-section" title="진행 이력" meta={`${siteEvents.length}건`} openOnDesktop>
+          <DetailSection id="history-section" title="검증 로그" meta={`${siteEvents.length}건`} openOnDesktop>
             <SiteHistoryTimeline events={siteEvents} />
             <p style={{ fontSize: 'var(--fs-xs)', lineHeight: 1.55, color: 'var(--text-tertiary)', margin: '2px 0 0' }}>
               확정은 고시·공시 원문, 추정은 복수 언론, 카더라는 업계·조합 전언입니다. 일정과 계획은 바뀔 수 있습니다.
@@ -2128,380 +2522,6 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
            ⚠️ '공고일'(rcrit_pblanc_de)은 스키마에 없다. rcept_bgnde 는 접수 시작일이지
               모집공고일이 아니므로 «접수» 라고 적는다. 제목도 '전문' 이 아니라 '핵심 요약' 이다 —
               이 안에 든 것은 구조화 요약이고 원본은 하단 '청약홈 원문' 링크로 나간다. */}
-      {sub && (
-        <DetailSection
-          id="notice-section"
-          title="모집공고 핵심 요약"
-          meta={sub.rcept_bgnde ? `접수 ${sub.rcept_bgnde}${sub.rcept_endde ? ` ~ ${sub.rcept_endde}` : ''}` : undefined}
-        >
-          <div>
-
-          {/* AI 분석 — 상단 히어로에 이미 표시되므로 중복 제거 */}
-
-          {/* 핵심 지표 시각 분석 — 기존 데이터 최대 활용 */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
-            {/* 입주까지 남은 기간 */}
-            {sub.mvn_prearnge_ym && (() => {
-              const now = new Date();
-              const mvnY = parseInt(sub.mvn_prearnge_ym.slice(0, 4));
-              const mvnM = parseInt(sub.mvn_prearnge_ym.slice(4, 6)) || 1;
-              const months = (mvnY - now.getFullYear()) * 12 + (mvnM - (now.getMonth() + 1));
-              const years = Math.floor(months / 12);
-              const remMonths = months % 12;
-              const timeStr = months <= 0 ? '입주 완료/임박' : years > 0 ? `${years}년 ${remMonths > 0 ? `${remMonths}개월` : ''}` : `${months}개월`;
-              const pct = Math.max(0, Math.min(100, 100 - (months / 60) * 100));
-              return (
-                <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '10px 12px' }}>
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 3 }}>입주까지</div>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: months <= 6 ? 'var(--accent-green)' : months <= 24 ? 'var(--brand)' : 'var(--text-primary)' }}>{timeStr}</div>
-                  <div style={{ height: 3, borderRadius: 'var(--radius-xs)', background: 'var(--border)', marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${pct}%`, borderRadius: 'var(--radius-xs)', background: months <= 6 ? 'var(--accent-green)' : months <= 24 ? 'var(--brand)' : 'var(--accent-purple)' }} />
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-
-          {/* 시행 유형 뱃지 */}
-          {(() => {
-            const dev = sub.developer_nm || site?.developer || '';
-            const isJohap = dev.includes('조합') || dev.includes('정비');
-            const isPublic = dev.includes('공사') || dev.includes('LH') || dev.includes('SH');
-            const devType = isJohap ? { label: '재개발/재건축 조합', color: 'var(--accent-orange)' } : isPublic ? { label: '공공 시행', color: 'var(--accent-green)' } : null;
-            if (!devType) return null;
-            return (
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)', padding: '4px 10px', borderRadius: 'var(--radius-xs)', background: `${devType.color}12`, fontSize: 'var(--fs-xs)' }}>
-                <span style={{ color: devType.color, fontWeight: 500 }}>{devType.label}</span>
-              </div>
-            );
-          })()}
-
-          {/* 분양 조건 — RegulationBadges 컴포넌트로 상단에 표시 (중복 제거) */}
-
-          {/* 단지 개요 행 — 건물 스펙 (시공사/시행사는 상단 헤더에 표시) */}
-          {(() => {
-            const rows = [
-              ['브랜드', sub.brand_name],
-              ['사업유형', (sub as any).project_type],
-              ['동수', (sub.total_dong_count || sub.total_dong_co) ? `${sub.total_dong_count || sub.total_dong_co}개 동` : null],
-              ['층수', sub.max_floor ? `지상 ${sub.max_floor}층${sub.min_floor ? ` / 지하 ${sub.min_floor}층` : ''}` : null],
-              ['주차', sub.parking_total || sub.parking_co ? `${Number(sub.parking_total || sub.parking_co).toLocaleString()}대${sub.parking_ratio ? ` (세대당 ${sub.parking_ratio}대)` : ''}` : null],
-              ['난방', sub.heating_type],
-              ['구조', sub.structure_type],
-              ['외장재', sub.exterior_finish],
-            ].filter(r => r[1]);
-            if (!rows.length) return null;
-            return (
-              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--sp-md)' }}>
-                {rows.map(([l, v], i) => (
-                  <div key={l as string} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 'var(--fs-sm)' }}>
-                    <span style={{ color: 'var(--text-tertiary)' }}>{l}</span>
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)', textAlign: 'right', maxWidth: '60%' }}>{v}</span>
-                  </div>
-                ))}
-              </div>
-            );
-          })()}
-
-          {/* 면적/용적 정보 */}
-          {(sub.land_area || sub.floor_area_ratio) && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'var(--sp-xs)', marginTop: 8 }}>
-              {sub.land_area > 0 && <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>대지면적</div><div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500 }}>{Number(sub.land_area).toLocaleString()}㎡</div></div>}
-              {sub.building_area > 0 && <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>건축면적</div><div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500 }}>{Number(sub.building_area).toLocaleString()}㎡</div></div>}
-              {sub.floor_area_ratio > 0 && <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>용적률</div><div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500 }}>{sub.floor_area_ratio}%</div></div>}
-              {sub.building_coverage > 0 && <div style={{ textAlign: 'center', padding: '6px 4px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)' }}><div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>건폐율</div><div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500 }}>{sub.building_coverage}%</div></div>}
-            </div>
-          )}
-
-          {/* 납부일정 — 통합 (payment_schedule 우선, down_payment_pct 폴백) */}
-          {(sub.payment_schedule || sub.down_payment_pct || sub.interim_count) && (() => {
-            const fmtA = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}억` : `${n.toLocaleString()}만`;
-            const colors: Record<string, string> = { deposit: 'var(--brand)', interim: 'var(--accent-purple)', balance: 'var(--accent-green)' };
-            let steps: { key: string; label: string; pct: number; amount?: number; loan?: string }[] = [];
-
-            if (sub.payment_schedule) {
-              const ps = typeof sub.payment_schedule === 'string' ? JSON.parse(sub.payment_schedule) : sub.payment_schedule;
-              steps = ['deposit', 'interim', 'balance'].map(k => ps[k] ? { key: k, label: ps[k].label, pct: ps[k].pct, amount: ps[k].amount, loan: ps[k].loan } : null).filter(Boolean) as typeof steps;
-            } else {
-              const down = sub.down_payment_pct || 10;
-              const interim = sub.interim_count || 6;
-              const interimPct = sub.balance_pct ? (100 - down - sub.balance_pct) : 60;
-              const balance = sub.balance_pct || (100 - down - interimPct);
-              steps = [
-                { key: 'deposit', label: '계약금', pct: down },
-                { key: 'interim', label: `중도금 (${interim}회)`, pct: interimPct },
-                { key: 'balance', label: '잔금', pct: balance },
-              ];
-            }
-            if (steps.length === 0) return null;
-            return (
-              <div style={{ marginTop: 10, paddingTop: 'var(--sp-md)', borderTop: '1px solid var(--border)' }}>
-                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>납부일정{sub.payment_schedule ? ' (최고 분양가 기준)' : ''}</div>
-                <div style={{ display: 'flex', height: 22, borderRadius: 'var(--radius-xs)', overflow: 'hidden', marginBottom: 8 }}>
-                  {steps.map((s, i) => (
-                    <div key={s.key} style={{ flex: s.pct, background: colors[s.key] || 'var(--text-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', color: 'var(--text-inverse)', fontWeight: 500, borderRight: i < steps.length - 1 ? '2px solid var(--bg-surface)' : 'none' }}>
-                      {s.pct}%
-                    </div>
-                  ))}
-                </div>
-                {steps.map(s => (
-                  <div key={s.key} style={{ marginBottom: 4 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', marginBottom: 2 }}>
-                      <span style={{ color: 'var(--text-tertiary)' }}>{s.label} ({s.pct}%){s.loan ? ` — ${s.loan}` : ''}</span>
-                      {s.amount && <span style={{ fontWeight: 700, color: colors[s.key] || 'var(--text-primary)' }}>{fmtA(s.amount)}</span>}
-                    </div>
-                    <div style={{ height: 3, borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${s.pct}%`, background: colors[s.key] || 'var(--text-tertiary)', borderRadius: 'var(--radius-xs)' }} />
-                    </div>
-                  </div>
-                ))}
-                {sub.acquisition_tax_estimate > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', marginTop: 4, padding: '4px 0', borderTop: '1px solid var(--border)' }}>
-                    <span style={{ color: 'var(--text-tertiary)' }}>예상 취득세</span>
-                    <span style={{ fontWeight: 700, color: 'var(--accent-red)' }}>약 {fmtA(sub.acquisition_tax_estimate)}</span>
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-
-          {/* 청약 조건 (RegulationBadges에 없는 고유 항목만 표시) */}
-          {(sub.savings_requirement || sub.priority_supply_area || sub.balcony_extension !== undefined) && (
-            <div style={{ marginTop: 10, paddingTop: 'var(--sp-md)', borderTop: '1px solid var(--border)' }}>
-              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>청약 조건</div>
-              {[
-                sub.balcony_extension !== undefined && ['발코니확장', sub.balcony_extension ? '가능' : '불가', sub.balcony_extension ? 'var(--accent-green)' : 'var(--text-tertiary)'],
-                sub.savings_requirement && ['청약저축', sub.savings_requirement, 'var(--brand)'],
-                sub.priority_supply_area && ['우선공급', sub.priority_supply_area, 'var(--accent-purple)'],
-              ].filter(Boolean).map(([l, v, c]: any) => (
-                <div key={l} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', fontSize: 'var(--fs-xs)', borderBottom: '1px solid var(--border)' }}>
-                  <span style={{ color: 'var(--text-tertiary)' }}>{l}</span>
-                  <span style={{ fontWeight: 500, color: c, textAlign: 'right', maxWidth: '60%' }}>{v}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* 사업일정 */}
-          {(sub.business_approval_date || sub.construction_start_date || sub.completion_date) && (
-            <div style={{ marginTop: 10, paddingTop: 'var(--sp-md)', borderTop: '1px solid var(--border)' }}>
-              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>사업일정</div>
-              {[
-                sub.business_approval_date && ['사업승인', sub.business_approval_date],
-                sub.construction_start_date && ['착공', sub.construction_start_date],
-                sub.completion_date && ['준공예정', sub.completion_date],
-              ].filter(Boolean).map(([l, v]: any) => (
-                <div key={l} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 'var(--fs-xs)', borderBottom: '1px solid var(--border)' }}>
-                  <span style={{ color: 'var(--text-tertiary)' }}>{l}</span>
-                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{v}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* 커뮤니티 시설 */}
-          {(sub.community_facilities?.length > 0 || (Array.isArray(sub.community_list) && sub.community_list.length > 0)) && (() => {
-                    const categoryLabels: Record<string, string> = { fitness: '피트니스', sports: '스포츠', kids: '키즈', senior: '경로', common: '공용' };
-            const pdfList = Array.isArray(sub.community_list) ? sub.community_list as { name: string; category: string }[] : [];
-            const oldList = sub.community_facilities || [];
-            return (
-              <div style={{ marginTop: 10, paddingTop: 'var(--sp-md)', borderTop: '1px solid var(--border)' }}>
-                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>커뮤니티 시설</div>
-                {pdfList.length > 0 ? (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 'var(--sp-xs)' }}>
-                    {pdfList.map((f, i) => (
-                      <div key={i} style={{ padding: '6px 8px', borderRadius: 'var(--radius-sm)', background: f.category === 'fitness' ? 'var(--accent-red-bg)' : f.category === 'kids' ? 'var(--accent-orange-bg)' : f.category === 'sports' ? 'var(--accent-green-bg)' : 'var(--bg-hover)', border: '1px solid var(--border)', textAlign: 'center' }}>
-                        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)' }}>{f.name}</div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
-                    {oldList.map((f: string) => (
-                      <span key={f} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>{f}</span>
-                    ))}
-                  </div>
-                )}
-                {/* 핵심 시설 요약 뱃지 */}
-                {(sub.has_fitness || sub.has_daycare) && (
-                  <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginTop: 6 }}>
-                    {sub.has_fitness && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-red-bg)', color: 'var(--accent-red)', fontWeight: 600 }}>피트니스 있음</span>}
-                    {sub.has_daycare && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-orange-bg)', color: 'var(--warning)', fontWeight: 600 }}>어린이집 있음</span>}
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-
-          {/* 견본주택 */}
-          {sub.model_house_addr && (
-            <div style={{ marginTop: 'var(--sp-sm)', padding: '8px 10px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', wordBreak: 'keep-all' }}>
-              견본주택: {sub.model_house_addr}
-            </div>
-          )}
-
-          {/* 단지 스펙 */}
-          {(sub.architect || sub.energy_grade || sub.ceiling_height || sub.entrance_type || sub.elevator_count || sub.estimated_mgmt_fee || sub.special_features || sub.landscape_designer) && (
-            <div style={{ marginTop: 10, paddingTop: 'var(--sp-md)', borderTop: '1px solid var(--border)' }}>
-              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>단지 스펙</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 'var(--sp-sm)' }}>
-                {sub.architect && (
-                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>설계</div>
-                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--text-primary)', marginTop: 2 }}>{sub.architect}</div>
-                  </div>
-                )}
-                {sub.landscape_designer && (
-                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>조경</div>
-                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--text-primary)', marginTop: 2 }}>{sub.landscape_designer}</div>
-                  </div>
-                )}
-                {sub.ceiling_height && (
-                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>천장고</div>
-                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: Number(sub.ceiling_height) >= 2.4 ? 'var(--accent-green)' : 'var(--text-primary)', marginTop: 2 }}>{sub.ceiling_height}m{Number(sub.ceiling_height) >= 2.5 ? ' ' : ''}</div>
-                  </div>
-                )}
-                {sub.entrance_type && (
-                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>현관 구조</div>
-                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: sub.entrance_type === '계단식' ? 'var(--accent-green)' : 'var(--text-primary)', marginTop: 2 }}>{sub.entrance_type}</div>
-                  </div>
-                )}
-                {sub.energy_grade && (
-                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>에너지 효율</div>
-                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--accent-green)', marginTop: 2 }}>{sub.energy_grade}</div>
-                  </div>
-                )}
-                {sub.zero_energy_cert && (
-                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--accent-green-bg)', border: '1px solid var(--accent-green-bg)' }}>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>제로에너지</div>
-                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--accent-green)', marginTop: 2 }}>{sub.zero_energy_cert}</div>
-                  </div>
-                )}
-                {sub.estimated_mgmt_fee && (
-                  <div style={{ padding: '8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>예상 관리비</div>
-                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--text-primary)', marginTop: 2 }}>{Number(sub.estimated_mgmt_fee).toLocaleString()}원/월</div>
-                  </div>
-                )}
-              </div>
-              {sub.special_features && (
-                <div style={{ marginTop: 6, fontSize: 'var(--fs-xs)', color: 'var(--accent-purple)', padding: '4px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--accent-purple-bg)' }}>
-                  특화설계: {sub.special_features}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 평형별 공급 정보 — 정확한 데이터 테이블 */}
-          {sub.house_type_info && (() => {
-            const types = Array.isArray(sub.house_type_info) ? sub.house_type_info : [];
-            if (!types.length) return null;
-            const hasPrice = types.some((t: any) => Number(t.lttot_top_amount || 0) > 0);
-            const totalGen = types.reduce((s: number, t: any) => s + Number(t.supply || 0), 0);
-            const totalSpe = types.reduce((s: number, t: any) => s + Number(t.spsply_hshldco || 0), 0);
-            return (
-              <div style={{ marginTop: 10, paddingTop: 'var(--sp-md)', borderTop: '1px solid var(--border)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)' }}>평형별 공급 · 분양가</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>일반{totalGen} · 특별{totalSpe}</span>
-                </div>
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', fontSize: 'var(--fs-xs)', borderCollapse: 'collapse' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1.5px solid var(--border)' }}>
-                        <th style={{ padding: '5px 6px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600 }}>타입</th>
-                        <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>전용(㎡)</th>
-                        <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>공급(㎡)</th>
-                        <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>일반</th>
-                        <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>특별</th>
-                        <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>합계</th>
-                        {hasPrice && <th style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>최고분양가</th>}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {types.map((t: any, i: number) => {
-                        const typeLabel = t.type || '';
-                        const exclusiveArea = parseFloat((typeLabel || '0').replace(/[A-Za-z]/g, ''));
-                        const supplyArea = parseFloat(t.area || '0');
-                        const supply = Number(t.supply || 0);
-                        const spsply = Number(t.spsply_hshldco || 0);
-                        const total = supply + spsply;
-                        const price = Number(t.lttot_top_amount || 0);
-                        const priceMin = Number(t.lttot_min_amount || 0);
-                        const priceAvg = Number(t.lttot_avg_amount || 0);
-                        const displayPrice = priceAvg || price;
-                        const ppyeong = displayPrice > 0 && exclusiveArea > 10 ? Math.round(displayPrice / (exclusiveArea / 3.3058)) : 0;
-                        const typeEstimated = !t.price_source || t.price_source !== 'regex';
-                        const useRate = exclusiveArea > 0 && supplyArea > 0 ? Math.round(exclusiveArea / supplyArea * 100) : 0;
-                        return (
-                          <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                            <td style={{ padding: '6px', fontWeight: 500, color: 'var(--text-primary)' }}>{typeLabel || '-'}</td>
-                            <td style={{ padding: '6px', textAlign: 'right', color: 'var(--text-secondary)' }}>{exclusiveArea > 0 ? exclusiveArea.toFixed(1) : '-'}</td>
-                            <td style={{ padding: '6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>{supplyArea > 0 ? <>{supplyArea.toFixed(1)}{useRate > 0 && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-green)' }}>전용률 {useRate}%</div>}</> : '-'}</td>
-                            <td style={{ padding: '6px', textAlign: 'right', color: 'var(--brand)', fontWeight: 600 }}>{supply}</td>
-                            <td style={{ padding: '6px', textAlign: 'right', color: 'var(--accent-purple)' }}>{spsply}</td>
-                            <td style={{ padding: '6px', textAlign: 'right', fontWeight: 500, color: 'var(--text-primary)' }}>{total}</td>
-                            {hasPrice && <td style={{ padding: '6px', textAlign: 'right' }}>
-                              <div style={{ fontWeight: 700, color: 'var(--accent-blue)' }}>{priceMin > 0 && priceMin !== price ? <><span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{priceMin >= 10000 ? `${(priceMin / 10000).toFixed(1)}억` : `${priceMin.toLocaleString()}`}~</span>{price >= 10000 ? `${(price / 10000).toFixed(1)}억` : `${price.toLocaleString()}만`}</> : price >= 10000 ? `${(price / 10000).toFixed(1)}억` : `${price.toLocaleString()}만`}</div>
-                              {ppyeong > 0 && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-purple)' }}>평당 {ppyeong.toLocaleString()}만 <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>({priceAvg > 0 ? '평균' : '최고가'})</span>{priceMin > 0 && typeEstimated && sub?.price_source === 'estimated' ? <span style={{ fontSize: 'var(--fs-xs)', marginLeft: 3, padding: '0px 3px', borderRadius: 'var(--radius-xs)', background: 'var(--accent-orange-bg)', color: 'var(--warning)', fontWeight: 600 }}>추정</span> : null}</div>}
-                            </td>}
-                          </tr>
-                        );
-                      })}
-                      <tr style={{ borderTop: '1.5px solid var(--brand)', background: 'var(--bg-hover)' }}>
-                        <td style={{ padding: '6px', fontWeight: 600, color: 'var(--text-primary)' }}>합계</td>
-                        <td></td>
-                        <td></td>
-                        <td style={{ padding: '6px', textAlign: 'right', fontWeight: 500, color: 'var(--brand)' }}>{totalGen}</td>
-                        <td style={{ padding: '6px', textAlign: 'right', fontWeight: 500, color: 'var(--accent-purple)' }}>{totalSpe}</td>
-                        <td style={{ padding: '6px', textAlign: 'right', fontWeight: 500, color: 'var(--text-primary)' }}>{totalGen + totalSpe}</td>
-                        {hasPrice && <td></td>}
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 6 }}>출처: 청약홈 모집공고 · 최고 분양가 기준 (만원)</div>
-              </div>
-            );
-          })()}
-
-
-          {/* 같은 시공사 분양가 비교 */}
-          {sameBuilderSites.length > 0 && (
-            <div style={{ marginTop: 10, paddingTop: 'var(--sp-md)', borderTop: '1px solid var(--border)' }}>
-              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>{(sub.constructor_nm || site?.builder || '').split('(')[0].split('주식')[0].trim()} 분양가 비교</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)' }}>
-                {sameBuilderSites.slice(0, 4).map((sb2: any) => {
-                  const hti = Array.isArray(sb2.house_type_info) ? sb2.house_type_info : [];
-                  const prices = hti.map((t: any) => Number(t.lttot_top_amount || 0)).filter((p: number) => p > 0);
-                  const pMin = prices.length > 0 ? Math.min(...prices) : 0;
-                  const pMax = prices.length > 0 ? Math.max(...prices) : 0;
-                  return (
-                  <Link key={sb2.id} href={`/apt/${sb2.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 10px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)', border: '1px solid var(--border)', textDecoration: 'none' }}>
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 'var(--fs-xs)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sb2.house_nm}</div>
-                      <div style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>{sb2.region_nm} · {sb2.tot_supply_hshld_co}세대</div>
-                    </div>
-                    {pMax > 0 && <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--accent-blue)', flexShrink: 0, marginLeft: 8 }}>{fmtAmount(pMin)}{pMax !== pMin ? `~${fmtAmount(pMax)}` : ''}</div>}
-                  </Link>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* 하단 CTA: 공유 + 청약홈 */}
-          <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 'var(--sp-md)', paddingTop: 'var(--sp-md)', borderTop: '1px solid var(--border)' }}>
-            <SectionShareButton section="announcement" label={`${name} 모집공고 요약`} text={`${name} 입주자모집공고 핵심 요약 — ${sub.constructor_nm || site?.builder || ''} 시공, ${sub.tot_supply_hshld_co || site?.total_units || ''}세대`} pagePath={`/apt/${slug}`} />
-            {sub.pblanc_url && <a href={sub.pblanc_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-sm)', padding: '8px 16px', borderRadius: 'var(--radius-md)', background: 'var(--accent-green-bg)', border: '1px solid var(--accent-green-border)', color: 'var(--accent-green)', fontSize: 'var(--fs-sm)', fontWeight: 500, textDecoration: 'none' }}>청약홈 원문</a>}
-          </div>
-          </div>
-        </DetailSection>
-      )}
 
       {/* Unsold section */}
       {unsold && (
