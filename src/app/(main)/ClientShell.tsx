@@ -93,7 +93,18 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
             minHeight: 'calc(100vh - 48px)',
             backgroundColor: 'var(--bg-base)',
             color: 'var(--text-primary)',
-            overflowX: 'hidden',
+            /* ⛔⛔ U-1b 실측(2026-08-30) — 여기가 `hidden` 이면 main 이 «스크롤 컨테이너» 가 되어
+                 그 안의 `position: sticky` 가 «전부 죽는다». 실측으로 잡은 사망자 셋:
+                   · 상세 점프바(top:45)  — 스크롤 2,400px 에서 top 이 -1,920 이었다(화면 밖)
+                   · 상세 우측 레일        — --rail-top: 103px 을 «아무도 안 쓰고 있었다»
+                   · 지역 셀렉 하단 적용 바(bottom:0)
+                 U-1a 에서 레일 정지선을 118→103 으로 «고친» 것도 사실은 죽은 값을 고친 것이었다.
+                 → `clip` 은 가로를 «똑같이 잘라내면서» 스크롤 컨테이너를 만들지 «않는다».
+                    그래서 가로 넘침 방어는 그대로 두고 sticky 만 되살린다.
+                 ⚠️ Safari 16 미만은 `clip` 을 모른다 — 그 경우 `visible` 로 떨어져
+                    «자르지 않는다». 넘침이 있으면 가로 스크롤이 생기지만, ds-6x6 이
+                    6폭 × 3모드 × 6페이지에서 넘침 0 을 확인하고 있어 방어 대상이 지금은 없다. */
+            overflowX: 'clip',
           }}>
             <ErrorBoundary>
               <ProfileCompleteBanner />
