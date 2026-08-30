@@ -30,8 +30,10 @@ const TIME_BUDGET_MS = 250_000;
  * ⛔ ad_keywords 의 «기존 행을 덮어쓰지 않는다». 그 표의 유니크 키는 keyword_id 가 아니라
  *    (snapshot_date, keyword_id) 다 — «일자별 스냅샷 이력» 이라는 뜻이다. 그래서 동기화는
  *    오늘 날짜의 «새 세대» 를 넣는 방식이고, 8/26 수동 스냅샷은 그대로 남는다.
- *    ⚠️ site_slug·landing_* 은 직전 스냅샷에서 «이어받는다». 광고 API 는 키워드별 랜딩을
- *       주지 않으므로, 이어받지 않으면 사람이 붙여 둔 현장 연결이 세대마다 사라진다.
+ *    ⚠️ site_slug·landing_* 은 «API 의 links 를 먼저» 쓰고, 없을 때만 직전 스냅샷에서 이어받는다.
+ *       ⛔ 예전 주석은 「광고 API 는 키워드별 랜딩을 주지 않는다」고 적혀 있었는데 «틀렸다» —
+ *          /ncc/keywords 는 links.pc.final 을 준다(PL-5 가 그것으로 착지 5,478건을 전수 조회했다).
+ *          그 잘못된 전제 때문에 CSV 에 안 찍힌 4,081건이 세대마다 NULL 로 남아 있었다.
  *
  * ── 2026-08-29 실측으로 정해진 것 ───────────────────────────────────────────
  * `id`(단수)는 일자별 행을 주지만 키워드 하나뿐이라 5,974 호출/일이 든다.
@@ -45,6 +47,40 @@ const TIME_BUDGET_MS = 250_000;
  *   ?days=3    최근 N일 (전일 데이터는 익일 확정되므로 재수집이 기본)
  *   ?limit=2   훑을 배치 수 상한 (게이트·소량 검증용)
  */
+/**
+ * 키워드 `links` 에서 최종 URL 하나를 꺼낸다.
+ * ⚠️ 값이 문자열일 때도 `{final}` 일 때도 있다 — 실측으로 확인한 두 모양을 모두 받는다.
+ */
+function finalUrl(links: unknown, side: 'pc' | 'mobile'): string | null {
+  if (!links) return null;
+  if (typeof links === 'string') return links || null;
+  const L = links as Record<string, unknown>;
+  const v = L[side];
+  if (typeof v === 'string') return v || null;
+  if (v && typeof v === 'object') {
+    const f = (v as Record<string, unknown>).final;
+    if (typeof f === 'string' && f) return f;
+  }
+  const f = L.final;
+  return typeof f === 'string' && f ? f : null;
+}
+
+/**
+ * 착지 URL → site_slug. 허브·목록·빈 URL 은 null 이다.
+ * ⚠️ import_csv.py 의 site_slug_of() 와 «같은 규칙» 이다. 두 곳이 갈리면 안 된다.
+ */
+function slugFromLanding(pc: string | null, mobile: string | null): string | null {
+  const raw = pc || mobile;
+  if (!raw) return null;
+  let path: string;
+  try { path = decodeURIComponent(new URL(raw).pathname); } catch { return null; }
+  if (!path.startsWith('/apt/')) return null;
+  const rest = path.slice('/apt/'.length).replace(/\/+$/, '');
+  if (!rest || rest.includes('/')) return null;            // 허브 2단 경로
+  if (['unsold', 'pipeline', 'busan', 'search', 'region'].includes(rest)) return null;
+  return rest;
+}
+
 async function handler(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const dryRun = sp.get('dry') === '1';
@@ -103,6 +139,10 @@ async function handler(req: NextRequest) {
             adgroup_name: gg.name ?? null,
             bid: typeof x.bidAmt === 'number' ? x.bidAmt : null,
             status: x.status ?? null,
+            // ⚠️ links 는 문자열일 때도 dict 일 때도 온다(일부 키워드가 {final: ...} 형태).
+            //    바로 인덱싱하면 죽는다 — 어떤 모양이 와도 문자열을 낸다.
+            landing_pc: finalUrl(x.links, 'pc'),
+            landing_mobile: finalUrl(x.links, 'mobile'),
           });
         }
       }
@@ -141,8 +181,12 @@ async function handler(req: NextRequest) {
     const today = kstDate();
     const payload = kwRows.map((r) => {
       const c = carry.get(String(r.keyword_id));
-      if (c?.site_slug) kwCarried++;
-      return { ...r, snapshot_date: today, site_slug: c?.site_slug ?? null, landing_pc: c?.landing_pc ?? null, landing_mobile: c?.landing_mobile ?? null };
+      // API 의 links 가 «권위» 다. 없을 때만 직전 세대를 잇는다.
+      const pc = (r.landing_pc as string | null) ?? (c?.landing_pc as string | null) ?? null;
+      const mo = (r.landing_mobile as string | null) ?? (c?.landing_mobile as string | null) ?? null;
+      const slug = slugFromLanding(pc, mo) ?? (c?.site_slug as string | null) ?? null;
+      if (slug) kwCarried++;
+      return { ...r, snapshot_date: today, site_slug: slug, landing_pc: pc, landing_mobile: mo };
     });
     for (let i = 0; i < payload.length; i += 500) {
       const { error } = await (sb as any)
