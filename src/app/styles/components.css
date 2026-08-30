@@ -704,3 +704,15 @@
      그 규칙은 «아무것도 겨냥하지 않는다». 유령 규칙을 남기지 않는다(중단점 C-3 의 교훈). */
 
 }
+
+
+/* U-1b 지역 셀렉 그리드 — 시안 v3: 6열 / 900↓ 4열 / 480↓ 3열.
+   ⚠️ 인라인 gridTemplateColumns 로 두면 폭에 따라 못 바꾼다 — 그 실수의 실례가
+      font-large-guard 가 매번 확인하는 «죽은 방어 규칙» 이다. 여기 한 곳에 둔다. */
+/* ⚠️ 레이어 이름은 «이 저장소의 것» 을 쓴다 — `components` 는 Tailwind 지시어 이름과
+   충돌해 빌드가 죽는다(실측: `@layer components is used but no matching @tailwind components`). */
+@layer patterns {
+  .kd-rg-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--sp-sm); }
+  @media (max-width: 900px) { .kd-rg-grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 480px) { .kd-rg-grid { grid-template-columns: repeat(3, 1fr); } }
+}

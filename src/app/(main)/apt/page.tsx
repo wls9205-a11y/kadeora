@@ -67,6 +67,10 @@ import { fetchGichukActivity } from '@/lib/apt/gichuk-activity';
 import RecentMovesStrip from '@/components/apt/RecentMovesStrip';
 import { SectionLink } from '@/components/apt/SectionHeader';
 import { regionLabel, metaLine } from '@/lib/region/display';
+import RegionSelectPanel from '@/components/region/RegionSelectPanel';
+import SiteRow from '@/components/apt/SiteRow';
+import { parseRegionSelection } from '@/lib/region/select-tree';
+import { getRegionCounts, getSitesForSelection, selectionToPairs } from '@/lib/region/select-server';
 
 // Next 는 segment config 를 정적 분석하므로 리터럴이어야 한다 (import 식별자 불가).
 // lib/apt/hub.ts 의 APT_HUB_REVALIDATE_SECONDS 와 같은 값으로 유지할 것.
@@ -118,7 +122,7 @@ export async function generateMetadata({
 export default async function AptPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ region?: string; sgg?: string; st?: string }>;
+  searchParams?: Promise<{ region?: string; sgg?: string; st?: string; rg?: string }>;
 }) {
   const sp = (await searchParams) || {};
 
@@ -233,6 +237,21 @@ export default async function AptPage({
 
   // NEW 배지(단계 변경 30일 이내) 기준 시각. 행마다 Date.now() 를 부르면
   //   한 렌더 안에서 기준이 갈린다. 한 번 찍어 내려보낸다.
+  /* ══ U-1b 지역 셀렉 ══
+     선택은 «코드 배열» 로 URL 에 실린다(?rg=11110,26350). 라벨로 실으면 창원처럼
+     한 라벨이 5개 구 코드를 갖는 자리에서 무엇을 고른 건지 URL 이 말하지 못한다.
+     ⚠️ 카운트는 집계 RPC 라 캐시(900초)에 얹혀 있다 — 목록 조회를 늘리지 않는다.
+     ⚠️ 선택 현장 조회는 «선택이 있을 때만» 돈다. 없으면 Promise 하나로 접는다(Rule #49). */
+  const selectedCodes = parseRegionSelection(sp.rg ?? null);
+  const [regionCounts, selectedSites] = await Promise.all([
+    getRegionCounts(),
+    selectedCodes.length ? getSitesForSelection(selectedCodes) : Promise.resolve([]),
+  ]);
+  const selectedLabels = selectionToPairs(selectedCodes).map((x) => `${x.region} ${x.sigungu}`.trim());
+  const selectSummary = selectedLabels.length
+    ? `${selectedLabels.slice(0, 2).join(' · ')}${selectedLabels.length > 2 ? ` 외 ${selectedLabels.length - 2}곳` : ''}`
+    : '전국 — 지역을 골라 보세요';
+
   const pipelineNow = Date.now();
 
   const events = buildSubscriptionEvents(cards);
@@ -306,6 +325,53 @@ export default async function AptPage({
 
       {/* 위치 추정은 쿠키가 없을 때만 돈다 — 쿠키가 있으면 쿠키가 이긴다. */}
       {isAutoRegion && <RegionAutoSelect />}
+
+      {/* U-1b 지역 셀렉 — 닫힌 채로도 «무엇을 고른 상태인지» 버튼이 말한다.
+          ⚠️ 카운트는 Map 이라 클라이언트로 그대로 못 넘긴다(직렬화 불가) — 객체로 편다. */}
+      <RegionSelectPanel
+        sidoCounts={Object.fromEntries(regionCounts.bySidoCode)}
+        sigunguCounts={Object.fromEntries(regionCounts.bySigunguLabel)}
+        nationwide={regionCounts.nationwide}
+        initialCodes={selectedCodes}
+        summary={selectSummary}
+      />
+
+      {/* 선택이 있으면 «그 선택의 결과» 를 먼저 낸다.
+          ⛔ 아래 허브 섹션들은 시도 하나(p_region)로 도는 RPC 라 다중 선택을 담지 못한다.
+             담는 척하지 않고, 이 섹션이 «선택분» 이라는 것을 제목으로 밝힌다. */}
+      {selectedCodes.length > 0 && (
+        <section style={{ margin: '0 0 var(--sp-lg)' }}>
+          <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, margin: '0 0 var(--sp-sm)' }}>
+            선택한 지역의 분양예정·분양중 현장
+            <span style={{ marginLeft: 'var(--sp-sm)', fontSize: 'var(--fs-2xs)', fontWeight: 500, color: 'var(--text-tertiary)' }}>
+              {selectedSites.length}곳
+            </span>
+          </h2>
+          {selectedSites.length === 0 ? (
+            /* ⚠️ 「없다」와 「못 불러왔다」를 같은 화면으로 만들지 않는다(DS_RULES §2-5). */
+            <p style={{ margin: 0, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>
+              고른 지역에 분양예정·분양중으로 잡힌 현장이 없습니다. 다른 지역을 골라 보세요.
+            </p>
+          ) : (
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+              {selectedSites.map((it) => (
+                <li key={it.slug ?? it.name}>
+                  <SiteRow
+                    item={{
+                      slug: it.slug,
+                      name: it.display_name || it.name,
+                      region: it.region,
+                      sigungu: it.sigungu,
+                      lifecycle_stage: it.lifecycle_stage,
+                      total_units: it.total_units,
+                    }}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       {showTiles ? (
         /* ══ 1단 — 17 시도 타일 ══
