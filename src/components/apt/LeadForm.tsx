@@ -20,7 +20,9 @@ import { leadCopy, leadCopyForHome } from '@/lib/apt/lead-copy';
 import { leadKind } from '@/lib/apt/lead-eligibility';
 import { trackLeadSubmit, trackLeadView } from '@/lib/apt/lead-track';
 
-const ENDPOINT = process.env.NEXT_PUBLIC_LEAD_ENDPOINT || '';
+/* ⚠️ 값을 여기서 다시 읽지 않는다 — lead-eligibility 의 LEAD_ENDPOINT 한 곳이 원본이다.
+   두 벌이면 한쪽만 고쳐져 「폼은 서는데 버튼이 없다」 같은 어긋남이 다시 난다(V4-D P0-A). */
+import { LEAD_ENDPOINT as ENDPOINT } from '@/lib/apt/lead-eligibility';
 const DRAFT_PREFIX = 'kd_lead_draft:';
 const PENDING_PREFIX = 'kd_lead_pending:';
 // 최초 1회 즉시 전송 후, 실패하면 이 간격만큼 쉬고 재시도 (총 3회 재시도)

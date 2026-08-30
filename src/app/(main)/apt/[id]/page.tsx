@@ -33,7 +33,7 @@ import RecentObservations from '@/components/apt/RecentObservations';
 import { siteEntity } from '@/lib/seo/entity';
 import FieldNote from '@/components/apt/FieldNote';
 
-import { leadKind } from '@/lib/apt/lead-eligibility';
+import { leadFormAvailable, leadKind } from '@/lib/apt/lead-eligibility';
 import { canUseHeroImage } from '@/lib/apt/hero-license';
 import { canShowPriceChange, pcArea, priceChangeDirection, PRICE_CHANGE_COLS } from '@/lib/apt/price-change';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
@@ -781,7 +781,9 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
   //    기축도 이제 리드를 받는 페이지이므로 미확정 정보를 감추는 광고 안전장치가
   //    같이 걸리는 게 맞다 — 보수적인 쪽이다.
   // ⚠️ lifecycle_stage 가 비면 leadKind 가 null 이라 폼이 안 뜬다. 추정해 채우지 않는다.
-  const showLeadForm = !!site?.slug && leadKind(site.lifecycle_stage) !== null;
+  // V4-D P0-A — 네 진입점(폼 · 하단 바 · 점프바 CTA · 우측 레일)이 «이 한 줄» 을 공유한다.
+  //   ⚠️ 예전엔 넷이 따로 계산했고 점프바·레일이 ENDPOINT 를 빠뜨려 유령 앵커가 됐다.
+  const showLeadForm = leadFormAvailable(site?.lifecycle_stage, site?.slug);
   const hideUnconfirmed = shouldHideUnconfirmed(showLeadForm, sp);
 
   // 현장 행의 등급이 미확정이면 별칭 크론이 채웠을 수 있는 세대수·시공사를 내리지 않는다.

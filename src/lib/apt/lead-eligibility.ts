@@ -90,3 +90,27 @@ export function leadKind(stage?: string | null): LeadKind | null {
   if ((RESALE_STAGES as readonly string[]).includes(stage)) return 'resale';
   return null;
 }
+
+/* ── V4-D P0-A — 「폼이 실제로 서는가」의 «단일 소스» ─────────────────────
+ *
+ * ⚠️ 이 사실을 «넷이 따로» 계산하고 있었고 그중 «둘이 틀렸다»(2026-08-30 실측):
+ *     LeadForm      showLeadForm && site  + 내부 `if (!ENDPOINT) return null`   ✅
+ *     하단 액션바   showLeadForm && !!ENDPOINT                                  ✅
+ *     점프바 CTA    showLeadForm            ← ENDPOINT 를 «안 봤다»             ❌
+ *     우측 레일     showLeadForm            ← 같음                              ❌
+ *   그래서 ENDPOINT 가 비면 폼은 null 이 되어 DOM 에서 사라지는데 점프바·레일은
+ *   그대로 남아 «사라진 #lead-form 을 가리키는 유령 앵커» 가 된다.
+ *   눌러도 아무 일이 없다 — 하단 바의 침묵 반환과 «같은 병의 다른 표면» 이다.
+ *
+ * ⛔ 이 판정을 다시 손으로 조합하지 말 것. 폼 유무를 묻는 곳은 여기를 부른다.
+ *   이름에 의미를 담았다 — 「폼이 붙을 자격이 있는가」(leadKind)가 아니라
+ *   «실제로 화면에 서는가» 다. 자격이 있어도 엔드포인트가 없으면 서지 않는다.
+ */
+export const LEAD_ENDPOINT = process.env.NEXT_PUBLIC_LEAD_ENDPOINT || '';
+
+export function leadFormAvailable(
+  stage?: string | null,
+  slug?: string | null,
+): boolean {
+  return !!slug && leadKind(stage) !== null && !!LEAD_ENDPOINT;
+}

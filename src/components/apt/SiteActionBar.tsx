@@ -67,7 +67,8 @@ const SLOT: CSSProperties = {
 const TALK_LABEL = '카카오톡방 입장';
 
 /** LeadForm 과 같은 조건으로 사라져야 한다 — 눌러도 갈 곳이 없는 버튼을 만들지 않는다. */
-const ENDPOINT = process.env.NEXT_PUBLIC_LEAD_ENDPOINT || '';
+/* ⚠️ 여기서 ENDPOINT 를 «다시 계산하지 않는다». 폼 유무 판정은 lead-eligibility 의
+   leadFormAvailable 한 곳이고, 그 결과가 showLeadForm 으로 내려온다(V4-D P0-A). */
 
 export type SiteActionBarProps = {
   siteSlug: string;
@@ -83,13 +84,22 @@ export default function SiteActionBar({ siteSlug, showLeadForm = false, lifecycl
   const [visible, setVisible] = useState(true);
   const [seen, setSeen] = useState(false);
 
-  const hasForm = showLeadForm && !!ENDPOINT;
+  const hasForm = showLeadForm;
 
   const jumpToForm = useCallback(() => {
     // §5-3: 어느 자리가 폼으로 사람을 보내는지. 스크롤 실패해도 클릭은 일어난 일이라 먼저 센다.
     trackLeadClick('bottom_bar', { site_slug: siteSlug, lifecycle_stage: lifecycleStage });
     const form = document.getElementById(LEAD_FORM_ID);
-    if (!form) return;
+    if (!form) {
+      /* ⛔ 침묵 반환을 없앴다(V4-D P0-A · §1-3 ②).
+         원칙은 「폼이 없으면 그 폼으로 보내는 버튼도 없다」이고, showLeadForm 단일 소스가
+         그것을 보장한다 — 그래서 여기 도달하면 «그 보장이 깨진» 것이다.
+         예전에는 조용히 return 해서 클릭 계측만 남고 화면은 아무 일도 안 했다.
+         사용자에게는 남은 길(카톡 상담)을 주고, 개발자에게는 깨졌다는 사실을 남긴다. */
+      console.error('[lead] 폼 앵커를 찾지 못했다 — showLeadForm 과 실제 렌더가 어긋났다', { siteSlug });
+      window.location.hash = LEAD_FORM_ID;
+      return;
+    }
     form.scrollIntoView({ behavior: 'smooth', block: 'center' });
     // 스크롤이 끝난 뒤 포커스를 준다. 지금 바로 focus() 하면 브라우저가 즉시 점프시켜
     // smooth 스크롤이 잘린다.
