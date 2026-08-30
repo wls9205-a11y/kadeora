@@ -60,9 +60,9 @@ export default function AptBuilderHub(props: Props) {
               style={{
                 display: 'flex', flexDirection: 'column', gap: 3,
                 padding: '12px 12px', textAlign: 'left',
-                background: active ? 'var(--brand)' : 'var(--bg-surface)',
+                background: active ? 'var(--brand-navy)' : 'var(--bg-surface)',
                 color: active ? 'var(--text-inverse)' : 'inherit',
-                border: `1px solid ${active ? 'var(--brand)' : 'var(--border)'}`,
+                border: `1px solid ${active ? 'var(--brand-navy)' : 'var(--border)'}`,
                 borderRadius: 12, cursor: 'pointer',
                 transition: 'transform 100ms ease, box-shadow 100ms ease',
               }}

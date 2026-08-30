@@ -167,7 +167,7 @@ export default async function BusanAptPage({
                     fontWeight: active ? 600 : 500,
                     textDecoration: 'none',
                     border: '1px solid var(--border)',
-                    background: active ? 'var(--brand)' : 'var(--bg-surface)',
+                    background: active ? 'var(--brand-navy)' : 'var(--bg-surface)',
                     color: active ? 'var(--text-inverse)' : 'var(--text-secondary)',
                   }}
                 >

@@ -169,7 +169,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
         {tabs.map(tab => (
           <button key={tab} onClick={() => handleTabChange(tab)} aria-pressed={activeTab === tab} style={{
             flex: 1, padding: '8px 0', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer',
-            background: activeTab === tab ? 'var(--brand)' : 'transparent',
+            background: activeTab === tab ? 'var(--brand-navy)' : 'transparent',
             color: activeTab === tab ? 'var(--text-inverse)' : 'var(--text-secondary)',
             fontWeight: 600, fontSize: 'var(--fs-sm)', transition: 'all var(--transition-fast)', whiteSpace: 'nowrap', minWidth: 'fit-content',
           }}>

@@ -206,13 +206,13 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
                 display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)',
                 padding: '6px 8px', textDecoration: 'none',
                 background: isActive ? 'rgba(59,123,246,0.06)' : 'var(--bg-surface)',
-                border: isActive ? '1.5px solid var(--brand)' : '1px solid var(--border)',
+                border: isActive ? '1.5px solid var(--brand-navy)' : '1px solid var(--border)',
                 borderRadius: 7, width: '100%',
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--sp-xs)' }}>
-                    <span style={{ fontSize: 13, fontWeight: isActive ? 600 : 500, color: isActive ? 'var(--brand)' : 'var(--text-primary)', whiteSpace: 'nowrap' }}>{r.region}</span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: isActive ? 'var(--brand)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>{r.count.toLocaleString()}</span>
+                    <span style={{ fontSize: 13, fontWeight: isActive ? 600 : 500, color: isActive ? 'var(--brand-navy)' : 'var(--text-primary)', whiteSpace: 'nowrap' }}>{r.region}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: isActive ? 'var(--brand-navy)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>{r.count.toLocaleString()}</span>
                   </div>
                   <div style={{ display: 'flex', width: '100%', height: 3, borderRadius: 4, overflow: 'hidden', marginTop: 2, background: 'var(--bg-hover)' }}>
                     <div style={{ width: `${pct}%`, height: '100%', background: isActive ? 'linear-gradient(90deg, var(--brand), rgba(59,123,246,0.7))' : 'linear-gradient(90deg, rgba(59,123,246,0.5), rgba(59,123,246,0.2))', borderRadius: 4, transition: 'width 0.3s' }} />

@@ -95,7 +95,7 @@ export default function BlogToc({ toc }: { toc: TocItem[] }) {
               onClick={() => scrollTo(item.id)}
               style={{
                 padding: '6px 12px', borderRadius: 'var(--radius-xl)', fontSize: 11, fontWeight: isActive ? 700 : 500,
-                background: isActive ? 'var(--brand)' : 'var(--bg-surface)',
+                background: isActive ? 'var(--brand-navy)' : 'var(--bg-surface)',
                 color: isActive ? '#fff' : 'var(--text-secondary)',
                 border: isActive ? 'none' : '1px solid var(--border)',
                 cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,

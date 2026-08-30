@@ -89,7 +89,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
           padding: '4px 10px', borderRadius: 'var(--radius-xs)', cursor: 'pointer',
           fontSize: 10, fontWeight: !selectedAge ? 600 : 500,
           background: !selectedAge ? 'rgba(59,123,246,0.2)' : 'transparent',
-          color: !selectedAge ? 'var(--brand)' : 'var(--text-tertiary)',
+          color: !selectedAge ? 'var(--brand-navy)' : 'var(--text-tertiary)',
           border: !selectedAge ? '1px solid rgba(59,123,246,0.4)' : '1px solid var(--border)',
         }}>전체</button>
         {ageGroups.map((g: any) => {

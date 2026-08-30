@@ -133,7 +133,7 @@ export default async function BigEventsHubPage({ searchParams }: SearchProps) {
                 fontSize: 12,
                 fontWeight: 500,
                 border: '1px solid var(--border)',
-                background: active ? 'var(--brand)' : 'var(--bg-surface)',
+                background: active ? 'var(--brand-navy)' : 'var(--bg-surface)',
                 color: active ? '#fff' : 'var(--text-secondary)',
                 textDecoration: 'none',
               }}

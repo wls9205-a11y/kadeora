@@ -114,9 +114,9 @@ export default function AptPriceTrendUnified(props: Props) {
                   style={{
                     padding: '6px 12px', borderRadius: 999,
                     fontSize: 11, fontWeight: 500,
-                    background: active ? 'var(--brand)' : 'var(--bg-hover)',
+                    background: active ? 'var(--brand-navy)' : 'var(--bg-hover)',
                     color: active ? 'var(--text-inverse)' : 'var(--text-secondary)',
-                    border: `1px solid ${active ? 'var(--brand)' : 'var(--border)'}`,
+                    border: `1px solid ${active ? 'var(--brand-navy)' : 'var(--border)'}`,
                     cursor: 'pointer',
                   }}
                 >
