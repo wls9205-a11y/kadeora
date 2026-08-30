@@ -170,9 +170,15 @@ export function Navigation() {
     alignItems: 'center' as const,
     fontSize: 'var(--fs-base)',
     fontWeight: active ? 600 : 500,
-    color: active ? 'var(--brand)' : 'var(--nav-text)',
+    /* V4 F-2-1 ①-b — 「선택=네이비」(H5 기확정)를 전역 네비도 진다.
+       ⛔ 골드 언더라인을 «여기까지» 확장하지 않는다. 흰 바탕 위 골드는 1.58:1 뿐이고,
+          .kd-utab 에서 그게 성립하는 건 텍스트 신호가 같이 지기 때문이다. 그런데 전역 네비는
+          «상시 노출 × 짧은 라벨» 이라 텍스트 신호의 여유가 화면 안 탭보다 적다.
+          네이비 단독이면 ≈13.4:1 이라 색만으로도 상태가 읽힌다.
+       ⚠️ 층이 나뉘는 것이 부작용이 아니라 «위계» 다 — 골드는 「화면 안 활성」 전용으로 남는다. */
+    color: active ? 'var(--brand-navy)' : 'var(--nav-text)',
     textDecoration: 'none' as const,
-    borderBottom: active ? '2px solid var(--brand)' : '2px solid transparent',
+    borderBottom: active ? '2px solid var(--brand-navy)' : '2px solid transparent',
     transition: 'color var(--transition-fast), border-color var(--transition-fast)',
     letterSpacing: '-0.2px',
   });
@@ -488,10 +494,11 @@ export function Navigation() {
               display:'flex', flexDirection:'column', alignItems:'center', gap:2,
               padding:'10px 8px 6px', textDecoration:'none', minHeight:56,
               justifyContent:'center', flex:1, position:'relative',
-              color: active ? 'var(--brand)' : 'var(--text-tertiary)',
+              /* ①-b — 위 navItemStyle 과 «같은 판정» 이다. 두 벌로 갈리지 않게 같이 바꾼다. */
+              color: active ? 'var(--brand-navy)' : 'var(--text-tertiary)',
               transition:'color var(--transition-fast) ease',
             }}>
-              {active && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2.5, borderRadius: 4, background:'var(--brand)' }} />}
+              {active && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:2.5, borderRadius: 4, background:'var(--brand-navy)' }} />}
               <item.Icon size={18} strokeWidth={active ? 2.5 : 1.8} />
               <span style={{ fontSize: 10, fontWeight: active ? 600 : 500, lineHeight:1.2 }}>{item.label}</span>
             </Link>
