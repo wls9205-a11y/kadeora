@@ -320,9 +320,9 @@ export default function FeedClient({
                   style={{
                     padding: '5px 10px 6px', fontSize: 11, border: 'none', borderRadius: 0,
                     background: 'transparent',
-                    color: isActive ? 'var(--brand)' : 'var(--text-tertiary)',
+                    color: isActive ? 'var(--brand-navy)' : 'var(--text-tertiary)',
                     fontWeight: isActive ? 500 : 400, cursor: 'pointer',
-                    borderBottom: isActive ? '2px solid var(--brand)' : '2px solid transparent',
+                    borderBottom: isActive ? '2px solid var(--brand-navy)' : '2px solid transparent',
                     display: 'flex', alignItems: 'center', gap: 3,
                   }}
                   onClick={() => router.push(buildUrl({ sort: opt.key }))}>

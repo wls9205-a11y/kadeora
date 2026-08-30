@@ -41,6 +41,7 @@ const KPI_CFG = [
   { key: 'unsold', label: '미분양', c: 'var(--accent-red)' },
   { key: 'redev', label: '재건축', c: 'var(--accent-purple)' },
   { key: 'trade', label: '실거래', c: 'var(--accent-yellow)' },
+  // kd-brand-exempt: 차트 «시리즈» 색 표다. 항목마다 고정 색이고 상태와 무관하다.
   { key: 'complex', label: '단지백과', c: 'var(--brand)' },
 ] as const;
 
@@ -63,6 +64,8 @@ function MiniDonut({ sub, ongoing, unsold, redev, name, total, size = 34, active
         off += len;
         return el;
       })}
+      {/* kd-brand-exempt: 도넛 «중앙 수치» 다. 차트 안의 강조이지 고른 항목의 표시가 아니다 —
+          고른 항목은 아래 KPI 버튼의 테두리(네이비 · aria-current)가 진다. */}
       <text x={cx} y={cx + size * 0.08} textAnchor="middle" style={{ fontSize: size * 0.28, fill: active ? 'var(--brand)' : 'var(--text-primary)', fontWeight: 600 }}>{name}</text>
     </svg>
   );
@@ -110,7 +113,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               style={{
                 padding: '6px 4px', borderRadius: 'var(--radius-sm)', textAlign: 'center', cursor: 'pointer',
                 background: isAct ? 'var(--bg-hover)' : 'var(--bg-surface)',
-                border: `1px solid ${isAct ? 'var(--brand)' : 'var(--border)'}`,
+                border: `1px solid ${isAct ? 'var(--brand-navy)' : 'var(--border)'}`,
                 transition: 'all 0.15s',
               }}>
               <div style={{ fontSize: 16, fontWeight: 800, color: k.c, fontVariantNumeric: 'tabular-nums', lineHeight: 1.2 }}>

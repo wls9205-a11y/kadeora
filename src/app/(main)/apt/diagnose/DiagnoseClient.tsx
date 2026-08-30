@@ -53,7 +53,7 @@ export default function DiagnoseClient() {
     :total>=25?{t:'추첨제 + 특별공급',d:'추첨제와 특별공급에 집중하세요.',i:['85㎡ 초과 추첨제 40% 활용','생애최초 특별공급 (소득 기준)','신혼부부 특별공급 (혼인 7년 이내)']}
     :{t:'특별공급 집중',d:'특별공급 자격을 우선 확인하세요.',i:['신혼부부/생애최초/다자녀 특별공급','추첨제 85㎡ 초과 물량','무주택기간·통장 기간 꾸준히 쌓기']};
 
-  const chip=(active:boolean)=>({padding:'9px 0',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',fontWeight:600 as const,fontSize: 13,background:active?'var(--brand)':'var(--bg-hover)',color:active?'var(--text-inverse)':'var(--text-secondary)',flex:1,textAlign:'center' as const});
+  const chip=(active:boolean)=>({padding:'9px 0',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',fontWeight:600 as const,fontSize: 13,background:active?'var(--brand-navy)':'var(--bg-hover)',color:active?'var(--text-inverse)':'var(--text-secondary)',flex:1,textAlign:'center' as const});
   const steps=['기본 정보','무주택기간','부양가족','통장 기간'];
   const ctr=(n:number,set:(v:number)=>void,min:number,max:number,label:string,sub?:string)=>(
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
@@ -73,7 +73,7 @@ export default function DiagnoseClient() {
       {!showResult&&(
         <>
           <div style={{display:'flex',gap:4,marginBottom:20}}>
-            {steps.map((s,i)=><button key={i} onClick={()=>setStep(i)} style={{flex:1,padding:'8px 0',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',background:step===i?'var(--brand)':'var(--bg-hover)',color:step===i?'var(--text-inverse)':'var(--text-tertiary)',fontSize: 11,fontWeight:500}}><span style={{display:'block',fontSize: 14,marginBottom:1}}>{i+1}</span>{s}</button>)}
+            {steps.map((s,i)=><button key={i} onClick={()=>setStep(i)} style={{flex:1,padding:'8px 0',borderRadius: 'var(--radius-md)',border:'none',cursor:'pointer',background:step===i?'var(--brand-navy)':'var(--bg-hover)',color:step===i?'var(--text-inverse)':'var(--text-tertiary)',fontSize: 11,fontWeight:500}}><span style={{display:'block',fontSize: 14,marginBottom:1}}>{i+1}</span>{s}</button>)}
           </div>
 
           {step===0&&<div style={card}>

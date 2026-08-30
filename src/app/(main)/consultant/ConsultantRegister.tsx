@@ -102,6 +102,8 @@ export default function ConsultantRegister() {
       <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-2xl)', justifyContent: 'center' }}>
         {['등록', '요금제', '대시보드'].map((s, i) => {
           const steps = ['register', 'pricing', 'dashboard'];
+          // kd-brand-exempt: `>= i` 다 — 「지금 고른 것」이 아니라 «여기까지 왔다» 는 진행 표시다.
+          //   AptScheduleTimeline·attendance 와 같은 계열(완료-현재-예정)이다.
           const active = steps.indexOf(step) >= i;
           return (
             <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
@@ -153,8 +155,8 @@ export default function ConsultantRegister() {
               {REGIONS.map(r => (
                 <button key={r} onClick={() => toggleRegion(r)} style={{
                   padding: '6px 12px', borderRadius: 'var(--radius-lg)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
-                  border: `1px solid ${regions.includes(r) ? 'var(--brand)' : 'var(--border)'}`,
-                  background: regions.includes(r) ? 'var(--brand)' : 'transparent',
+                  border: `1px solid ${regions.includes(r) ? 'var(--brand-navy)' : 'var(--border)'}`,
+                  background: regions.includes(r) ? 'var(--brand-navy)' : 'transparent',
                   color: regions.includes(r) ? 'var(--text-inverse)' : 'var(--text-tertiary)',
                 }}>{r}</button>
               ))}
