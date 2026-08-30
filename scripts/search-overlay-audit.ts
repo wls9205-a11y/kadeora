@@ -11,7 +11,10 @@
  *   ② 포커스가 즉시 입력창에 있다
  *   ③ 패널 top ≥ 입력 bottom  — 패널이 입력 «아래» 에 붙는다
  *   ④ 패널 × 입력 겹침 0
- *   ⑤ 입력 top ≥ 헤더 bottom  — --kd-overlay-top 이 헤더 높이와 어긋나지 않았다
+ *   ⑤ 입력 top ≥ «뷰포트 고정» 상단 크롬의 bottom — --kd-overlay-top 이 그 띠와 어긋나지 않았다
+ *      ⚠️ 첫판에 이 계약을 「헤더 bottom」으로 썼다가 자를 고쳤다. 헤더는 sticky 라
+ *         스크롤에 따라 top 이 52↔0 로 «움직인다» — 스크롤 900 에서만 참인 계약이었다.
+ *         고정된 것(노란 띠 fixed 0..52)만이 스크롤과 무관한 기준이다.
  *   ⑥ 가로 넘침 0
  *
  * 사용: npx tsx scripts/search-overlay-audit.ts https://kadeora.app [경로]
@@ -129,6 +132,17 @@ function expect(where: string, cond: boolean, msg: string) {
           focused: ae ? `${ae.tagName.toLowerCase()}${ae.getAttribute('aria-label') ? `[${ae.getAttribute('aria-label')}]` : ''}` : '(none)',
           panel: R(panel), panelLabel: chipsHead?.innerText.trim() ?? null, overlap,
           header: R(header),
+          // «뷰포트에 고정» 되어 상단(y=0)에 걸려 있는 것들의 최대 bottom.
+          // 스크롤과 무관한 유일한 기준선이다 — sticky 헤더는 여기 안 넣는다.
+          // ⚠️ 오버레이 «자신» 을 빼지 않으면 자기 bottom(900)이 기준선이 되어 항상 실패한다.
+          //    첫판에 그렇게 재서 18건이 빨간불이었다 — 자가 자기를 재고 있었다.
+          fixedTopBottom: Array.from(document.body.querySelectorAll('*')).reduce((mx, el) => {
+            if (dlg && (el === dlg || dlg.contains(el))) return mx;
+            if (getComputedStyle(el).position !== 'fixed') return mx;
+            const r = el.getBoundingClientRect();
+            if (r.height === 0 || r.top > 0 || r.bottom <= 0) return mx;
+            return Math.max(mx, Math.round(r.bottom));
+          }, 0),
           overlayTopVar: getComputedStyle(document.documentElement).getPropertyValue('--kd-overlay-top').trim(),
           causes: chain,
           overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -139,17 +153,89 @@ function expect(where: string, cond: boolean, msg: string) {
       expect(where, m.focusIsInput, `포커스가 입력창이 아니다 — ${m.focused}`);
       expect(where, !!m.input && !!m.panel && m.panel.y >= m.input.b, `패널이 입력 아래가 아니다 — 입력 bottom ${m.input?.b} · 패널 top ${m.panel?.y}`);
       expect(where, !m.overlap, `패널이 입력을 덮는다 — 겹침 ${m.overlap ? `${m.overlap.w}×${m.overlap.h} @(${m.overlap.x},${m.overlap.y})` : ''}`);
-      expect(where, !!m.input && !!m.header && m.input.y >= m.header.b, `입력창이 헤더를 파고든다 — 헤더 bottom ${m.header?.b} · 입력 top ${m.input?.y} (--kd-overlay-top ${m.overlayTopVar})`);
+      expect(where, !!m.input && m.input.y >= m.fixedTopBottom, `입력창이 상단 고정 띠 밑으로 들어간다 — 고정 크롬 bottom ${m.fixedTopBottom} · 입력 top ${m.input?.y} (--kd-overlay-top ${m.overlayTopVar})`);
       expect(where, m.overflow === 0, `가로 넘침 ${m.overflow}px`);
 
       grid[String(w)][mode || 'default'] = m.inputVisible && m.focusIsInput && !m.overlap ? '✅' : '❌';
       detail.push(
         `${where.padEnd(18)} 트리거 ${clicked.w}×${clicked.h} @${clicked.y} | dialog 부모 <${m.dlgParent}> ${m.dialog ? `${m.dialog.w}×${m.dialog.h}` : '-'}` +
         ` | 입력 (${m.input?.x},${m.input?.y}) ${m.input?.w}×${m.input?.h} ${m.inputVisible ? '보임' : '안보임'}` +
-        ` | 패널 top ${m.panel?.y} «${m.panelLabel ?? '-'}» | 헤더 h ${m.header?.h} | 기준상자 ${m.causes.length ? m.causes.join(',') : '뷰포트'}`,
+        ` | 패널 top ${m.panel?.y} «${m.panelLabel ?? '-'}» | 헤더 ${m.header?.y}..${m.header?.b} · 고정띠 bottom ${m.fixedTopBottom} | 기준상자 ${m.causes.length ? m.causes.join(',') : '뷰포트'}`,
       );
 
       if (!mode) await page.screenshot({ path: `.audit/search-overlay-${w}.png` });
+
+      /* 스크롤 0 재측 — 헤더는 sticky 라 스크롤에 따라 «자리가 바뀐다»(52..97 ↔ 0..45).
+       * 오버레이가 그 움직임을 따라가면 안 된다. 두 자리에서 «같은 값» 이 나와야 한다.
+       * ⚠️ 한 스크롤 위치만 재면 이 성질을 못 본다 — D 층에서 상세를 한 경로만 재다
+       *    21건을 놓친 것과 같은 형태다. */
+      if (!mode) {
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(250);
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.waitForTimeout(400);
+        const top0 = await page.evaluate(() => {
+          const btn = [...document.querySelectorAll('header [aria-label="검색 열기"]')].find((el) => {
+            const r = (el as HTMLElement).getBoundingClientRect();
+            return r.width > 0 && r.height > 0 && getComputedStyle(el).display !== 'none';
+          }) as HTMLElement | undefined;
+          if (!btn) return null;
+          btn.click();
+          return true;
+        });
+        if (top0) {
+          await page.waitForTimeout(450);
+          const t = await page.evaluate(() => {
+            const input = document.querySelector('[role="dialog"] input[aria-label="검색어 입력"]') as HTMLElement | null;
+            if (!input) return null;
+            const r = input.getBoundingClientRect();
+            const cx = Math.round(r.x + r.width / 2), cy = Math.round(r.y + r.height / 2);
+            const top = document.elementFromPoint(cx, cy);
+            const header = document.querySelector('header')!.getBoundingClientRect();
+            return {
+              y: Math.round(r.top), b: Math.round(r.bottom),
+              onTop: !!top && (top === input || input.contains(top)),
+              header: [Math.round(header.top), Math.round(header.bottom)],
+            };
+          });
+          expect(`${w}px/스크롤0`, !!t && t.onTop, '스크롤 0 에서 입력창이 최상단이 아니다');
+          expect(`${w}px/스크롤0`, !!t && t.y === m.input?.y,
+            `스크롤에 따라 오버레이가 움직인다 — 스크롤900 y ${m.input?.y} · 스크롤0 y ${t?.y}`);
+          detail.push(`${(w + 'px/스크롤0').padEnd(18)} 입력 y ${t?.y}..${t?.b} (스크롤900 과 ${t?.y === m.input?.y ? '같음' : '다름'}) · 헤더 ${t?.header.join('..')}`);
+        }
+      }
+
+      /* 히어로 경로 — 「홈 히어로 큰 검색창과 헤더 검색은 같은 계층」을 «좌표로» 증명한다.
+       * 로직이 갈리면 여기서 다른 rect 가 나온다. 같은 컴포넌트를 쓰는지 «주장» 하지 않고 잰다. */
+      if (!mode) {
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(250);
+        const hero = await page.evaluate(() => {
+          const el = document.querySelector('.kd-hero-search') as HTMLElement | null;
+          if (!el) return null;
+          el.click();
+          return true;
+        });
+        if (hero) {
+          await page.waitForTimeout(450);
+          const h = await page.evaluate(() => {
+            const input = document.querySelector('[role="dialog"] input[aria-label="검색어 입력"]') as HTMLElement | null;
+            if (!input) return null;
+            const r = input.getBoundingClientRect();
+            return {
+              y: Math.round(r.top), b: Math.round(r.bottom), w: Math.round(r.width),
+              parent: document.querySelector('[role="dialog"]')?.parentElement?.tagName.toLowerCase() ?? '-',
+              focused: document.activeElement === input,
+            };
+          });
+          expect(`${w}px/히어로`, !!h && h.y === m.input?.y && h.w === m.input?.w,
+            `히어로 검색이 헤더 검색과 다른 자리에 뜬다 — 헤더 (y ${m.input?.y}, w ${m.input?.w}) · 히어로 (y ${h?.y}, w ${h?.w})`);
+          expect(`${w}px/히어로`, !!h && h.focused, '히어로 검색 — 입력창 포커스 아님');
+          detail.push(`${(w + 'px/히어로').padEnd(18)} 입력 y ${h?.y}..${h?.b} w ${h?.w} · dialog 부모 <${h?.parent}> · 포커스 ${h?.focused ? '✅' : '❌'}`);
+        } else {
+          detail.push(`${(w + 'px/히어로').padEnd(18)} (.kd-hero-search 없음 — 홈이 아닌 경로)`);
+        }
+      }
       await ctx.close();
     }
   }
