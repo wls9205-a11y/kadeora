@@ -195,7 +195,15 @@ export function Navigation() {
            ⛔ 여기에 숫자를 다시 박지 말 것 — 띠 유무가 라우트마다 다르다. */
         position: 'sticky', top: 'var(--kd-header-top)', zIndex: 100,
         background: 'rgba(255,255,255,0.92)',
-        backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+        /* ⛔ backdrop-filter 를 뺐다 (DS_RULES §1-6 · 2026-08-30).
+           이 헤더가 «결함 1호가 실제로 터졌던 현장» 이다 — blur 는 자손 중 position:fixed 의
+           기준 상자를 만들고, 그래서 검색 오버레이가 6폭 전부에서 화면 밖에 있었다.
+           지금은 오버레이가 이 밖으로 나가 있어 기준상자가 «뷰포트» 로 측정되지만
+           (search-overlay-audit 144검사 0실패), blur 를 두면 «다음에 여기 fixed 를 넣는 사람» 이
+           같은 함정을 다시 밟는다. 재발 경로를 남기지 않는다.
+           ⚠️ A/B 실측(390×844 · /blog · 스크롤 900): 채널 평균차 0.59 · >8 차이 픽셀 0.9%.
+              배경이 이미 92% 불투명이라 blur 가 만질 수 있는 것이 8% 뿐이었다 — 실질 무변화다.
+              반투명(0.92)은 «그대로 둔다». 뺀 것은 blur 뿐이다. */
         borderBottom: '1px solid var(--border)',
       }}>
         <div style={{
@@ -481,7 +489,12 @@ export function Navigation() {
       <nav style={{
         position:'fixed', bottom:0, left:0, right:0, zIndex: 100,
         background: 'rgba(255,255,255,0.95)',
-        backdropFilter:'blur(16px)', WebkitBackdropFilter:'blur(16px)',
+        /* ⛔ 위 헤더와 같은 이유로 blur 를 뺐다(§1-6).
+           ⚠️ fixed 자손 실측 «0» — FAB(bottom:calc(68px+…))와 더보기 시트(inset:0)는
+              </nav> «뒤» 에 있는 형제다. 자손이 아니라 지금 갇힌 것은 없다.
+              그래도 뺀다 — 이 바는 fixed 이고, 여기 자손을 넣는 순간 갇힌다.
+           ⚠️ A/B 실측: 채널 평균차 1.59 · «최대 12/255» — 육안 식별 불가다.
+              95% 불투명이라 blur 의 몫이 5% 뿐이었다. 반투명은 그대로 둔다. */
         borderTop:'1px solid var(--nav-border)',
         display:'flex', alignItems:'flex-end', justifyContent:'space-around',
         paddingBottom:'max(6px, env(safe-area-inset-bottom))',
