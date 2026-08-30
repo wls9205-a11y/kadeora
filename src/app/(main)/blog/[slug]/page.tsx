@@ -994,7 +994,9 @@ export default async function BlogDetailPage({ params }: Props) {
             <span style={{ fontSize: 11, fontWeight: 500, padding: '4px 12px', borderRadius: 'var(--radius-xl)', background: catStyle.bg, color: catStyle.color, letterSpacing: '0.3px' }}>
               {({ stock: '주식 분석', apt: '청약 분석', unsold: '미분양 분석', finance: '재테크', general: '생활' } as Record<string, string>)[post.category] || post.category}
             </span>
-            {(post.view_count ?? 0) >= 100 && <span style={{ fontSize: 10, fontWeight: 500, padding: '3px 8px', borderRadius: 'var(--radius-xl)', background: 'var(--error-bg)', color: 'var(--error)' }}>인기</span>}
+            {/* ⛔ V4-D — 「HOT」 배지를 걷어냈다. 근거가 blog_posts.view_count 인데 그 값이 «합성» 이다
+                (blog/page.tsx 실측: 합계 약 49만 vs page_views 30일 실조회 2,617건, 100배 괴리).
+                V4-3 이 «목록» 에서 걷어낸 것과 같은 컬럼이고, HOT 은 그 값이 라벨만 갈아입은 것이다. */}
             {post.rewritten_at && <span style={{ fontSize: 10, fontWeight: 500, padding: '3px 8px', borderRadius: 'var(--radius-xl)', background: 'var(--success-bg)', color: 'var(--success)' }}>UP</span>}
           </div>
           {/* 제목 */}
@@ -1007,8 +1009,8 @@ export default async function BlogDetailPage({ params }: Props) {
             </time>
             <span aria-hidden>·</span>
             <span>{readingTimeMin}분 읽기</span>
-            <span aria-hidden>·</span>
-            <span>👀 {(post.view_count ?? 0).toLocaleString()}</span>
+            {/* ⛔ V4-D — 「👀 조회수」를 걷어냈다(위와 같은 합성 컬럼).
+                컬럼과 increment_blog_view RPC 는 그대로 둔다 — 계측이 붙어 값이 실측이 되면 되살린다. */}
           </div>
         </div>
 
@@ -1535,7 +1537,7 @@ export default async function BlogDetailPage({ params }: Props) {
               <Link key={r.slug} href={`/blog/${r.slug}`} className="kd-feed-card" style={{ display: 'block', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', textDecoration: 'none', transition: 'border-color var(--transition-fast)' }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden', lineHeight: 1.4 }}>{r.title}</span>
                 <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 6, fontSize: 10, color: 'var(--text-tertiary)' }}>
-                  {r.view_count > 0 && <span>👀 {r.view_count.toLocaleString()}</span>}
+                  {/* ⛔ V4-D — 관련글 카드의 조회수도 같은 합성 컬럼이다. */}
                   <span>{r.category === 'stock' ? '📈' : r.category === 'apt' ? '🏠' : '📝'}</span>
                 </div>
               </Link>
