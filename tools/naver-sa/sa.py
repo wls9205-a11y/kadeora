@@ -23,7 +23,7 @@ DB가 준 slug 를 그대로 URL 로 쓴다. 사람이 옮겨 적는 단계가 �
 zone: 수도권 · 부울경 · 대경 · 충청 · 호남강원제주
 """
 
-import argparse, base64, csv, hashlib, hmac, io, json, os, re, sys, time
+import argparse, base64, csv, datetime, hashlib, hmac, io, json, os, re, sys, time
 
 # ⚠️ 윈도우 콘솔 기본 코드페이지가 cp949 라 «—» · «⚠️» 같은 문자에서 UnicodeEncodeError 로
 #    죽는다. 출력만의 문제인데 실행 전체가 멈추므로 여기서 한 번 고정한다.
@@ -66,6 +66,15 @@ EXISTING_GROUPS = {
     "C_정비사업":   "grp-a001-01-000000072353971",
     "D_기축":       "grp-a001-01-000000072353993",
     "E_대표":       "grp-a001-01-000000072363917",
+    # ⚠️ PL-5 실측: 아래 6그룹이 «같은 캠페인» 에 이미 있다. 문서에는 없었다.
+    #    빠뜨리면 확대 때 전량 중복 거부된다(README «하지 말 것» 9번).
+    #    실제로 B_입주예정 ↔ 부울경_D_입주예정 사이에 중복 40건이 나 있었다.
+    "부울경_A_분양중":     "grp-a001-01-000000072376797",
+    "부울경_B_분양예정":   "grp-a001-01-000000072376804",
+    "부울경_C_미분양":     "grp-a001-01-000000072376809",
+    "부울경_D_입주예정":   "grp-a001-01-000000072376814",
+    "부울경_E_정비사업_1": "grp-a001-01-000000072376823",
+    "부울경_E_정비사업_2": "grp-a001-01-000000072376826",
 }
 
 ZONE = {
@@ -103,9 +112,17 @@ SELECT slug, name, region, sigungu, total_units, content_score,
     WHEN lifecycle_stage IN ('subscription_open','contract_signing','award_announced') THEN 'A_분양중'
     WHEN lifecycle_stage = 'pre_announcement'                                          THEN 'B_분양예정'
     WHEN lifecycle_stage = 'unsold_active'                                             THEN 'C_미분양'
-    WHEN lifecycle_stage IN ('move_in_ready','move_in_started')                        THEN 'D_입주예정'
+    -- ⚠️ PL-A 판정 ③ — 'construction' 은 «입주예정» 이다. 정비사업이 아니다.
+    --    공사중 단지를 정비사업으로 보내던 규칙이 그룹↔단계 역전 1,392건을 만들었다
+    --    (PL-5 축1). 운영자가 손으로 B_입주예정 에 넣어 둔 쪽이 «맞았고» 규칙이 틀렸다.
+    -- ⚠️ 단, «착공한 정비사업» 은 예외다. 단계만 보고 전부 입주예정으로 보내면
+    --    「양정3 재개발」·「엄궁1 재개발」 같은 26현장 218키워드가 반대로 틀린다.
+    --    판별자는 lifecycle_stage 가 아니라 site_type 이다 (실측: construction 757 중
+    --    subscription 723 · redevelopment 34).
+    WHEN lifecycle_stage = 'construction' AND site_type = 'redevelopment'              THEN 'E_정비사업'
+    WHEN lifecycle_stage IN ('move_in_ready','move_in_started','construction')         THEN 'D_입주예정'
     WHEN lifecycle_stage IN ('union_established','site_planning','plan_approved',
-                             'mgmt_approved','constructor_selected','construction')    THEN 'E_정비사업'
+                             'mgmt_approved','constructor_selected')                   THEN 'E_정비사업'
     ELSE 'F_기축'
   END AS cat,
   CASE WHEN jsonb_typeof(name_variants) = 'array'
@@ -251,6 +268,36 @@ def fetch_sites():
 
 SLUG_KEYWORD = re.compile(r"[가-힣]-[가-힣]")
 
+# 브랜드·등급 접미어. «단독» 으로는 어느 현장도 가리키지 못한다 (PL-A 판정 ①).
+# PL-5 실측: 「시그니처」가 39현장 · 「아이파크」 53 · 「푸르지오」 128 · 「힐스테이트」 143 에
+# 걸쳐 있었고, 부울경_D_입주예정 노출의 97%(116,000)를 CTR 0.006% 로 이 부류가 먹었다.
+# ⚠️ 이 집합은 «보조» 다. 진짜 문지기는 아래 alias_is_fragment() 의 구조 규칙이다 —
+#    집합에 없는 새 브랜드가 나와도 그쪽이 잡는다.
+SUFFIX_ALONE = frozenset("""
+프리미엄 리미티드 시그니처 플래티넘 포레스트 그랑블루 프리미어 아이파크 엘리시움
+노르웨이숲 양우내안애 VIEW 뷰 아시아드 리버파크 리치먼드 푸르지오 한라비발디 메가시티
+시에르네 아이유쉘 센트레빌 센트럴파크 한화포레나 오션포레 우미린 로제비앙 디에트르
+그랑루체 에듀리버 센트럴스카이 한양립스 월드메르디앙 비스타동원 에듀포레 대광로제비앙
+힐스테이트 롯데캐슬 에일린의 자이 아이원 더샵 e편한세상 이편한세상 위브 스위첸 하늘채 린 린스트라우스
+""".split())
+
+
+def alias_is_fragment(alias, main=None):
+    """검색어가 «브랜드 접미어 단독» 이면 True — 채택하지 않는다 (PL-A 판정 ①).
+
+    판정: 브랜드 접미어 단독 금지 · 「현장명+접미어」 결합만 허용.
+
+    ⚠️ 판정은 «목록» 으로만 한다. 한때 「대표명의 토큰이면 조각」이라는 구조 규칙을 뒀는데
+       그것이 「창원자이」(『창원자이 더 스카이』의 첫 토큰) 와 「경남아너스빌」 까지 죽였다 —
+       둘 다 지역이 붙어 현장을 좁히는 «살려야 할» 결합형이다.
+       test_name_pool.py ① 이 그 과잉 차단을 잡아 이 형태로 되돌렸다.
+
+    ⚠️ 공백이 있으면 무조건 통과다. 「서면 롯데캐슬」 은 결합형이라 살린다.
+    """
+    if " " in (alias or ""):
+        return False
+    return alias in SUFFIX_ALONE
+
 
 def reject_slug_keywords(keywords):
     """slug 형태 키워드를 «생성 단계에서» 걸러 낸다. 뚫려도 나갈 수 없게 하는 마지막 문이다.
@@ -316,13 +363,17 @@ def name_pool(site, max_alias=4):
       - 짧은 것 우선               '서면 롯데캐슬'이 '부산진구 양정3 재개발'보다 검색량이 많다
     """
     main = kw_name(site["name"])
-    out = [main] if len(main) >= 4 else []
+    # ⚠️ 이름 «자체» 가 브랜드 접미어뿐인 현장이 실제로 있다(『월드메르디앙』·『대광로제비앙』).
+    #    그 이름으로 만든 키워드는 14~22개 현장에 걸쳐 어느 곳도 가리키지 못한다.
+    out = [main] if len(main) >= 4 and not alias_is_fragment(main) else []
     seen = {main.replace(" ", "")}
     cands = []
     for v in (site.get("variants") or []):
         n = kw_name(v)
         k = n.replace(" ", "")
         if not (4 <= len(n) <= 30) or k in seen:
+            continue
+        if alias_is_fragment(n, main):      # PL-A 판정 ① — 접미어 단독 금지
             continue
         seen.add(k); cands.append(n)
     cands.sort(key=lambda x: (len(x), x))
@@ -660,9 +711,56 @@ def cmd_verify(args):
     print("전수 통과." if bad == 0 and nourl == 0 else "!! 위 키워드는 /apt/search 로 튕깁니다.")
 
 
+def rollback_gate(gidv):
+    """이 그룹을 지워도 «되는가». 안 되면 이유 문자열을 낸다 (None 이면 통과).
+
+    ⛔ PL-A. `sa_state.json` 은 «등록 직후 되돌리기» 용으로 만들었는데, 그 파일이 지금
+       가동 중인 부울경 6그룹(키워드 2,318 · 캠페인 노출 최대치)을 가리키고 있다.
+       `rollback --live` 한 줄이 라이브 삭제 버튼이 돼 있었다 — 그래서 문을 단다.
+
+    통과 조건은 «켜진 적 없는 그룹» 이다:
+      ① userLock=True   — apply 가 만든 직후 상태 그대로 (한 번도 켜지지 않았다)
+      ② 14일 노출 0     — 실제로 나간 적이 없다
+    ⚠️ 둘 다여야 한다. 지금 꺼져 있다는 것은 「켜진 적 없다」가 아니다.
+    """
+    try:
+        g = call("GET", "/ncc/adgroups/" + gidv)
+    except Exception as e:
+        return "그룹 조회 실패 — 확인 전에는 지우지 않는다 (%s)" % str(e)[:80]
+    if g.get("userLock") is not True:
+        return "userLock=False — 켜져 있거나 켜진 적 있는 그룹이다"
+    try:
+        kws = call("GET", "/ncc/keywords", params={"nccAdgroupId": gidv}) or []
+    except Exception as e:
+        return "키워드 조회 실패 (%s)" % str(e)[:80]
+    ids = [k["nccKeywordId"] for k in kws]
+    until = datetime.date.today() - datetime.timedelta(days=1)
+    since = until - datetime.timedelta(days=13)
+    imp = 0
+    for i in range(0, len(ids), 100):
+        try:
+            r = call("GET", "/stats", params={
+                "ids": ids[i:i+100], "fields": json.dumps(["impCnt"]),
+                "timeRange": json.dumps({"since": str(since), "until": str(until)})})
+        except Exception as e:
+            return "실적 조회 실패 — 확인 전에는 지우지 않는다 (%s)" % str(e)[:80]
+        for row in (r.get("data") if isinstance(r, dict) else r) or []:
+            imp += int(row.get("impCnt") or 0)
+        time.sleep(0.2)
+    if imp > 0:
+        return "14일 노출 %d — 실제로 나가고 있는 그룹이다 (키워드 %d)" % (imp, len(ids))
+    return None
+
+
 def cmd_rollback(args):
     st = json.load(open(STATE, encoding="utf-8")) if os.path.exists(STATE) else {"adgroups": {}}
+    blocked = 0
     for name, gidv in list(st["adgroups"].items()):
+        why = rollback_gate(gidv)
+        if why:
+            blocked += 1
+            print("⛔ 거부  %-22s %s — %s" % (name, gidv, why))
+            continue
         if not args.live: print("삭제예정 %s %s" % (name, gidv)); continue
         try:
             call("DELETE", "/ncc/adgroups/" + gidv)
@@ -670,6 +768,11 @@ def cmd_rollback(args):
             json.dump(st, open(STATE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
             print("삭제완료 %s" % name)
         except Exception as e: print("삭제실패 %s %s" % (name, str(e)[:100]))
+    if blocked:
+        print("")
+        print("⛔ %d개 그룹이 게이트에 막혔다. 이 명령으로는 지울 수 없다." % blocked)
+        print("   정말 지워야 한다면 사람이 광고주센터에서 지우고 sa_state.json 에서 줄을 뺀다 —")
+        print("   그 판단을 스크립트가 대신하지 않는다.")
 
 
 # ─────────────────────────────────────────────── off (R3-1)
