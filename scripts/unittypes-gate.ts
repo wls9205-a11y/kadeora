@@ -69,8 +69,8 @@ async function main() {
     await new Promise((x) => setTimeout(x, 350));
   }
 
-  const areas = exclusiveAreas(ar);
-  console.log(`── 수집 ── ${sgg}+${bjd} · 호 ${ho.length}/${hoTotal} · 면적행 ${ar.length} · 전유(주건축물·주거) ${areas.length} · 호출 ${calls}`);
+  const areasAll = exclusiveAreas(ar);
+  console.log(`── 수집 ── ${sgg}+${bjd} · 호 ${ho.length}/${hoTotal} · 면적행 ${ar.length} · 전유(주건축물·주거) ${areasAll.length} · 호출 ${calls}`);
   // ⚠️ 「수집 < 전체」면 잘린 것이다. 0 건과 구분되어야 한다.
   if (ho.length < hoTotal) console.log(`   ⚠️ 호별이 잘렸다 — ${ho.length}/${hoTotal}. --pages 를 늘려야 전량이다.`);
 
@@ -81,10 +81,17 @@ async function main() {
     console.log('');
     console.log(`■ ${t.building} — 총 ${t.totalUnits}세대 · ${t.dongs}개동 · 타입 ${t.types.length}종${t.mixedNotation ? '  ⚠️ 표기 혼재(평형계열+면적계열)' : ''}`);
     console.log(`  제외 — 근생 ${t.excluded.retail} · 호표기 ${t.excluded.malformed} · 빈값 ${t.excluded.empty}`);
+    // ⛔ 면적 후보를 «이 건물로» 좁힌다. 법정동 전체를 던지면 전부 미확정이 된다.
+    const areas = exclusiveAreas(ar, t.platPlcs);
+    console.log(`  면적 후보 — 이 건물 ${areas.length} / 법정동 전체 ${areasAll.length}`);
     for (const x of t.types) {
-      const a = matchArea(x, areas);
+      const m = matchArea(x, areas);
       const pct = ((x.units / t.totalUnits) * 100).toFixed(0);
-      console.log(`    ${x.label.padEnd(10)} ${String(x.units).padStart(4)}세대 (${pct.padStart(2)}%)   전유 ${a !== null ? `${a.toFixed(2)}㎡` : '— 미매칭'}`);
+      // ⛔ 단정한 것과 «관측만» 한 것을 화면에서도 가른다.
+      const area = m.exact !== null
+        ? `${m.exact.toFixed(2)}㎡`
+        : m.series.length ? `${m.series.map((a) => a.toFixed(2)).join('/')}㎡ 중 미확정` : '— 관측 없음';
+      console.log(`    ${x.label.padEnd(10)} ${String(x.units).padStart(4)}세대 (${pct.padStart(2)}%)   전유 ${area}`);
     }
   }
   console.log('');

@@ -112,19 +112,55 @@ describe('전유면적 — 세대수를 «세지 않는다»', () => {
     { exposPubuseGbCdNm: '전유', mainAtchGbCdNm: '주건축물', purpsCdNm: '기타제2종근린생활시설', area: '40.00' },
   ];
   it('전유 + 주건축물 + 주거용도만 남긴다', () => {
-    expect(exclusiveAreas(areas)).toEqual([59.84, 84.09]);
+    // ⚠️ 반환은 «후보» 다 — 면적 + (상대 소스가 주면) 접미. 실측상 접미는 오지 않는다.
+    expect(exclusiveAreas(areas).map((c) => c.area)).toEqual([59.84, 84.09]);
+    expect(exclusiveAreas(areas).every((c) => c.suffix === null)).toBe(true);
   });
   it('⚠️ purpsCdNm 은 실측에서 「아파트」다 — 「공동주택」을 지어내지 않는다', () => {
     expect(exclusiveAreas([{ exposPubuseGbCdNm: '전유', mainAtchGbCdNm: '주건축물', purpsCdNm: '아파트', area: 1 }])).toHaveLength(1);
   });
 
-  it('평형 라벨에 실면적을 붙인다 — 84A → 84.09㎡', () => {
-    expect(matchArea({ label: '84A', units: 64, areaHint: 84, suffix: 'A' }, [59.84, 84.09])).toBe(84.09);
+  const c = (area: number, suffix: string | null = null) => ({ area, suffix });
+
+  it('계열 후보가 «유일하면» 단정한다 — 84A → 84.09㎡', () => {
+    const m = matchArea({ label: '84A', units: 64, areaHint: 84, suffix: 'A' }, [c(59.84), c(84.09)]);
+    expect(m.exact).toBe(84.09);
+    expect(m.note).toContain('유일');
   });
-  it('⛔ 못 맞추면 «지어내지 않는다» — null 이다', () => {
-    expect(matchArea({ label: '59', units: 1, areaHint: 59, suffix: null }, [84.09])).toBeNull();
+  it('⛔ 못 맞추면 «지어내지 않는다»', () => {
+    const m = matchArea({ label: '59', units: 1, areaHint: 59, suffix: null }, [c(84.09)]);
+    expect(m.exact).toBeNull();
+    expect(m.series).toEqual([]);
   });
   it('면적계열은 이미 면적이라 그대로 쓴다', () => {
-    expect(matchArea({ label: '21.62C', units: 1, areaHint: 21.62, suffix: 'C' }, [])).toBe(21.62);
+    expect(matchArea({ label: '21.62C', units: 1, areaHint: 21.62, suffix: 'C' }, []).exact).toBe(21.62);
+  });
+
+  it('⭐ C′ ⑩ — 접미 근거가 «없으면» 개별 타입을 단정하지 않는다', () => {
+    // 실측: 70A(47세대)·70B(14세대) 에 둘 다 70.17㎡ 가 붙었다. 다른 평면인데 같은 면적이 됐다.
+    // 전유면적 응답에는 접미가 «없다» → 계열 관측만 남기고 단정하지 않는다.
+    const areas = [c(69.98), c(70.17)];
+    for (const t of [{ label: '70A', units: 47, areaHint: 70, suffix: 'A' },
+                     { label: '70B', units: 14, areaHint: 70, suffix: 'B' }]) {
+      const m = matchArea(t, areas);
+      expect(m.exact).toBeNull();                    // ⛔ 단정하지 않는다
+      expect(m.series).toEqual([69.98, 70.17]);      // 관측은 남긴다
+      expect(m.note).toContain('접미 근거가 없어');
+    }
+  });
+  it('⭐ C′ ⑩ — 상대에 접미가 «있으면» 2키로 단정한다', () => {
+    const areas = [c(69.98, 'A'), c(70.17, 'B')];
+    expect(matchArea({ label: '70A', units: 47, areaHint: 70, suffix: 'A' }, areas).exact).toBe(69.98);
+    expect(matchArea({ label: '70B', units: 14, areaHint: 70, suffix: 'B' }, areas).exact).toBe(70.17);
+  });
+  it('⛔ 「약 70㎡」로 «뭉개지 않는다» — 아는 것을 버리지 않는다', () => {
+    // 계열 후보가 하나면 그건 사실이므로 그대로 단정한다.
+    const m = matchArea({ label: '70A', units: 47, areaHint: 70, suffix: 'A' }, [c(70.17)]);
+    expect(m.exact).toBe(70.17);
+  });
+  it('2키에도 후보가 둘이면 단정하지 않는다', () => {
+    const m = matchArea({ label: '84A', units: 1, areaHint: 84, suffix: 'A' }, [c(83.9, 'A'), c(84.4, 'A')]);
+    expect(m.exact).toBeNull();
+    expect(m.note).toContain('2키에도');
   });
 });
