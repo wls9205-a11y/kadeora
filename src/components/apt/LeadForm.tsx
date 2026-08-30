@@ -23,6 +23,7 @@ import { trackLeadSubmit, trackLeadView } from '@/lib/apt/lead-track';
 /* ⚠️ 값을 여기서 다시 읽지 않는다 — lead-eligibility 의 LEAD_ENDPOINT 한 곳이 원본이다.
    두 벌이면 한쪽만 고쳐져 「폼은 서는데 버튼이 없다」 같은 어긋남이 다시 난다(V4-D P0-A). */
 import { LEAD_ENDPOINT as ENDPOINT } from '@/lib/apt/lead-eligibility';
+import { LEAD_FORM_ID } from '@/lib/apt/detail-anchors';
 const DRAFT_PREFIX = 'kd_lead_draft:';
 const PENDING_PREFIX = 'kd_lead_pending:';
 // 최초 1회 즉시 전송 후, 실패하면 이 간격만큼 쉬고 재시도 (총 3회 재시도)
@@ -32,7 +33,9 @@ const RETRY_DELAYS = [300, 900, 2700];
  * 하단 전체 폼의 앵커 id — 하단 액션바·레일 진입 카드가 이 id 로 스크롤한다.
  * ⚠️ 값을 바꾸지 말 것.
  */
-export const LEAD_FORM_ID = 'lead-form';
+/* ⛔ 여기서 LEAD_FORM_ID 를 export 하지 않는다 — 이 파일은 'use client' 라
+   서버가 그 export 를 읽으면 문자열이 아니라 클라이언트 참조 프록시를 받는다.
+   상수는 lib/apt/detail-anchors.ts 가 든다(2026-08-30 · P0-A). */
 
 /** 희망 타입 기본값. select 는 항상 이 값으로 시작한다 (추가 조작 없이 제출 가능). */
 const TYPE_UNDECIDED = '미정';

@@ -28,7 +28,8 @@ import SiteJumpBar, { SECTION_SCROLL_MARGIN } from '@/components/apt/SiteJumpBar
 import DetailSection from '@/components/apt/detail/DetailSection';
 import AptKeyMetrics from '@/components/apt/detail/AptKeyMetrics';
 import SiteDetailRail from '@/components/apt/SiteDetailRail';
-import LeadForm, { LEAD_FORM_ID } from '@/components/apt/LeadForm';
+import LeadForm from '@/components/apt/LeadForm';
+import { LEAD_FORM_ID } from '@/lib/apt/detail-anchors';
 import RecentObservations from '@/components/apt/RecentObservations';
 import { siteEntity } from '@/lib/seo/entity';
 import FieldNote from '@/components/apt/FieldNote';

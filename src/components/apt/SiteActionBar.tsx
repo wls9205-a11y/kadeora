@@ -30,7 +30,7 @@
 
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { KAKAO_TALK_URL, trackTalkClick, trackTalkView } from '@/lib/talk-banner';
-import { LEAD_FORM_ID } from '@/components/apt/LeadForm';
+import { LEAD_FORM_ID } from '@/lib/apt/detail-anchors';
 import { leadCopy } from '@/lib/apt/lead-copy';
 import { trackLeadClick, trackLeadView } from '@/lib/apt/lead-track';
 

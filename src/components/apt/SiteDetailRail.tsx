@@ -17,7 +17,7 @@
 import Link from 'next/link';
 import { KAKAO_TALK_URL, trackTalkClick } from '@/lib/talk-banner';
 import { useTalkView } from '@/components/banner/useTalkView';
-import { LEAD_FORM_ID } from '@/components/apt/LeadForm';
+import { LEAD_FORM_ID } from '@/lib/apt/detail-anchors';
 import { leadCopy } from '@/lib/apt/lead-copy';
 import { trackLeadClick } from '@/lib/apt/lead-track';
 
