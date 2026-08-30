@@ -63,6 +63,7 @@ export default function AptScheduleTimeline({ specialDate, rank1Date, rank2Date,
                 width: 14, height: 14, borderRadius: '50%',
                 background: dotColor,
                 border: state === 'active' ? '3px solid var(--brand-bg)' : '2px solid var(--bg-surface)',
+                // kd-brand-exempt: 위 dotColor 와 «같은» 진행 단계 체계다(완료-진행-예정).
                 boxShadow: state === 'active' ? '0 0 0 3px var(--brand)' : 'none',
                 zIndex: 1, marginLeft: 4,
               }}

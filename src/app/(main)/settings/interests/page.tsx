@@ -83,7 +83,7 @@ export default function InterestsSettingsPage() {
             <button key={item.key} onClick={() => toggle(item.key)} style={{
               padding: '14px 12px', borderRadius: 'var(--radius-card)', textAlign: 'left',
               background: isSelected ? 'rgba(59,123,246,0.06)' : 'var(--bg-surface)',
-              border: isSelected ? '2px solid var(--brand)' : '1px solid var(--border)',
+              border: isSelected ? '2px solid var(--brand-navy)' : '1px solid var(--border)',
               cursor: 'pointer', transition: 'all 0.15s',
             }}>
               <div style={{ fontSize: 15, marginBottom: 4 }}>{item.label}</div>

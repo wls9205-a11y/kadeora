@@ -107,6 +107,7 @@ export default function ConsultantRegister() {
           const active = steps.indexOf(step) >= i;
           return (
             <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
+              {/* kd-brand-exempt: 위 `>= i` 진행 표시의 원 배경이다 — 선택이 아니다. */}
               <div style={{ width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 600, background: active ? 'var(--brand)' : 'var(--bg-hover)', color: active ? 'var(--text-inverse)' : 'var(--text-tertiary)' }}>{i + 1}</div>
               <span style={{ fontSize: 'var(--fs-xs)', color: active ? 'var(--text-primary)' : 'var(--text-tertiary)', fontWeight: active ? 600 : 400 }}>{s}</span>
               {i < 2 && <span style={{ color: 'var(--text-tertiary)', margin: '0 4px' }}>→</span>}

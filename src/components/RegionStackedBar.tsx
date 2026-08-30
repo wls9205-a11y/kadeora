@@ -139,7 +139,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 padding: '2px 0', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
                 background: isAct ? 'var(--bg-hover)' : 'transparent',
-                border: `1px solid ${isAct ? 'var(--brand)' : 'transparent'}`,
+                border: `1px solid ${isAct ? 'var(--brand-navy)' : 'transparent'}`,
                 transition: 'all 0.15s',
               }}>
               <MiniDonut sub={r.sub} ongoing={r.ongoing} unsold={r.unsold} redev={r.redev} name={r.name} total={r.total} size={36} active={isAct} />
@@ -170,7 +170,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
               <button key={idx} onClick={() => onTabChange?.(item.tab)} style={{
                 textAlign: 'center', padding: '3px 2px', borderRadius: 'var(--radius-sm)',
                 background: activeTab === item.tab ? 'var(--bg-hover)' : 'var(--bg-hover)',
-                border: activeTab === item.tab ? '1px solid var(--brand)' : '1px solid transparent',
+                border: activeTab === item.tab ? '1px solid var(--brand-navy)' : '1px solid transparent',
                 cursor: 'pointer', transition: 'all 0.12s',
               }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: item.c }}>{item.v.toLocaleString()}</div>
