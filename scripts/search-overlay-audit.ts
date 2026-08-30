@@ -29,6 +29,21 @@ const BASE = process.argv[2] ?? 'https://kadeora.app';
 const PATHS = process.argv.length > 3
   ? process.argv.slice(3)
   : ['/', '/apt/%EA%B7%B8%EB%9E%91%EB%9D%BC%ED%81%AC-%EC%97%90%EC%9D%BC%EB%A6%B0%EC%9D%98-%EB%9C%B0'];
+
+/* ⚠️ Git Bash(MSYS)는 `/stock` 같은 «슬래시로 시작하는 인자» 를 Windows 경로로
+      바꿔 버린다 — 실측 2026-08-30: `/stock` → `C:/Program Files/Git/stock` 이 되어
+      첫 실행이 ERR_NAME_NOT_RESOLVED 로 죽었다. 앞에 MSYS_NO_PATHCONV=1 을 붙인다.
+      여기서 «죽기 전에» 알려 준다 — 다음 사람이 자를 의심하기 전에 환경을 보게. */
+for (const p of PATHS) {
+  if (/^[A-Za-z]:[\\/]/.test(p) || p.includes('Program Files')) {
+    console.error(
+      `⛔ 경로 인자가 «오변환» 됐다: ${p}\n` +
+      `   Git Bash 의 MSYS 경로 변환이다. 이렇게 다시 실행할 것:\n` +
+      `   MSYS_NO_PATHCONV=1 npx tsx scripts/search-overlay-audit.ts ${BASE} /경로`,
+    );
+    process.exit(2);
+  }
+}
 const WIDTHS = [390, 480, 700, 768, 1024, 1280];
 const MODES = ['', 'font-small', 'font-large'];
 

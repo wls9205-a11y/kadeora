@@ -26,11 +26,20 @@ const BASE = process.argv[2] ?? 'https://kadeora.app';
 const DETAIL = '/apt/%EA%B7%B8%EB%9E%91%EB%9D%BC%ED%81%AC-%EC%97%90%EC%9D%BC%EB%A6%B0%EC%9D%98-%EB%9C%B0';
 const BLOG = '/blog/%EB%B6%80%EC%82%B0-%EC%95%84%ED%8C%8C%ED%8A%B8-%EC%B2%AD%EC%95%BD';
 
-/** 띠 «유» 3곳 · 띠 «무» 2곳. 조건이 값(--kd-banner-h)에 흡수되는지 양쪽에서 본다. */
+/** 띠 «유» 4곳 · 띠 «무» 1곳. 조건이 값(--kd-banner-h)에 흡수되는지 양쪽에서 본다.
+ *
+ * ⚠️ 이 목록은 «기준선의 일부» 다. 인자로 받지 않는다 —
+ *    받는 순간 「무엇을 쟀는지」가 호출자 재량이 되어 회귀 기준선이 흔들린다.
+ *    (search-overlay-audit 은 특정 화면을 깊게 파는 자라 인자를 받는다. 성격이 다르다.)
+ * ⚠️ 2026-08-30 — /stock 이 «빠져 있었다». V4-2 가 그 화면의 sticky 를 건드렸는데
+ *    이 자에는 대상이 아예 없어서 「108검사 0실패」가 그대로 통과했다.
+ *    자가 안 재는 것은 초록이 아니라 «모르는» 것이다. DS-3 화면을 바꿀 때는
+ *    그 경로가 여기 있는지부터 본다. */
 const ROUTES: Array<{ path: string; banner: boolean }> = [
   { path: '/',      banner: true },
   { path: '/apt',   banner: true },
   { path: '/blog',  banner: true },
+  { path: '/stock', banner: true },
   { path: DETAIL,   banner: false },
 ];
 const WIDTHS = [390, 1280];

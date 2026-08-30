@@ -179,6 +179,28 @@ primitive(`--c-blue-600`)를 컴포넌트가 직접 쓰면 「파랑을 쓴 이�
 | `search-overlay-audit` | 헤더 검색 오버레이 6폭 × 3모드 — 입력창이 «보이는지» 를 좌표로 |
 | `chrome-stack-audit` | 상단 크롬 스택 — 띠·헤더가 «쌓이는지» + 화면의 sticky 를 «찾아서» 살아 있는지 |
 
+**실행 환경 — Git Bash 에서는 `MSYS_NO_PATHCONV=1` 을 붙인다** (2026-08-30 실측)
+MSYS 는 «슬래시로 시작하는 인자» 를 Windows 경로로 바꾼다.
+`... search-overlay-audit.ts https://kadeora.app /stock` 이
+`https://kadeora.appc/Program Files/Git/stock` 으로 나가 `ERR_NAME_NOT_RESOLVED` 로 죽었다.
+```
+MSYS_NO_PATHCONV=1 npx tsx scripts/search-overlay-audit.ts https://kadeora.app /stock
+```
+⚠️ 자가 죽은 것이 아니라 «인자가 도착하지 못한» 것이다. 게이트가 이상하면 환경부터 본다.
+   (`search-overlay-audit` 은 이 오변환을 감지해 죽기 전에 알려 준다.)
+
+**⛔ 대상 «목록» 은 인자로 받지 않는다**
+`chrome-stack-audit` 의 ROUTES 처럼 「무엇을 재는가」가 회귀 기준선인 자는 목록을 코드에 둔다.
+인자로 받으면 무엇을 쟀는지가 호출자 재량이 되어 기준선이 흔들린다.
+(`search-overlay-audit`·`font-large-guard` 는 «특정 화면을 깊게 파는» 자라 인자를 받는다 — 성격이 다르다.)
+
+**화면을 바꿀 때는 «그 경로가 자의 목록에 있는지» 부터 본다** (2026-08-30 · V4-2)
+`/stock` 이 `chrome-stack-audit` 의 ROUTES 에 «없었다». 그 화면의 sticky 를 바꿨는데
+게이트는 「108검사 0실패」로 그대로 통과했다 — 안 재는 것은 초록이 아니라 «모르는» 것이다.
+착수 절차에 두 줄을 넣는다:
+1. 이 화면의 «렌더 분기가 몇 개인가» (환경변수로 갈리는 분기 포함 — /stock 이 그랬다)
+2. 이 경로가 «자의 대상 목록에 있는가»
+
 ### 4-1. 게이트가 실패하면 «단언의 전제» 부터 의심한다
 죽은 규칙이 걸리기를 기대하는 단언은 **버그를 정상으로 고정**시킨다.
 살아 있는 라우트를 「닫혔다」고 부르는 검사는 **매일 거짓말을 한다**.
