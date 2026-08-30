@@ -1360,8 +1360,16 @@
      - 터치 타겟 최소 크기
   ═══════════════════════════════════════════════════════════ */
 
-  /* 전역: body 가로 넘침 방지 */
-  html, body { overflow-x: hidden; max-width: 100vw; }
+  /* 전역: body 가로 넘침 방지.
+     ⛔⛔ U-1b 실측(2026-08-30) — 여기가 `hidden` 이면 «페이지의 모든 position:sticky 가 죽는다».
+        html/body 에 overflow-x:hidden 을 걸면 스크롤 상자가 문서 루트에서 body 로 옮겨 가고,
+        그러면 sticky 요소가 붙을 «기준 스크롤포트» 가 어긋난다.
+        실측 사망자: 상세 점프바(top:45) · 상세 우측 레일(--rail-top:103) · 셀렉 하단 적용 바.
+        스크롤 2,400px 지점에서 점프바 top 이 -1,920 이었다 — 화면 밖으로 그냥 흘러갔다.
+     → `clip` 은 «똑같이 잘라내면서» 스크롤 상자를 만들지 않는다. 방어는 유지되고 sticky 는 산다.
+     ⚠️ Safari 16 미만은 clip 을 몰라 visible 로 떨어진다(자르지 않음).
+        ds-6x6 이 6폭 × 3모드 × 6페이지 넘침 0 을 상시 확인하므로 지금 방어 대상은 없다. */
+  html, body { overflow-x: clip; max-width: 100vw; }
 
   /* 전역: 이미지 가로 넘침 방지 */
   img { max-width: 100%; height: auto; }
