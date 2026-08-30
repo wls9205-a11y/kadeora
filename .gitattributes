@@ -1,0 +1,11 @@
+# 게이트 기준선은 «바이트로» 비교된다 — EOL 이 흔들리면 자가 흔들린다.
+#
+# core.autocrlf=true 인 Windows 워크트리에서 docs/gates/*.txt 는 CRLF 로 체크아웃되고,
+# scripts/token-snapshot.ts 는 LF 로 출력한다. 그래서 실측 2026-08-30 에
+# «4,770행 전부» 가 거짓 차이로 잡혔다 — 진짜 1행 변경이 그 안에 파묻힌다.
+# `git show HEAD:...` 로 우회할 수는 있지만, 아는 사람만 쓸 수 있는 우회는
+# 게이트 자격이 없다. 기준선은 저장소가 든다(296e25e).
+#
+# ⛔ `* text=auto` 같은 광역 지정을 넣지 않는다 — 전 저장소 renormalize 사고가 난다.
+#    여기 지정은 «게이트 기준선 파일» 로 좁힌다.
+docs/gates/*.txt text eol=lf
