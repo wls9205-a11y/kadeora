@@ -196,8 +196,8 @@ async function searchOverlay(where: string, page: Page) {
         cover: at ? `${at.tagName.toLowerCase()}${at.getAttribute('aria-label') ? `[${(at.getAttribute('aria-label') || '').slice(0, 20)}]` : ''}` : '(없음)',
       };
     });
-    expect(where, !!hit, `스크롤${y} — 헤더 돋보기 없음`);
-    if (hit) expect(where, hit.reachable, `스크롤${y} — 돋보기가 최상단 (덮은 것: ${hit.cover})`);
+    expect(where, !!hit, `스크롤${y} — 헤더 돋보기 있음`);
+    if (hit) expect(where, hit.reachable, `스크롤${y} — 돋보기가 최상단 (그 점의 최상단 요소: ${hit.cover})`);
   }
 
   const r = await page.evaluate(() => {

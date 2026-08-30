@@ -194,7 +194,9 @@ export function Navigation() {
       }}>
         <div style={{
           maxWidth: 1340, margin: '0 auto', padding: '0 14px',
-          height: 44, display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)',
+          /* ⚠️ 44 를 여기 박아 두면 --kd-header-h(45 = 44 + 아래 테두리 1)와 두 벌이 된다.
+             토큰을 원본으로 삼고 테두리 1px 만 뺀다 — 헤더 높이를 바꿀 곳은 토큰 한 곳이다. */
+          height: 'calc(var(--kd-header-h) - 1px)', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)',
         }}>
           {/* 로고 */}
           <Link href="/" style={{ display:'flex', alignItems:'center', gap:6, textDecoration:'none', flexShrink:0, marginRight:2 }}>
