@@ -1655,7 +1655,9 @@
   .apt-complex-layout { display: flex; flex-direction: column; gap: var(--sp-lg); padding: var(--sp-md); }
   @media (min-width: 1024px) {
     .apt-complex-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr); gap: var(--sp-xl); padding: var(--sp-xl) var(--sp-lg); }
-    .apt-complex-side { position: sticky; top: 80px; align-self: start; max-height: calc(100vh - 100px); overflow-y: auto; }
+    /* ⚠️ 여유 35px 의 근거가 코드에 없다(사다리 밖 값이다). 값을 «보존한 채»
+       앞의 「헤더까지」만 스택에서 받게 했다 — 오늘 값은 80 그대로다. 35 의 규명은 안건. */
+    .apt-complex-side { position: sticky; top: calc(var(--kd-header-bottom) + 35px); align-self: start; max-height: calc(100vh - 100px); overflow-y: auto; }
   }
 
   .apt-page-container { max-width: 720px; margin: 0 auto; padding: var(--sp-md); }

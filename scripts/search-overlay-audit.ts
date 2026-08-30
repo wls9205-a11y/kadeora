@@ -16,13 +16,19 @@
  *         스크롤에 따라 top 이 52↔0 로 «움직인다» — 스크롤 900 에서만 참인 계약이었다.
  *         고정된 것(노란 띠 fixed 0..52)만이 스크롤과 무관한 기준이다.
  *   ⑥ 가로 넘침 0
+ *   ⑦ **트리거가 실제로 눌리는가** — `elementFromPoint(돋보기 중심) === 돋보기`.
+ *      결함 2호(띠 z110 이 헤더 z100 을 덮어 스크롤 뒤 헤더가 통째로 죽던 것)의 잠금이다.
+ *      ⚠️ 스크롤 0 과 900 «두 자리» 에서 잰다 — 헤더는 sticky 라 한 자리만 재면 안 보인다.
  *
  * 사용: npx tsx scripts/search-overlay-audit.ts https://kadeora.app [경로]
  */
 import { chromium } from 'playwright';
 
 const BASE = process.argv[2] ?? 'https://kadeora.app';
-const PATH = process.argv[3] ?? '/';
+// 띠 «유»(홈) · 띠 «무»(현장 상세) 각 1곳. 조건이 값(--kd-banner-h)에 흡수되는지 두 쪽에서 본다.
+const PATHS = process.argv.length > 3
+  ? process.argv.slice(3)
+  : ['/', '/apt/%EA%B7%B8%EB%9E%91%EB%9D%BC%ED%81%AC-%EC%97%90%EC%9D%BC%EB%A6%B0%EC%9D%98-%EB%9C%B0'];
 const WIDTHS = [390, 480, 700, 768, 1024, 1280];
 const MODES = ['', 'font-small', 'font-large'];
 
@@ -38,12 +44,17 @@ function expect(where: string, cond: boolean, msg: string) {
 (async () => {
   const b = await chromium.launch();
   const detail: string[] = [];
-  const grid: Record<string, Record<string, string>> = {};
+  const grids: Array<{ path: string; grid: Record<string, Record<string, string>> }> = [];
 
+  for (const PATH of PATHS) {
+  const grid: Record<string, Record<string, string>> = {};
+  grids.push({ path: decodeURIComponent(PATH), grid });
+  detail.push(`
+── ${decodeURIComponent(PATH)} ──`);
   for (const w of WIDTHS) {
     grid[String(w)] = {};
     for (const mode of MODES) {
-      const where = `${w}px/${mode || 'default'}`;
+      const where = `${decodeURIComponent(PATH)} ${w}px/${mode || 'default'}`;
       const ctx = await b.newContext({ viewport: { width: w, height: 900 }, isMobile: w < 768, hasTouch: w < 768 });
       const page = await ctx.newPage();
       // tsx(esbuild) 가 keepNames 로 __name 을 심는다 — 페이지 쪽에는 그 헬퍼가 없다.
@@ -66,8 +77,24 @@ function expect(where: string, cond: boolean, msg: string) {
         });
         if (!vis) return null;
         const r = vis.getBoundingClientRect();
+        /* 계약 ⑦ — «누를 수 있는가». 결함 2호(띠 z110 이 헤더 z100 을 덮던 것)의 잠금.
+         * ⚠️ el.click() 은 덮여 있어도 «성공한다» — 그래서 클릭 성공으로 재면 안 잡힌다.
+         *    사람의 손가락이 닿는 곳을 재려면 elementFromPoint 여야 한다. */
+        const at = document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2));
+        const reachable = !!at && (at === vis || vis.contains(at));
+        const cover = at ? `${at.tagName.toLowerCase()}${at.getAttribute('aria-label') ? `[${(at.getAttribute('aria-label') || '').slice(0, 24)}]` : ''}` : '(없음)';
+        const header = document.querySelector('header')!.getBoundingClientRect();
+        const cs = getComputedStyle(document.documentElement);
         vis.click();
-        return { tag: vis.tagName, x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) };
+        return {
+          tag: vis.tagName, x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height),
+          reachable, cover,
+          headerBox: [Math.round(header.top), Math.round(header.bottom)] as [number, number],
+          bannerH: cs.getPropertyValue('--kd-banner-h').trim(),
+          headerTop: cs.getPropertyValue('--kd-header-top').trim(),
+          headerBottom: cs.getPropertyValue('--kd-header-bottom').trim(),
+          overlayTop: cs.getPropertyValue('--kd-overlay-top').trim(),
+        };
       });
       if (!clicked) {
         expect(where, false, '헤더 검색 트리거를 못 찾음');
@@ -155,15 +182,16 @@ function expect(where: string, cond: boolean, msg: string) {
       expect(where, !m.overlap, `패널이 입력을 덮는다 — 겹침 ${m.overlap ? `${m.overlap.w}×${m.overlap.h} @(${m.overlap.x},${m.overlap.y})` : ''}`);
       expect(where, !!m.input && m.input.y >= m.fixedTopBottom, `입력창이 상단 고정 띠 밑으로 들어간다 — 고정 크롬 bottom ${m.fixedTopBottom} · 입력 top ${m.input?.y} (--kd-overlay-top ${m.overlayTopVar})`);
       expect(where, m.overflow === 0, `가로 넘침 ${m.overflow}px`);
+      expect(where, clicked.reachable, `스크롤900 — 돋보기가 덮여 있다(누르면 «${clicked.cover}» 가 받는다) · 헤더 ${clicked.headerBox.join('..')}`);
 
       grid[String(w)][mode || 'default'] = m.inputVisible && m.focusIsInput && !m.overlap ? '✅' : '❌';
       detail.push(
-        `${where.padEnd(18)} 트리거 ${clicked.w}×${clicked.h} @${clicked.y} | dialog 부모 <${m.dlgParent}> ${m.dialog ? `${m.dialog.w}×${m.dialog.h}` : '-'}` +
+        `${`${w}px/${mode || 'default'}`.padEnd(18)} 트리거 ${clicked.w}×${clicked.h} @${clicked.y} ${clicked.reachable ? '닿음' : '덮임'} | 띠 ${clicked.bannerH} · 헤더top ${clicked.headerTop} · 헤더bottom ${clicked.headerBottom} · 오버레이top ${clicked.overlayTop}` +
         ` | 입력 (${m.input?.x},${m.input?.y}) ${m.input?.w}×${m.input?.h} ${m.inputVisible ? '보임' : '안보임'}` +
         ` | 패널 top ${m.panel?.y} «${m.panelLabel ?? '-'}» | 헤더 ${m.header?.y}..${m.header?.b} · 고정띠 bottom ${m.fixedTopBottom} | 기준상자 ${m.causes.length ? m.causes.join(',') : '뷰포트'}`,
       );
 
-      if (!mode) await page.screenshot({ path: `.audit/search-overlay-${w}.png` });
+      if (!mode) await page.screenshot({ path: `.audit/search-overlay-${PATH === '/' ? 'home' : 'detail'}-${w}.png` });
 
       /* 스크롤 0 재측 — 헤더는 sticky 라 스크롤에 따라 «자리가 바뀐다»(52..97 ↔ 0..45).
        * 오버레이가 그 움직임을 따라가면 안 된다. 두 자리에서 «같은 값» 이 나와야 한다.
@@ -180,8 +208,15 @@ function expect(where: string, cond: boolean, msg: string) {
             return r.width > 0 && r.height > 0 && getComputedStyle(el).display !== 'none';
           }) as HTMLElement | undefined;
           if (!btn) return null;
+          const r = btn.getBoundingClientRect();
+          const at = document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2));
+          const header = document.querySelector('header')!.getBoundingClientRect();
           btn.click();
-          return true;
+          return {
+            reachable: !!at && (at === btn || btn.contains(at)),
+            cover: at ? at.tagName.toLowerCase() : '(없음)',
+            headerBox: [Math.round(header.top), Math.round(header.bottom)] as [number, number],
+          };
         });
         if (top0) {
           await page.waitForTimeout(450);
@@ -198,6 +233,7 @@ function expect(where: string, cond: boolean, msg: string) {
               header: [Math.round(header.top), Math.round(header.bottom)],
             };
           });
+          expect(`${w}px/스크롤0`, top0.reachable, `스크롤0 — 돋보기가 덮여 있다(«${top0.cover}») · 헤더 ${top0.headerBox.join('..')}`);
           expect(`${w}px/스크롤0`, !!t && t.onTop, '스크롤 0 에서 입력창이 최상단이 아니다');
           expect(`${w}px/스크롤0`, !!t && t.y === m.input?.y,
             `스크롤에 따라 오버레이가 움직인다 — 스크롤900 y ${m.input?.y} · 스크롤0 y ${t?.y}`);
@@ -239,15 +275,19 @@ function expect(where: string, cond: boolean, msg: string) {
       await ctx.close();
     }
   }
+  }
   await b.close();
 
   console.log('\n■ 상세 실측');
   for (const d of detail) console.log('  ' + d);
-  console.log('\n■ 6폭 × 3모드 — 돋보기 클릭 상태');
-  console.log('        default    font-small  font-large');
-  for (const w of WIDTHS) {
-    const g = grid[String(w)];
-    console.log(`${String(w).padStart(5)}px  ${(g.default ?? '-').padEnd(10)} ${(g['font-small'] ?? '-').padEnd(11)} ${g['font-large'] ?? '-'}`);
+  for (const { path, grid } of grids) {
+    console.log(`
+■ 6폭 × 3모드 — 돋보기 클릭 상태 · ${path}`);
+    console.log('        default    font-small  font-large');
+    for (const w of WIDTHS) {
+      const g = grid[String(w)];
+      console.log(`${String(w).padStart(5)}px  ${(g.default ?? '-').padEnd(10)} ${(g['font-small'] ?? '-').padEnd(11)} ${g['font-large'] ?? '-'}`);
+    }
   }
   console.log(`\n■ 검사 ${checks} / 실패 ${fails}`);
   if (fails) { console.log('❌ 검색 오버레이 게이트 실패'); process.exit(1); }

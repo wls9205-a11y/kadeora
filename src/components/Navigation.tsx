@@ -184,7 +184,10 @@ export function Navigation() {
     <>
       {/* ── 헤더 ── */}
       <header style={{
-        position: 'sticky', top: 0, zIndex: 100,
+        /* 결함 2호 — 헤더는 «띠 아래» 에 멈춘다. 값은 크롬 스택에서 파생된다
+           (--kd-header-top = --kd-banner-h). 띠가 없는 라우트에서는 0 이라 종전과 같다.
+           ⛔ 여기에 숫자를 다시 박지 말 것 — 띠 유무가 라우트마다 다르다. */
+        position: 'sticky', top: 'var(--kd-header-top)', zIndex: 100,
         background: 'rgba(255,255,255,0.92)',
         backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         borderBottom: '1px solid var(--border)',

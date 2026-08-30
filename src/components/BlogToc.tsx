@@ -70,7 +70,9 @@ export default function BlogToc({ toc }: { toc: TocItem[] }) {
     <nav
       aria-label="목차"
       style={{
-        position: 'sticky', top: 56, zIndex: 10,
+        // 결함 2호 — 헤더 아래 11px. 그 11 은 이 화면의 여유고, 앞의 «헤더까지» 는 스택이 준다.
+        // 블로그 상세는 오늘 띠가 없어 56 그대로다(종전 값 보존).
+        position: 'sticky', top: 'calc(var(--kd-header-bottom) + 11px)', zIndex: 10,
         background: 'var(--bg-base)', padding: '8px 0', marginBottom: 'var(--sp-lg)',
         borderBottom: '1px solid var(--border)',
       }}

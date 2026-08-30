@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import {
   KAKAO_TALK_URL,
@@ -46,6 +47,26 @@ export default function StickyTalkBanner() {
   // 훅은 조기 반환보다 위에서 무조건 호출한다 (훅 순서 규칙).
   // 렌더하지 않는 라우트에서는 ref 가 붙지 않아 노출도 기록되지 않는다.
   const viewRef = useTalkView<HTMLAnchorElement>('sticky');
+
+  /* 결함 2호 수리 (2026-08-30) — 이 띠는 상단 크롬 «스택의 첫 칸» 이다.
+   *
+   * 전에는 띠(fixed · z110)와 헤더(sticky · top 0 · z100)가 «같은 자리» 를 놓고
+   * 겹쳤다. 스크롤하면 헤더가 통째로 띠 밑으로 들어가 로고·검색·내비가 전부 죽고,
+   * 그 자리를 누르면 카톡방이 열렸다(오클릭). → 겹치지 말고 쌓는다.
+   *
+   * ⛔ 라우트별 CSS 분기를 만들지 않는다. 「띠가 있는가」라는 조건을 «값» 으로 바꿔
+   *    <html> 에 올리면, 띠가 없는 라우트에서는 tokens.css 의 :root 기본 0 이 그대로 산다.
+   * ⚠️ 판정(`hidden`)은 이 컴포넌트 «한 곳» 에만 있다. 값도 여기서 낸다 —
+   *    판정과 값이 두 벌이 되면 한쪽만 늘어난다(STATUS 공리).
+   * ⚠️ 언마운트에서 되돌린다. (main) 밖(예: /admin)으로 클라이언트 이동하면
+   *    이 컴포넌트가 사라지는데, 인라인 값이 <html> 에 남으면 띠 없는 화면이
+   *    52px 만큼 밀린 헤더를 갖는다.
+   */
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--kd-banner-h', hidden ? '0px' : `${STICKY_BANNER_HEIGHT}px`);
+    return () => { root.style.removeProperty('--kd-banner-h'); };
+  }, [hidden]);
 
   if (hidden) return null;
 

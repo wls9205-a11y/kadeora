@@ -203,14 +203,36 @@
     --card-p: 16px;
     --touch-min: 46px;
 
-    /* COMPONENT — 검색 오버레이가 «시작하는 높이» (결함 1호, 2026-08-30).
-       헤더(실측 45px) 아래에 입력창이 서도록 하는 값이다. --rail-top 과 같은 성격 —
-       «파일을 건너 살아 있는 값» 이라 자동으로 안 따라온다.
-       ⚠️ 헤더 높이가 바뀌면 여기를 바꾼다. 어긋나면 scripts/search-overlay-audit.ts 가
-          「입력창 top < 헤더 bottom」으로 잡는다. 숫자가 아니라 이 관계가 계약이다.
-       ⛔ 폭별로 갈라 쓰지 않는다 — 전 폭이 같은 모양이고, 좁은 폭의 «전폭 시트» 는
-          패널의 width:100% + max-width 로 이미 나온다(컴포넌트 CSS 분기 0). */
-    --kd-overlay-top: 56px;
+    /* ═══ COMPONENT — 상단 크롬 «스택» (결함 2호 판정, 2026-08-30) ═══════════
+       띠와 헤더는 «겹치는» 것이 아니라 «쌓인다». 그 순서를 값 하나에서 파생시킨다.
+
+           --kd-banner-h      노란 공유방 띠. 띠가 없는 라우트에서는 0
+           --kd-header-top    = 띠 높이            (헤더가 멈추는 자리)
+           --kd-header-bottom = 띠 + 헤더 높이     (그 아래 것들의 기준선)
+
+       ⛔ 라우트별 CSS 분기를 «만들지 않는다». 조건은 --kd-banner-h 라는 «값» 에
+          흡수된다 — 띠가 렌더되는 라우트에서만 StickyTalkBanner 가 <html> 에
+          52px 을 올리고, 안 그리는 라우트에서는 여기 :root 기본값 0 이 그대로 산다.
+          (그 판정은 StickyTalkBanner 한 곳에만 있다. 두 벌이면 한쪽만 늘어난다.)
+
+       ⛔ 아래 파생값을 «손으로 밀지 말 것». 헤더 높이나 띠 높이가 바뀌면
+          이 세 줄만 고치고, 소비처는 전부 따라온다. 어긋나면
+          scripts/search-overlay-audit.ts 와 smoke 의 「돋보기 = 최상단」 검사가 잡는다. */
+    --kd-banner-h: 0px;
+    /** Navigation <header> 실측 높이 — 내부 44 + border-bottom 1. */
+    --kd-header-h: 45px;
+    --kd-header-top: var(--kd-banner-h);
+    --kd-header-bottom: calc(var(--kd-header-top) + var(--kd-header-h));
+    /** 현장 상세 점프바 높이(SiteJumpBar.JUMP_BAR_HEIGHT 와 짝). */
+    --kd-jumpbar-h: 42px;
+
+    /* 검색 오버레이가 «시작하는 높이» (결함 1호).
+       ⚠️ 기준선은 «헤더» 가 아니라 «띠» 다. 헤더는 sticky 라 스크롤에 따라
+          자리가 움직이고(0..45 ↔ 52..97), 모달이 헤더를 덮는 것은 정상이다.
+          띠는 fixed 라 항상 그 자리에 있고 오버레이 «위» 로 올라온다 — 물리면 안 된다.
+       띠 있는 라우트: max(16, 52+4) = 56  (종전 값과 같다 — 검산 통과)
+       띠 없는 라우트: max(16,  0+4) = 16  (바닥값. 4px 이면 화면 끝에 붙는다) */
+    --kd-overlay-top: max(var(--sp-lg), calc(var(--kd-banner-h) + var(--sp-xs)));
 
     /* s5-2 (Rule #78): 본문 컨테이너 기준 폭. 어드민(1400)·앱셸(1200)·좁은 폼(480)만 예외 */
     --container-max: 720px;

@@ -275,7 +275,9 @@
       display: block;
       min-width: 0;
       position: sticky;
-      top: 61px;
+      /* 헤더 아래 + 여유 16. 블로그 상세는 오늘 띠가 없어 61 그대로다(값 보존).
+         ⚠️ StickyTalkBanner 의 INLINE_ROUTES 에서 블로그 상세가 빠지는 날 자동으로 113 이 된다. */
+      top: calc(var(--kd-header-bottom) + 16px);
       max-height: calc(100vh - 80px);
       overflow-y: auto;
     }

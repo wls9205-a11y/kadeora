@@ -183,10 +183,13 @@
     font-weight: var(--kd-chip-fw, 600);
   }
 
-  /* /stock 탭 바 */
+  /* /stock 탭 바.
+     ⚠️ 실측(2026-08-30) 소비처 «0» 이다 — 어느 tsx 도 .kd-tabbar 를 쓰지 않는다.
+        죽은 규칙이지만 값은 스택에서 파생시켜 둔다(살아나는 날 44 로 되살아나면
+        헤더 밑에 깔린다). 제거 여부는 안건. */
   .kd-tabbar {
     position: sticky;
-    top: 44px;
+    top: var(--kd-header-bottom);
     z-index: 10;
     display: flex;
     flex-wrap: wrap;
@@ -443,7 +446,11 @@
                두 값이 파일을 건너 살아 있어 자동으로 따라오지 않는다.
          ⚠️ /apt 목록에는 점프바가 «없어» 값이 다르다(61). 그래서 상수를 공유
             클래스에 박지 않고 각 화면이 «자기 값을» 준다. */
-      --rail-top: 103px;
+      /* 결함 2호(2026-08-30) — 숫자를 «손으로 밀지» 않는다. 스택에서 파생시킨다:
+         띠 + 헤더 + 점프바 + 여유 16. 상세는 띠가 0 이라 오늘 값은 103 그대로다.
+         ⛔ 점프바 높이를 바꿀 때 이제 «여기를 같이 고칠 필요가 없다» —
+            --kd-jumpbar-h 한 곳만 고치면 따라온다. */
+      --rail-top: calc(var(--kd-header-bottom) + var(--kd-jumpbar-h) + 16px);
       /* ⚠️ H6-6 — sticky 를 «여기서 뺐다». 안쪽 .kd-rail-sticky(screens.css)와
          이중으로 걸려 있었다. 중첩 sticky 는 안쪽의 top 이 바깥 상자에 갇혀
          무효가 되는데, 안쪽 max-height 는 자기 top 을 기준으로 계산돼
@@ -543,8 +550,11 @@
       align-items: start;
     }
     /* ⚠️ H6-6 — 여기도 sticky 를 뺐다. 안쪽 .kd-rail-sticky 와 이중이었다.
-       점프바가 없는 화면이라 멈추는 자리는 헤더 45 + 여유 16 = 61 이다. */
-    .kd-list-rail { display: block; min-width: 0; --rail-top: 61px; }
+       점프바가 없는 화면이라 멈추는 자리는 «헤더 아래 + 여유 16» 이다.
+       ⚠️⚠️ 결함 2호(2026-08-30) — 이 화면들(/apt · /blog · /stock · /apt/archive)은
+          노란 띠가 «있는» 라우트다. 61 은 띠를 안 센 값이었고, 헤더가 띠 아래로
+          내려온 뒤에는 레일이 헤더 밑에 깔린다. 실측 61 → 113(52+45+16). */
+    .kd-list-rail { display: block; min-width: 0; --rail-top: calc(var(--kd-header-bottom) + 16px); }
   }
 
   /* 레일 패널. '관련 분석'·'시리즈'·'테마' 는 모바일에서 하단 탭과 중복이라 숨긴다

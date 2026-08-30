@@ -512,9 +512,10 @@
          ⚠️ top 과 max-height 는 «같은 값에서» 나와야 한다. 하나만 고치면 다시 갈린다. */
       /* 값은 화면이 준다(.kd-detail-rail 118 · .kd-list-rail 61). 폴백 61 은
          점프바 없는 화면 기준이다 — 없는 막대만큼 띄우는 쪽보다 안전하다. */
-      top: var(--rail-top, 61px);
+      /* ⚠️ 폴백도 «스택에서» 낸다. 61px 을 박아 두면 띠 있는 화면에서 헤더 밑에 깔린다. */
+      top: var(--rail-top, calc(var(--kd-header-bottom) + 16px));
       align-self: start;
-      max-height: calc(100vh - var(--rail-top, 61px) - 24px);
+      max-height: calc(100vh - var(--rail-top, calc(var(--kd-header-bottom) + 16px)) - 24px);
       overflow-y: auto;
       scrollbar-width: thin;
     }

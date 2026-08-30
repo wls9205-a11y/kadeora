@@ -7,32 +7,30 @@
 //    전 섹션이 펼쳐지면서 열 것이 없어졌고, Enhancer 도 퇴역했다.
 //    이제 이 바는 브라우저의 fragment 이동만 쓴다 — 연동 대상이 없다.
 //
-// 상단 고정 스택 (실측):
-//   Navigation <header>  sticky top:0 · z-100 · 내부 height 44 + border-bottom 1px = 45px
-//   StickyTalkBanner     fixed top:0 · z-110 · 52px — 커밋6 에서 현장 상세는 렌더하지 않는다
-//   이 바                 sticky top:45 · z-60
+// 상단 고정 스택 — 값은 «전부» tokens.css 의 크롬 스택에서 온다(결함 2호, 2026-08-30):
+//   --kd-banner-h      노란 공유방 띠. 현장 상세는 띠를 안 그리므로 0
+//   --kd-header-top    = 띠 높이            (헤더가 멈추는 자리)
+//   --kd-header-bottom = 띠 + 헤더 45       ← 이 바가 멈추는 자리
+//   --kd-jumpbar-h     이 바의 높이 42
 //
 // ⚠️ z-index 를 100 이상으로 올리지 말 것 — 헤더 위로 올라온다.
 // ⚠️ 각 섹션의 scrollMarginTop 은 SECTION_SCROLL_MARGIN 을 쓴다.
 //    기존 60 은 헤더(45)만 겨우 피하는 값이라 이 바 아래로 제목이 숨는다.
+//
+// ⛔⛔ 예전에는 여기에 `HEADER_HEIGHT = 45` · `JUMP_BAR_HEIGHT = 42` 상수가 있었고,
+//    components.css 의 `--rail-top: 103` 이 «같은 수를 손으로 한 번 더» 들고 있었다.
+//    U-1a 에서 점프바를 57→42 로 낮췄을 때 CSS 쪽이 안 따라와 레일이 15px 어긋났다 —
+//    「어휘가 두 벌이면 한쪽만 늘어난다」의 실례다. 그래서 상수를 «지웠다».
+//    높이를 바꿀 일이 생기면 tokens.css 의 --kd-jumpbar-h 한 곳만 고친다.
+//
+// 점프바 높이 42 의 근거(U-1a): 낮추면서 «칩의 누를 크기는 줄이지 않았다» —
+//   시각 높이 30px + Rule #77 `.touch-target` 으로 히트 영역 44px 유지(DS_RULES §1-5 ②).
+//   sticky 라 「높이가 곧 본문을 가리는 양」이고, 전 섹션 펼침으로 본문이 길어졌으므로
+//   상단 고정물이 차지하는 자리를 줄이는 쪽이 맞다.
 
-/** Navigation <header> 실측 높이 (내부 44 + border-bottom 1). */
-export const HEADER_HEIGHT = 45;
-/**
- * 이 바의 높이. U-1a 에서 57 → **42** 로 낮췄다.
- *
- * ⚠️ 낮추면서 «칩의 누를 크기를 줄이지 않았다» — 그러면 접근성이 후퇴한다.
- *    시각 높이 30px + Rule #77 `.touch-target` 으로 히트 영역 44px 를 유지한다.
- *    (DS_RULES §1-5 ② — 「레이아웃이 움직이면 안 되는 자리」의 기본 수법.)
- * ⚠️ 이 바는 sticky 라 «높이가 곧 본문을 가리는 양» 이다. 전 섹션 펼침으로
- *    본문이 길어졌으므로 상단 고정물이 차지하는 자리를 줄이는 쪽이 맞다.
- */
-export const JUMP_BAR_HEIGHT = 42;
-// ⛔ 이 값을 바꾸면 components.css 의 `.kd-detail-rail { --rail-top }` «도» 바꿀 것.
-//    레일이 멈추는 자리 = 헤더 45 + 이 값 + 여유 16 이다. CSS 라 자동으로 안 따라온다.
-//    (U-1a 에서 57→42 로 바꾸면서 실제로 한 번 갈렸다.)
-/** 섹션 앵커의 scroll-margin-top. 헤더 + 점프바 + 여유 8. */
-export const SECTION_SCROLL_MARGIN = HEADER_HEIGHT + JUMP_BAR_HEIGHT + 8;
+/** 섹션 앵커의 scroll-margin-top. 헤더 아래 + 점프바 + 여유 8 (상세 실측 95). */
+export const SECTION_SCROLL_MARGIN =
+  'calc(var(--kd-header-bottom) + var(--kd-jumpbar-h) + 8px)';
 
 export type JumpItem = { id: string; label: string; show: boolean };
 
@@ -56,11 +54,13 @@ export default function SiteJumpBar({ items, cta }: { items: JumpItem[]; cta?: J
       className="kd-jumpbar"
       style={{
         position: 'sticky',
-        top: HEADER_HEIGHT,
+        // 결함 2호 — 「헤더 아래」를 «숫자» 가 아니라 스택에서 받는다.
+        // 상세에는 띠가 없어 오늘 값은 45 그대로다. 띠가 생기면 자동으로 97 이 된다.
+        top: 'var(--kd-header-bottom)',
         zIndex: 60,
         // 아티클 좌우 패딩을 상쇄해 스크롤 끝이 화면 끝에 닿게 한다
         margin: '0 calc(-1 * var(--sp-lg)) var(--sp-md)',
-        height: JUMP_BAR_HEIGHT,
+        height: 'var(--kd-jumpbar-h)',
         display: 'flex',
         alignItems: 'center',
         padding: '0 var(--sp-lg)',

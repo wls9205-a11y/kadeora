@@ -176,10 +176,34 @@ async function imagesLoad(where: string, page: Page) {
  *    「경로가 살아 있는가」 1검사 — 스모크는 상시 도는 자라 가볍게 둔다.
  */
 async function searchOverlay(where: string, page: Page) {
+  /* 결함 2호 잠금 — 돋보기가 «덮여 있지 않은가» 를 스크롤 0 과 900 두 자리에서 잰다.
+   * ⚠️ el.click() 은 덮여 있어도 성공한다. 사람 손가락이 닿는 곳은 elementFromPoint 다.
+   *    노란 띠(fixed z110)가 헤더(sticky z100)를 덮던 시절, 스크롤 뒤 이 자리를 누르면
+   *    검색이 아니라 «카톡방» 이 열렸다 — 오클릭은 안 보이는 것보다 나쁘다. */
+  for (const y of [0, 900]) {
+    await page.evaluate((s) => window.scrollTo(0, s), y);
+    await page.waitForTimeout(350);
+    const hit = await page.evaluate(() => {
+      const btn = [...document.querySelectorAll('header [aria-label="검색 열기"]')].find((el) => {
+        const b = (el as HTMLElement).getBoundingClientRect();
+        return b.width > 0 && b.height > 0 && getComputedStyle(el).display !== 'none';
+      }) as HTMLElement | undefined;
+      if (!btn) return null;
+      const b = btn.getBoundingClientRect();
+      const at = document.elementFromPoint(Math.round(b.x + b.width / 2), Math.round(b.y + b.height / 2));
+      return {
+        reachable: !!at && (at === btn || btn.contains(at)),
+        cover: at ? `${at.tagName.toLowerCase()}${at.getAttribute('aria-label') ? `[${(at.getAttribute('aria-label') || '').slice(0, 20)}]` : ''}` : '(없음)',
+      };
+    });
+    expect(where, !!hit, `스크롤${y} — 헤더 돋보기 없음`);
+    if (hit) expect(where, hit.reachable, `스크롤${y} — 돋보기가 최상단 (덮은 것: ${hit.cover})`);
+  }
+
   const r = await page.evaluate(() => {
     const btn = [...document.querySelectorAll('header [aria-label="검색 열기"]')].find((el) => {
       const b = (el as HTMLElement).getBoundingClientRect();
-      return b.width > 0 && b.height > 0;
+      return b.width > 0 && b.height > 0 && getComputedStyle(el).display !== 'none';
     }) as HTMLElement | undefined;
     if (!btn) return { ok: false, why: '헤더 검색 트리거 없음' };
     btn.click();
@@ -366,6 +390,9 @@ async function main() {
     } else {
       console.log(`  ·  ${w} — (참고) 관측 블록 ${m.obsTop === null ? '없음' : '있음'} · 리드폼 ${m.leadTop === null ? '없음' : '있음'}`);
     }
+    // 결함 2호 — 상세는 노란 띠를 «안 그리는» 라우트다(--kd-banner-h: 0).
+    // 조건이 값에 흡수됐는지 보려면 띠 있는 화면(/)과 «양쪽» 을 재야 한다.
+    await searchOverlay(w, page);
     await deadControls(w, page);
     await imagesLoad(w, page);
     await page.close();

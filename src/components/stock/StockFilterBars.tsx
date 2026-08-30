@@ -53,14 +53,15 @@ export default function StockFilterBars({
 }) {
   return (
     <>
-      {/* 시장 — sticky. Navigation <header> 실측 45px 아래. z-index 는 헤더(100) 미만. */}
+      {/* 시장 — sticky. 「헤더 바로 아래」를 크롬 스택에서 받는다. z-index 는 헤더(100) 미만.
+          ⚠️ 결함 2호 — /stock 은 띠가 «있는» 라우트다. 45 를 박아 두면 헤더(52..97) 밑에 깔린다. */}
       <div
         role="group"
         aria-label="시장 선택"
         style={{
           ...ROW,
           position: 'sticky',
-          top: 45,
+          top: 'var(--kd-header-bottom)',
           zIndex: 60,
           background: 'var(--bg-base)',
           paddingTop: 6,
