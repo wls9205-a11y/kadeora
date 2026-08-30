@@ -1158,20 +1158,22 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
            네 칩 모두 show:true 인 것은 각 묶음에 «조건 없이 렌더되는» 블록이
            하나씩 있기 때문이다 — ① 핵심 지표 ② 시세·분양가 ③ 청약 가점 매칭
            ④ 인포그래픽. 그 넷 중 하나라도 조건부로 바뀌면 여기도 같이 고칠 것. */}
+      {/* U-1b — 시안 E 의 서브내비: 6칩 + 우측 CTA.
+           ⚠️ 칩은 «실제로 렌더되는» 섹션만 가리킨다. show 조건은 각 섹션의 렌더 조건과
+              «같은 식» 을 쓴다 — 갈리면 눌러도 아무 일이 없는 칩이 생긴다.
+           ⚠️ 시안은 「타입·분양가」다. 지금 화면에 «면적 타입표가 없어» 「분양가」로 둔다 —
+              라벨이 데이터를 앞지르면 라벨을 데이터에 맞춘다(DS_RULES §2-2).
+              타입표(세션 A 의 pngtypGbNm 실측)가 화면에 붙으면 그때 제목을 승격한다. */}
       <SiteJumpBar
         items={[
-          /* H6-3 — 「이 단지 / 얼마 / 될까」는 구어체 2글자라 리뉴얼 톤과 어긋났다.
-             명사형으로 맞춘다. id 는 그대로 — 앵커 링크가 걸려 있다. */
-          { id: 'about-group', label: '단지',   show: true },
-          { id: 'price-group', label: '분양가', show: true },
-          { id: 'odds-group',  label: '전망',   show: true },
-          { id: 'more-group',  label: '더보기', show: true },
-          /* U-1a — 다섯째 칩. 리드폼은 «이동하지 않는다»(이미 상단·A6 배치 존중).
-             대신 어디서 스크롤하고 있든 «한 번에 돌아올 길» 을 준다.
-             ⚠️ show 는 폼이 실제로 렌더될 때만 true 다 — 눌러도 갈 곳이 없는 칩을
-                만들지 않는다(SiteActionBar 가 지키는 규칙과 같다). */
-          { id: LEAD_FORM_ID, label: '신청', show: showLeadForm },
+          { id: 'movein-section',   label: '일정',      show: !!sub },
+          { id: 'price-section',    label: '분양가',    show: true },
+          { id: 'location-section', label: '입지',      show: true },
+          { id: 'history-section',  label: '검증',      show: siteEvents.length > 0 },
+          { id: 'faq-section',      label: 'FAQ',       show: faq.length > 0 },
+          { id: 'related-section',  label: '주변 비교', show: relatedPosts.length > 0 || relatedBlogs.length > 0 },
         ]}
+        cta={{ id: LEAD_FORM_ID, label: '관심고객 등록', show: showLeadForm }}
       />
 
 
@@ -2082,15 +2084,19 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
       </figure>
 
       {/* ── 7번 블록 · 핵심 포인트 + FAQ ── */}
-      {features.length > 0 && (
-        <DetailSection id="points-section" title="핵심 포인트">
-          <div style={{ display: 'flex', gap: 'var(--sp-sm)', flexWrap: 'wrap' }}>
-            {features.map((f: any, i: number) => (
-              <span key={i} style={{ padding: '4px 10px', borderRadius: 'var(--radius-lg)', fontSize: 'var(--fs-xs)', fontWeight: 600, background: 'var(--brand-bg)', color: 'var(--brand)', border: '1px solid var(--brand-bg)' }}>{String(f)}</span>
-            ))}
-          </div>
-        </DetailSection>
-      )}
+            {/* ⛔ U-1b — 「핵심 포인트」(key_features 칩)를 «뺐다». 실측이 근거다(2026-08-30).
+           활성 현장 6,033곳 · 칩 20,910개 · 고유 3,212종을 전수로 갈라 보니,
+           «이 섹션에만 있는 사실이 없었다»:
+             지역명 5,199 (히어로 브레드크럼 중복) · 시공사 2,594 (지표 중복)
+             준공년 2,137 (지표 중복) · 실거래 N건 2,112 (시세 섹션 중복)
+             평가어   697 — 「지역 대표 단지」·「랜드마크」·「시세 기준점」이 «각 120».
+                            landmark_active 단계 120건과 «정확히 일치» 한다.
+                            즉 단계에서 기계로 찍힌 «평가» 라벨이지 관측이 아니다.
+           n=1 짜리 1,609종도 전부 가격대(「8.1~11.0억」)·세대수(「분양 1084세대」)·
+           시공사명이라 이미 지표·분양가 섹션이 말하는 값이다.
+           ⛔ 근거 없는 최상급은 이 저장소의 금칙 계열이다(DS_RULES §2-3).
+           ⚠️ DB 컬럼은 «지우지 않았다» — og-apt 카드가 상위 3개를 쓰고, sync 크론의
+              content_score 가 배열 길이를 점수에 쓴다. 화면에서만 뺀다. */}
 
       {faq.length > 0 && (
         <DetailSection id="faq-section" title="자주 묻는 질문" meta={`${faq.length}개`}>

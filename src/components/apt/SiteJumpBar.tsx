@@ -36,7 +36,16 @@ export const SECTION_SCROLL_MARGIN = HEADER_HEIGHT + JUMP_BAR_HEIGHT + 8;
 
 export type JumpItem = { id: string; label: string; show: boolean };
 
-export default function SiteJumpBar({ items }: { items: JumpItem[] }) {
+/**
+ * U-1b — 시안 E 의 서브내비는 오른쪽 «끝에» CTA 를 둔다.
+ *
+ * ⚠️ 칩 줄은 가로 스크롤이라, CTA 를 그 안에 넣으면 «같이 밀려 나간다».
+ *    그래서 스크롤 컨테이너는 flex:1 로 두고 CTA 는 그 «밖에» 둔다 — 항상 보인다.
+ * ⛔ show=false 면 렌더하지 않는다. 눌러도 갈 곳이 없는 버튼을 만들지 않는다.
+ */
+export type JumpCta = { id: string; label: string; show: boolean };
+
+export default function SiteJumpBar({ items, cta }: { items: JumpItem[]; cta?: JumpCta }) {
   const shown = items.filter(i => i.show);
   // 칩이 2개 미만이면 바가 정보를 주지 않는다 — 자리만 먹는다.
   if (shown.length < 2) return null;
@@ -63,7 +72,7 @@ export default function SiteJumpBar({ items }: { items: JumpItem[] }) {
         scrollbarWidth: 'none',
       }}
     >
-      <div style={{ display: 'flex', gap: 'var(--sp-xs)', width: 'max-content' }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-xs)', width: 'max-content', flex: 1, minWidth: 0, overflowX: 'auto', scrollbarWidth: 'none' }}>
         {shown.map(i => (
           <a
             key={i.id}
@@ -92,6 +101,30 @@ export default function SiteJumpBar({ items }: { items: JumpItem[] }) {
           </a>
         ))}
       </div>
+      {cta?.show && (
+        <a
+          href={`#${cta.id}`}
+          className="touch-target"
+          style={{
+            flex: 'none',
+            marginLeft: 'var(--sp-sm)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            height: 30, // 칩과 같은 높이 — 전역 min-height:36 에 눌려 실제 36 이다
+            padding: '0 var(--sp-md)',
+            borderRadius: 'var(--radius-sm)',
+            // 강조색 3역할 고정(U-1b): 골드 = «행동». 네이비는 값, 검증 3색은 뱃지 전용.
+            background: 'var(--kd-accent)',
+            color: 'var(--text-inverse)',
+            fontSize: 'var(--fs-xs)',
+            fontWeight: 800,
+            whiteSpace: 'nowrap',
+            textDecoration: 'none',
+          }}
+        >
+          {cta.label}
+        </a>
+      )}
     </nav>
   );
 }
