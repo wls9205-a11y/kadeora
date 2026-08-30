@@ -92,8 +92,13 @@ export default function BlogCurationCard({
           </p>
         )}
 
-        <span style={{ marginTop: 'auto', paddingTop: 8, fontSize: 10, color: navy ? 'rgba(255,255,255,0.70)' : 'var(--text-tertiary)' }}>
-          {post.reading_time_min || 3}분 · 👀 {(post.view_count ?? 0).toLocaleString()}
+        {/* ⛔ V4-3 — 「👀 조회수」를 걷어냈다. 근거가 `blog_posts.view_count` 인데
+            그 값이 «합성» 이다(blog/page.tsx 실측: 합계 약 49만 vs page_views 30일
+            실조회 2,617건, 100배 괴리). 목록 행에서는 뺐는데 «피처드 카드에 남아»
+            네이비 위에 「👀 0」을 띄우고 있었다 — 값이 0 이라 정보도 아니었다.
+            ⚠️ 컬럼과 타입은 그대로 둔다. 계측이 붙어 값이 실측이 되면 되살린다. */}
+        <span style={{ marginTop: 'auto', paddingTop: 8, fontSize: 'var(--fs-3xs)', color: navy ? 'rgba(255,255,255,0.70)' : 'var(--text-tertiary)' }}>
+          읽는 시간 {post.reading_time_min || 3}분
         </span>
       </div>
     </article>
