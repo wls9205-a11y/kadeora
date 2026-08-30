@@ -565,8 +565,10 @@
     table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table tbody, table thead { display: table; width: 100%; }
 
-    /* 버튼/태그 줄바꿈 방지 */
-    .kd-tab-btn, .kd-sort-btn, .kd-pill {
+    /* 버튼/태그 줄바꿈 방지.
+       ⚠️ .kd-tab-btn · .kd-sort-btn 을 «선택자에서만» 뺐다 — 둘은 사문이고
+          .kd-pill 은 FeedClient 에서 살아 있다. 줄을 통째로 지우면 산 것이 같이 죽는다. */
+    .kd-pill {
       white-space: nowrap;
       flex-shrink: 0;
     }
