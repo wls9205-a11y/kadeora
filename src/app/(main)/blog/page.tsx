@@ -522,15 +522,25 @@ export default async function BlogPage({ searchParams }: Props) {
       {/* speakable — 네이버 음성검색 */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: '카더라 블로그', speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.blog-summary'] } }) }} />
       {/* s205-W2: HeroCard "오늘의 블로그" 제거. */}
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14, paddingTop: 4 }}>
-        <div>
-          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.5px' }}>블로그</h1>
-          <p className="blog-summary" style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '2px 0 0', letterSpacing: '0.3px' }}>매일 업데이트되는 투자 인사이트 · {totalCount.toLocaleString()}편</p>
+      {/* V4-3 — 서브마스트. 단색 --brand-navy + 하단 골드 2px.
+          ⚠️ h1 을 «지우지 않고» sr-only 로 내렸다. 문자열은 「블로그」 그대로다 —
+             색인이 받는 것을 바꾸지 않는다(판정회신 증분3 ④). 서브마스트 제목은
+             heading 이 아니라 «시각 라벨» 이라 문서의 제목은 여전히 하나뿐이다.
+          ⚠️ `.blog-summary` 는 speakable JSON-LD 의 cssSelector(['h1','.blog-summary'])가
+             «이름으로» 잡는 자리다. 클래스를 서브마스트 보조 줄로 «옮겼다» — 지우면
+             네이버 음성검색이 짚을 것이 사라진다. 그래서 텍스트를 두 벌로 만들지 않고
+             보이는 쪽 한 벌에 클래스를 붙였다. */}
+      <h1 className="sr-only">블로그</h1>
+      <div className="kd-submast kd-submast--bleed">
+        <div className="kd-submast__row">
+          <div className="kd-submast__title">부정공 칼럼</div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
-          <SectionShareButton section="blog" label="투자 정보 블로그 7,600편+" pagePath="/blog" />
-
+        <div className="kd-submast__sub blog-summary">
+          매일 업데이트되는 투자 인사이트 · {totalCount.toLocaleString()}편
         </div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 'var(--sp-xs)', margin: 'var(--sp-sm) 0 var(--sp-md)' }}>
+        <SectionShareButton section="blog" label="투자 정보 블로그 7,600편+" pagePath="/blog" />
       </div>
 
       {/* 검색 */}
@@ -539,7 +549,7 @@ export default async function BlogPage({ searchParams }: Props) {
         {sort !== 'latest' && <input type="hidden" name="sort" value={sort} />}
         <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-tertiary)' }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input name="q" defaultValue={q} placeholder="블로그 검색" style={{
-          width: '100%', height: 40, padding: '0 12px 0 38px', fontSize: 13, fontWeight: 500,
+          width: '100%', minHeight: 'var(--touch-min)', padding: '0 var(--sp-md) 0 38px', fontSize: 'var(--fs-xs)', fontWeight: 500,
           borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)',
           color: 'var(--text-primary)', boxSizing: 'border-box', outline: 'none',
         }} />
@@ -578,8 +588,11 @@ export default async function BlogPage({ searchParams }: Props) {
                 flexShrink: 0,
                 // ⚠️ DS-3-2 — 누를 수 있는 칩은 44px 이상(DS ② Chip 표준).
                 //    시각 높이는 padding 이 정하고, «터치 높이» 는 minHeight 가 보장한다.
-                minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                padding: '5px 11px',
+                // V4-3 — 값은 --touch-min 이 진다(판정회신 증분2 B). 44 를 손으로 적지 않는다:
+                //    :root 46 · font-small 44 · font-large 52 로 전 모드가 하한 위이고
+                //    글꼴 모드를 자동으로 따라온다.
+                minHeight: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                padding: '5px var(--sp-md)',
                 borderRadius: 'var(--radius-pill)',
                 fontSize: 'var(--fs-xs)', fontWeight: 500, letterSpacing: 0,
                 // ⚠️ 선택색을 인라인으로 주지 않는다 — 인라인은 모든 @layer 를 이겨
@@ -623,7 +636,7 @@ export default async function BlogPage({ searchParams }: Props) {
         <section aria-labelledby="blog-apt-groups" style={{ marginBottom: 'var(--sp-md)' }}>
           <h2
             id="blog-apt-groups"
-            style={{ fontSize: 12, fontWeight: 500, letterSpacing: 0, color: 'var(--text-tertiary)', margin: '0 0 6px' }}
+            style={{ fontSize: 'var(--fs-2xs)', fontWeight: 500, letterSpacing: 0, color: 'var(--text-tertiary)', margin: '0 0 var(--sp-sm)' }}
           >
             현장별로 모아 보기
           </h2>
@@ -634,7 +647,7 @@ export default async function BlogPage({ searchParams }: Props) {
                 href={`/apt/${encodeURIComponent(g.slug)}`}
                 style={{
                   minHeight: 44, display: 'inline-flex', alignItems: 'center',
-                  padding: '5px 10px',
+                  padding: '5px var(--sp-md)',
                   borderRadius: 'var(--radius-pill)',
                   fontSize: 'var(--fs-2xs)', fontWeight: 400, letterSpacing: 0,
                   background: 'var(--bg-surface)',
@@ -656,7 +669,7 @@ export default async function BlogPage({ searchParams }: Props) {
         {CATS.map(c => (
           <Link key={c.key} href={`/blog${c.key !== 'all' ? `?category=${c.key}` : ''}${sort !== 'latest' ? `${c.key !== 'all' ? '&' : '?'}sort=${sort}` : ''}${q ? `${c.key !== 'all' || sort !== 'latest' ? '&' : '?'}q=${q}` : ''}`}
             style={{
-              padding: '8px 14px', minHeight: 44, fontSize: 'var(--fs-sm)', fontWeight: activeTab === c.key ? 600 : 500,
+              padding: 'var(--sp-sm) var(--sp-lg)', minHeight: 'var(--touch-min)', fontSize: 'var(--fs-sm)', fontWeight: activeTab === c.key ? 600 : 500,
               color: activeTab === c.key ? 'var(--brand)' : 'var(--text-tertiary)',
               textDecoration: 'none', flexShrink: 0,
               borderBottom: activeTab === c.key ? '2px solid var(--brand)' : '2px solid transparent',
@@ -667,7 +680,7 @@ export default async function BlogPage({ searchParams }: Props) {
           </Link>
         ))}
         <Link href="/blog/series" style={{
-          padding: '8px 14px', fontSize: 'var(--fs-sm)', fontWeight: 500,
+          padding: 'var(--sp-sm) var(--sp-lg)', minHeight: 'var(--touch-min)', fontSize: 'var(--fs-sm)', fontWeight: 500,
           color: 'var(--brand)', textDecoration: 'none', flexShrink: 0,
           borderBottom: '2px solid transparent',
           display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)',
@@ -718,7 +731,7 @@ export default async function BlogPage({ searchParams }: Props) {
             <span>제목</span>
             <span>발행</span>
           </div>
-          {listPosts.map((p: any) => {
+          {listPosts.map((p: any, i: number) => {
             const catColor = CAT_COLORS[p.category] || 'var(--text-tertiary)';
             const catLabel = POST_CAT_LABEL[p.category] || p.category;
             const readMin = p.reading_time_min || 3;
@@ -726,17 +739,22 @@ export default async function BlogPage({ searchParams }: Props) {
             const now = Date.now();
             const diff = now - d.getTime();
             const dateStr = diff < 86400000 ? '오늘' : diff < 172800000 ? '어제' : diff < 604800000 ? `${Math.floor(diff / 86400000)}일 전` : d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
-            const isHot = (p.view_count ?? 0) >= 100;
+            // V4-3 — 썸네일은 «상위 2건만». 이미지 승격이 목록 전체에 걸리면 밀도가
+            // 카드로 돌아간다(§1-1 「목록을 카드로 만들지 않는다」). 나머지는 텍스트 행이다.
+            const withThumb = i < 2;
             return (
               // v3 커밋5: 요약(excerpt)을 뺐다 — 모바일에서 16건 전부 한 줄 말줄임으로 잘려
               // 정보 구실을 못 했다. 그 폭을 제목 2줄에 몰아준다.
               // 좌측 칩 = 분류, 우측 = 발행일 + 읽는 시간.
-              <Link key={p.id} href={`/blog/${p.slug}`} className="kd-lrow kd-lrow--thumb" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Link key={p.id} href={`/blog/${p.slug}`} className={withThumb ? 'kd-lrow kd-lrow--thumb' : 'kd-lrow'} style={{ textDecoration: 'none', color: 'inherit' }}>
                 {/* v4-C7-2: 판정은 safe-image.ts 한 곳에서만 한다 — 새 함수를 만들면
                     OG 판정과 목록 판정이 갈린다. 외부 스크랩(발행분 24.7%)은 통과시키지 않는다.
                     ⚠️ 폴백을 생성 OG 카드로 두지 않았다 (C7-1 과 같은 이유):
-                       텍스트 카드라 64px 에서 글씨가 안 보인다. 같은 크기 이니셜 블록이 낫다. */}
-                <ListThumb src={listThumb(p, postImageMap)} name={p.title || ''} />
+                       텍스트 카드라 64px 에서 글씨가 안 보인다. 같은 크기 이니셜 블록이 낫다.
+                    ⚠️ 썸네일이 없는 행도 «칸을 비우지 않는다» — .kd-lrow 는 3열 그리드라
+                       첫 칸이 사라지면 제목이 좌측으로 밀려 상·하위 행의 축이 어긋난다.
+                       그래서 빈 span 하나로 칸을 지킨다(폭 0 이라 밀도는 그대로다). */}
+                {withThumb ? <ListThumb src={listThumb(p, postImageMap)} name={p.title || ''} /> : <span />}
 
                 <span style={{ minWidth: 0 }}>
                   <h2 className="kd-lrow-t is-two" style={{ margin: 0 }}>
@@ -745,10 +763,16 @@ export default async function BlogPage({ searchParams }: Props) {
                     </span>
                     {q ? highlightTitle(p.title, q) : p.title}
                   </h2>
-                  {(isHot || (p.comment_count || 0) > 0 || (p.helpful_count || 0) > 0) && (
+                  {/* ⛔ V4-3 — 「👀 조회수」와 「HOT」을 걷어냈다. 둘 다 근거가
+                      `blog_posts.view_count` 인데 그 값이 «합성» 이다 — 실측(위 주석):
+                      발행분 합계 약 49만 vs page_views 30일 실조회 2,617건, 100배 괴리.
+                      저장소는 이미 인기순·인기글·큐레이션 선정을 같은 이유로 걷어냈고
+                      「컬럼과 RPC 는 남기고 화면에서만 뺀다」가 그때의 판정이다.
+                      이 두 곳이 «남아 있었다» — HOT 은 같은 값이 라벨만 갈아입은 것이라
+                      조회수만 지우면 근거 없는 최상급이 그대로 산다(§2-2 · 「인기」 금칙의 연장).
+                      ⚠️ 계측이 붙어 값이 실측이 되면 그때 되살린다. 컬럼은 그대로 둔다. */}
+                  {((p.comment_count || 0) > 0 || (p.helpful_count || 0) > 0) && (
                     <span className="kd-lrow-m">
-                      {isHot && <span className="kd-lrow-m-fix" style={{ color: 'var(--accent-red)', fontWeight: 500 }}>HOT</span>}
-                      <span className="kd-lrow-m-fix">👀 {p.view_count > 0 ? p.view_count.toLocaleString() : 0}</span>
                       {(p.comment_count || 0) > 0 && <span className="kd-lrow-m-fix">💬 {p.comment_count}</span>}
                       {(p.helpful_count || 0) > 0 && <span className="kd-lrow-m-fix" style={{ color: 'var(--accent-green)' }}>👍 {p.helpful_count}</span>}
                     </span>
@@ -757,7 +781,7 @@ export default async function BlogPage({ searchParams }: Props) {
 
                 <span className="kd-lrow-r">
                   {dateStr}
-                  <span style={{ display: 'block', marginTop: 1, fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>
+                  <span style={{ display: 'block', marginTop: 1, fontSize: 'var(--fs-3xs)', fontWeight: 600, color: 'var(--text-tertiary)' }}>
                     {readMin}분
                   </span>
                 </span>
@@ -776,34 +800,40 @@ export default async function BlogPage({ searchParams }: Props) {
         <summary
           style={{
             cursor: 'pointer', listStyle: 'revert',
-            padding: '8px 2px',
-            fontSize: 13, fontWeight: 500, letterSpacing: 0,
+            padding: 'var(--sp-sm) 2px',
+            fontSize: 'var(--fs-xs)', fontWeight: 500, letterSpacing: 0,
             color: 'var(--text-secondary)',
           }}
         >
           세부 분류
         </summary>
-      {/* 서브카테고리 칩 */}
+      {/* 서브카테고리 칩
+          V4-3 — 서브칩을 «기존 네이비 표준» 에 얹었다(판정회신 증분6 단서).
+          .apt-pill-scroll a[aria-current='true'] 가 screens.css 에 이미 있고
+          「H5 에서 선택은 전 화면 공통으로 네이비」가 그때의 판정이다.
+          여기만 인라인 --brand(파랑)로 갈라져 있었다 — 새 표준을 만들지 않고 붙였다.
+          ⚠️ 선택색을 인라인으로 주지 «않는다». 인라인은 모든 @layer 를 이겨
+             screens.css 의 네이비 규칙이 안 먹는다(같은 파일 위쪽에 같은 주의가 있다). */}
       {subChips && (
-        <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none' }}>
+        <div className="apt-pill-scroll" style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none' }}>
           <Link href={`/blog?category=${category}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
+            aria-current={!sub ? 'true' : undefined}
             style={{
-              minHeight: 44, display: 'inline-flex', alignItems: 'center',
-              padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: !sub ? 600 : 500,
-              background: !sub ? 'var(--brand)' : 'var(--bg-hover)',
-              color: !sub ? 'var(--text-inverse)' : 'var(--text-tertiary)',
-              textDecoration: 'none', flexShrink: 0, border: 'none',
+              padding: 'var(--sp-xs) var(--sp-md)', minHeight: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: !sub ? 600 : 500,
+              background: !sub ? undefined : 'var(--bg-hover)',
+              color: !sub ? undefined : 'var(--text-tertiary)',
+              textDecoration: 'none', flexShrink: 0, border: '1px solid var(--border)',
             }}>
             전체
           </Link>
           {subChips.map(sc => (
             <Link key={sc.key} href={`/blog?category=${category}&sub=${sc.key}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
+              aria-current={sub === sc.key ? 'true' : undefined}
               style={{
-                minHeight: 44, display: 'inline-flex', alignItems: 'center',
-                padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: sub === sc.key ? 600 : 500,
-                background: sub === sc.key ? 'var(--brand)' : 'var(--bg-hover)',
-                color: sub === sc.key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
-                textDecoration: 'none', flexShrink: 0, border: 'none',
+                padding: 'var(--sp-xs) var(--sp-md)', minHeight: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: sub === sc.key ? 600 : 500,
+                background: sub === sc.key ? undefined : 'var(--bg-hover)',
+                color: sub === sc.key ? undefined : 'var(--text-tertiary)',
+                textDecoration: 'none', flexShrink: 0, border: '1px solid var(--border)',
               }}>
               {sc.label}
               <span style={{ marginLeft: 4, fontSize: 'var(--fs-3xs)', opacity: 0.65 }}>{sc.cnt}</span>
@@ -813,7 +843,7 @@ export default async function BlogPage({ searchParams }: Props) {
       )}
 
       {/* 정렬 + 인기태그 인라인 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
         <div style={{ display: 'flex', gap: 'var(--sp-xs)' }}>
           {/* ⛔ 「인기순」을 뺐다 — 근거 컬럼이 합성값이다(위 주석). 최신순만 남는다. */}
           {[
@@ -822,7 +852,7 @@ export default async function BlogPage({ searchParams }: Props) {
             <Link key={s.key} href={`/blog?${category !== 'all' ? `category=${category}&` : ''}sort=${s.key}${q ? `&q=${q}` : ''}`}
               style={{
                 minHeight: 44, display: 'inline-flex', alignItems: 'center',
-                padding: '4px 10px', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-2xs)', fontWeight: 600,
+                padding: 'var(--sp-xs) var(--sp-md)', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-2xs)', fontWeight: 600,
                 background: sort === s.key ? 'var(--brand)' : 'transparent',
                 color: sort === s.key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
                 textDecoration: 'none', border: sort === s.key ? 'none' : '1px solid var(--border)',
@@ -837,7 +867,7 @@ export default async function BlogPage({ searchParams }: Props) {
             {popularTags.slice(0, 4).map((t: any) => (
               <Link key={t.tag} href={`/blog?q=${encodeURIComponent(t.tag)}`}
                 style={{ minHeight: 44, display: 'inline-flex', alignItems: 'center',
-                  fontSize: 'var(--fs-3xs)', color: 'var(--text-tertiary)', padding: '3px 8px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', whiteSpace: 'nowrap', textDecoration: 'none' }}>
+                  fontSize: 'var(--fs-3xs)', color: 'var(--text-tertiary)', padding: '3px var(--sp-sm)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', whiteSpace: 'nowrap', textDecoration: 'none' }}>
                 #{t.tag}
               </Link>
             ))}
@@ -854,25 +884,25 @@ export default async function BlogPage({ searchParams }: Props) {
       {/* 세션70: 블로그 목록 회원가입 유도 */}
       {pageNum === 1 && !q && (
         <div style={{
-          margin: '12px 0', padding: '10px 14px', borderRadius: 'var(--radius-md)',
+          margin: 'var(--sp-md) 0', padding: 'var(--sp-md) var(--sp-lg)', borderRadius: 'var(--radius-md)',
           background: 'linear-gradient(135deg, var(--brand-bg), var(--accent-green-bg))',
           border: '1px solid var(--brand-border)',
           display: 'flex', alignItems: 'center', gap: 10,
         }}>
-          <span style={{ fontSize: 20, flexShrink: 0 }}>📬</span>
+          <span style={{ fontSize: 'var(--fs-lg)', flexShrink: 0 }}>📬</span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>매일 투자 분석 받아보기</div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>가입하면 전체 글 무제한 · 알림까지 무료</div>
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)' }}>매일 투자 분석 받아보기</div>
+            <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-secondary)' }}>가입하면 전체 글 무제한 · 알림까지 무료</div>
           </div>
           <Link href="/login?redirect=/blog" style={{
-            padding: '6px 14px', borderRadius: 'var(--radius-pill)',
+            padding: 'var(--sp-sm) var(--sp-lg)', borderRadius: 'var(--radius-pill)',
             background: 'var(--kakao-bg)', color: 'var(--kakao-text)',
-            fontWeight: 500, fontSize: 12, textDecoration: 'none', flexShrink: 0,
+            fontWeight: 500, fontSize: 'var(--fs-2xs)', textDecoration: 'none', flexShrink: 0,
           }}>가입</Link>
         </div>
       )}
       {topSeries.length > 0 && (
-        <div style={{ marginTop: 'var(--sp-2xl)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
+        <div style={{ marginTop: 'var(--sp-2xl)', padding: 'var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
             <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>📚 글이 많은 시리즈</span>
             <Link href="/blog/series" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>전체 보기 →</Link>
@@ -920,7 +950,7 @@ export default async function BlogPage({ searchParams }: Props) {
             { href: '/daily/서울', label: '📰 데일리 리포트' },
             { href: '/apt/diagnose', label: '🎯 가점 계산기' },
           ].map(l => (
-            <Link key={l.href} href={l.href} style={{ padding: '5px 10px', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-xs)', fontWeight: 500, background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', border: '1px solid var(--border)' }}>
+            <Link key={l.href} href={l.href} style={{ padding: '5px var(--sp-md)', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-xs)', fontWeight: 500, background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', border: '1px solid var(--border)' }}>
               {l.label}
             </Link>
           ))}
