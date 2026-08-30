@@ -8,7 +8,7 @@
 // ⚠️ 문구가 LeadForm · SiteActionBar · SiteDetailRail 세 곳에 흩어져 있었다.
 //    한 곳에서만 고치면 화면마다 다른 말을 한다 — 여기 한 벌로 모은다.
 
-import { PIPELINE_STAGES } from '@/lib/apt/lifecycle-label';
+import { UPCOMING_SALE_STAGES } from '@/lib/apt/lifecycle-label';
 
 export type LeadCopyKind = 'pre_notice' | 'offering' | 'existing' | 'home' | 'resale';
 
@@ -36,7 +36,9 @@ export interface LeadCopy {
  * 공고 전 정비사업 단계. 여기에 `분양` 이라는 말을 쓰지 않는다.
  * `contract_signing` 은 이미 분양이 끝난 계약 단계라 여기 넣지 않는다.
  */
-const PRE_NOTICE = new Set<string>([...PIPELINE_STAGES, 'site_planning', 'pre_announcement']);
+// ⚠️ 여기서 목록을 «다시 적지 않는다». 같은 집합을 두 곳에 적으면 한쪽만 늘어난다 —
+//    셀렉 카운트가 쓰는 UPCOMING_SALE_STAGES 와 «같은 상수» 여야 문구와 숫자가 갈리지 않는다.
+const PRE_NOTICE = new Set<string>(UPCOMING_SALE_STAGES);
 
 /**
  * 준공된 기축. 그 지역 분양 정보를 안내한다 — 이 단지를 파는 게 아니다.

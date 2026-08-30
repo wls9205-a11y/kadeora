@@ -26,6 +26,33 @@ export const PIPELINE_STAGES = [
 export type PipelineStage = (typeof PIPELINE_STAGES)[number];
 
 /**
+ * 「분양예정」 — **아직 모집공고가 안 났다.** 공고 전 정비사업 5단계 + 부지계획 + 분양 예고.
+ *
+ * ⚠️ 이 집합은 `lead-copy.ts` 의 `pre_notice` 와 «같은 집합» 이다. 거기서 다시 적지 않고
+ *    이 상수를 가져다 쓴다 — 어휘를 두 곳에 적으면 한쪽만 늘어난다(STATUS 공리).
+ * ⛔ 이 단계에 「분양중」·「분양 개시」를 쓰지 않는다. 분양가도 일정도 아직 없다(§7-1).
+ */
+export const UPCOMING_SALE_STAGES = [
+  ...PIPELINE_STAGES,
+  'site_planning',
+  'pre_announcement',
+] as const;
+
+/**
+ * 「분양중」 — **지금 신청할 수 있다.** 접수 중 · 발표 대기 · 발표 · 미분양 잔여세대.
+ *
+ * ⚠️ `unsold_active`(미분양)를 여기 넣은 것은 «지금 살 수 있다» 는 축이 같아서다.
+ *    화면에서 「미분양」이라는 말을 지우려는 것이 아니다 — 라벨은 단계별로 그대로 간다.
+ * ⛔ `move_in_*`·`post_move_in` 은 «분양» 이 아니다. 리드폼 대상이라도 여기 넣지 않는다.
+ */
+export const OPEN_SALE_STAGES = [
+  'subscription_open',
+  'award_pending',
+  'award_announced',
+  'unsold_active',
+] as const;
+
+/**
  * 단계 → 한글 라벨.
  * 공고 전 5단계 → 청약 라인 → 입주 이후 → 축이 다른 상태 순으로 적는다.
  */
