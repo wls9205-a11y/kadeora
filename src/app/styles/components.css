@@ -744,3 +744,182 @@
   @media (max-width: 900px) { .kd-rg-grid { grid-template-columns: repeat(4, 1fr); } }
   @media (max-width: 480px) { .kd-rg-grid { grid-template-columns: repeat(3, 1fr); } }
 }
+
+
+/* ── V4-1 · 「네이비 인덱스」 마스트 2종 + 섹션 머리 ─────────────────
+   시안: docs/디자인시안_v4_네이비인덱스.html (V4-0 · 459cf552)
+   지시서 DS3-V4 §3 + 판정회신 증분1(8/30).
+
+   ⚠️ 여기 있는 것은 «면과 리듬» 뿐이다. 검색창 자체는 UniversalSearchBar 의
+      hero variant 가 그린다 — .kd-masthead__search 는 «자리» 이지 입력창이 아니다.
+      지역 셀렉도 마찬가지로 U-1b 트리거를 그대로 꽂는다. 재구현 금지(§6).
+
+   ⚠️ 마스트는 «단색» --brand-navy 다. 그라디언트가 아니다 —
+      screens.css:478,579 의 실측 주석이 단색 기준이고, 그라디언트 위 대비는
+      자리마다 달라져 실측이 무의미해진다. --brand-hero-bg 는 썸네일·카드·버튼 몫.
+
+   대비 실측(합성, 바탕 #0B2A6B): 흰 13.48 · --brand-gold 8.54
+     · rgba(255,255,255,.72) → #BBC3D6 7.62  (마스트 태그라인)
+     · rgba(255,255,255,.62) → #A2AEC7 6.03  (서브마스트 보조 한 줄)
+     · rgba(255,255,255,.45) → #79 8A AE 3.87 (테두리 — 비텍스트 3:1 하한 통과)
+   전부 텍스트 4.5:1 하한 위. 반투명은 sub-card--navy 의 기존 관례를 따른다
+   (신규 토큰을 만들지 않는다 — §2 토큰 신설 0).
+
+   ⚠️ 시안의 800 굵기·17px·19px 는 사다리로 «스냅» 했다. 굵기는 400/500/600/700
+      네 단이 전부이고(§1), 크기는 --fs-* 사다리 밖 값을 만들지 않는다. */
+@layer patterns {
+
+  /* 홈 마스트헤드 — 단색 네이비 + 하단 골드 2px */
+  .kd-masthead {
+    position: relative;
+    background: var(--brand-navy);
+    padding: var(--sp-lg) var(--sp-xl) var(--sp-xl);
+  }
+  .kd-masthead::after,
+  .kd-submast::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 2px;
+    background: var(--brand-gold);
+  }
+  .kd-masthead__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-sm);
+  }
+  .kd-masthead__logo {
+    font-size: var(--fs-md);
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--text-inverse);
+  }
+  /* 로고 뒤 골드 점 — 도형이라 흰 바탕 금칙(골드 텍스트)에 걸리지 않는다 */
+  .kd-masthead__logo::after {
+    content: "";
+    display: inline-block;
+    width: 5px; height: 5px;
+    border-radius: var(--radius-pill);
+    background: var(--brand-gold);
+    margin-left: 3px;
+    vertical-align: 4px;
+  }
+  .kd-masthead__tag {
+    margin-top: var(--sp-xs);
+    font-size: var(--fs-2xs);
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.72);
+  }
+  /* 검색 «자리». 안에 들어오는 것은 UniversalSearchBar hero variant 다
+     (hotkey=false — 헤더 인스턴스가 이미 true 라 두 벌이면 단축키가 겹친다). */
+  .kd-masthead__search { margin-top: var(--sp-md); }
+
+  /* 탭 헤더 서브마스트 — 마스트헤드의 축소 변형 */
+  .kd-submast {
+    position: relative;
+    background: var(--brand-navy);
+    padding: var(--sp-sm) var(--sp-xl) var(--sp-md);
+  }
+  .kd-submast__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-sm);
+  }
+  .kd-submast__title {
+    font-size: var(--fs-base);
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--text-inverse);
+  }
+  /* 우측 슬롯 — 지역 셀렉 트리거·검색 아이콘이 들어온다.
+     ⚠️ 여기서는 «칩이 곧 타깃» 이다. kd-lrow 처럼 행이 대신 져 줄 것이 없으므로
+        --touch-min 을 칩 자신이 진다(46 / font-small 44 / font-large 52 — 전 모드 44 이상). */
+  .kd-submast__action {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-xs);
+    min-height: var(--touch-min);
+    padding: 0 var(--sp-md);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: var(--radius-sm);
+    background: none;
+    font-size: var(--fs-2xs);
+    font-weight: 500;
+    color: var(--text-inverse);
+  }
+  .kd-submast__sub {
+    margin-top: var(--sp-xs);
+    font-size: var(--fs-3xs);
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.62);
+  }
+
+  /* ── 섹션 머리 (SectionHeader.tsx 의 인라인 회수분) ──────────────
+     ⚠️ 값은 «옮긴 것» 이지 바꾼 것이 아니다. 다만 사다리 밖이던 두 곳
+        (marginBottom 10 · SectionLink marginTop 12)은 --sp-* 로 스냅했다.
+     eyebrow 는 s2 의 모노 스펙 그대로다 — 10px/600/.8 안은 폐기(판정 ④). */
+  .kd-sechead {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--sp-sm);
+    margin-bottom: var(--sp-md);
+  }
+  .kd-sechead__main { min-width: 0; }
+  /* 골드 룰 — V4 증분. 흰 바탕 위 골드는 «도형만» 허용된다(§6).
+     실측 #FFC53D on #FFFFFF = 1.58:1 — 낮다. 그래서 이 룰은 «장식» 이고,
+     섹션 식별은 제목 텍스트가 진다. 룰이 안 보여도 잃는 정보가 없어야 한다. */
+  .kd-sechead__rule {
+    width: 22px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--brand-gold);
+    margin-bottom: var(--sp-sm);
+  }
+  .kd-sechead__eb {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--brand);
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .kd-sechead__title {
+    margin: 0;
+    font-size: var(--fs-xl);
+    font-weight: 600;
+    letter-spacing: -.02em;
+    line-height: 1.25;
+    color: var(--text-primary);
+    word-break: keep-all;
+  }
+  .kd-sechead__meta {
+    flex-shrink: 0;
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+    white-space: nowrap;
+  }
+
+  /* 목록 바닥 문장형 이동 경로. 8/26 「더보기는 바닥에 문장으로」의 구현이다 —
+     ⛔ 섹션 머리 우측에 화살표 링크를 «만들지 않는다»(판정 ④). */
+  .kd-seclink {
+    margin-top: var(--sp-md);
+    padding-top: var(--sp-md);
+    border-top: 1px solid var(--border);
+  }
+  .kd-seclink > a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-xs);
+    min-height: var(--touch-min);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+}

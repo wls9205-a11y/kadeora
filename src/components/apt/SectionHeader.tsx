@@ -5,6 +5,16 @@
 //
 // 하단 링크는 버튼이 아니다. 페이지 안에서 CTA 는 카드/CTA바가 담당하고,
 // 섹션 링크는 "더 있다"는 신호만 준다.
+//
+// V4-1 (2026-08-30, 지시서 DS3-V4 §3-3 + 판정회신 증분1 ④)
+//   - 인라인 style 을 .kd-sechead* 로 «동반 회수» 했다. 값은 옮긴 것이지 바꾼 것이
+//     아니다 — 사다리 밖이던 여백 두 곳만 --sp-* 로 스냅했다(components.css 주석).
+//   - 골드 룰은 «opt-in» 이다. rule 을 넘기지 않은 기존 호출 13곳은 그대로 산다.
+//     화면 전환은 각 화면 커밋(V4-2~V4-5)이 지고, 이 커밋은 전역을 흔들지 않는다.
+//   ⛔ eyebrow 를 10px/600 으로 바꾸지 말 것. 모노 스펙은 s2 의 것이고,
+//      그 안은 --fs-* 사다리 밖이라 폐기됐다.
+//   ⛔ 제목 «우측» 에 텍스트링크를 만들지 말 것. 이동 경로는 목록 바닥의
+//      SectionLink 한 벌뿐이다(8/26 「더보기는 바닥에 문장으로」).
 
 import React from 'react';
 import Link from 'next/link';
@@ -20,67 +30,27 @@ export interface SectionHeaderProps {
   title: string;
   /** h2 의 id — 상위 section 의 aria-labelledby 와 짝을 맞춘다. */
   id?: string;
-  /** 제목 우측 보조 텍스트 (건수·정렬 기준 등). */
+  /** 제목 우측 보조 텍스트 (건수·정렬 기준 등). 링크가 아니다. */
   meta?: React.ReactNode;
+  /**
+   * V4 골드 룰(22×2)을 제목 위에 얹는다. 기본 false.
+   * 장식이다 — 룰이 안 보여도 섹션 식별은 제목 텍스트가 진다
+   * (실측 #FFC53D on #FFFFFF = 1.58:1).
+   */
+  rule?: boolean;
 }
 
-export default function SectionHeader({ eyebrow, title, id, meta }: SectionHeaderProps) {
+export default function SectionHeader({ eyebrow, title, id, meta, rule }: SectionHeaderProps) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'flex-end',
-        justifyContent: 'space-between',
-        gap: 'var(--sp-sm)',
-        marginBottom: 10,
-      }}
-    >
-      <div style={{ minWidth: 0 }}>
-        {eyebrow ? (
-          <div
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 'var(--fs-xs)',
-              letterSpacing: '.14em',
-              textTransform: 'uppercase',
-              color: 'var(--brand)',
-              fontWeight: 500,
-              marginBottom: 3,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {eyebrow}
-          </div>
-        ) : null}
-        <h2
-          id={id}
-          style={{
-            fontSize: 'var(--fs-xl)',
-            fontWeight: 600,
-            letterSpacing: '-.02em',
-            lineHeight: 1.25,
-            margin: 0,
-            color: 'var(--text-primary)',
-            wordBreak: 'keep-all',
-          }}
-        >
+    <div className="kd-sechead">
+      <div className="kd-sechead__main">
+        {rule ? <div className="kd-sechead__rule" aria-hidden="true" /> : null}
+        {eyebrow ? <div className="kd-sechead__eb">{eyebrow}</div> : null}
+        <h2 id={id} className="kd-sechead__title">
           {title}
         </h2>
       </div>
-      {meta ? (
-        <span
-          style={{
-            fontSize: 'var(--fs-xs)',
-            color: 'var(--text-tertiary)',
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-          }}
-        >
-          {meta}
-        </span>
-      ) : null}
+      {meta ? <span className="kd-sechead__meta">{meta}</span> : null}
     </div>
   );
 }
@@ -96,18 +66,8 @@ export interface SectionLinkProps {
  */
 export function SectionLink({ href, children }: SectionLinkProps) {
   return (
-    <div style={{ borderTop: '1px solid var(--border)', marginTop: 12, paddingTop: 'var(--sp-md)' }}>
-      <Link
-        href={href}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 'var(--sp-xs)',
-          fontSize: 'var(--fs-sm)',
-          color: 'var(--text-secondary)',
-          textDecoration: 'none',
-        }}
-      >
+    <div className="kd-seclink">
+      <Link href={href}>
         {children}
         <span aria-hidden="true">↗</span>
       </Link>
