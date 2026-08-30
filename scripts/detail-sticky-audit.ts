@@ -19,7 +19,10 @@ const PATH = process.argv[3] ?? '/apt/%EA%B7%B8%EB%9E%91%EB%9D%BC%ED%81%AC-%EC%9
     await page.waitForTimeout(700);
     const r = await page.evaluate(() => {
       const bar = document.querySelector('.kd-jumpbar') as HTMLElement | null;
-      const rail = document.querySelector('.kd-detail-rail') as HTMLElement | null;
+      // ⚠️ 붙는 것은 «바깥 레일이 아니라» 안쪽 .kd-rail-sticky 다(H6-6 에서 이중 sticky 를 정리했다).
+      //    바깥을 재면 position:static 이 나와 「안 붙는다」고 오독하게 된다 — 자를 대상에 맞춘다.
+      const rail = document.querySelector('.kd-rail-sticky') as HTMLElement | null;
+      const railBox = document.querySelector('.kd-detail-rail') as HTMLElement | null;
       const header = document.querySelector('header') as HTMLElement | null;
       const chips = bar ? Array.from(bar.querySelectorAll('a')).map((a) => (a as HTMLElement).innerText.trim()) : [];
       const cs = rail ? getComputedStyle(rail) : null;
@@ -28,13 +31,15 @@ const PATH = process.argv[3] ?? '/apt/%EA%B7%B8%EB%9E%91%EB%9D%BC%ED%81%AC-%EC%9
         barH: bar ? Math.round(bar.getBoundingClientRect().height) : 0,
         barTop: bar ? Math.round(bar.getBoundingClientRect().top) : 0,
         headerH: header ? Math.round(header.getBoundingClientRect().height) : 0,
-        railTopVar: cs ? cs.getPropertyValue('--rail-top').trim() : '(레일 없음)',
+        railTopVar: railBox ? getComputedStyle(railBox).getPropertyValue('--rail-top').trim() : '(레일 없음)',
+        railPos: cs ? cs.position : '-',
+        railCssTop: cs ? cs.top : '-',
         railTop: rail ? Math.round(rail.getBoundingClientRect().top) : null,
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       };
     });
     const expected = r.headerH + r.barH;
-    console.log(`${w}px | 헤더 ${r.headerH} + 바 ${r.barH} = ${expected} | 바 top ${r.barTop} | rail-top ${r.railTopVar} | 레일 실제 top ${r.railTop} | 넘침 ${r.overflow}`);
+    console.log(`${w}px | 헤더 ${r.headerH} + 바 ${r.barH} = ${expected} | 바 top ${r.barTop} | rail-top ${r.railTopVar}(css ${r.railCssTop}/${r.railPos}) | 레일 실제 top ${r.railTop} | 넘침 ${r.overflow}`);
     console.log(`      칩 ${r.chips.length}: ${r.chips.join(' · ')}`);
     await ctx.close();
   }

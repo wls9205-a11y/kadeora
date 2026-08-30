@@ -1396,7 +1396,10 @@
 
   /* 종목/부동산 상세: flex 아이템 넘침 방지 */
   @media (max-width: 479.98px) {
-    article { overflow-x: hidden; }
+    /* ⛔ hidden 이면 이 article 안의 sticky 가 죽는다 — 모바일에서 상세 점프바가
+       실제로 그렇게 죽어 있었다(실측: 스크롤 2,400px 에서 top -1,835).
+       clip 은 똑같이 잘라내면서 스크롤 상자를 만들지 않는다. */
+    article { overflow-x: clip; }
   }
 
   /* FeedStatusBar: 초소형 화면 대응 */
