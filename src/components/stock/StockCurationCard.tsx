@@ -69,10 +69,10 @@ export default function StockCurationCard({ data }: { data: StockIssueScore }) {
               <span style={{ flexShrink: 0, width: 34, fontWeight: 500, color: 'var(--text-secondary)' }}>
                 {REASON_LABELS[g.tag]}
               </span>
-              <span style={{ flex: 1, height: 4, borderRadius: 999, background: 'var(--bg-sunken)', overflow: 'hidden' }}>
+              <span style={{ flex: 1, height: 4, borderRadius: 'var(--radius-pill)', background: 'var(--bg-sunken)', overflow: 'hidden' }}>
                 <span
                   style={{
-                    display: 'block', height: '100%', borderRadius: 999,
+                    display: 'block', height: '100%', borderRadius: 'var(--radius-pill)',
                     width: `${Math.round(Math.min(1, g.value) * 100)}%`,
                     background: 'var(--brand)',
                   }}

@@ -77,40 +77,25 @@ export default function StockTabCarousel({
 
   return (
     <div onKeyDown={handleKeyDown} tabIndex={-1}>
-      {/* Tab pills */}
-      <nav
-        role="tablist"
-        aria-label="carousel tabs"
-        style={{
-          display: 'flex', flexWrap: 'wrap', gap: 4,
-          padding: '8px 6px', margin: '0 -6px 4px',
-          background: 'rgba(255,255,255,0.92)',
-          backdropFilter: 'blur(8px)',
-          borderBottom: '1px solid var(--border)',
-        }}
-      >
-        {tabs.map((t, i) => {
-          const isActive = i === active;
-          return (
-            <button
-              key={t.key}
-              role="tab"
-              aria-selected={isActive}
-              onClick={() => jumpTo(i)}
-              style={{
-                padding: '5px 10px', borderRadius: 'var(--radius-pill)',
-                fontSize: 'var(--fs-2xs)', fontWeight: isActive ? 600 : 500,
-                // ✅ DS-3 전 화면 실측 후 --surface-inverse 를 신설해 «의미를 맞췄다»(2026-08-29).
-                //    이전에는 --text-primary 를 배경으로 썼다 — 색은 맞고 의미는 어긋난 흡수였다.
-                background: isActive ? 'var(--surface-inverse)' : 'var(--bg-elevated)',
-                color: isActive ? 'var(--text-inverse)' : 'var(--text-secondary)',
-                border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
-              }}
-            >
-              {t.label}
-            </button>
-          );
-        })}
+      {/* V4-2 — 필 → 언더라인 «구조» 교체(판정회신 증분1 ②).
+          모양은 .kd-utab 한 벌이 진다. StockFilterBars 시장 축과 «같은 클래스» 다 —
+          탭 문법이 화면마다 갈리던 것이 이번 리뉴얼의 발단이다.
+          ⚠️ 여기서 배경을 rgba(255,255,255,.92) + backdrop-filter 로 두던 것을 버렸다.
+             backdrop-filter 는 position:fixed 자손의 «기준 상자» 를 만든다 — 결함 1호가
+             바로 그 사고였다. .kd-utabs 는 불투명 배경만 쓴다.
+          role=tab / aria-selected 체계는 그대로다. */}
+      <nav role="tablist" aria-label="carousel tabs" className="kd-utabs" style={{ margin: '0 -6px 4px' }}>
+        {tabs.map((t, i) => (
+          <button
+            key={t.key}
+            role="tab"
+            aria-selected={i === active}
+            onClick={() => jumpTo(i)}
+            className="kd-utab"
+          >
+            {t.label}
+          </button>
+        ))}
       </nav>
 
       <div

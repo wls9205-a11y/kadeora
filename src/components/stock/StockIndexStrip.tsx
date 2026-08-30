@@ -16,10 +16,13 @@ export type StripData = {
   usdkrwAt: string | null;
 };
 
+// V4-2 — 이 화면의 하드코딩 여백만 «동반 회수» 한다(전수 금지).
+// ⚠️ 데이터는 손대지 않는다. 시안의 「코스피 2,847.36」 같은 «지수 레벨» 은
+//    이 저장소에 없는 값이다(파일 최상단 주석). 스킨만 바꾼다.
 const CELL: React.CSSProperties = {
   flex: 1,
   minWidth: 0,
-  padding: '8px 10px',
+  padding: 'var(--sp-sm) var(--sp-md)',
   borderRight: '1px solid var(--border)',
 };
 
@@ -56,7 +59,7 @@ export default function StockIndexStrip({ data }: { data: StripData }) {
       style={{
         display: 'flex',
         alignItems: 'stretch',
-        margin: '0 6px 10px',
+        margin: '0 var(--sp-sm) var(--sp-md)',
         border: '1px solid var(--border)',
         borderRadius: 'var(--radius-md)',
         background: 'var(--bg-surface)',

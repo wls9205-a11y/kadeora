@@ -14,13 +14,19 @@ import {
   type StockParams,
 } from '@/lib/stock/filters';
 
+// V4-2 — 두 축은 «문법이 달라야» 한다.
+//   시장 = 1차 축(무엇을 보는가) → 언더라인 탭 .kd-utab
+//   정렬·테마 = 2차 필터(어떻게 거르는가) → 칩 유지
+// 셋 다 언더라인으로 만들면 v7-C1 이 세운 2축 구분이 사라진다. 시안의 /stock 도
+// 언더라인 줄은 «하나» 뿐이다(국내/해외/관심/업종 = 시장 축).
 const CHIP: React.CSSProperties = {
   flexShrink: 0,
   display: 'inline-flex',
   alignItems: 'center',
-  gap: 4,
-  minHeight: 32,
-  padding: '0 11px',
+  gap: 'var(--sp-xs)',
+  // 판정회신 증분2 B — 인터랙티브 타깃은 --touch-min 하한을 진다. 32 는 그 아래였다.
+  minHeight: 'var(--touch-min)',
+  padding: '0 var(--sp-md)',
   borderRadius: 'var(--radius-pill)',
   fontSize: 'var(--fs-2xs)',
   fontWeight: 600,
@@ -36,11 +42,11 @@ const chipStyle = (active: boolean): React.CSSProperties =>
 
 const ROW: React.CSSProperties = {
   display: 'flex',
-  gap: 6,
+  gap: 'var(--sp-sm)',
   overflowX: 'auto',
   WebkitOverflowScrolling: 'touch',
   scrollbarWidth: 'none',
-  padding: '0 6px 8px',
+  padding: '0 var(--sp-sm) var(--sp-sm)',
 };
 
 export default function StockFilterBars({
@@ -58,13 +64,11 @@ export default function StockFilterBars({
       <div
         role="group"
         aria-label="시장 선택"
+        className="kd-utabs"
         style={{
-          ...ROW,
           position: 'sticky',
           top: 'var(--kd-header-bottom)',
           zIndex: 60,
-          background: 'var(--bg-base)',
-          paddingTop: 6,
         }}
       >
         {MARKETS.map((m) => (
@@ -72,7 +76,7 @@ export default function StockFilterBars({
             key={m.key}
             href={stockHref(params, { market: m.key })}
             scroll={false}
-            style={chipStyle(params.market === m.key)}
+            className="kd-utab"
             aria-current={params.market === m.key ? 'true' : undefined}
           >
             {m.label}

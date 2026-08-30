@@ -155,7 +155,9 @@
   /* 탭 바 */
   /* 모바일: font-large 일 때 탭 글씨 축소 (화면에 5개 들어가야 하니까) */
   @media (max-width: 767.98px) {
-    html.font-large .kd-tab { font-size: var(--fs-xs); padding: var(--sp-xs) 0; }
+    /* V4-2: .kd-tab 짝 규칙은 «본체와 같이» 지웠다. 본체(components.css)가 사문이라
+       사라졌으므로 여기 남으면 아무 데도 안 걸리는 유령 규칙이 된다.
+       언더라인 탭(.kd-utab)은 --touch-min 과 --fs-2xs 로 모드를 이미 따라간다. */
     html.font-large .kd-pill { font-size: var(--fs-xs); padding: var(--sp-xs) var(--sp-sm); }
   }
 

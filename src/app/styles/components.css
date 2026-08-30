@@ -183,42 +183,6 @@
     font-weight: var(--kd-chip-fw, 600);
   }
 
-  /* /stock 탭 바.
-     ⚠️ 실측(2026-08-30) 소비처 «0» 이다 — 어느 tsx 도 .kd-tabbar 를 쓰지 않는다.
-        죽은 규칙이지만 값은 스택에서 파생시켜 둔다(살아나는 날 44 로 되살아나면
-        헤더 밑에 깔린다). 제거 여부는 안건. */
-  .kd-tabbar {
-    position: sticky;
-    top: var(--kd-header-bottom);
-    z-index: 10;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    padding: 8px 6px;
-    margin: 0 -6px 8px;
-    background: var(--bg-surface-translucent, rgba(13, 23, 48, 0.92));
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .kd-tab {
-    padding: 5px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
-    background: var(--bg-elevated);
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
-    text-decoration: none;
-    white-space: nowrap;
-  }
-
-  .kd-tab[aria-selected='true'] {
-    background: var(--brand);
-    color: #FFFFFF;
-    font-weight: 700;
-  }
-
   .kd-empty {
     padding: 16px;
     margin: 3px;
@@ -921,5 +885,75 @@
     font-size: var(--fs-sm);
     color: var(--text-secondary);
     text-decoration: none;
+  }
+}
+
+
+/* ── V4-2 · 언더라인 탭 (.kd-utabs / .kd-utab) ────────────────────────
+   판정회신 증분1 ② — 필 → 언더라인 «구조» 교체 승인분. 탭 문법이 화면마다
+   갈리던 것이 이번 리뉴얼의 발단이라, 구현을 «한 벌» 로 둔다.
+   여기 있는 것을 /stock 의 두 곳(StockFilterBars 시장 축 · StockTabCarousel)이
+   같이 쓴다 — 두 벌을 만들면 한쪽만 늘어난다.
+
+   활성은 «3중 신호» 다: 네이비 텍스트 + 굵기 600 + 골드 언더라인 2px.
+   ⚠️ 색 단독으로 상태를 전달하지 않는다. 골드 언더라인은 흰 바탕에서
+      #FFC53D on #FFFFFF = 1.58:1 뿐이라, 이 선이 «유일한» 신호가 되면
+      상태를 못 읽는 사용자가 생긴다. 텍스트 신호가 항상 동반돼야 한다.
+   ⛔ 텍스트 색이 안 변하는 「언더라인-온리」 변형을 만들지 말 것.
+
+   aria-selected 와 aria-current 를 «둘 다» 받는다 — 둘은 다른 것이고 여기서
+   섞이지 않는다. StockTabCarousel 은 role=tab 이라 aria-selected 이고,
+   StockFilterBars 시장 축은 Link(내비게이션)라 aria-current 다.
+
+   ⛔ backdrop-filter 를 넣지 않는다. 이 속성은 «position:fixed 자손의 기준
+      상자» 를 만든다 — 결함 1호(헤더 backdrop-filter 가 오버레이를 가뒀다)와
+      같은 계열이다. sticky 로 쓰는 바라서 그 사고가 그대로 재현된다.
+      그래서 반투명 대신 «불투명» --bg-base 를 쓴다. */
+@layer patterns {
+  .kd-utabs {
+    display: flex;
+    gap: var(--sp-xs);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    background: var(--bg-base);
+    border-bottom: 1px solid var(--border);
+  }
+  .kd-utabs::-webkit-scrollbar { display: none; }
+
+  .kd-utab {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    /* 인터랙티브 타깃은 --touch-min 하한을 진다(판정회신 증분2 B).
+       전 모드가 44 이상이다 — :root 46 · font-small 44 · font-large 52. */
+    min-height: var(--touch-min);
+    padding: 0 var(--sp-md);
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    font-size: var(--fs-2xs);
+    font-weight: 500;
+    color: var(--text-tertiary);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .kd-utab[aria-selected='true'],
+  .kd-utab[aria-current='true'] {
+    color: var(--brand-navy);
+    font-weight: 600;
+    border-bottom-color: var(--brand-gold);
+  }
+}
+
+/* 서브마스트 «풀블리드» 변형 — 목록 컨테이너(.kd-list) 안에서 쓸 때.
+   ⚠️ -8/-6 은 .kd-list 의 padding: 8px 6px 28px 을 «되돌리는» 값이다(위 504행).
+      둘은 같이 움직인다 — 한쪽만 바꾸면 네이비 면이 어긋나 뜬다.
+   ⚠️ ≥1024 에서는 .kd-list 가 2단 그리드라 이 상쇄를 «걸지 않는다». 한 칸짜리
+      본문 열에서 좌우로 삐져나오면 레일 거터를 침범한다. 데스크탑은 그대로 인셋. */
+@layer patterns {
+  @media (max-width: 1023.98px) {
+    .kd-submast--bleed { margin: -8px -6px 0; }
   }
 }

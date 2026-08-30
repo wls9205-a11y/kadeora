@@ -5,6 +5,7 @@
 // default = 이슈 (stock_issue_scores). 비로그인 시 6번째 카드 자리에 IssueGateCard 노출.
 // s262 Phase E (CAROUSEL v1): NEXT_PUBLIC_CAROUSEL_ENABLED 시 swipe carousel 모드.
 import { Suspense } from 'react';
+import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
@@ -357,10 +358,28 @@ export default async function StockPage({
     <Suspense>
       <div className="kd-list">
         <div className="kd-list-main">
+        {/* ⚠️ h1 은 «설명형 그대로» 둔다 — 「코스피 주식 — 거래대금 · #반도체」가
+            색인이 받는 문자열이다. 서브마스트의 「마켓」으로 갈아끼우면 그 신호를
+            버리게 된다. 그래서 서브마스트 제목은 heading 이 아니라 시각 라벨이고,
+            문서의 제목은 여기 하나뿐이다(제목 두 벌을 만들지 않는다). */}
         <h1 className="sr-only">
           {marketLabel(params.market)} 주식 — {sortLabel(params.sort)}
           {params.theme ? ` · ${params.theme}` : ''}
         </h1>
+
+        {/* V4-2 — 서브마스트. 단색 네이비 + 하단 골드 2px.
+            우측 슬롯은 «검색» 이다 — 지역 셀렉은 /apt 의 것이고 여기엔 축이 없다. */}
+        <div className="kd-submast kd-submast--bleed">
+          <div className="kd-submast__row">
+            <div className="kd-submast__title">마켓</div>
+            <Link href="/stock/search" className="kd-submast__action" aria-label="종목 검색">
+              검색
+            </Link>
+          </div>
+          <div className="kd-submast__sub">
+            분양 시장을 움직이는 숫자까지 한 화면에
+          </div>
+        </div>
 
         {/* v7-C2: 지수 스트립 3칸 한 줄 */}
         <StockIndexStrip data={strip} />
