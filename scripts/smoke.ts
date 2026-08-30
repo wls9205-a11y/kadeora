@@ -180,6 +180,14 @@ async function searchOverlay(where: string, page: Page) {
    * ⚠️ el.click() 은 덮여 있어도 성공한다. 사람 손가락이 닿는 곳은 elementFromPoint 다.
    *    노란 띠(fixed z110)가 헤더(sticky z100)를 덮던 시절, 스크롤 뒤 이 자리를 누르면
    *    검색이 아니라 «카톡방» 이 열렸다 — 오클릭은 안 보이는 것보다 나쁘다. */
+  /* ⚠️ Navigation 은 dynamic({ ssr:false }) 이다 — 헤더가 «하이드레이션 뒤에» 생긴다.
+   *    고정 대기(350ms)로 재면 어떤 날은 있고 어떤 날은 없다. 실제로 같은 커밋에서
+   *    실패가 9건 → 4건으로 흔들렸다. 깜빡이는 게이트는 없는 게이트보다 나쁘다.
+   *    → 「있을 때까지 기다렸다가」 잰다. 끝내 없으면 그때가 진짜 실패다. */
+  try {
+    await page.waitForSelector('header [aria-label="검색 열기"]', { state: 'attached', timeout: 8000 });
+  } catch { /* 아래 expect 가 실패로 기록한다 */ }
+
   for (const y of [0, 900]) {
     await page.evaluate((s) => window.scrollTo(0, s), y);
     await page.waitForTimeout(350);
@@ -210,7 +218,13 @@ async function searchOverlay(where: string, page: Page) {
     return { ok: true, why: '' };
   });
   if (!r.ok) { expect(where, false, `검색 오버레이 — ${r.why}`); return; }
-  await page.waitForTimeout(400);
+  await page.waitForSelector('[role="dialog"] input[aria-label="검색어 입력"]', { timeout: 5000 }).catch(() => {});
+  // 「인기 검색어」 칩은 /api/search/trending 응답 뒤에 붙는다 — 기다렸다가 잰다.
+  await page.waitForFunction(
+    () => [...document.querySelectorAll('[role="dialog"] h3')].some((h) => /인기 검색어|최근 검색/.test((h as HTMLElement).innerText)),
+    undefined,
+    { timeout: 4000 },
+  ).catch(() => {});
   const m = await page.evaluate(() => {
     const input = document.querySelector('[role="dialog"] input[aria-label="검색어 입력"]') as HTMLElement | null;
     if (!input) return null;
@@ -232,8 +246,13 @@ async function searchOverlay(where: string, page: Page) {
   if (!m) return;
   expect(where, m.inView && m.onTop, `검색 입력창이 보임 (top ${m.y}, 최상단 ${m.onTop})`);
   expect(where, m.focused, '검색 입력창에 포커스');
-  expect(where, m.panelTop === null || m.panelTop >= m.bottom,
-    `인기 검색어 패널이 입력 아래 (입력 bottom ${m.bottom} · 패널 top ${m.panelTop})`);
+  // ⚠️ 패널이 «없으면» 이 계약은 공허하다 — 통과로 세지 않고 사실만 적는다.
+  if (m.panelTop === null) {
+    console.log(`  ·  ${where} — (참고) 추천 칩 패널이 뜨지 않았다(trending 응답 없음). 덮임 검사는 이번 회차에 공허하다`);
+  } else {
+    expect(where, m.panelTop >= m.bottom,
+      `인기 검색어 패널이 입력 아래 (입력 bottom ${m.bottom} · 패널 top ${m.panelTop})`);
+  }
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
   const closed = await page.evaluate(() => document.querySelectorAll('[role="dialog"][aria-modal="true"]').length === 0);

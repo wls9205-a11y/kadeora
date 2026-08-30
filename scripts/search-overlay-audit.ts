@@ -69,6 +69,8 @@ function expect(where: string, cond: boolean, msg: string) {
       await page.evaluate(() => window.scrollTo(0, 900));
       await page.waitForTimeout(500);
 
+      // ⚠️ Navigation 은 ssr:false — 헤더가 하이드레이션 뒤에 생긴다. 고정 대기로 재면 깜빡인다.
+      await page.waitForSelector('header [aria-label="검색 열기"]', { state: 'attached', timeout: 8000 }).catch(() => {});
       const clicked = await page.evaluate(() => {
         const btns = Array.from(document.querySelectorAll('header [aria-label="검색 열기"]')) as HTMLElement[];
         const vis = btns.find((el) => {
@@ -102,7 +104,14 @@ function expect(where: string, cond: boolean, msg: string) {
         await ctx.close();
         continue;
       }
-      await page.waitForTimeout(500);
+      await page.waitForSelector('[role="dialog"] input[aria-label="검색어 입력"]', { timeout: 5000 }).catch(() => {});
+      // 「인기 검색어」 칩은 trending 응답 뒤에 붙는다 — 계약 ③④ 가 그 패널을 쓰므로 기다린다.
+      await page.waitForFunction(
+        () => [...document.querySelectorAll('[role="dialog"] h3')].some((h) => /인기 검색어|최근 검색/.test((h as HTMLElement).innerText)),
+        undefined,
+        { timeout: 4000 },
+      ).catch(() => {});
+      await page.waitForTimeout(200);
 
       const m = await page.evaluate(() => {
         const R = (el: Element | null) => {
