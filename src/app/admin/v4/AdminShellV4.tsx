@@ -75,7 +75,15 @@ export default function AdminShellV4() {
         position: 'sticky', top: 0, zIndex: 100,
         padding: '10px 12px', borderRadius: 'var(--radius-md, 10px)',
         background: 'var(--bg-elevated)', border: '1px solid var(--border)',
-        backdropFilter: 'blur(8px)',
+        /* ⛔ backdrop-filter 를 뺐다 (DS_RULES §1-6 · 2026-08-30 실측).
+           이 헤더는 position: sticky 인데, backdrop-filter 는 자손 중 position: fixed 의
+           «기준 상자» 를 만든다 — 결함 1호(헤더 blur 가 검색 오버레이를 가뒀다)가 그것이다.
+           ⚠️ 그런데 여기서는 그 blur 가 «보이지도 않았다»:
+              배경 --bg-elevated 가 #F0F2F5 «완전 불투명» hex 라 비칠 것이 없다.
+              효과 0 · 위험만 남는 한 줄이었다. 삭제는 시각적 무변화다.
+           ⚠️ 지금은 이 헤더에 fixed 자손이 0 이라(HealthRing·KPIStrip·AlertsHeaderLink·
+              NotificationBell 각 0, 벨 드롭다운은 absolute) 사고가 «아직» 안 났을 뿐이다.
+              여기에 fixed 를 하나 넣는 순간 재현된다. */
         display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
       }}>
         <HealthRing score={h.score ?? 0} />
