@@ -52,7 +52,9 @@ export default function AptScheduleTimeline({ specialDate, rank1Date, rank2Date,
       {steps.map((s, i) => {
         const next = steps[i + 1]?.date;
         const state = classifyStep(s.date, next);
-        const dotColor = state === 'done' ? 'var(--accent-green)' : state === 'active' ? 'var(--brand)' : 'var(--border)';
+        // kd-brand-exempt: 진행 «단계» 색 체계다. --accent-green(완료)과 «짝» 을 이루므로
+  //   여기만 네이비로 바꾸면 완료/진행/예정 3단의 색 계열이 깨진다. 선택 상태가 아니다.
+  const dotColor = state === 'done' ? 'var(--accent-green)' : state === 'active' ? 'var(--brand)' : 'var(--border)';
         return (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 0', position: 'relative' }}>
             <div

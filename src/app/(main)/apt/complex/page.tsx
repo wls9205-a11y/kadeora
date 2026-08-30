@@ -215,6 +215,8 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
                     <span style={{ fontSize: 12, fontWeight: 700, color: isActive ? 'var(--brand-navy)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>{r.count.toLocaleString()}</span>
                   </div>
                   <div style={{ display: 'flex', width: '100%', height: 3, borderRadius: 4, overflow: 'hidden', marginTop: 2, background: 'var(--bg-hover)' }}>
+                    {/* kd-brand-exempt: width 가 pct 인 «비율 막대» — 데이터 시각화다.
+                        이 행의 선택 신호는 위 테두리·텍스트(네이비)가 이미 진다. */}
                     <div style={{ width: `${pct}%`, height: '100%', background: isActive ? 'linear-gradient(90deg, var(--brand), rgba(59,123,246,0.7))' : 'linear-gradient(90deg, rgba(59,123,246,0.5), rgba(59,123,246,0.2))', borderRadius: 4, transition: 'width 0.3s' }} />
                   </div>
                 </div>

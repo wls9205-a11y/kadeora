@@ -120,6 +120,7 @@ export default function AttendancePage() {
                 width: 28, height: 28, borderRadius: '50%', display: 'flex',
                 alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600,
                 background: done ? 'rgba(16,185,129,0.15)' : current ? 'rgba(59,123,246,0.15)' : 'var(--bg-hover)',
+                /* kd-brand-exempt: 출석 진행 색 체계(완료/오늘/예정). 위 AptScheduleTimeline 과 같은 계열이다. */
                 color: done ? '#10B981' : current ? 'var(--brand)' : 'var(--text-tertiary)',
               }}>
                 {done ? '✓' : r.days}

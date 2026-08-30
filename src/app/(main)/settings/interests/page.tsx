@@ -96,6 +96,8 @@ export default function InterestsSettingsPage() {
 
       <button onClick={handleSave} disabled={selected.length === 0 || saving} style={{
         width: '100%', padding: '14px 0', borderRadius: 'var(--radius-md)',
+        /* kd-brand-exempt: 「저장하기」 «주 CTA 버튼» 의 활성화 색이다(disabled 와 짝).
+           선택 상태가 아니라 «누를 수 있는가» 를 말한다 — 주 버튼은 앱 전역이 --brand 다. */
         background: selected.length > 0 ? 'var(--brand)' : 'var(--bg-hover)',
         color: selected.length > 0 ? '#fff' : 'var(--text-tertiary)',
         border: 'none', fontSize: 15, fontWeight: 600, cursor: selected.length > 0 ? 'pointer' : 'default',

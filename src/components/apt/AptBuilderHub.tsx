@@ -73,6 +73,8 @@ export default function AptBuilderHub(props: Props) {
               <span style={{ fontSize: 11, color: active ? 'rgba(255,255,255,0.85)' : 'var(--text-tertiary)' }}>
                 {region === '전국' ? '' : `${region} `}{b.site_count}건
               </span>
+              {/* kd-brand-exempt: 아래 --brand 는 «비활성» 쪽이다. 활성이면 배경이 네이비로 차고
+                  글자가 흰색이 된다 — 여기 --brand 는 「선택 «안» 된 칩의 건수 라벨 색」일 뿐이다. */}
               {b.avg_popularity > 0 && (
                 <span style={{ fontSize: 10, fontWeight: 500, color: active ? 'rgba(255,255,255,0.9)' : 'var(--brand)' }}>
                   ⭐ 평균 {b.avg_popularity}

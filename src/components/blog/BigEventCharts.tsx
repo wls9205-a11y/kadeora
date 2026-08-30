@@ -170,7 +170,8 @@ export default async function BigEventCharts({ eventId }: Props) {
               : past
                 ? 'var(--brand-bg, rgba(59,123,246,0.18))'
                 : 'var(--bg-hover)';
-            const fg = active ? '#fff' : past ? 'var(--brand)' : 'var(--text-tertiary)';
+            // kd-brand-exempt: 차트 «시리즈 색» 이다. 「지금 고른 것」이 아니라 「지난 것/앞으로 올 것」을 가른다.
+  const fg = active ? '#fff' : past ? 'var(--brand)' : 'var(--text-tertiary)';
             return (
               <div
                 key={s}
