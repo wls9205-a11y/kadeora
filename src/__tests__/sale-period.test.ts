@@ -5,7 +5,7 @@
 //    그건 표시광고 리스크다(§7-1).
 
 import { describe, it, expect } from 'vitest';
-import { parseSalePeriod, salePeriodText } from '@/lib/apt/sale-period';
+import { parseSalePeriod, salePeriodText, salePeriodDisplay } from '@/lib/apt/sale-period';
 
 describe('가변 정밀도 파싱', () => {
   it('네 정밀도를 그대로 읽는다', () => {
@@ -60,5 +60,44 @@ describe('§7-1 한정어', () => {
   it('값이 없으면 문구도 없다 — 빈 자리를 문장으로 메우지 않는다', () => {
     expect(salePeriodText(null)).toBeNull();
     expect(salePeriodText('미정')).toBeNull();
+  });
+});
+
+describe('§7-1 4요소 — 넷이 안 모이면 «줄을 내지 않는다» (D-2)', () => {
+  const full = {
+    period: '2026-09',
+    source: 'news',
+    asof: '2026-08-10',
+    confidence: 'verified',
+  };
+
+  it('넷이 다 있으면 표시한다', () => {
+    const d = salePeriodDisplay(full)!;
+    expect(d.text).toBe('2026년 9월 분양예정');
+    expect(d.sourceLabel).toBe('언론 보도');
+    expect(d.asofText).toBe('2026-08-10 기준');
+    expect(d.confidence).toBe('verified');
+  });
+
+  it('⛔ 하나라도 빠지면 null 이다 — 부분 표시가 더 위험하다', () => {
+    expect(salePeriodDisplay({ ...full, period: null })).toBeNull();
+    expect(salePeriodDisplay({ ...full, source: null })).toBeNull();
+    expect(salePeriodDisplay({ ...full, asof: null })).toBeNull();
+    expect(salePeriodDisplay({ ...full, confidence: null })).toBeNull();
+  });
+
+  it('⛔ 모르는 출처 enum 은 라벨이 없으므로 표시하지 않는다', () => {
+    expect(salePeriodDisplay({ ...full, source: 'blog' })).toBeNull();
+  });
+
+  it('⛔ 날짜가 아닌 기준일은 «또 하나의 추정» 이라 받지 않는다', () => {
+    for (const bad of ['2026년 여름', '2026-08', '20260810', '']) {
+      expect(salePeriodDisplay({ ...full, asof: bad })).toBeNull();
+    }
+  });
+
+  it('timestamptz 가 와도 날짜 앞 10자리로 읽는다', () => {
+    expect(salePeriodDisplay({ ...full, asof: '2026-08-10T00:00:00+00:00' })!.asofText)
+      .toBe('2026-08-10 기준');
   });
 });

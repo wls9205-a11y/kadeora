@@ -53,3 +53,44 @@ export function salePeriodText(raw: string | null | undefined): string | null {
   const p = parseSalePeriod(raw);
   return p ? `${p.label} 분양예정` : null;
 }
+
+// ── §7-1 4요소 판정 (D-2 · 2026-08-30) ─────────────────────────────────────
+// 「한정어 · 출처 · 기준일 · confidence」가 «함께» 가야 §7-1 이다.
+// 넷 중 하나라도 빠지면 남은 셋이 오히려 위험해진다 — 출처와 등급이 붙은 시기는
+// 「검증된 일정」으로 읽히는데, 기준일이 없으면 «언제 기준인지 모르는» 검증이 된다.
+// ⛔ 그래서 빠진 채로 «부분 표시» 하지 않는다. 넷이 안 모이면 줄을 내지 않는다.
+
+import { saleSourceLabel } from '@/lib/apt/sale-source';
+
+export interface SalePeriodParts {
+  period: string | null | undefined;
+  source: string | null | undefined;
+  /** 출처가 «말한 날»(보도일·공고일). ⛔ 우리가 적재한 날이 아니다. */
+  asof: string | null | undefined;
+  confidence: string | null | undefined;
+}
+
+export interface SalePeriodDisplay {
+  text: string;        // '2026년 9월 분양예정'
+  sourceLabel: string; // '언론 보도'
+  asofText: string;    // '2026-08-10 기준'
+  confidence: string;  // VerifiedBadge 로 넘긴다
+}
+
+/**
+ * @returns 4요소가 모두 있을 때만 객체. 하나라도 없으면 **null**(줄을 내지 않는다).
+ *
+ * ⚠️ 기준일은 «날짜 형식» 이어야 한다. 「2026년 여름」 같은 값이 오면 기준일이 아니라
+ *    또 하나의 추정이므로 받지 않는다 — 그것까지 통과시키면 이 판정이 무의미해진다.
+ */
+export function salePeriodDisplay(p: SalePeriodParts): SalePeriodDisplay | null {
+  const text = salePeriodText(p.period);
+  if (!text) return null;
+  const sourceLabel = saleSourceLabel(p.source);
+  if (!sourceLabel) return null;
+  const asof = (p.asof ?? '').slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(asof)) return null;
+  const confidence = (p.confidence ?? '').trim();
+  if (!confidence) return null;
+  return { text, sourceLabel, asofText: `${asof} 기준`, confidence };
+}
