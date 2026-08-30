@@ -363,7 +363,7 @@ export default async function HomePage() {
   const dealRows = dealHero ? sections.deals.filter((r) => r.slug !== dealHero.slug) : sections.deals;
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '8px 6px 24px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: 'var(--sp-sm) var(--sp-sm) var(--sp-2xl)' }}>
       {/* ── 2 히어로 (H5-1) ──
        * 첫 화면의 55~60%를 네이비 색면이 차지하고 흰 검색창 하나만 뜬다.
        * ⛔ 카피에 지역명을 넣지 않는다. 전국 플랫폼이고, 「부울경」은 데이터 필터·크론·
@@ -400,10 +400,10 @@ export default async function HomePage() {
        *    전체 목록이 아니기 때문이다 — 없는 걸 있다고 쓰지 않는다.
        * ⚠️ /apt/pipeline 을 쓰지 않는다. 그건 「공고 전 현장 전체 보기」라 성격이 다르다. */}
       {moves.length > 0 && (
-        <section style={{ marginBottom: 18 }}>
+        <section style={{ marginBottom: 'var(--sp-xl)' }}>
           {/* ⛔ eyebrow 에서 지역명을 뺐다. 데이터 필터(HOME_REGIONS)는 «그대로» 다 —
                 지우면 응대 못 하는 지역 현장이 홈에 뜬다(C-5). 카피만 뺀다. */}
-          <SectionHeader eyebrow="APT — 최근 갱신" title="최근 움직인 현장" id="home-moves" />
+          <SectionHeader eyebrow="APT — 최근 갱신" title="최근 움직인 현장" id="home-moves" rule />
           <RecentMoves items={moves} />
           <MoreLink href="/apt" label="부동산 홈에서 더 보기" />
         </section>
@@ -411,8 +411,8 @@ export default async function HomePage() {
 
       {/* ── 6 재개발·재건축 ── */}
       {sections.redev.length >= MIN_ROWS && (
-        <section style={{ marginBottom: 18 }}>
-          <SectionHeader eyebrow="APT — 정비사업" title="재개발·재건축" id="home-redev" />
+        <section style={{ marginBottom: 'var(--sp-xl)' }}>
+          <SectionHeader eyebrow="APT — 정비사업" title="재개발·재건축" id="home-redev" rule />
           <SiteRows items={sections.redev} />
           <MoreLink href="/apt/redev/부산" label="구역별 진행 단계 전체" />
         </section>
@@ -423,8 +423,8 @@ export default async function HomePage() {
        * ⚠️ 링크는 실재가 확인된 라우트만 쓴다 —
        *    /apt/region/[region] · /apt/region/[region]/[sigungu]. */}
       {counts.byRegion.length > 0 && (
-        <section style={{ marginBottom: 18 }}>
-          <SectionHeader eyebrow="REGION — 지역별" title="지역별 보기" id="home-region" />
+        <section style={{ marginBottom: 'var(--sp-xl)' }}>
+          <SectionHeader eyebrow="REGION — 지역별" title="지역별 보기" id="home-region" rule />
           <nav aria-label="시도별 현장" style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)', padding: '0 3px' }}>
             {counts.byRegion.map((r) => (
               <Link
@@ -443,7 +443,7 @@ export default async function HomePage() {
           {counts.bySigungu.length > 0 && (
             <nav
               aria-label="주요 구군 현장"
-              style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)', padding: '0 3px', marginTop: 6 }}
+              style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)', padding: '0 3px', marginTop: 'var(--sp-sm)' }}
             >
               {counts.bySigungu.map((s) => (
                 <Link
@@ -476,7 +476,7 @@ export default async function HomePage() {
 
 /** 칩 한 벌. 지역·구군·빠른 이동이 같은 모양을 쓴다. */
 const chipStyle: React.CSSProperties = {
-  padding: '5px 10px',
+  padding: '5px var(--sp-md)',
   borderRadius: 'var(--radius-pill)',
   fontSize: 'var(--fs-2xs)',
   fontWeight: 500,
