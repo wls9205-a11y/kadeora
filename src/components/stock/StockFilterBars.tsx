@@ -35,9 +35,16 @@ const CHIP: React.CSSProperties = {
   whiteSpace: 'nowrap',
 };
 
+/* V4-2b — 활성색을 «기존 네이비 표준» 에 넘긴다(판정회신 증분7 판정 1).
+   screens.css 의 `.apt-pill-scroll a[aria-current='true']` 가 그 표준이고
+   「H5 에서 선택은 전 화면 공통으로 네이비」가 그때의 판정이다. 여기만 --brand(파랑)로
+   갈라져 있었다 — /blog 서브칩과 «같은 이탈» 이었다.
+   ⛔ 활성 배경·글자색을 인라인으로 주지 않는다. 인라인은 모든 @layer 를 이겨
+      그 규칙이 «안 먹는다». 색을 비워 클래스에 맡기는 것이 이 함수의 요점이다.
+   ⚠️ 그래서 아래 두 줄(class + aria-current)이 «짝» 이다. 하나만 있으면 무색이 된다. */
 const chipStyle = (active: boolean): React.CSSProperties =>
   active
-    ? { ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: 'var(--text-inverse)', fontWeight: 500 }
+    ? { ...CHIP, fontWeight: 600 }
     : { ...CHIP, background: 'var(--bg-surface)', color: 'var(--text-secondary)' };
 
 const ROW: React.CSSProperties = {
@@ -85,7 +92,7 @@ export default function StockFilterBars({
       </div>
 
       {/* 정렬 */}
-      <div role="group" aria-label="정렬" style={ROW}>
+      <div role="group" aria-label="정렬" className="apt-pill-scroll" style={ROW}>
         {SORT_CHIPS.map((c) => {
           if (c.key === 'change') {
             const active = isChangeSort(params.sort);
@@ -118,8 +125,15 @@ export default function StockFilterBars({
 
       {/* 테마 — 선택. 데이터가 없는 날은 줄 자체를 내지 않는다. */}
       {themes.length > 0 && (
-        <div role="group" aria-label="테마" style={ROW}>
-          <Link href={stockHref(params, { theme: '' })} scroll={false} style={chipStyle(!params.theme)}>
+        <div role="group" aria-label="테마" className="apt-pill-scroll" style={ROW}>
+          {/* ⚠️ aria-current 가 «없었다». 표준 규칙이 그 속성으로 걸리므로,
+              없으면 「전체」만 활성 표시가 안 되는 한 칸짜리 구멍이 된다. */}
+          <Link
+            href={stockHref(params, { theme: '' })}
+            scroll={false}
+            style={chipStyle(!params.theme)}
+            aria-current={!params.theme ? 'true' : undefined}
+          >
             전체
           </Link>
           {themes.map((t) => (
