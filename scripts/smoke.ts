@@ -167,6 +167,55 @@ async function imagesLoad(where: string, page: Page) {
 
 /** 죽은 링크·빈 버튼 — DS-3 이 정리할 대상을 상시로 잡는다(구 H7-6).
     ⚠️ /apt/[id] 몫은 이미 빠졌다 — Navigation 이 상세에서 글쓰기 FAB 를 렌더하지 않는다. */
+/** 돋보기 클릭 경로 — 결함 1호(2026-08-30) 재발 잠금.
+ *
+ * ⚠️ 「모달이 열렸는가」로 재면 이 결함이 «통과» 한다. 실제로 open 도 됐고 포커스도
+ *    입력창에 갔는데, 헤더의 backdrop-filter 가 fixed 의 기준 상자를 헤더로 만들어
+ *    입력창이 화면 위 -54px 에 있었다. 그래서 «좌표» 로 잰다.
+ * ⚠️ 자세한 6폭×3모드 실측은 scripts/search-overlay-audit.ts 다. 여기 있는 것은
+ *    「경로가 살아 있는가」 1검사 — 스모크는 상시 도는 자라 가볍게 둔다.
+ */
+async function searchOverlay(where: string, page: Page) {
+  const r = await page.evaluate(() => {
+    const btn = [...document.querySelectorAll('header [aria-label="검색 열기"]')].find((el) => {
+      const b = (el as HTMLElement).getBoundingClientRect();
+      return b.width > 0 && b.height > 0;
+    }) as HTMLElement | undefined;
+    if (!btn) return { ok: false, why: '헤더 검색 트리거 없음' };
+    btn.click();
+    return { ok: true, why: '' };
+  });
+  if (!r.ok) { expect(where, false, `검색 오버레이 — ${r.why}`); return; }
+  await page.waitForTimeout(400);
+  const m = await page.evaluate(() => {
+    const input = document.querySelector('[role="dialog"] input[aria-label="검색어 입력"]') as HTMLElement | null;
+    if (!input) return null;
+    const b = input.getBoundingClientRect();
+    const cx = Math.round(b.x + b.width / 2), cy = Math.round(b.y + b.height / 2);
+    const top = (cx >= 0 && cy >= 0 && cx < innerWidth && cy < innerHeight) ? document.elementFromPoint(cx, cy) : null;
+    const head = [...document.querySelectorAll('[role="dialog"] h3')]
+      .find((h) => /인기 검색어|최근 검색/.test((h as HTMLElement).innerText)) as HTMLElement | undefined;
+    const panelTop = head?.parentElement ? Math.round(head.parentElement.getBoundingClientRect().top) : null;
+    return {
+      y: Math.round(b.top), bottom: Math.round(b.bottom),
+      inView: b.top >= 0 && b.bottom <= innerHeight && b.width > 0 && b.height > 0,
+      onTop: !!top && (top === input || input.contains(top)),
+      focused: document.activeElement === input,
+      panelTop,
+    };
+  });
+  expect(where, !!m, '검색 오버레이 — 입력창이 DOM 에 없음');
+  if (!m) return;
+  expect(where, m.inView && m.onTop, `검색 입력창이 보임 (top ${m.y}, 최상단 ${m.onTop})`);
+  expect(where, m.focused, '검색 입력창에 포커스');
+  expect(where, m.panelTop === null || m.panelTop >= m.bottom,
+    `인기 검색어 패널이 입력 아래 (입력 bottom ${m.bottom} · 패널 top ${m.panelTop})`);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  const closed = await page.evaluate(() => document.querySelectorAll('[role="dialog"][aria-modal="true"]').length === 0);
+  expect(where, closed, 'ESC 로 닫힘');
+}
+
 async function deadControls(where: string, page: Page) {
   const bad0 = await page.evaluate(() => {
     const anchorsNoHref = [...document.querySelectorAll('a')].filter(
@@ -245,6 +294,7 @@ async function main() {
     expect(w, m.stats.every((s) => /\d/.test(s)), '각 데이터 칸에 숫자 있음');
     expect(w, m.moved >= 1, `「최근 움직인 현장」 항목 ${m.moved}개 (≥1)`);
     expect(w, m.leadForm === 0, `홈 리드폼 ${m.leadForm}개 (0이어야 함)`);
+    await searchOverlay(w, page);
     await deadControls(w, page);
     await imagesLoad(w, page);
     await sameForBot(w, '/');

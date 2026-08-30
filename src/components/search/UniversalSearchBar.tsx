@@ -5,6 +5,7 @@
 // Enter → /search?q=... 결과 페이지
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { shortSiteName } from "@/lib/apt/short-name";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -99,6 +100,31 @@ export default function UniversalSearchBar({
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
+  /* ── 결함 1호 수리 (2026-08-30) — 오버레이를 body 로 «내보낸다» ─────────────
+   * 이 모달은 <header> «안» 에서 렌더된다. 그런데 헤더에는 backdrop-filter: blur(16px)
+   * 가 걸려 있고, backdrop-filter 가 none 이 아닌 요소는 자손 position:fixed 의
+   * «기준 상자(containing block)» 가 된다 — 즉 inset:0 이 뷰포트가 아니라
+   * «높이 45px 짜리 헤더» 를 가리켰다. items-center 가 그 45px 상자의 중앙에
+   * 패널을 맞추면서 입력 줄이 화면 위(y=-54)로 밀려났다. 실측 6폭 전부 같은 값이다.
+   *
+   * ⚠️ E 층의 「overflow-x:hidden 이 sticky 를 죽인다」와 «같은 형태» 다.
+   *    장식·방어 목적의 CSS 한 줄이 위치 지정 기능을 조용히 먹는다.
+   * → 좌표를 밀어 맞추지 않고 «기준 상자 밖» 으로 옮긴다. portal 이 그 일이다.
+   */
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  /** 닫은 뒤 포커스를 돌려줄 자리. 열기 «직전» 의 활성 요소를 그대로 기억한다. */
+  const restoreRef = useRef<HTMLElement | null>(null);
+  const openSearch = useCallback(() => {
+    if (typeof document !== "undefined") {
+      const ae = document.activeElement;
+      restoreRef.current = ae instanceof HTMLElement ? ae : null;
+    }
+    setOpen(true);
+  }, []);
+  const closeSearch = useCallback(() => setOpen(false), []);
+
   /* ── H3-2 회전 플레이스홀더 ──────────────────────────────────────────── */
   const rotateList = variant === "hero" ? (rotatingPlaceholders ?? []) : [];
   const canRotate = rotateList.length > 1;
@@ -173,22 +199,41 @@ export default function UniversalSearchBar({
    */
   const heroChips = variant === "hero" ? (suggestions ?? []) : [];
 
-  // ⌘K / Ctrl+K 단축키
+  // ⌘K / Ctrl+K 단축키 — «여는» 쪽만 소유권이 갈린다(헤더에 인스턴스가 둘이라).
   useEffect(() => {
     if (!hotkey) return;
     function onKey(e: KeyboardEvent) {
-      const isCmd = (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k";
-      if (isCmd) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setOpen(true);
-      }
-      if (e.key === "Escape" && open) {
-        setOpen(false);
+        openSearch();
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, hotkey]);
+  }, [hotkey, openSearch]);
+
+  /* ESC 는 «열려 있는 인스턴스» 가 소유한다 — hotkey 여부와 무관하다.
+   * ⚠️ 전에는 ESC 가 ⌘K 리스너 안에 얹혀 있었다. 그래서 hotkey={false} 인
+   *    모바일 아이콘 인스턴스는 «입력창에 포커스가 있을 때만» 닫혔다 —
+   *    칩을 눌러 포커스가 옮겨 가면 ESC 가 아무 일도 하지 않았다. */
+  useEffect(() => {
+    if (!open) return;
+    function onEsc(e: KeyboardEvent) {
+      if (e.key === "Escape") { e.preventDefault(); closeSearch(); }
+    }
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, [open, closeSearch]);
+
+  /* 닫힌 뒤 포커스 복원. 열 때 기억해 둔 자리로 돌려준다 —
+   * 안 돌려주면 포커스가 <body> 로 떨어져 키보드 사용자가 헤더를 처음부터 훑어야 한다.
+   * ⚠️ 결과를 눌러 라우팅한 경우에도 트리거(헤더 버튼)는 그대로 살아 있어 안전하다. */
+  useEffect(() => {
+    if (open) return;
+    const el = restoreRef.current;
+    restoreRef.current = null;
+    if (el && el.isConnected) el.focus({ preventScroll: true });
+  }, [open]);
 
   // 모달 열림 시 입력 포커스 + recent 로드
   useEffect(() => {
@@ -282,7 +327,7 @@ export default function UniversalSearchBar({
   function goToResultsPage(query: string) {
     if (!query.trim()) return;
     saveRecent(query);
-    setOpen(false);
+    closeSearch();
     setQ("");
     setResp(null);
     router.push(`/search?q=${encodeURIComponent(query)}`);
@@ -301,7 +346,7 @@ export default function UniversalSearchBar({
         }),
       }).catch(() => {});
     }
-    setOpen(false);
+    closeSearch();
     setQ("");
     setResp(null);
     router.push(item.url);
@@ -324,7 +369,7 @@ export default function UniversalSearchBar({
       e.preventDefault();
       setActiveIdx((i) => Math.max(i - 1, 0));
     } else if (e.key === "Escape") {
-      setOpen(false);
+      closeSearch();
     }
   }
 
@@ -334,7 +379,7 @@ export default function UniversalSearchBar({
       {variant === "icon" ? (
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={openSearch}
           aria-label="검색 열기"
           // ⚠️ DS-3-4 — 헤더 아이콘 버튼은 36×36 이다. Rule #77 `.touch-target` 으로
           //    «히트 영역만» 44px 로 넓힌다 — 시각 크기를 키우면 헤더 높이가 밀린다.
@@ -359,7 +404,7 @@ export default function UniversalSearchBar({
          *    자동 확대해 화면이 튄다. 홈 첫 화면이라 그 튐이 가장 잘 보인다. */}
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={openSearch}
           aria-label="검색 열기"
           className={["kd-hero-search", tone === "dark" ? "kd-hero-search--dark" : "", className].filter(Boolean).join(" ")}
           style={{
@@ -480,7 +525,7 @@ export default function UniversalSearchBar({
       ) : (
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={openSearch}
           aria-label="검색 열기"
           className={[
             "flex w-full items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm text-gray-500 transition hover:bg-gray-50",
@@ -495,22 +540,46 @@ export default function UniversalSearchBar({
         </button>
       )}
 
-      {/* 모달 */}
-      {open && (
+      {/* 모달 — body 로 portal 한다.
+       * ⛔ 여기서 «좌표를 밀어» 고치지 않는다. 기준 상자가 헤더인 것이 원인이고,
+       *    그 원인은 헤더의 backdrop-filter 다(위 openSearch 주석). 헤더 밖으로 옮기면
+       *    fixed 가 다시 뷰포트를 본다 — 폭마다 다른 보정값이 필요 없어진다.
+       * ⚠️ z-index 는 «헤더(100) 위» 여야 한다. portal 로 나온 뒤에는 헤더와 같은
+       *    루트 쌓임 맥락에 서므로 50 이면 헤더가 오버레이를 덮는다.
+       *    9999 는 이 저장소의 기존 오버레이 층(Navigation 더보기 시트)과 같은 값이다.
+       * ⛔ body 스크롤 잠금을 «걸지 않았다» — body 에 overflow:hidden 을 걸면
+       *    이 사이트의 모든 sticky 가 죽는다(globals.css 의 실측 주석). 방어가 기능을 먹는 그 형태다.
+       */}
+      {open && mounted && createPortal(
         <div
           role="dialog"
           aria-modal="true"
-          // 상단 고정(items-start pt-16)이면 패널이 64px 지점에서 시작해
-          // 노란 배너 + 헤더(약 150px)를 덮었다. 세로 중앙으로 둔다.
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={() => setOpen(false)}
+          aria-label="검색"
+          onClick={closeSearch}
+          style={{
+            position: "fixed", inset: 0, zIndex: 9999,
+            display: "flex", flexDirection: "column", alignItems: "center",
+            // 입력창은 «항상 헤더 아래» 에 선다. 값은 토큰 하나로만 산다 —
+            // 헤더 높이가 바뀌면 그 토큰을 바꾸고, 자(search-overlay-audit)가 어긋남을 잡는다.
+            padding: "var(--kd-overlay-top) var(--sp-md) var(--sp-md)",
+            background: "rgba(0,0,0,0.5)",
+          }}
         >
           <div
-            className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className="rounded-2xl bg-white shadow-2xl"
             onClick={(e) => e.stopPropagation()}
+            style={{
+              // 좁은 폭에서는 좌우 여백만 남는 «전폭 시트» 가 된다 — 폭 분기 없이
+              // width:100% + max-width 하나로 두 모양이 다 나온다.
+              width: "100%", maxWidth: 640,
+              display: "flex", flexDirection: "column",
+              // ⚠️ 세로는 «남은 높이만큼» 만 쓴다. 그래야 결과가 길어도 입력 줄이
+              //    화면 밖으로 밀리지 않는다 — 이번 결함이 정확히 그 모양이었다.
+              minHeight: 0, maxHeight: "100%", overflow: "hidden",
+            }}
           >
-            {/* 검색 입력 */}
-            <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-3">
+            {/* 검색 입력 — ⛔ flexShrink:0. 패널이 커져도 이 줄은 «먼저» 자리를 갖는다. */}
+            <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-3" style={{ flexShrink: 0 }}>
               <SearchIcon />
               <input
                 ref={inputRef}
@@ -531,15 +600,16 @@ export default function UniversalSearchBar({
                     inputRef.current?.focus();
                   }}
                   aria-label="입력 지우기"
-                  className="text-gray-400 hover:text-gray-600"
+                  // Rule #77 — 시각 크기는 그대로 두고 히트 영역만 44 로 넓힌다(§1-5 ②).
+                  className="touch-target text-gray-400 hover:text-gray-600"
                 >
                   ✕
                 </button>
               )}
             </div>
 
-            {/* 결과 패널 */}
-            <div className="max-h-[60vh] overflow-y-auto p-2">
+            {/* 결과 패널 — 입력 줄 «아래» 에서 남은 높이를 받아 자기 안에서 스크롤한다. */}
+            <div className="overflow-y-auto p-2" style={{ flex: "1 1 auto", minHeight: 0 }}>
               {/* 결과 표시 */}
               {q && resp && (
                 <ResultsPanel
@@ -561,7 +631,7 @@ export default function UniversalSearchBar({
                           <button
                             key={`r-${kw}`}
                             onClick={() => goToResultsPage(kw)}
-                            className="rounded-full bg-gray-100 px-3 py-1 text-xs hover:bg-gray-200"
+                            className="touch-target rounded-full bg-gray-100 px-3 py-1 text-xs hover:bg-gray-200"
                           >
                             {kw}
                           </button>
@@ -585,7 +655,7 @@ export default function UniversalSearchBar({
                             key={`t-${kw}`}
                             onClick={() => goToResultsPage(kw)}
                             title={kw}
-                            className="rounded-full bg-blue-50 px-3 py-1 text-xs text-blue-700 hover:bg-blue-100"
+                            className="touch-target rounded-full bg-blue-50 px-3 py-1 text-xs text-blue-700 hover:bg-blue-100"
                           >
                             {shortSiteName(kw)}
                           </button>
@@ -610,7 +680,8 @@ export default function UniversalSearchBar({
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
@@ -720,7 +791,7 @@ function ResultsPanel({
       {resp.total > sections.reduce((sum, s) => sum + s.items.length, 0) && (
         <button
           onClick={onSeeAll}
-          className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-center text-xs text-gray-700 hover:bg-gray-50"
+          className="touch-target mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-center text-xs text-gray-700 hover:bg-gray-50"
         >
           "{resp.query}" 전체 결과 ({resp.total}+) 보기 →
         </button>
