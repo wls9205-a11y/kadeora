@@ -512,3 +512,59 @@ StanReginCd 의 시도명은 「전남광주통합특별시」다. lawd.ts 의 �
 
 ⛔ 이 스크립트는 **반복 실행하지 않는다.** `dedupe_key` 로 `inquiry_count` 만 올라
    「같은 사람이 두 번 문의했다」는 «다른 사실» 이 된다.
+
+
+---
+
+# ⛔⛔ 라이브 결함 — `get_apt_subscription_hub` 가 «모든 호출에서» 죽는다 (2026-08-30 발견)
+
+## 증상
+```
+[apt/hub] rpc error: {"code":"42703","message":"column \"hero_license_tier\" does not exist"}
+```
+`/apt` 요청마다 찍힌다(01:32~01:36 연속, cache MISS·STALE 무관). 페이지는 200 이지만
+허브가 `EMPTY_HUB` 로 떨어져 **청약 카드 섹션이 통째로 빈다.**
+스모크 「/ — 데이터 띠 0칸」도 같은 뿌리로 보인다.
+
+## 원인 — 함수 «정의» 안에 있다. 컬럼은 멀쩡하다
+`apt_sites.hero_license_tier` 는 **존재한다**(확인함). 문제는 RPC 안이다:
+
+```sql
+-- base CTE 의 LATERAL: 이 목록에 hero_license_tier 가 «없다»
+LEFT JOIN LATERAL (
+  SELECT a.slug, a.hero_image_url, a.card_image_url,
+         a.satellite_image_url, a.lifecycle_stage, a.builder
+  FROM apt_sites a WHERE a.name = s.house_nm ...
+) site ON true
+...
+-- shaped CTE: 그런데 여기서 «접두 없이» 참조한다
+'site_slug', e.site_slug, 'hero_license_tier', hero_license_tier, 'thumb_url', e.thumb_url
+```
+JSON 키만 추가되고 **값의 출처가 안 따라왔다.** `enriched` 어디에도 그 컬럼이 없어
+계획 단계에서 42703 이 난다 — 데이터와 무관하게 «항상» 실패한다.
+
+## 고치는 법 (한 줄씩 둘)
+1. LATERAL 의 SELECT 에 `a.hero_license_tier` 를 넣는다.
+2. base CTE 가 `site.hero_license_tier` 를 내보내게 한다(그러면 `b.*` → `typed` →
+   `enriched` 를 타고 흘러 `shaped` 의 맨 참조가 해소된다).
+
+## ⛔ 내가 고치지 않은 이유
+이 RPC 는 DB 담당/세션 A 자산이고, 저장소 `supabase/migrations/` 에 «정의가 없다»
+(repo 에서 `get_apt_subscription_hub` 를 만드는 파일 0건 — 채팅으로 관리돼 왔다).
+같은 함수를 두 곳에서 재정의하면 어느 판이 최신인지 알 수 없게 된다.
+**지시를 주면 즉시 적용한다.**
+
+## ⚠️ 오늘 스모크가 빨간불인 이유이기도 하다 (Rule #114 로 «완료 보고 안 함»)
+```
+❌ /            — 데이터 띠 0칸
+❌ /blog?region=부산&sgg=해운대구 — 목록 0건 · 콘솔 「Connection closed」
+```
+⚠️ 블로그 쪽은 «데이터는 있다» — `v_blog_posts_listing` 에 해운대구 7건이 실재한다.
+   같은 파라미터로 사상구는 31건이 뜬다. 렌더 도중 스트림이 끊기는 형태라
+   위 RPC 장애와 같은 시간대에 몰려 있다. 원인 분리는 RPC 수리 뒤 다시 잰다.
+
+## ⚠️ 함께 관측된 것 — DDL 직후 스키마 캐시 재적재
+01:31~01:32 사이 `PGRST002 Could not query the database for the schema cache` 가
+홈·블로그·상세에 «동시에» 떴다. 그 시각은 내가 D-2 컬럼과 카운트 RPC 를 넣은 직후다.
+→ **낮에 DDL 을 치면 몇 분간 사이트 전역이 흔들린다.** 이 창은 지나갔지만(그 뒤 0건),
+   앞으로 마이그레이션은 그 사실을 알고 친다. 42703 은 이것과 «다른 건» 이다 — 계속된다.
