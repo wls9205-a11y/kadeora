@@ -40,6 +40,28 @@ const TAB_LABELS: { key: string; label: string }[] = [
   { key: 'watch',   label: '관심' },
 ];
 
+/**
+ * V4-2 — /stock 서브마스트. 단색 --brand-navy + 하단 골드 2px.
+ *
+ * ⚠️ 이 화면은 렌더 분기가 «둘» 이다(캐러셀 / 기본). 서브마스트는 두 분기가 «같은 한 벌»
+ *    을 쓴다 — 두 벌로 두면 한쪽만 늘어나고, 실제로 첫판이 그렇게 어긋났다.
+ * ⚠️ 제목은 heading 이 아니라 «시각 라벨» 이다. 문서의 h1 은 각 분기의 sr-only 하나뿐이고
+ *    그 문자열이 색인이 받는 것이다(판정회신 증분3 ④).
+ */
+function StockSubmast() {
+  return (
+    <div className="kd-submast kd-submast--bleed">
+      <div className="kd-submast__row">
+        <div className="kd-submast__title">마켓</div>
+        <Link href="/stock/search" className="kd-submast__action" aria-label="종목 검색">
+          검색
+        </Link>
+      </div>
+      <div className="kd-submast__sub">분양 시장을 움직이는 숫자까지 한 화면에</div>
+    </div>
+  );
+}
+
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ tab?: string }> }): Promise<Metadata> {
   const sp = await searchParams;
   const m = stockTabMeta(sp.tab);
@@ -320,6 +342,11 @@ export default async function StockPage({
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '8px 6px 24px' }}>
         <h1 className="sr-only">주식 시세 — 이슈 캐러셀</h1>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+        {/* ⚠️ 이 분기가 «프로덕션에서 실제로 도는» 경로다(NEXT_PUBLIC_CAROUSEL_ENABLED
+            는 Vercel 환경변수에만 있고 로컬 .env 에는 없다 — 실측 2026-08-30).
+            V4-2 첫판이 서브마스트를 아래 기본 분기에만 붙여 «live 화면에는 안 나왔다».
+            두 분기가 있는 화면은 «둘 다» 확인한다. */}
+        <StockSubmast />
         <StockTabCarousel tabs={TAB_LABELS} initialIndex={initialIdx} paramDefault="issue" trackSource="stock_carousel">
           {TAB_LABELS.map((t, i) => {
             const r = allResults[i];
@@ -367,19 +394,7 @@ export default async function StockPage({
           {params.theme ? ` · ${params.theme}` : ''}
         </h1>
 
-        {/* V4-2 — 서브마스트. 단색 네이비 + 하단 골드 2px.
-            우측 슬롯은 «검색» 이다 — 지역 셀렉은 /apt 의 것이고 여기엔 축이 없다. */}
-        <div className="kd-submast kd-submast--bleed">
-          <div className="kd-submast__row">
-            <div className="kd-submast__title">마켓</div>
-            <Link href="/stock/search" className="kd-submast__action" aria-label="종목 검색">
-              검색
-            </Link>
-          </div>
-          <div className="kd-submast__sub">
-            분양 시장을 움직이는 숫자까지 한 화면에
-          </div>
-        </div>
+        <StockSubmast />
 
         {/* v7-C2: 지수 스트립 3칸 한 줄 */}
         <StockIndexStrip data={strip} />
