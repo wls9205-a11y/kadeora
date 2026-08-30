@@ -323,6 +323,25 @@ export default async function AptPage({
       <div className="kd-list-main">
       <h1 className="sr-only">{hub.region} 아파트 청약 일정 · 경쟁률</h1>
 
+      {/* V4-4 — 서브마스트. 단색 --brand-navy + 하단 골드 2px.
+          ⚠️ h1 은 이미 sr-only 였다 — 그대로 둔다. 서브마스트 제목은 heading 이 아니라
+             «시각 라벨» 이라 문서의 제목은 여전히 하나뿐이다(증분3 ④).
+          ⚠️ 우측 슬롯을 «비웠다». 지시서는 지역 셀렉 트리거를 여기 놓으라고 했지만,
+             실물 RegionSelectPanel 의 트리거는 «전폭 버튼» 이다 — 「닫힌 채로도 무엇을
+             고른 상태인지 말한다」는 계약을 지키려고 요약 문자열을 통째로 물고 있어서
+             칩 슬롯에 들어가지 않는다. 폭을 뺏으면 그 계약이 깨진다.
+             재구현·개조 금지(§6)라 손대지 않고 «바로 아래» 그대로 둔다.
+          ⚠️ 보조 줄의 정렬 근거는 「모집공고 기준」이다 — 아래 섹션 meta 와 같은 말을 쓴다.
+             두 자리가 다른 기준을 말하면 같은 화면이 두 소리를 낸다. */}
+      <div className="kd-submast kd-submast--bleed">
+        <div className="kd-submast__row">
+          <div className="kd-submast__title">부동산</div>
+        </div>
+        <div className="kd-submast__sub">
+          모집공고 기준 최신순 · {regionSiteCount.toLocaleString('ko-KR')}곳
+        </div>
+      </div>
+
       {/* 위치 추정은 쿠키가 없을 때만 돈다 — 쿠키가 있으면 쿠키가 이긴다. */}
       {isAutoRegion && <RegionAutoSelect />}
 
@@ -341,7 +360,7 @@ export default async function AptPage({
              담는 척하지 않고, 이 섹션이 «선택분» 이라는 것을 제목으로 밝힌다. */}
       {selectedCodes.length > 0 && (
         <section style={{ margin: '0 0 var(--sp-lg)' }}>
-          <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 800, margin: '0 0 var(--sp-sm)' }}>
+          <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, margin: '0 0 var(--sp-sm)' }}>
             선택한 지역의 분양예정·분양중 현장
             <span style={{ marginLeft: 'var(--sp-sm)', fontSize: 'var(--fs-2xs)', fontWeight: 500, color: 'var(--text-tertiary)' }}>
               {selectedSites.length}곳
@@ -455,7 +474,7 @@ export default async function AptPage({
 
       <AptViewSwitch>
       {/* ③ 청약 카드 리스트 */}
-      <section style={{ padding: '0 6px' }} aria-labelledby="apt-cards-heading">
+      <section style={{ padding: '0 var(--sp-sm)' }} aria-labelledby="apt-cards-heading">
         <SectionHeader
           id="apt-cards-heading"
           eyebrow="FEATURED — 분양중"
@@ -489,7 +508,7 @@ export default async function AptPage({
            "그럼 아직 공고 안 난 데는?" 이다.
            ⚠️ 데이터가 없으면 섹션을 통째로 렌더하지 않는다. 빈 껍데기를 만들지 않는다. */}
       {pipeline.items.length > 0 && (
-        <section style={{ padding: '0 6px' }} aria-labelledby="apt-pipeline-heading">
+        <section style={{ padding: '0 var(--sp-sm)' }} aria-labelledby="apt-pipeline-heading">
           <SectionHeader
             id="apt-pipeline-heading"
             eyebrow="PIPELINE — 공고 전"
@@ -524,7 +543,7 @@ export default async function AptPage({
               실측상 가격이 붙는 건 연결된 기축의 54%뿐이고, 나머지는 그게 정상이다.
            ⚠️ 데이터가 없으면 섹션을 통째로 렌더하지 않는다. */}
       {gichuk.length > 0 && (
-        <section style={{ padding: '0 6px' }} aria-labelledby="apt-gichuk-heading">
+        <section style={{ padding: '0 var(--sp-sm)' }} aria-labelledby="apt-gichuk-heading">
           <SectionHeader
             id="apt-gichuk-heading"
             eyebrow="GICHUK — 기축 실거래"
@@ -555,16 +574,16 @@ export default async function AptPage({
 
       {/* v5-V3: 지난 공고 진입점. 허브는 최근(60/180/365)만 보여주므로
            이 링크가 없으면 그 이전 2,842건을 아무도 찾지 못한다. */}
-      <div style={{ padding: '0 6px', margin: '0 0 var(--sp-md)' }}>
+      <div style={{ padding: '0 var(--sp-sm)', margin: '0 0 var(--sp-md)' }}>
         <Link
           href={region !== '전국' ? `/apt/archive?region=${encodeURIComponent(region)}` : '/apt/archive'}
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: 8,
-            minHeight: 48,
-            padding: '0 14px',
+            gap: 'var(--sp-sm)',
+            minHeight: 'var(--touch-min)',
+            padding: '0 var(--sp-lg)',
             borderRadius: 'var(--radius-md)',
             border: '1px solid var(--border)',
             background: 'var(--bg-surface)',
@@ -599,7 +618,7 @@ export default async function AptPage({
              「청약 D-4 · 인천」이 떠 있었다 — 지역을 고른 의미가 사라진다.
              0건이면 미렌더한다. 전국으로 «바꾸지 않는다». */}
       {curatedInRegion.length > 0 && (
-        <div style={{ padding: '0 6px' }}>
+        <div style={{ padding: '0 var(--sp-sm)' }}>
           <CurationCarousel
             title={`${hub.region} 지금 주목할 청약`}
             items={curatedInRegion.map((it) => (

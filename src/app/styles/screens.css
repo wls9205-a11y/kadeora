@@ -134,7 +134,10 @@
     display: inline-flex;
     align-items: baseline;
     gap: 4px;
-    /* 칩 시각 높이는 낮지만 누를 수 있는 높이는 44px 로 잡는다 */
+    /* 칩 시각 높이는 낮지만 누를 수 있는 높이는 44px 로 잡는다.
+       V4-4 — 그 44 를 «값으로» 박지 않고 --touch-min 이 지게 한다(증분2 B).
+       padding 만으로 44 를 만들면 글꼴 모드가 바뀔 때 같이 안 따라온다. */
+    min-height: var(--touch-min);
     padding: 12px 4px;
     color: var(--text-secondary);
     text-decoration: none;
@@ -146,8 +149,14 @@
     color: var(--text-primary);
   }
   .stage-strip__l { font-size: var(--fs-xs); font-weight: 400; letter-spacing: 0; }
+  /* V4-4 — 활성색을 네이비 표준으로. 「H5 에서 선택은 전 화면 공통으로 네이비」가
+     이 파일 아래 .apt-pill-scroll 규칙에 이미 적혀 있는 판정이고, 이 스트립만
+     --brand(파랑)로 남아 있었다 — /blog 서브칩(V4-3)·/stock 칩(V4-2b)과 같은 이탈이다.
+     대비도 낫다: #0B2A6B on #FFFFFF = 13.48 (--brand 파랑보다 높다).
+     ⚠️ 색만 바뀌는 게 아니다 — data-active 는 굵기 600(.stage-strip__n)을 이미 지고 있어
+        색이 안 보여도 상태가 남는다(§2-6). 색 단독 신호가 아니다. */
   .stage-strip__link[data-active='true'] .stage-strip__n,
-  .stage-strip__link[data-active='true'] .stage-strip__l { color: var(--brand); }
+  .stage-strip__link[data-active='true'] .stage-strip__l { color: var(--brand-navy); }
 
   /* ── H5-2 2단 : 목록 두 덩어리 ────────────────────────────────────────── */
   .apt-block { padding: 0 6px; margin-bottom: var(--sp-lg); }
