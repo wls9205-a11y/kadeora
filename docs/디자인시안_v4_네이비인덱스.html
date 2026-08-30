@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>카더라 V4 · 네이비 인덱스 — 확정안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  /* 저장소 실토큰 값 그대로 — tokens.css 대응 */
+  --ink:#191F28;--sub:#4E5968;--ter:#8B95A1;--line:#E7EAEE;--line2:#F0F2F5;
+  --brand:#2563EB;--brand-dark:#1E40AF;
+  --navy:#0B2A6B;--gold:#FFC53D;
+  --grad:linear-gradient(158deg,#0B2A6B 0%,#123A8F 52%,#2563EB 100%);
+  --up:#E5484D;--down:#3182F6;
+  --g-bg:#E8F7F0;--g-tx:#0E8A5F;--b-bg:#EAF0FE;--b-tx:#1E40AF;
+  --a-bg:#FEF3E2;--a-tx:#B45309;--n-bg:#F2F4F6;--n-tx:#4E5968;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;
+}
+html{-webkit-text-size-adjust:100%}
+body{background:#0F1217;color:var(--ink);
+  font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;
+  -webkit-font-smoothing:antialiased;min-height:100vh}
+button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
+.num{font-variant-numeric:tabular-nums;letter-spacing:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ── 스튜디오 크롬 ── */
+.studio{max-width:1100px;margin:0 auto;padding:28px 16px 60px}
+.st-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.st-title{color:#F2F4F6;font-size:17px;font-weight:700;letter-spacing:-.2px}
+.st-title b{color:var(--gold);font-weight:700}
+.st-sub{color:#6B7684;font-size:12px;font-weight:400}
+.st-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.tab{padding:7px 13px;border-radius:10px;background:#1A1F27;color:#9AA4B2;font-size:12.5px;font-weight:500;border:1px solid #232A34}
+.tab:hover{color:#D6DCE4}
+.tab:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.tab.on{background:#2563EB;border-color:#2563EB;color:#fff;font-weight:600}
+.spec{margin-top:12px;color:#7A8494;font-size:12px;line-height:1.6;max-width:660px}
+.spec b{color:#C6CDD6;font-weight:600}
+.stage{display:flex;justify-content:center;margin-top:22px}
+.phone{width:390px;max-width:100%;height:790px;background:#fff;border-radius:30px;overflow:hidden;position:relative;
+  box-shadow:0 0 0 1px #262D38,0 24px 60px rgba(0,0,0,.5)}
+.screen{position:absolute;inset:0;overflow-y:auto;display:none;scrollbar-width:thin;background:#fff;padding-bottom:64px}
+.screen.on{display:block}
+
+/* ── 공용 조각 ── */
+.thumb{background:var(--grad);position:relative;overflow:hidden;flex:none}
+.thumb::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 12% 0%,rgba(255,255,255,.14),transparent 55%)}
+.t3{position:absolute;left:10%;top:50%;transform:translateY(-50%);z-index:1}
+.t3 i{display:block;font-style:normal;color:#fff;font-weight:600;line-height:1.35;letter-spacing:-.2px}
+.t3 i.g{color:var(--gold)}
+.stg{display:inline-flex;align-items:center;border-radius:6px;font-weight:500;white-space:nowrap;font-size:10.5px;padding:3px 8px}
+.stg.g{background:var(--g-bg);color:var(--g-tx)}.stg.b{background:var(--b-bg);color:var(--b-tx)}
+.stg.a{background:var(--a-bg);color:var(--a-tx)}.stg.n{background:var(--n-bg);color:var(--n-tx)}
+.vf{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:500;color:var(--g-tx)}
+.vf.est{color:var(--ter)}
+.vf svg{width:11px;height:11px}
+.up{color:var(--up)}.down{color:var(--down)}
+
+/* ── 마스트헤드 (홈) · 서브마스트 (탭) — 단색 네이비 + 골드 2px ── */
+.mast{background:var(--navy);padding:16px 20px 20px;position:relative}
+.mast::after,.subm::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--gold)}
+.mrow{display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:19px;font-weight:800;color:#fff;letter-spacing:-.4px}
+.logo::after{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold);margin-left:3px;vertical-align:4px}
+.mrow svg{color:rgba(255,255,255,.85)}
+.mtag{font-size:11px;color:rgba(255,255,255,.72);font-weight:400;margin-top:4px}
+.msrch{display:flex;align-items:center;gap:8px;background:#fff;border-radius:var(--r-md);padding:12px 16px;margin-top:12px;
+  color:var(--ter);font-size:14px;font-weight:400;box-shadow:0 6px 18px rgba(7,20,60,.30)}
+.subm{background:var(--navy);padding:12px 20px 12px;position:relative}
+.subm .tt{font-size:17px;font-weight:700;color:#fff;letter-spacing:-.3px}
+.subm .srow{display:flex;align-items:center;justify-content:space-between}
+.subm .rs{display:inline-flex;align-items:center;gap:4px;border:1px solid rgba(255,255,255,.45);border-radius:var(--r-sm);
+  color:#fff;font-size:12px;font-weight:500;padding:6px 10px}
+.subm .sort{font-size:10px;color:rgba(255,255,255,.62);font-weight:400;margin-top:6px}
+
+/* ── 섹션 헤더 — 골드 룰 + eyebrow + 제목 + 텍스트링크 ── */
+.sechead{padding:20px 20px 8px}
+.sechead .grule{width:22px;height:2px;background:var(--gold);border-radius:2px;margin-bottom:6px}
+.sechead .row2{display:flex;align-items:baseline;justify-content:space-between}
+.sechead .eb{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;font-weight:500;color:var(--brand);letter-spacing:.14em;margin-bottom:2px}
+.sechead h2{font-size:17px;font-weight:700;letter-spacing:-.4px}
+.sechead a{font-size:12px;color:var(--sub);text-decoration:none;font-weight:400}
+
+/* ── 리스트 골격 (B) — 행 42 · 헤어라인 · tabular 우측 ── */
+.lhead{display:flex;padding:4px 20px 5px;font-size:10px;color:#AEB6C0;font-weight:500;border-bottom:1px solid var(--line2)}
+.lhead .c1{flex:1}.lhead .c2{width:52px;text-align:right}.lhead .c3{width:92px;text-align:right}
+.r{display:flex;align-items:center;min-height:44px;padding:4px 20px;gap:10px}
+.r+.r{border-top:1px solid var(--line2)}
+.r .l{flex:1;min-width:0}
+.r .nm{font-size:14px;font-weight:500;letter-spacing:-.15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r .mt{font-size:11px;color:var(--ter);font-weight:400;margin-top:1px}
+.r .c2{width:52px;text-align:right;font-size:12px;color:var(--sub);font-weight:400}
+.r .c3{width:92px;text-align:right}
+.r .pr{font-size:14px;font-weight:700;letter-spacing:-.1px}
+.r .st{font-size:10px;font-weight:500;margin-top:1px}
+.st.g{color:var(--g-tx)}.st.b{color:var(--b-tx)}.st.a{color:var(--a-tx)}.st.n{color:var(--ter)}
+.st::before{content:"·";margin-right:3px}
+.foot{display:block;text-align:center;padding:11px;font-size:11px;color:var(--sub);font-weight:400;border-top:1px solid var(--line2)}
+.sq{width:36px;height:36px;border-radius:var(--r-sm);box-shadow:inset 2px 0 0 var(--gold)}
+.thm52{width:52px;height:52px;border-radius:var(--r-md);box-shadow:inset 2px 0 0 var(--gold)}
+
+/* ── 피처드 카드 (홈·블로그 1개) ── */
+.feat{margin:12px 20px 0;border-radius:var(--r-lg);overflow:hidden;position:relative}
+.feat .thumb{height:164px}
+.feat .thumb::before{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--gold);z-index:2}
+.feat .stg2{position:absolute;top:12px;left:12px;z-index:2;font-size:10px;padding:4px 8px;border-radius:6px;
+  background:rgba(11,42,107,.35);border:1px solid rgba(255,197,61,.85);color:var(--gold);font-weight:500;backdrop-filter:blur(2px)}
+.fmeta{display:flex;align-items:center;justify-content:space-between;padding:10px 22px 0;gap:12px}
+.fmeta .nm{font-size:15px;font-weight:600;letter-spacing:-.3px}
+.fmeta .mt{font-size:11px;color:var(--ter);font-weight:400;margin-top:2px}
+.fmeta .pr{font-size:16px;font-weight:700}
+
+/* ── 탭 (언더라인 · 활성 골드) ── */
+.utabs{display:flex;overflow-x:auto;border-bottom:1px solid var(--line2);position:sticky;top:0;background:#fff;z-index:15;scrollbar-width:none;padding:0 8px}
+.utabs::-webkit-scrollbar{display:none}
+.utabs button{flex:none;padding:11px 12px;font-size:12.5px;font-weight:500;color:var(--ter);border-bottom:2px solid transparent}
+.utabs button.on{color:var(--navy);font-weight:600;border-bottom-color:var(--gold)}
+
+/* ── 지역 타일 · 리드 · 증시 ── */
+.rgn2{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px 20px 0}
+.rgn2 button{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:12px 16px;font-size:13px;font-weight:600;letter-spacing:-.2px}
+.rgn2 b{font-size:11px;color:var(--brand);font-weight:600}
+.lead{display:flex;align-items:center;gap:12px;background:var(--navy);padding:11px 16px 11px 20px;position:relative}
+.lead::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold)}
+.lead .tx{flex:1;font-size:12px;color:#fff;font-weight:500;line-height:1.45}
+.lead .tx small{display:block;font-size:10px;color:rgba(255,255,255,.68);font-weight:400}
+.lead .go{flex:none;background:var(--gold);color:#3A2C00;font-size:12px;font-weight:700;padding:8px 12px;border-radius:var(--r-sm)}
+.idx{display:flex;border-bottom:1px solid var(--line2);margin-top:4px}
+.idx>div{flex:1;padding:10px 0 12px;text-align:center}
+.idx>div+div{border-left:1px solid var(--line2)}
+.idx .k{font-size:10px;color:var(--ter);font-weight:500}
+.idx .v{font-size:14px;font-weight:700;margin-top:2px}
+.idx .d{font-size:10px;font-weight:600;margin-top:1px}
+
+/* ── 하단 내비 ── */
+.nav{position:absolute;bottom:0;left:0;right:0;height:56px;background:#fff;border-top:1px solid var(--line2);display:flex;z-index:30}
+.nav button{flex:1;font-size:11px;font-weight:500;color:#AEB6C0;position:relative}
+.nav button.on{color:var(--navy);font-weight:600}
+.nav button.on::after{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:18px;height:2px;background:var(--gold)}
+
+/* ── 상세 ── */
+.heroD{background:var(--navy);padding:16px 20px;position:relative}
+.heroD::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--gold)}
+.heroD .stg2{display:inline-flex;border:1px solid rgba(255,197,61,.9);color:var(--gold);font-size:10px;font-weight:500;padding:4px 8px;border-radius:6px}
+.heroD .e1{font-size:13px;color:rgba(255,255,255,.85);font-weight:500;margin-top:12px}
+.heroD .e2{font-size:22px;color:var(--gold);font-weight:700;letter-spacing:-.5px;margin-top:2px}
+.heroD .e3{font-size:11px;color:rgba(255,255,255,.78);font-weight:400;margin-top:4px}
+.heroD .stats{display:flex;margin-top:14px;border-top:1px solid rgba(255,255,255,.18);padding-top:12px}
+.heroD .stats>div{flex:1}
+.heroD .stats .k{font-size:10px;color:rgba(255,255,255,.6);font-weight:500}
+.heroD .stats .v{font-size:14px;color:#fff;font-weight:700;margin-top:2px}
+.cs{padding:20px 20px 8px}
+.cs .grule{width:22px;height:2px;background:var(--gold);border-radius:2px;margin-bottom:6px}
+.cs h3{font-size:15px;font-weight:700;letter-spacing:-.3px}
+.kv{display:flex;justify-content:space-between;align-items:center;min-height:40px;padding:2px 20px;font-size:13px}
+.kv+.kv{border-top:1px solid var(--line2)}
+.kv .k{color:var(--ter);font-weight:400}
+.kv .v{font-weight:500;text-align:right}
+.frm{margin:8px 20px 16px;border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.frm .fh{background:var(--navy);padding:12px 16px}
+.frm .fh .t1{font-size:14px;font-weight:600;color:#fff}
+.frm .fh .t2{font-size:10px;color:var(--gold);font-weight:500;margin-top:2px}
+.frm .fb{padding:12px 16px 16px}
+.frm .fi{background:#F5F6F8;border-radius:var(--r-md);padding:12px 16px;font-size:13px;color:var(--ter);margin-bottom:8px;font-weight:400}
+.btnG{display:block;width:100%;background:var(--grad);color:#fff;text-align:center;padding:12px;border-radius:var(--r-md);font-size:13.5px;font-weight:600;margin-top:4px}
+.cta48{position:absolute;bottom:0;left:0;right:0;height:52px;display:flex;gap:8px;padding:6px 12px 8px;background:#fff;border-top:1px solid var(--line2);z-index:30}
+.cta48 .kk{flex:1;background:#FEE500;color:#191919;border-radius:var(--r-md);font-size:13px;font-weight:600}
+.cta48 .rg{flex:1.7;background:var(--grad);color:#fff;border-radius:var(--r-md);font-size:13px;font-weight:600}
+
+/* ── 글 상세 ── */
+.pull{margin:16px 20px;padding:2px 0 2px 12px;border-left:3px solid var(--gold);font-size:14px;font-weight:500;color:var(--navy);line-height:1.6;letter-spacing:-.2px}
+.sitec{margin:8px 20px 0;background:#F3F6FE;border-radius:var(--r-lg);padding:12px 16px;display:flex;align-items:center;gap:12px}
+.sum{margin:12px 20px 0;padding:12px 16px;background:#F6F7F9;border-radius:var(--r-sm)}
+</style>
+</head>
+<body>
+<div class="studio">
+  <div class="st-head">
+    <div class="st-title">카더라 <b>V4 · 네이비 인덱스</b> — 확정안</div>
+    <div class="st-sub">B 골격 + C 아이덴티티 + A 폼 · 모바일 390 · 라이트 단일 · 판정 증분1 반영</div>
+  </div>
+  <div class="st-tabs" id="ptabs">
+    <button class="tab on" data-p="home">홈</button>
+    <button class="tab" data-p="apt">부동산</button>
+    <button class="tab" data-p="aptd">현장 상세</button>
+    <button class="tab" data-p="stock">주식</button>
+    <button class="tab" data-p="blog">블로그</button>
+    <button class="tab" data-p="blogd">글 상세</button>
+  </div>
+  <div class="spec"><b>확정 언어 · 판정 증분1 반영(8/30)</b> — 마스트·서브마스트는 단색 네이비 + 하단 골드 2px. 본문은 풀블리드 헤어라인 리스트(인터랙티브 행 44px 하한 · 정보 행 40px · tabular 우측정렬 · 열 캡션). 섹션 머리는 골드 룰 22×2 + eyebrow(기존 모노 스펙 존중) → 제목이고, 이동은 우측 링크가 아니라 목록 바닥 문장형. 탭 활성은 네이비 텍스트 600 + 골드 언더라인 2px(높이 44 하한). 그라디언트는 썸네일·히어로 카드·등록 버튼에만, 골드 텍스트는 네이비 위에서만. 라운드 8/12/16/20 · 굵기 400/500/600/700 · 토큰 신설 0.</div>
+
+  <div class="stage"><div class="phone">
+
+  <!-- ══ 홈 ══ -->
+  <div class="screen on" id="v-home">
+    <div class="mast">
+      <div class="mrow"><span class="logo">카더라</span>
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg></div>
+      <div class="mtag">모집공고 전 소식까지, 가장 빠른 분양 노트</div>
+      <div class="msrch"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>단지 · 지역 · 종목 검색</div>
+    </div>
+
+    <div class="sechead"><div class="grule"></div>
+      <div class="row2"><div><div class="eb">NOW · 계약 가능</div><h2>지금 계약 가능한 현장</h2></div></div>
+    </div>
+    <div class="feat">
+      <div class="thumb" style="height:164px"><span class="stg2">선착순 계약 중</span>
+        <span class="t3"><i style="font-size:14px">엄궁역</i><i class="g" style="font-size:20px">트라비스 하늘채</i><i style="font-size:11px;font-weight:400;opacity:.88">일반 1,061세대 · 전용 59~101</i></span>
+      </div>
+    </div>
+    <div class="fmeta">
+      <div><div class="nm">엄궁역 트라비스 하늘채</div><div class="mt">사상구 엄궁동 · 코오롱글로벌</div></div>
+      <div class="pr num">4.86~14.6억</div>
+    </div>
+    <div class="lhead" style="margin-top:10px"><span class="c1">현장</span><span class="c2">일반</span><span class="c3">분양가</span></div>
+    <div class="r"><div class="l"><div class="nm">두산위브더제니스 대연</div><div class="mt">남구 대연동</div></div>
+      <span class="c2 num">176</span><span class="c3"><div class="pr num">7.65~10.9억</div><div class="st b">분양중</div></span></div>
+    <div class="r"><div class="l"><div class="nm">해링턴 마레</div><div class="mt">남구 우암동</div></div>
+      <span class="c2 num">1,382</span><span class="c3"><div class="pr num">5.33~8.56억</div><div class="st a">잔여세대</div></span></div>
+    <div class="r"><div class="l"><div class="nm">온천장 하늘채 엘리시움</div><div class="mt">동래구 온천동</div></div>
+      <span class="c2 num">129</span><span class="c3"><div class="pr num">7.02~8.20억</div><div class="st g">선착순</div></span></div>
+    <a class="foot" href="#">계약 가능 현장 5곳 전체 보기</a>
+
+    <div class="sechead"><div class="grule"></div>
+      <div class="row2"><div><div class="eb">MOVE · 이번 주</div><h2>최근 움직인 현장</h2></div></div>
+    </div>
+    <div class="r"><div class="l"><div class="nm">블랑 써밋 74</div><div class="mt">동구 범일동</div></div>
+      <span class="c3" style="width:auto"><div class="st b" style="font-size:11px">모집공고 게시</div><div class="mt num" style="text-align:right">2일 전</div></span></div>
+    <div class="r"><div class="l"><div class="nm">연제 갤러리 자이</div><div class="mt">연제구 연산동</div></div>
+      <span class="c3" style="width:auto"><div class="st n" style="font-size:11px">10월 분양예정</div><div class="mt num" style="text-align:right">4일 전</div></span></div>
+    <div class="r"><div class="l"><div class="nm">힐스테이트 아이코닉</div><div class="mt">부산진구 범천동</div></div>
+      <span class="c3" style="width:auto"><div class="st n" style="font-size:11px">후분양 전환</div><div class="mt num" style="text-align:right">6일 전</div></span></div>
+    <a class="foot" href="#">이번 주 단계가 바뀐 현장 12곳 더 보기</a>
+
+    <div class="sechead"><div class="grule"></div>
+      <div class="row2"><div><div class="eb">AREA</div><h2>지역으로 찾기</h2></div></div>
+    </div>
+    <div class="rgn2">
+      <button>부산<b class="num">1,204곳</b></button><button>울산<b class="num">218곳</b></button>
+      <button>경남<b class="num">640곳</b></button><button>서울<b class="num">892곳</b></button>
+    </div>
+
+    <div class="sechead"><div class="grule"></div>
+      <div class="row2"><div><div class="eb">COLUMN · 부정공</div><h2>현장을 읽는 노트</h2></div></div>
+    </div>
+    <div class="r" style="min-height:60px"><div class="thumb thm52"><span class="t3" style="left:8px"><i class="g" style="font-size:7.5px">오티에르</i><i style="font-size:7.5px">해운대</i></span></div>
+      <div class="l"><div class="nm" style="white-space:normal;line-height:1.35">오티에르 해운대 분양가 분석 — 중동 하이엔드의 셈법</div><div class="mt">분양권 분석 · 8.28</div></div></div>
+    <div class="r"><div class="l"><div class="nm">블랑 써밋 74, 지금 들어가도 될까</div><div class="mt">분양권 분석 · 8.26</div></div></div>
+
+    <a class="foot" href="#">부정공 칼럼 전체 보기</a>
+
+    <div class="sechead"><div class="grule"></div>
+      <div class="row2"><div><div class="eb">MARKET</div><h2>오늘의 증시</h2></div></div>
+    </div>
+    <div class="idx" style="margin-bottom:16px">
+      <div><div class="k">코스피</div><div class="v num">2,847.36</div><div class="d up num">▲0.82%</div></div>
+      <div><div class="k">코스닥</div><div class="v num">892.41</div><div class="d down num">▼0.48%</div></div>
+      <div><div class="k">USD/KRW</div><div class="v num">1,318.5</div><div class="d up num">▲0.21%</div></div>
+    </div>
+    <div class="nav"><button class="on">홈</button><button>부동산</button><button>주식</button><button>블로그</button><button>마이</button></div>
+  </div>
+
+  <!-- ══ 부동산 목록 ══ -->
+  <div class="screen" id="v-apt">
+    <div class="subm">
+      <div class="srow"><span class="tt">부동산</span>
+        <button class="rs">부산 · 사상구 외 2 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button></div>
+      <div class="sort">모집공고 기준 최신순 · 1,204곳</div>
+    </div>
+    <div class="utabs">
+      <button class="on">전체</button><button>분양예정</button><button>분양중</button><button>선착순</button><button>잔여세대</button><button>재개발</button>
+    </div>
+    <div class="lead">
+      <span class="tx">분양 정보 안내 신청<small>이름·연락처만 남기면 담당자가 연락드려요</small></span>
+      <button class="go">신청</button>
+    </div>
+
+    <div class="sechead"><div class="grule"></div>
+      <div class="row2"><div><div class="eb">PICK · 큐레이션</div><h2>이번 주 주목 현장</h2></div></div>
+    </div>
+    <div class="r"><div class="thumb sq"><span class="t3" style="left:5px"><i class="g" style="font-size:6.5px">트라비스</i><i style="font-size:6.5px">하늘채</i></span></div>
+      <div class="l"><div class="nm">엄궁역 트라비스 하늘채</div><div class="mt">사상구 · 동·호 지정 계약</div></div>
+      <span class="c3"><div class="pr num">4.86~14.6억</div><div class="st g">선착순</div></span></div>
+    <div class="r"><div class="thumb sq"><span class="t3" style="left:5px"><i class="g" style="font-size:6.5px">오티에르</i><i style="font-size:6.5px">해운대</i></span></div>
+      <div class="l"><div class="nm">오티에르 해운대</div><div class="mt">해운대구 중동 · 공고 전</div></div>
+      <span class="c3"><div class="pr" style="font-size:12px;font-weight:500;color:var(--sub)">알림 신청</div><div class="st n">분양예정</div></span></div>
+    <div class="r"><div class="thumb sq"><span class="t3" style="left:5px"><i class="g" style="font-size:6.5px">하늘채</i><i style="font-size:6.5px">엘리시움</i></span></div>
+      <div class="l"><div class="nm">온천장 하늘채 엘리시움</div><div class="mt">동래구 · 역세권 초입</div></div>
+      <span class="c3"><div class="pr num">7.02~8.20억</div><div class="st g">선착순</div></span></div>
+
+    <div class="sechead"><div class="grule"></div>
+      <div class="row2"><div><div class="eb">ALL</div><h2>전체 현장</h2></div></div>
+    </div>
+    <div class="lhead"><span class="c1">현장</span><span class="c2">일반</span><span class="c3">분양가</span></div>
+    <div class="r"><div class="l"><div class="nm">블랑 써밋 74</div><div class="mt">동구 범일동 · 공고 8.28</div></div>
+      <span class="c2 num">594</span><span class="c3"><div class="pr" style="font-size:12px;font-weight:500;color:var(--sub)">공고 확인</div><div class="st b">분양중</div></span></div>
+    <div class="r"><div class="l"><div class="nm">두산위브더제니스 대연</div><div class="mt">남구 대연동 · 공고 7.18</div></div>
+      <span class="c2 num">176</span><span class="c3"><div class="pr num">7.65~10.9억</div><div class="st b">분양중</div></span></div>
+    <div class="r"><div class="l"><div class="nm">해링턴 마레</div><div class="mt">남구 우암동 · 공고 6.27</div></div>
+      <span class="c2 num">1,382</span><span class="c3"><div class="pr num">5.33~8.56억</div><div class="st a">잔여세대</div></span></div>
+    <div class="r"><div class="l"><div class="nm">힐스테이트 사직아시아드</div><div class="mt">동래구 사직동 · 공고 3.6</div></div>
+      <span class="c2 num">242</span><span class="c3"><div class="pr num">6.1~9.4억</div><div class="st a">잔여세대</div></span></div>
+    <div class="r"><div class="l"><div class="nm">르엘 리버파크 센텀</div><div class="mt">해운대구 재송동 · 공고 전</div></div>
+      <span class="c2 num">2,070</span><span class="c3"><div class="pr" style="font-size:12px;font-weight:500;color:var(--sub)">미정</div><div class="st n">분양예정</div></span></div>
+    <div class="r"><div class="l"><div class="nm">연제 갤러리 자이</div><div class="mt">연제구 연산동 · 공고 전</div></div>
+      <span class="c2 num">499</span><span class="c3"><div class="pr" style="font-size:12px;font-weight:500;color:var(--sub)">미정</div><div class="st n">분양예정</div></span></div>
+    <a class="foot" href="#">분양예정 337곳 포함 1,198곳 더 보기</a>
+    <div class="nav"><button>홈</button><button class="on">부동산</button><button>주식</button><button>블로그</button><button>마이</button></div>
+  </div>
+
+  <!-- ══ 현장 상세 ══ -->
+  <div class="screen" id="v-aptd" style="padding-bottom:58px">
+    <div class="heroD">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="color:#fff;font-size:14px;font-weight:600">←</span>
+        <span class="stg2">선착순 계약 진행 중</span>
+      </div>
+      <div class="e1">엄궁역</div>
+      <div class="e2">트라비스 하늘채</div>
+      <div class="e3">부산 사상구 엄궁동 · 코오롱글로벌 · 2028.9 입주 예정</div>
+      <div class="stats">
+        <div><div class="k">일반공급</div><div class="v num">1,061세대</div></div>
+        <div><div class="k">분양가</div><div class="v num">4.86~14.6억</div></div>
+        <div><div class="k">전용면적</div><div class="v num">59~101㎡</div></div>
+      </div>
+    </div>
+    <div class="utabs">
+      <button class="on">일정</button><button>타입·분양가</button><button>입지</button><button>검증</button><button>FAQ</button><button>주변 비교</button>
+    </div>
+
+    <div class="cs"><div class="grule"></div><h3>일정</h3></div>
+    <div class="kv"><span class="k">모집공고</span><span class="v num" style="color:var(--ter);font-weight:400">5.2 완료</span></div>
+    <div class="kv"><span class="k">1·2순위 청약</span><span class="v num" style="color:var(--ter);font-weight:400">5.13 완료</span></div>
+    <div class="kv"><span class="k">당첨자 발표</span><span class="v num" style="color:var(--ter);font-weight:400">5.20 완료</span></div>
+    <div class="kv"><span class="k">정당계약</span><span class="v num" style="color:var(--ter);font-weight:400">6.2~6.4 완료</span></div>
+    <div class="kv"><span class="k" style="color:var(--navy);font-weight:600">선착순 동·호 지정</span><span class="v"><span class="stg g">진행 중</span></span></div>
+    <div class="kv" style="border-bottom:1px solid var(--line2)"><span class="k">입주 예정</span><span class="v num">2028.9 <span class="vf est">추정</span></span></div>
+
+    <div class="cs"><div class="grule"></div><h3>타입·분양가</h3></div>
+    <div class="kv"><span class="k">소재지</span><span class="v">부산 사상구 엄궁동</span></div>
+    <div class="kv"><span class="k">일반공급</span><span class="v num">1,061세대</span></div>
+    <div class="kv"><span class="k">전용면적</span><span class="v num">59 · 84 · 101㎡</span></div>
+    <div class="kv"><span class="k">분양가</span><span class="v num">4.86~14.62억 <span class="vf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M4 12l5 5L20 6"/></svg>확인됨</span></span></div>
+    <div class="kv" style="border-bottom:1px solid var(--line2)"><span class="k">시공</span><span class="v">코오롱글로벌</span></div>
+
+    <div class="cs"><div class="grule"></div><h3>관심고객 등록</h3></div>
+    <div class="frm">
+      <div class="fh"><div class="t1">엄궁역 트라비스 하늘채</div><div class="t2">남겨주시면 담당자가 직접 연락드립니다</div></div>
+      <div class="fb">
+        <div class="fi">이름</div>
+        <div class="fi">연락처</div>
+        <div class="fi">생년월일</div>
+        <div class="fi">희망 타입 <span style="float:right;color:#AEB6C0">84A ▾</span></div>
+        <label style="display:flex;gap:6px;align-items:center;font-size:11px;color:var(--sub);margin:4px 0 8px;font-weight:400"><input type="checkbox" checked>개인정보 수집·이용 동의 (필수)</label>
+        <button class="btnG">관심고객 등록</button>
+      </div>
+    </div>
+    <div class="cta48"><button class="kk">카톡 상담</button><button class="rg">관심고객 등록</button></div>
+  </div>
+
+  <!-- ══ 주식 ══ -->
+  <div class="screen" id="v-stock">
+    <div class="subm">
+      <div class="srow"><span class="tt">마켓</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+      <div class="sort">분양 시장을 움직이는 숫자까지 한 화면에</div>
+    </div>
+    <div class="utabs"><button class="on">국내</button><button>해외</button><button>관심</button><button>업종</button></div>
+    <div class="idx">
+      <div><div class="k">코스피</div><div class="v num">2,847.36</div><div class="d up num">▲0.82%</div></div>
+      <div><div class="k">코스닥</div><div class="v num">892.41</div><div class="d down num">▼0.48%</div></div>
+      <div><div class="k">USD/KRW</div><div class="v num">1,318.5</div><div class="d up num">▲0.21%</div></div>
+    </div>
+    <div class="sechead"><div class="grule"></div>
+      <div class="row2"><div><div class="eb">TOP · 거래대금</div><h2>거래대금 상위</h2></div></div>
+    </div>
+    <div class="lhead"><span class="c1">종목</span><span class="c3" style="width:76px">현재가</span><span class="c3" style="width:64px">등락률</span></div>
+    <div class="r"><div class="l"><div class="nm">삼성전자</div><div class="mt">코스피 · 반도체</div></div>
+      <span class="c3 num" style="width:76px;font-weight:600;font-size:13px">78,400</span><span class="c3 up num" style="width:64px;font-size:12px;font-weight:600">▲1.42%</span></div>
+    <div class="r"><div class="l"><div class="nm">SK하이닉스</div><div class="mt">코스피 · 반도체</div></div>
+      <span class="c3 num" style="width:76px;font-weight:600;font-size:13px">224,500</span><span class="c3 up num" style="width:64px;font-size:12px;font-weight:600">▲3.18%</span></div>
+    <div class="r"><div class="l"><div class="nm">한화오션</div><div class="mt">코스피 · 조선</div></div>
+      <span class="c3 num" style="width:76px;font-weight:600;font-size:13px">42,150</span><span class="c3 down num" style="width:64px;font-size:12px;font-weight:600">▼0.95%</span></div>
+    <div class="r"><div class="l"><div class="nm">HD현대중공업</div><div class="mt">코스피 · 조선</div></div>
+      <span class="c3 num" style="width:76px;font-weight:600;font-size:13px">198,700</span><span class="c3 up num" style="width:64px;font-size:12px;font-weight:600">▲0.61%</span></div>
+    <div class="r"><div class="l"><div class="nm">NAVER</div><div class="mt">코스피 · 인터넷</div></div>
+      <span class="c3 num" style="width:76px;font-weight:600;font-size:13px">231,000</span><span class="c3 down num" style="width:64px;font-size:12px;font-weight:600">▼1.28%</span></div>
+    <a class="foot" href="#">거래대금 상위 30 전체 보기</a>
+    <div class="sechead"><div class="grule"></div>
+      <div class="row2"><div><div class="eb">LINK · 현장 연결</div><h2>분양 관련주</h2></div></div>
+    </div>
+    <div class="r"><div class="l"><div class="nm">코오롱글로벌</div><div class="mt">트라비스 하늘채 시공</div></div>
+      <span class="c3 num" style="width:76px;font-weight:600;font-size:13px">9,840</span><span class="c3 up num" style="width:64px;font-size:12px;font-weight:600">▲2.07%</span></div>
+    <div class="r"><div class="l"><div class="nm">HDC현대산업개발</div><div class="mt">신문 센트럴 아이파크 시공</div></div>
+      <span class="c3 num" style="width:76px;font-weight:600;font-size:13px">21,350</span><span class="c3 down num" style="width:64px;font-size:12px;font-weight:600">▼0.47%</span></div>
+    <div class="nav"><button>홈</button><button>부동산</button><button class="on">주식</button><button>블로그</button><button>마이</button></div>
+  </div>
+
+  <!-- ══ 블로그 ══ -->
+  <div class="screen" id="v-blog">
+    <div class="subm">
+      <div class="srow"><span class="tt">부정공 칼럼</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+      <div class="sort">현장을 읽는 부동산 노트 · 매주 9편</div>
+    </div>
+    <div class="utabs"><button class="on">전체</button><button>분양권 분석</button><button>청약</button><button>재개발</button><button>시세</button></div>
+    <div class="feat">
+      <div class="thumb" style="height:156px"><span class="stg2">분양권 분석</span>
+        <span class="t3"><i style="font-size:13px">해운대 중동</i><i class="g" style="font-size:18px">오티에르 해운대</i><i style="font-size:11px;font-weight:400;opacity:.88">분양가의 셈법</i></span>
+      </div>
+    </div>
+    <div class="fmeta" style="align-items:flex-start">
+      <div><div class="nm" style="line-height:1.4">오티에르 해운대 분양가 분석 — 중동 하이엔드의 셈법</div><div class="mt">부정공 · 8.28 · 읽기 6분</div></div>
+    </div>
+    <div class="sechead"><div class="grule"></div>
+      <div class="row2"><div><div class="eb">LATEST</div><h2>최신 글</h2></div></div>
+    </div>
+    <div class="r" style="min-height:60px"><div class="thumb thm52"><span class="t3" style="left:8px"><i class="g" style="font-size:7.5px">블랑</i><i style="font-size:7.5px">써밋 74</i></span></div>
+      <div class="l"><div class="nm" style="white-space:normal;line-height:1.35">블랑 써밋 74, 지금 들어가도 될까</div><div class="mt">분양권 분석 · 8.26</div></div></div>
+    <div class="r" style="min-height:60px"><div class="thumb thm52"><span class="t3" style="left:8px"><i class="g" style="font-size:7.5px">범천1-1</i><i style="font-size:7.5px">후분양</i></span></div>
+      <div class="l"><div class="nm" style="white-space:normal;line-height:1.35">힐스테이트 아이코닉, 후분양 전환의 의미</div><div class="mt">재개발 · 8.24</div></div></div>
+    <div class="r"><div class="l"><div class="nm">대연동 3파전 — 두산위브·포레나·비스타동원</div><div class="mt">시세 · 8.22</div></div></div>
+    <div class="r"><div class="l"><div class="nm">2026 하반기 부산 분양예정 캘린더</div><div class="mt">청약 · 8.20</div></div></div>
+    <div class="r"><div class="l"><div class="nm">반여 왕자맨션 재건축, 관리처분 이후의 시간표</div><div class="mt">재개발 · 8.18</div></div></div>
+    <a class="foot" href="#">이번 주 새 글 9편 더 보기</a>
+    <div class="nav"><button>홈</button><button>부동산</button><button>주식</button><button class="on">블로그</button><button>마이</button></div>
+  </div>
+
+  <!-- ══ 글 상세 ══ -->
+  <div class="screen" id="v-blogd" style="padding-bottom:24px">
+    <div style="padding:16px 20px 0"><span style="font-size:13px;font-weight:600;color:var(--sub)">← 부정공 칼럼</span></div>
+    <div style="padding:16px 20px 0">
+      <div class="grule" style="width:22px;height:2px;background:var(--gold);border-radius:2px;margin-bottom:6px"></div>
+      <div style="font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;font-weight:500;color:var(--brand);letter-spacing:.14em">COLUMN · 분양권 분석</div>
+      <h1 style="font-size:21px;font-weight:700;letter-spacing:-.5px;line-height:1.34;margin-top:4px">오티에르 해운대 분양가 분석 — 중동 하이엔드의 셈법</h1>
+      <div style="font-size:13px;color:var(--sub);font-weight:400;line-height:1.6;margin-top:8px">분양가가 없는 지금이 오히려 이 현장을 읽기 가장 좋은 시점인 이유.</div>
+      <div style="font-size:11px;color:var(--ter);margin-top:8px;font-weight:400">부정공 · 2026.8.28 · 읽기 6분</div>
+    </div>
+    <div class="feat" style="margin-top:12px">
+      <div class="thumb" style="height:148px">
+        <span class="t3"><i style="font-size:13px">해운대 중동</i><i class="g" style="font-size:18px">오티에르 해운대</i><i style="font-size:11px;font-weight:400;opacity:.88">분양가의 셈법</i></span>
+      </div>
+    </div>
+    <div class="sum">
+      <div style="font-size:10px;font-weight:600;color:var(--sub);margin-bottom:5px">세 줄 요약</div>
+      <div style="font-size:12.5px;line-height:1.62;color:var(--sub);font-weight:400">중동 하이엔드는 평당가가 아니라 총액으로 읽는다 · 인근 시세 세 값이 분양가의 기준선 · 공고 전 알림 등록이 유일한 선점 수단</div>
+    </div>
+    <div style="padding:14px 20px 0;font-size:14.5px;line-height:1.74;font-weight:400;color:#333B45">
+      <p>해운대 중동은 부산에서 하이엔드라는 단어가 실제 계약으로 이어지는 몇 안 되는 동네다. 오티에르 해운대가 분양가를 확정하지 않은 지금이, 오히려 셈법을 정리하기 가장 좋은 시점이다.</p>
+    </div>
+    <div class="pull">기준선은 세 개다 — 엘시티 실거래, 중동 신축 84 환산가, 그리고 시행사의 금융비용.</div>
+    <div style="padding:0 20px;font-size:14.5px;line-height:1.74;font-weight:400;color:#333B45">
+      <p>이 세 값이 만나는 구간 바깥으로 분양가가 나오기는 어렵다. 공고 전 현장에서 할 수 있는 유일한 준비는 알림 등록뿐이다.</p>
+    </div>
+    <div class="sitec">
+      <div class="thumb" style="width:44px;height:44px;border-radius:var(--r-sm)"><span class="t3" style="left:6px"><i class="g" style="font-size:6.5px">오티에르</i><i style="font-size:6.5px">해운대</i></span></div>
+      <div style="flex:1"><div style="font-size:13.5px;font-weight:600">오티에르 해운대</div><div style="font-size:11px;color:var(--ter);font-weight:400;margin-top:2px">해운대구 중동 · 분양예정</div></div>
+      <button style="background:var(--grad);color:#fff;font-size:11.5px;font-weight:600;padding:8px 12px;border-radius:var(--r-sm)">알림 신청</button>
+    </div>
+    <div class="sechead"><div class="grule"></div>
+      <div class="row2"><div><div class="eb">NEXT</div><h2>이어서 읽기</h2></div></div>
+    </div>
+    <div class="r"><div class="l"><div class="nm">블랑 써밋 74, 지금 들어가도 될까</div><div class="mt">분양권 분석 · 8.26</div></div></div>
+    <div class="r" style="border-bottom:1px solid var(--line2)"><div class="l"><div class="nm">2026 하반기 부산 분양예정 캘린더</div><div class="mt">청약 · 8.20</div></div></div>
+  </div>
+
+  </div></div>
+</div>
+
+<script>
+let p='home';
+function apply(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  const el=document.getElementById('v-'+p);
+  if(el){el.classList.add('on');el.scrollTop=0;}
+  document.querySelectorAll('#ptabs .tab').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
+}
+document.getElementById('ptabs').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(b){p=b.dataset.p;apply();}});
+apply();
+</script>
+</body>
+</html>
