@@ -119,7 +119,12 @@ export function formatAptDataForPrompt(data: AptEnrichment): string {
   prompt += `- 위치: ${c.region_nm} ${c.sigungu} ${c.dong}\n`;
   if (c.built_year) prompt += `- 입주년도: ${c.built_year}년 (${age}년차)\n`;
   if (c.total_households) prompt += `- 세대수: ${c.total_households}세대\n`;
-  if (c.latest_sale_price) prompt += `- 최근 매매가: ${c.latest_sale_price}만원 (${c.latest_sale_date || '최근'})\n`;
+  /* ⛔ 예전에는 날짜가 없을 때 «최근» 이라는 낱말을 프롬프트에 넣었다. 모델은 그것을 그대로
+     본문으로 옮겼고, 「기준일 없는 시간 표현」은 이 저장소의 금칙이다(DS_RULES §2-3).
+     없으면 «없다» 고 말하고 시점 표현을 금지시킨다.
+     ⚠️ 여기 단가 라벨은 «정확하다» — latest_sale_price 는 만원 단위이고 그대로 만원을 붙인다.
+        full_apt_blog 가 /10000 해서 「8만원」을 만든 것과 방향이 반대니 같이 고치지 말 것. */
+  if (c.latest_sale_price) prompt += `- 매매가: ${c.latest_sale_price}만원 (${c.latest_sale_date ? `실거래 기준일 ${c.latest_sale_date}` : '기준일 미상 — 「최근」·「현재」 등 시점 표현 금지'})\n`;
   if (c.avg_sale_price_pyeong) prompt += `- 평당가: ${c.avg_sale_price_pyeong}만원/3.3㎡\n`;
   if (c.latest_jeonse_price) prompt += `- 최근 전세가: ${c.latest_jeonse_price}만원\n`;
   if (c.jeonse_ratio) prompt += `- 전세가율: ${c.jeonse_ratio}%\n`;
