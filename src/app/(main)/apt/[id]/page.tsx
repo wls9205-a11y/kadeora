@@ -825,6 +825,15 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
   const preAnnouncement =
     !sub && (isPipelineStage(lc) || lc === 'site_planning' || lc === 'pre_announcement');
 
+  /* apt_comments.house_type — NOT NULL 이고 DB 기본값이 «없다».
+     ⚠️ 어휘는 AptCommentSheet 의 Props 가 이미 확립했다('sub' | 'unsold' | 'redev').
+        새 값을 만들지 않는다 — 셋에 정확히 안 맞는 현장은 'redev' 로 묶고, 그 사실을
+        여기 적어 둔다. 이 열을 «읽는» 코드는 오늘 하나도 없고 요건은 NOT NULL 충족이다.
+     ⛔ 이 값을 컴포넌트가 «스스로» 정하게 두지 않는다 — 어느 계보인지는 데이터를 가진
+        이 페이지만 안다(sub 유무). 컴포넌트가 추측하면 그 추측이 두 벌째 판정이 된다. */
+  const commentHouseType: 'sub' | 'unsold' | 'redev' =
+    sub ? 'sub' : lc === 'unsold_active' ? 'unsold' : 'redev';
+
   // 희망 타입 선택지는 모집공고 원본(house_type_info)의 type 앞 숫자(전용면적)에서 파생한다.
   // apt_sites 에 area_types 류 컬럼이 없고, 현장마다 평형이 달라 하드코딩하지 않는다.
   const leadTypeOptions: string[] = Array.from(
@@ -2615,7 +2624,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
            점프바 칩은 이제 «순수 앵커» 다(SiteJumpBar 참조). */}
 
       {/* 댓글 섹션 */}
-      {site?.slug && <AptCommentSection slug={site.slug} siteName={name} />}
+      {site?.slug && <AptCommentSection slug={site.slug} siteName={name} houseType={commentHouseType} />}
       {/* 비로그인 가입 유도 CTA — InlineCTA */}
       {!aptUser && <RelatedContentCard type="apt" entityName={name} />}
 

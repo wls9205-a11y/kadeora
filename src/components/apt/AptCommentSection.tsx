@@ -16,11 +16,21 @@ interface Comment {
   author_id: string | null;
 }
 
-export default function AptCommentSection({ slug, siteName }: { slug: string; siteName: string }) {
+/**
+ * 현장 댓글이 «어느 계보» 에 붙는가. apt_comments.house_type 이 이 값을 든다.
+ * ⚠️ 어휘를 새로 만들지 않는다 — AptCommentSheet 의 Props 가 이미 이 셋으로 확립했다.
+ *    셋 중 어디에도 정확히 안 맞는 현장(기축 landmark 등)은 'redev' 로 묶인다.
+ *    지금 이 열을 «읽는» 코드는 없고, 정밀도보다 「NOT NULL 을 채운다」가 요건이다.
+ */
+export type AptCommentHouseType = 'sub' | 'unsold' | 'redev';
+
+export default function AptCommentSection({ slug, siteName, houseType }: { slug: string; siteName: string; houseType: AptCommentHouseType }) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  /* ⛔ 침묵 실패를 없앤다(P0-B ⑤ · V4-D P0-A 와 같은 계열). 아래 submit 참조. */
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
   const { userId } = useAuth();
   const pathname = usePathname();
@@ -46,16 +56,30 @@ export default function AptCommentSection({ slug, siteName }: { slug: string; si
     if (!input.trim() || input.trim().length < 2 || submitting) return;
     if (!userId) { router.push(loginUrl); return; }
     setSubmitting(true);
+    setSubmitError(null);
     const { data: profile } = await sb.from('profiles').select('nickname').eq('id', userId).maybeSingle();
-    await (sb as any).from('apt_comments').insert({
+    /* ⛔⛔ house_type 을 «반드시» 싣는다 — NOT NULL 이고 DB 기본값이 없다.
+       이것이 빠져 있어서 **이 화면의 댓글 등록이 100% 실패하고 있었다**(2026-08-31 실측:
+       apt_comments 실사용자 행 «역사상 0건», 유일한 1행은 다른 경로가 넣은 것).
+       그리고 아래 error 를 안 보고 있어서 화면은 «성공한 것처럼» 굴었다 —
+       입력창이 비워지고 목록만 그대로였다. 그것이 「눌러도 아무 일도 없다」의 정체다. */
+    const { error: insertErr } = await (sb as any).from('apt_comments').insert({
       house_key: slug,
       house_nm: siteName,
+      house_type: houseType,
       author_id: userId,
       author_name: profile?.nickname || '익명',
       content: input.trim(),
     });
-    setInput('');
     setSubmitting(false);
+    if (insertErr) {
+      console.error('[apt-comment] 등록 실패', insertErr);
+      /* ⛔ 입력을 지우지 않는다 — 실패한 마당에 쓴 글까지 잃게 하지 않는다.
+         ⛔ 「죄송합니다」로 뭉개지 않는다(DS_RULES §2-5). 다음 행동을 말한다. */
+      setSubmitError('댓글을 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
+    setInput('');
     load();
   };
 
@@ -97,6 +121,8 @@ export default function AptCommentSection({ slug, siteName }: { slug: string; si
             onKeyDown={e => e.key === 'Enter' && submit()}
             placeholder="이 현장에 대한 의견을 남겨주세요"
             maxLength={500}
+            aria-invalid={submitError ? true : undefined}
+            aria-describedby={submitError ? 'kd-apt-comment-error' : undefined}
             style={{
               flex: 1, padding: '9px 12px', borderRadius: 'var(--radius-sm)',
               border: '1px solid var(--border)', background: 'var(--bg-hover)',
@@ -123,6 +149,18 @@ export default function AptCommentSection({ slug, siteName }: { slug: string; si
         }}>
           💬 로그인하고 댓글 남기기 (+5P)
         </a>
+      )}
+
+      {/* ⚠️ 색만으로 의미를 전달하지 않는다(DS_RULES §2-6) — 문장 + role="alert". */}
+      {submitError && (
+        <p
+          id="kd-apt-comment-error"
+          role="alert"
+          style={{
+            margin: '-8px 0 12px', fontSize: 'var(--fs-xs)',
+            color: 'var(--accent-red)', lineHeight: 1.5, wordBreak: 'keep-all',
+          }}
+        >{submitError}</p>
       )}
 
       {/* 댓글 목록 */}
