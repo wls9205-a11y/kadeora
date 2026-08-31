@@ -51,6 +51,9 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
       .eq('id', initialTopic.id).then(() => {});
   }, [initialTopic.id, initialTopic.view_count]);
 
+  /* ⛔ 호출자 없음 — 읽기 전용 아카이브 전환으로 투표 버튼을 disabled 로 바꿨다(2026-08-31).
+     함수를 «남겨 둔» 이유: 되살릴 때 로직을 다시 쓰지 않게. 다만 그때는 API 도 같이 열어야 한다
+     (/api/discuss/[id]/vote 는 현재 410). ⛔ UI 만 재배선하면 눌러도 410 이 난다. */
   const handleVote = async (vote: 'a' | 'b') => {
     if (!user) { router.push(`/login?redirect=${encodeURIComponent(pathname)}`); return; }
     if (voting) return;
@@ -84,6 +87,7 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
     } finally { setVoting(false); }
   };
 
+  /* ⛔ 호출자 없음 — 위와 같다. 되살릴 때 /api/discuss/[id]/comments 의 410 도 함께 푼다. */
   const handleComment = async () => {
     if (!user) { router.push(`/login?redirect=${encodeURIComponent(pathname)}`); return; }
     const t = input.trim();
@@ -119,7 +123,9 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
           { key: 'a' as const, label: topic.option_a, pct: pctA, count: topic.vote_a, winning: pctA >= pctB },
           { key: 'b' as const, label: topic.option_b, pct: pctB, count: topic.vote_b, winning: pctB > pctA },
         ].map(opt => (
-          <button key={opt.key} onClick={() => handleVote(opt.key)} disabled={voting}
+          /* ⛔ 읽기 전용 아카이브 — 투표 쓰기를 닫았다(2026-08-31). 결과는 계속 보인다.
+              실측: discussion_votes 실행 2건(전부 시드) · 최근 90일 0건. */
+          <button key={opt.key} disabled aria-disabled="true" title="이 토론은 보관 상태입니다"
             style={{
               width: '100%', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-sm)', borderRadius: 'var(--radius-card)',
               border: myVote === opt.key ? '2px solid var(--brand)' : '1px solid var(--border)',
@@ -150,23 +156,15 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
       <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginTop: 'var(--sp-lg)' }}>
         <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 16px' }}>의견 {comments.length}개</h2>
 
-        {/* Input */}
+        {/* ⛔ 의견 입력을 닫았다 — /discuss 는 읽기 전용 아카이브다(Node 판정 2026-08-31).
+             실측: discussion_comments «역사상 0건». 남길 사람이 없던 자리다.
+             ⚠️ 로그인 유도로 바꾸지 «않는다» — 로그인해도 쓸 수 없는데 로그인을 권하면
+                그것이 거짓 안내다. 상태를 그대로 말한다(§2-5: 다음 행동을 말한다). */}
         <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
-          {user ? (
-            <>
-              <input value={input} onChange={e => setInput(e.target.value)} placeholder="의견을 남겨보세요" maxLength={500}
-                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleComment(); } }}
-                style={{ flex: 1, padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)' }} />
-              <button onClick={handleComment} disabled={!input.trim() || sending}
-                style={{ padding: '10px 16px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', fontWeight: 600, fontSize: 'var(--fs-base)', cursor: 'pointer', opacity: !input.trim() || sending ? 0.5 : 1 }}>
-                전송
-              </button>
-            </>
-          ) : (
-            <div style={{ flex: 1, textAlign: 'center', padding: 12, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
-              <a href={`/login?redirect=${encodeURIComponent(pathname)}&source=discuss`} style={{ color: 'var(--brand)', textDecoration: 'none' }}>로그인</a>하면 의견을 남길 수 있습니다
-            </div>
-          )}
+          <div style={{ flex: 1, textAlign: 'center', padding: 12, color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', lineHeight: 1.5, wordBreak: 'keep-all' }}>
+            보관된 토론입니다. 새 의견은 받지 않습니다 —{' '}
+            <a href="/apt" style={{ color: 'var(--brand)', textDecoration: 'none' }}>분양 현장</a>에서 이어가 주세요.
+          </div>
         </div>
 
         {/* Comment list */}

@@ -2,49 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { createSupabaseServer } from '@/lib/supabase-server';
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
-  try {
-    const { id } = await params;
-    const topicId = parseInt(id, 10);
-    if (!topicId) return NextResponse.json({ error: 'Invalid topic' }, { status: 400 });
-
-    const sb = await createSupabaseServer();
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
-
-    const { vote } = await req.json();
-    if (vote !== 'a' && vote !== 'b') return NextResponse.json({ error: 'Invalid vote' }, { status: 400 });
-
-    // Check existing vote
-    const { data: existing } = await sb.from('discussion_votes')
-      .select('id, vote').eq('topic_id', topicId).eq('author_id', user.id).maybeSingle();
-
-    if (existing) {
-      if (existing.vote === vote) return NextResponse.json({ error: '이미 투표했습니다.' }, { status: 409 });
-      // Change vote
-      await sb.from('discussion_votes').update({ vote }).eq('id', existing.id);
-      const inc = vote === 'a' ? { vote_a: 1, vote_b: -1 } : { vote_a: -1, vote_b: 1 };
-      const { data: topic } = await sb.from('discussion_topics').select('vote_a, vote_b').eq('id', topicId).single();
-      if (topic) {
-        await sb.from('discussion_topics').update({
-          vote_a: Math.max(0, (topic.vote_a || 0) + inc.vote_a),
-          vote_b: Math.max(0, (topic.vote_b || 0) + inc.vote_b),
-        }).eq('id', topicId);
-      }
-      return NextResponse.json({ voted: vote, changed: true });
-    }
-
-    // New vote
-    const { error } = await sb.from('discussion_votes').insert({ topic_id: topicId, author_id: user.id, vote });
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-
-    const col = vote === 'a' ? 'vote_a' : 'vote_b';
-    const { data: topic } = await sb.from('discussion_topics').select(col).eq('id', topicId).single();
-    if (topic) {
-      await sb.from('discussion_topics').update({ [col]: ((topic as Record<string, any>)[col] || 0) + 1 }).eq('id', topicId);
-    }
-
-    return NextResponse.json({ voted: vote }, { status: 201 });
-  } catch { return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
+/* ⛔ 투표 차단 — /discuss 는 «읽기 전용 아카이브» 다 (Node 판정 2026-08-31).
+ * UI 만 닫으면 반쪽이다 — 라우트가 열려 있으면 같은 사실을 UI 와 API 가 «다르게» 안다.
+ * ⚠️ 데이터는 그대로다(토픽 35 · 채팅 216 · 투표 2). 폐쇄는 경로의 일이다.
+ * 되살리려면 UI 와 이 라우트를 «같은 커밋에서» 함께 열 것. */
+export async function POST() {
+  return NextResponse.json(
+    { error: 'gone', message: '보관된 토론입니다. 새 글·투표·의견은 받지 않습니다.' },
+    { status: 410 },
+  );
 }

@@ -9,11 +9,12 @@ import type { User } from '@supabase/supabase-js';
 import ChatRoom from './ChatRoom';
 import { timeAgo } from '@/lib/format';
 
+/* ⛔ 채팅방 탭 4종 제거 — /discuss 는 읽기 전용 아카이브다(Node 판정 2026-08-31).
+   실측: chat_messages 216건 중 «최근 90일 0건», 마지막 2026-04-17.
+   ⚠️ ChatRoom 컴포넌트와 chat_messages 데이터(216건)는 «지우지 않았다» —
+      폐쇄는 경로의 일이다. 탭이 없으면 isChat 은 항상 false 라 렌더되지 않는다.
+   ⚠️ 되살리려면 이 배열에 탭을 되돌리기 «전에» 시드 정책 판정을 먼저 받을 것. */
 const TABS = [
-  { key: 'lounge', label: '💬 전체' },
-  { key: 'stock', label: '📊 주식방' },
-  { key: 'apt', label: '🏢 부동산방' },
-  { key: 'free', label: '✏️ 자유방' },
   { key: 'poll', label: '🗳 투표' },
 ];
 

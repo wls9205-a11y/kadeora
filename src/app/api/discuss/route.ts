@@ -26,29 +26,13 @@ export async function GET(req: NextRequest) {
   } catch { return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
 }
 
-export async function POST(req: NextRequest) {
-  if (!(await rateLimit(req, 'api'))) return rateLimitResponse();
-  try {
-    const sb = await createSupabaseServer();
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
-
-    const body = await req.json();
-    const title = (body.title || '').trim();
-    if (!title || title.length < 5) return NextResponse.json({ error: '주제는 5자 이상이어야 합니다.' }, { status: 400 });
-    if (title.length > 100) return NextResponse.json({ error: '주제는 100자 이하여야 합니다.' }, { status: 400 });
-
-    const { data, error } = await sb.from('discussion_topics').insert({
-      title,
-      description: (body.description || '').trim().slice(0, 500) || null,
-      category: ['stock', 'apt', 'economy', 'free'].includes(body.category) ? body.category : 'free',
-      topic_type: body.topic_type === 'open' ? 'open' : 'poll',
-      option_a: (body.option_a || '찬성').trim().slice(0, 20),
-      option_b: (body.option_b || '반대').trim().slice(0, 20),
-      author_id: user.id,
-    }).select().single();
-
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ topic: data }, { status: 201 });
-  } catch { return NextResponse.json({ error: '서버 오류' }, { status: 500 }); }
+/* ⛔ 신규 토론 생성 차단 — /discuss 는 «읽기 전용 아카이브» 다 (Node 판정 2026-08-31).
+ * UI 만 닫으면 반쪽이다 — 라우트가 열려 있으면 같은 사실을 UI 와 API 가 «다르게» 안다.
+ * ⚠️ 데이터는 그대로다(토픽 35 · 채팅 216 · 투표 2). 폐쇄는 경로의 일이다.
+ * 되살리려면 UI 와 이 라우트를 «같은 커밋에서» 함께 열 것. */
+export async function POST() {
+  return NextResponse.json(
+    { error: 'gone', message: '보관된 토론입니다. 새 글·투표·의견은 받지 않습니다.' },
+    { status: 410 },
+  );
 }
