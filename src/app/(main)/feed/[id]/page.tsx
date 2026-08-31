@@ -139,7 +139,7 @@ export default async function FeedDetailPage({ params }: Props) {
 
     const { data: postData } = await sb
       .from('posts')
-      .select('*, slug, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade)')
+      .select('*, slug, profiles!posts_author_id_fkey(id,nickname,avatar_url,grade,is_seed)')
       .eq('id', numId)
       .eq('is_deleted', false)
       .maybeSingle();
@@ -308,6 +308,24 @@ export default async function FeedDetailPage({ params }: Props) {
   }
 
   if (!post) return notFound();
+
+  /* ⛔ 시드 계정 글은 «열리지 않는다» (2026-08-31 · 잡담 피드 영구 폐쇄 3항).
+   *
+   * 왜 여기인가 — 검색 노출은 이미 두 겹으로 막혀 있었다(사이트맵 is_seed=false 필터 ·
+   * generateMetadata 의 noindex). 남아 있던 구멍은 «URL 을 아는 사람이 직접 여는» 경로
+   * 하나였고, 그것을 닫는 자리가 여기다.
+   *
+   * ⚠️ 데이터는 건드리지 않는다. posts 행도 is_deleted 도 그대로다 —
+   *    폐쇄는 «경로» 의 일이지 «데이터» 의 일이 아니다. 되돌리려면 이 블록만 지운다.
+   * ⚠️ is_hidden 컬럼을 쓰지 않았다. 그 컬럼은 저장소에서 «읽는 코드가 하나도 없어»
+   *    12,536행을 바꿔도 효과가 0이다(2026-08-31 실측). 사문 컬럼을 되살리는 것은
+   *    별도 정당화가 필요한 일이라 하지 않았다.
+   * ⚠️ is_deleted 로 숨기지 않았다. 사유가 다르면 코드도 다르다 —
+   *    「폐쇄로 감춤」과 「사용자가 지움」이 한 컬럼에 섞이면 둘 다 못 읽는다.
+   * ⚠️ 작성자가 없는 글(author_id NULL · 실측 1건)은 시드임을 «증명할 수 없어»
+   *    여기 걸리지 않는다. 추측으로 감추지 않는다.
+   */
+  if ((post.profiles as { is_seed?: boolean } | null)?.is_seed === true) return notFound();
 
   if (post.slug && !isNaN(Number(id)) && post.slug !== id) {
     permanentRedirect(`/feed/${post.slug}`);

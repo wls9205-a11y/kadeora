@@ -176,16 +176,22 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
-      /* ⛔ A4(2026-08-27) — /feed 를 /apt 로 «임시» 이전한다.
+      /* ⛔ /feed 목록 «영구» 폐쇄 → /apt (Node 판정 2026-08-31)
        *
-       * ⚠️ permanent: false «반드시». 302 다.
-       *    Phase B4 에서 /feed 를 «관측 스트림» 으로 되살릴 예정이라 301 을 쓰면 안 된다 —
-       *    301 은 브라우저가 캐시하고 검색엔진이 URL 을 통합해 버려서, 되살려도
-       *    한동안 아무도 도달하지 못한다. 되돌릴 계획이 있으면 302 다.
-       * ⚠️ 하위 경로(/feed/:id)는 «건드리지 않는다». 개별 글은 살아 있고,
-       *    A4 는 목록 진입만 막는다. 시드 글 비공개 플립은 7일 뒤 별도 커밋이다.
+       * ⚠️ 이 자리는 A4(8/27)에 «임시 이전(302)» 으로 섰고, 그때 주석은
+       *    「Phase B4 에서 관측 스트림으로 되살릴 예정」이라 적었다. 그 계획은 폐기됐다 —
+       *    실사용자 UGC 가 2026-04-19 주부터 전 표면 0 이었고, 「살아 있어 보이던」
+       *    커뮤니티는 시드가 만든 것이었다(b96c7ff6 실측). 되살릴 것이 없다.
+       *    주석과 코드가 어긋나면 다음 사람이 «되살릴 계획이 있다» 고 읽는다. 같이 고친다.
+       *
+       * ⚠️ permanent: true «의도된 301» 이다. 302 였던 이유(되돌릴 계획)가 사라졌고,
+       *    검색엔진이 /feed 를 /apt 로 통합하는 것이 이제 «원하는» 결과다.
+       * ⚠️ 하위 경로(/feed/:id)는 «여전히 건드리지 않는다». 색인 300건이 실사용자 글이고
+       *    네이버 유입 76/월을 만든다(2026-08-31 실측) — 읽기 전용 아카이브로 유지한다.
+       *    폐쇄는 표면을 접는 일이지 자산을 태우는 일이 아니다.
+       *    시드 글은 상세 페이지에서 notFound() 로 닫았다(데이터 무변경).
        * ⚠️ /feed.xml 은 다른 것이다 — source 를 정확히 "/feed" 로 한정한다. */
-      { source: "/feed", destination: "/apt", permanent: false },
+      { source: "/feed", destination: "/apt", permanent: true },
 
       { source: "/api/stock-debug", destination: "/", permanent: true },
       { source: "/api/stock-debug/:path*", destination: "/", permanent: true },
