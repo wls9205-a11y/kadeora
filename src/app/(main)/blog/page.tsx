@@ -241,8 +241,29 @@ export default async function BlogPage({ searchParams }: Props) {
    *    ⛔ 다만 여기서는 「없으면 부산」으로 «떨어뜨리지 않는다». 블로그의 기본은 전체 글이고,
    *       지역을 고른 적 없는 사람에게 한 지역만 보여줄 이유가 없다.
    */
+  /* ⛔⛔ BF-0 (2026-08-31) — 지역은 «부동산의 축» 이다. 단일 소스로 게이트한다.
+   *
+   * 무엇이 났나: 부동산 탭에서 고른 「부산」이 REGION_COOKIE 에 남고, ?category=stock·life
+   * 에서도 «복원» 돼 목록 쿼리에 걸렸다. 그런데 실측상 stock 2,882 · finance 269 ·
+   * general 67 은 apt_region 이 «전건 NULL» 이다 — 부산 매칭 0 → 「아직 블로그 글이
+   * 없어요」. 주식·재테크 목록이 통째로 비어 있었다.
+   *
+   * ⚠️ 탭의 「주식 2882」는 region 을 «안 거는» 다른 자(카테고리 카운트)라 크게 보였다 —
+   *    건수와 목록이 다른 조건을 쓰고 있었다. 「같은 사실을 두 곳이 다르게」 그 자체다.
+   * ⚠️ UI 에는 stock 예외가 «있었는데»(칩 활성 표시) 쿼리에는 없었다. 예외를 표시에만
+   *    두면 화면은 맞고 결과는 틀린다. 그래서 조건을 하나로 모은다.
+   *
+   * ⛔ category='all' 에서도 지역을 걸지 않는다. 전체 탭은 «필터 없는 전체» 다 —
+   *    부산을 걸면 apt_region NULL 인 주식·재테크가 전부 빠져 전체가 부동산화된다.
+   * ⚠️ 비부동산 문맥에 region·sgg 파라미터가 붙어 들어오면 «에러 없이 무시» 한다.
+   *    빈 목록보다 전체가 낫다(기존 낙하 원칙 그대로).
+   * ⚠️ 쿠키 스키마는 건드리지 않았다 — «복원 조건» 만 게이트한다.
+   */
+  const REGION_CATEGORIES = new Set(['realestate', 'apt', 'unsold', 'redev']);
+  const regionAllowed = REGION_CATEGORIES.has(category);
+
   const cookieRegion = normalizeSido((await cookies()).get(REGION_COOKIE)?.value ?? null);
-  const region = normalizeSido(regionRaw) ?? cookieRegion ?? '';
+  const region = regionAllowed ? (normalizeSido(regionRaw) ?? cookieRegion ?? '') : '';
   const sgg = region ? (sggRaw || '').trim() : '';
   const pageNum = Math.max(1, parseInt(page) || 1);
   const perPage = 30;
@@ -555,8 +576,10 @@ export default async function BlogPage({ searchParams }: Props) {
         }} />
       </form>
 
-      {/* 부동산 탭과 같은 쿠키에 남긴다. 두 탭이 다른 지역을 말하면 고장으로 읽힌다. */}
-      <BlogRegionCookieSync region={region} />
+      {/* 부동산 탭과 같은 쿠키에 남긴다. 두 탭이 다른 지역을 말하면 고장으로 읽힌다.
+           ⛔ BF-0 — 부동산 문맥에서만 쓴다. 비부동산 탭에서 빈 값을 써 넣으면
+              부동산 탭의 선택을 «지워» 버린다(반대 방향 누수). */}
+      {regionAllowed && <BlogRegionCookieSync region={region} />}
 
       {/* ── H5-3 · 지역 세그먼트 ──
            ⛔ 「부울경」이라 쓰지 않는다. 엔티티 기준으로 17개 시도 전부에 글이 있다.
@@ -567,8 +590,13 @@ export default async function BlogPage({ searchParams }: Props) {
               (서울 592 대 세종 11). 부동산 탭의 타일과 역할이 다르다. */}
       <nav aria-label="빠른 분류" className="apt-pill-scroll" style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none' }}>
         {[
-          { k: '', label: '전체', cat: '' },
-          ...SIDO_LIST.map((r) => ({ k: r, label: r, cat: '' })),
+          /* ⛔ BF-0 — 시도 칩은 부동산 문맥에서만. 걸리지도 않는 필터를 보여 주지 않는다.
+             ⚠️ 「주식」 칩은 «남긴다» — 이 줄이 지금 첫 화면의 유일한 주식 진입점이고,
+                탭은 아직 네 층 아래다. BF-1(탭 최상단 이동) 뒤 BF-2 에서 제거한다.
+                지금 같이 빼면 주식으로 갈 길이 첫 화면에서 사라진다. */
+          ...(regionAllowed
+            ? [{ k: '', label: '전체', cat: '' }, ...SIDO_LIST.map((r) => ({ k: r, label: r, cat: '' }))]
+            : []),
           { k: '', label: '주식', cat: 'stock' },
         ].map(({ k, label, cat }) => {
           const on = cat ? category === cat : region === k && category !== 'stock';
