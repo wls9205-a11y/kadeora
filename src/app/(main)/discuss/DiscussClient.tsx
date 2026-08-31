@@ -56,26 +56,27 @@ function TopicCard({ topic }: { topic: Topic }) {
           {topic.is_hot && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-pill)', fontWeight: 500, background: 'var(--error)', color: 'var(--text-inverse)' }}>🔥 HOT</span>}
         </div>
         <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px', lineHeight: 1.4 }}>{topic.title}</h3>
+        {/* ⛔ 결과(퍼센트·막대)를 내렸다 — 실체가 없다(2026-08-31 실측).
+             카운터 vote_a+vote_b 합계 2,002 대 discussion_votes 실행 «2건»(전부 시드) — 1,001배.
+             ✅ 선택지 문구(option_a/b)는 «실제 콘텐츠» 라 남긴다. 걷는 것은 «결과» 뿐이다.
+             ⚠️ 퍼센트만 남기는 것도 같은 거짓이다 — 그 퍼센트가 2,002 를 분모로 쓴다. */}
         {topic.topic_type === 'poll' && (
-          <div style={{ marginBottom: 'var(--sp-md)' }}>
-            {[
-              { label: topic.option_a, pct: pctA, winning: pctA >= pctB },
-              { label: topic.option_b, pct: pctB, winning: pctB > pctA },
-            ].map((opt, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 6 }}>
-                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, minWidth: 60, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt.label}</span>
-                <div style={{ flex: 1, height: 22, background: 'var(--bg-hover)', borderRadius: 11, overflow: 'hidden' }}>
-                  <div style={{ width: `${opt.pct}%`, height: '100%', background: opt.winning ? 'var(--brand)' : 'var(--border)', borderRadius: 11, transition: 'width 0.3s', minWidth: opt.pct > 0 ? 8 : 0 }} />
-                </div>
-                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, minWidth: 36, textAlign: 'right', color: opt.winning ? 'var(--brand)' : 'var(--text-tertiary)' }}>{opt.pct}%</span>
-              </div>
+          <div style={{ marginBottom: 'var(--sp-md)', display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-sm)' }}>
+            {[topic.option_a, topic.option_b].filter(Boolean).map((label, i) => (
+              <span key={i} style={{
+                fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--text-secondary)',
+                padding: '4px 10px', borderRadius: 'var(--radius-pill)',
+                background: 'var(--bg-hover)', border: '1px solid var(--border)',
+              }}>{label}</span>
             ))}
           </div>
         )}
+        {/* ⛔ 💬 comment_count · 👁 view_count · 🗳 투표수 — 셋 다 내렸다.
+             실체: 댓글 0건 · 조회수는 이 저장소가 「합성값이라 노출 금지」로 이미 판정한 계열
+             (「많이 보는 현장」·「인기순」을 뺀 그 판례) · 투표 2건.
+             ⚠️ 판례는 «컬럼» 을 따라간다 — 블로그 표에만 적용하고 이 화면을 안 잰 것이 사각이었다. */}
         <div style={{ display: 'flex', gap: 'var(--sp-md)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-          <span>💬 {topic.comment_count || 0}</span>
-          <span>👁 {topic.view_count || 0}</span>
-          <span>🗳 {total}명</span>
+          <span>투표 종료</span>
           <span style={{ marginLeft: 'auto' }}>{timeAgo(topic.created_at)}</span>
         </div>
       </div>

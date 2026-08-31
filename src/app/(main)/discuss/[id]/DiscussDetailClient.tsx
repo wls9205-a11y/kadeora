@@ -123,8 +123,10 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
           { key: 'a' as const, label: topic.option_a, pct: pctA, count: topic.vote_a, winning: pctA >= pctB },
           { key: 'b' as const, label: topic.option_b, pct: pctB, count: topic.vote_b, winning: pctB > pctA },
         ].map(opt => (
-          /* ⛔ 읽기 전용 아카이브 — 투표 쓰기를 닫았다(2026-08-31). 결과는 계속 보인다.
-              실측: discussion_votes 실행 2건(전부 시드) · 최근 90일 0건. */
+          /* ⛔ 읽기 전용 아카이브 — 투표 쓰기를 닫고, «결과 표시도» 내렸다(2026-08-31).
+              실측: 카운터 vote_a+vote_b 2,002 대 discussion_votes 실행 «2건»(전부 시드) — 1,001배.
+              실체 없는 결과는 결과가 아니다(view_count 「합성값 노출 금지」 판례와 같은 계열).
+              ✅ 선택지 문구는 실제 콘텐츠라 남긴다. 걷는 것은 «수치» 뿐이다. */
           <button key={opt.key} disabled aria-disabled="true" title="이 토론은 보관 상태입니다"
             style={{
               width: '100%', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-sm)', borderRadius: 'var(--radius-card)',
@@ -132,23 +134,15 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
               background: 'var(--bg-base)', cursor: voting ? 'not-allowed' : 'pointer',
               textAlign: 'left', position: 'relative', overflow: 'hidden',
             }}>
-            <div style={{
-              position: 'absolute', left: 0, top: 0, height: '100%',
-              width: `${opt.pct}%`, background: opt.winning ? 'var(--brand-bg)' : 'rgba(128,128,128,0.05)',
-              borderRadius: 'var(--radius-card)', transition: 'width 0.3s',
-            }} />
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 'var(--fs-base)', fontWeight: myVote === opt.key ? 600 : 500, color: 'var(--text-primary)' }}>
                 {myVote === opt.key && '✓ '}{opt.label}
-              </span>
-              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: opt.winning ? 'var(--brand)' : 'var(--text-tertiary)' }}>
-                {opt.pct}% <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 400 }}>({opt.count}명)</span>
               </span>
             </div>
           </button>
         ))}
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textAlign: 'center', margin: '4px 0 0' }}>
-          🗳 {total}명 참여
+          투표 종료 — 보관된 토론입니다
         </p>
       </section>
 
