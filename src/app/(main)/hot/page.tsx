@@ -241,8 +241,8 @@ export default async function HotPage() {
 
       {/* ── 하단 CTA ── */}
       <div style={{ textAlign: 'center', padding: '16px 0 32px' }}>
-        <Link href="/feed" style={{ display: 'inline-block', padding: 'var(--sp-md) var(--sp-2xl)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
-          📝 커뮤니티 전체 보기
+        <Link href="/apt" style={{ display: 'inline-block', padding: 'var(--sp-md) var(--sp-2xl)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+          🏠 분양 현장 전체 보기
         </Link>
       </div>
 

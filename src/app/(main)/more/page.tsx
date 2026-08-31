@@ -24,7 +24,9 @@ const GROUPS: Group[] = [
     title: '커뮤니티',
     eyebrow: 'COMMUNITY — 사람들이 쓰는 글',
     items: [
-      { href: '/feed', label: '피드', sub: '커뮤니티 전체 글' },
+      /* ⛔ '/feed' 항목 제거 — 잡담 피드 영구 폐쇄(Node 판정 2026-08-31).
+         ⚠️ '/hot'·'/discuss' 는 «남긴다» — 폐쇄 대상은 잡담 목록이고 그 둘은 별 판정이다.
+            같이 지우면 「접두가 닮았다」로 산 것을 죽이는 삭제 함정 ①이다. */
       { href: '/hot', label: '이번주 HOT', sub: '많이 읽힌 글 모아보기' },
       { href: '/discuss', label: '라운지 토론', sub: 'A vs B 투표·토론' },
       { href: '/search', label: '통합 검색', sub: '글·종목·단지 한번에' },

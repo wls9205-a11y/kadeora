@@ -129,7 +129,9 @@ const CRON_GROUPS = {
     '/api/cron/batch-cluster-poll',
     '/api/cron/seo-score-refresh',
     '/api/cron/feed-buzz-publish',
-    '/api/cron/daily-seed-activity',
+    /* ⛔ '/api/cron/daily-seed-activity' 제거 — 라우트 폐기(2026-08-31 · 피드 영구 폐쇄 5항).
+       b96c7ff6(A1 시드 격리)이 seed-posts·seed-comments·seed-chat 을 여기서 뺐을 때
+       이 한 줄만 「지시서 목록 밖」이라 남았다. 그 예외가 오늘 닫힌다. */
     '/api/cron/aggregate-user-events',
     '/api/cron/blog-builder-analysis',
     '/api/cron/blog-calculator-guide',

@@ -101,7 +101,8 @@ const QUICK_LINKS: { href: string; label: string }[] = [
   { href: '/calc',         label: '계산기' },
   { href: '/stock/themes', label: '테마주' },
   { href: '/daily',        label: '데일리 리포트' },
-  { href: '/feed',         label: '커뮤니티' },
+  /* ⛔ '/feed' 칩 제거 — 잡담 피드 영구 폐쇄(2026-08-31). 301 로 /apt 에 튕기므로
+     남겨 두면 「눌렀더니 딴 데로 가는 칩」이 된다. */
 ];
 
 /**

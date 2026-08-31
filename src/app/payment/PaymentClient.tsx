@@ -99,7 +99,7 @@ export default function PaymentClient() {
         <div className="flex justify-between"><span className="text-[var(--text-primary)]/50">결제금액</span><span className="text-[var(--text-primary)] font-bold">{Number(paymentResult.amount).toLocaleString()}원</span></div>
         <div className="flex justify-between"><span className="text-[var(--text-primary)]/50">결제수단</span><span className="text-[var(--text-primary)]">{paymentResult.method}</span></div>
       </div>
-      <button onClick={() => router.push('/feed')} className="px-6 py-3 bg-[var(--brand)] text-white rounded-xl hover:opacity-90 transition-opacity">피드로 돌아가기</button>
+      <button onClick={() => router.push('/apt')} className="px-6 py-3 bg-[var(--brand)] text-white rounded-xl hover:opacity-90 transition-opacity">홈으로 돌아가기</button>
     </div></div>
   );
 

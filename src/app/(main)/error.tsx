@@ -25,8 +25,8 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
         <button onClick={reset} style={{ padding: '10px 22px', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 500, cursor: 'pointer' }}>
           🔄 다시 시도
         </button>
-        <Link href="/feed" style={{ padding: '10px 22px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', textDecoration: 'none', display: 'inline-block' }}>
-          📰 피드로
+        <Link href="/apt" style={{ padding: '10px 22px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', textDecoration: 'none', display: 'inline-block' }}>
+          🏠 분양 현장으로
         </Link>
       </div>
     </div>
