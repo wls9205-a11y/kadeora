@@ -28,6 +28,7 @@ import SiteJumpBar, { SECTION_SCROLL_MARGIN } from '@/components/apt/SiteJumpBar
 import DetailSection from '@/components/apt/detail/DetailSection';
 import AptKeyMetrics from '@/components/apt/detail/AptKeyMetrics';
 import SiteDetailRail from '@/components/apt/SiteDetailRail';
+import LeadAnchorTracker from '@/components/apt/LeadAnchorTracker';
 import LeadForm from '@/components/apt/LeadForm';
 import { LEAD_FORM_ID } from '@/lib/apt/detail-anchors';
 import RecentObservations from '@/components/apt/RecentObservations';
@@ -1189,6 +1190,11 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
         ]}
         cta={{ id: LEAD_FORM_ID, label: '관심고객 등록', show: showLeadForm }}
       />
+
+      {/* P0-A′ — 위 CTA 의 계측. SiteJumpBar 는 「클라이언트 JS 없는 순수 앵커」가
+           설계 조건이라(LCP) 계측을 그 안에 넣지 않고 «섬» 으로 뗀다.
+           ⚠️ showLeadForm 이 false 면 CTA 자체가 렌더되지 않으므로 자도 걸지 않는다. */}
+      {showLeadForm && <LeadAnchorTracker siteSlug={slug} lifecycleStage={lc} />}
 
 
       {/* ── M6 A-1 · ① 이 단지가 뭔가 ──

@@ -20,6 +20,7 @@ import { useTalkView } from '@/components/banner/useTalkView';
 import { LEAD_FORM_ID } from '@/lib/apt/detail-anchors';
 import { leadCopy } from '@/lib/apt/lead-copy';
 import { trackLeadClick } from '@/lib/apt/lead-track';
+import { useLeadView } from '@/components/apt/useLeadView';
 
 const KAKAO_INK = '#191919';
 
@@ -63,6 +64,15 @@ export default function SiteDetailRail({
   siteSlug, siteName, region, sigungu, dong, showLeadForm, nearby, lifecycleStage,
 }: SiteDetailRailProps) {
   const talkRef = useTalkView<HTMLAnchorElement>('rail', { site_slug: siteSlug });
+  /* P0-A′ — 레일 진입 카드의 «노출» 이 없었다. 실측 8/25~8/31: 노출 0 · 클릭 1.
+     분모가 없는 슬롯은 클릭률을 낼 수 없고, 「클릭이 1뿐」이 자리가 나쁜 탓인지
+     보이지 않은 탓인지도 못 가른다.
+     ⚠️ showLeadForm 을 그대로 분모 조건으로 넘긴다 — 폼이 없는 현장까지 세면 분모가
+        부푼다(SiteActionBar 의 hasForm 과 같은 판정). */
+  const leadRef = useLeadView<HTMLDivElement>('rail', showLeadForm, {
+    site_slug: siteSlug,
+    lifecycle_stage: lifecycleStage,
+  });
 
   return (
     <>
@@ -72,7 +82,7 @@ export default function SiteDetailRail({
            뒤에 무엇이 깔리느냐에 따라 글자가 읽히기도 안 읽히기도 했다(히어로 위에서
            실제로 안 읽혔다). 반투명 카드는 어떤 배경 위에 놓일지 보장할 수 없다.
            brand 색은 «테두리로만» 남긴다 — 정체성은 유지하고 가독성은 배경이 책임진다. */
-        <div style={{ ...panel, borderColor: 'var(--brand)', background: 'var(--bg-surface)' }}>
+        <div ref={leadRef} style={{ ...panel, borderColor: 'var(--brand)', background: 'var(--bg-surface)' }}>
           <p style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px', lineHeight: 1.4, wordBreak: 'keep-all' }}>
             {siteName} {leadCopy(lifecycleStage).band.replace(' · 무료', '')}
           </p>
