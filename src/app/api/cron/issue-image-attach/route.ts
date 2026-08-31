@@ -26,6 +26,9 @@ import { dbw } from '@/lib/cron-db-log';
 export const maxDuration = 300;
 export const runtime = 'nodejs';
 
+/** validate_blog_post_dry_run 의 excerpt·meta_description 하한(TRIM 길이). RPC 가 원본이다. */
+const DRY_RUN_MIN_TEXT_LEN = 20;
+
 // s193: orchestrator 가 30분→15분 빈도라 이론상 8건→16건/h. 백로그 1,486 청산 가속
 // 위해 MAX_PER_RUN 10→20. 측정치: 10건 평균 16s, 20건 추정 32s, PREEMPT_MS 80s 안 안전.
 const MAX_PER_RUN = 20;
@@ -112,13 +115,29 @@ async function handler(_req: NextRequest) {
             issue.draft_content = enriched;
           }
 
-          // 3) dry_run 검증 (실패는 warn 만 하고 진행 — finalize 가 실제 게이트)
+          /* 3) dry_run 검증.
+             ⚠️ 주석과 코드가 어긋나 있었다(2026-08-31 실측). 아래 분기는 «warn 만 하고 진행» 이
+                아니라 continue 로 «건너뛴다» — finalize 도 이미지 파이프라인도 돌지 않는다.
+                코드 쪽이 옳다(검증에 걸릴 글을 finalize 하지 않는 편이 맞다). 주석을 고친다. */
           try {
             const tagsForCheck: string[] = (issue.draft_keywords && issue.draft_keywords.length >= 2)
               ? issue.draft_keywords
               : [...(issue.draft_keywords || []), '카더라', category].slice(0, 5);
-            const excerptForCheck = (issue.summary || enriched.slice(0, 180)).slice(0, 240);
-            const metaDescForCheck = (issue.summary || enriched.replace(/[#*>`|]/g, '').slice(0, 155)).slice(0, 160);
+            /* ⛔⛔ 여기가 이 파이프라인이 «매번 0건» 이던 자리다 (2026-08-31 · BG-1).
+               `issue.summary || 폴백` 은 «없음» 만 막고 «너무 짧음» 은 못 막는다.
+               실측: 대기 후보 32건 «전부» summary 가 2~19자(평균 7)로 «짧지만 truthy» 라
+               폴백이 한 번도 걸리지 않았고, validate_blog_post_dry_run 의 하한(TRIM ≥ 20)에
+               EXCERPT_MISSING · META_DESC_MISSING 으로 걸려 전량 continue 됐다.
+               draft_content 는 최소 6,194자라 폴백은 «충분했는데 안 쓰였다».
+               ⚠️ falsy 검사와 «유효성» 검사를 섞지 않는다 — is_seed 의 `= false` vs
+                  `IS NOT TRUE` 함정과 같은 계열이다(b96c7ff6).
+               ⚠️ 하한 20 은 검증 RPC 가 «정한» 값이다. 두 벌로 들지 말 것 — 여기 상수를
+                  고치기 전에 validate_blog_post_dry_run 을 먼저 본다. */
+            const plain = enriched.replace(/[#*>`|]/g, '').trim();
+            const longEnough = (v?: string | null) =>
+              typeof v === 'string' && v.trim().length >= DRY_RUN_MIN_TEXT_LEN;
+            const excerptForCheck = (longEnough(issue.summary) ? issue.summary : plain.slice(0, 180)).slice(0, 240);
+            const metaDescForCheck = (longEnough(issue.summary) ? issue.summary : plain.slice(0, 155)).slice(0, 160);
             const coverForCheck = `${SITE_URL}/api/og?title=${encodeURIComponent(issue.draft_title?.slice(0, 40) || '')}&category=${category}`;
             const { data: dry } = await (sb as any).rpc('validate_blog_post_dry_run', {
               p_title: issue.draft_title,

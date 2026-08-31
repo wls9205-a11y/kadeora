@@ -33,6 +33,8 @@ export const maxDuration = 120;
 export const runtime = 'nodejs';
 
 const MAX_PER_RUN = 20;
+/** 이슈 초안 유통기한(일). 이보다 낡은 초안은 발행하지 않고 보류 표기한다(증분6 판정 2). */
+const STALE_DRAFT_DAYS = 3;
 const PREEMPT_MS = 100_000;
 const GATE_ENABLED = (process.env.CI_PUBLISH_GATE_ENABLED ?? 'true').toLowerCase() !== 'false';
 
@@ -48,6 +50,36 @@ async function handler(_req: NextRequest) {
       const sb = getSupabaseAdmin();
       const start = Date.now();
 
+      /* ── 유통기한 (증분6 판정 2 · 2026-08-31) ────────────────────────────
+       *
+       * 이슈 글은 «시의성이 곧 값» 이다. 4월 이슈를 오늘 발행하면 「누구보다 빠른 소식」
+       * 포지셔닝에 정면으로 역행한다.
+       *
+       * 실측이 그 위험을 확증했다 — 발행 대기 1,750건 중
+       *   3일 이내  54건
+       *   3일 초과  1,696건 (97%) · 가장 오래된 것 2026-04-13
+       * image-attach 를 고치기만 하고 이 게이트가 없었으면 «4월 뉴스 1,700편» 이 쏟아졌다.
+       *
+       * ⛔ 데이터는 «지우지 않는다». 보류 표기만 한다(publish_decision='stale_hold').
+       *    정책이 바뀌면 그대로 되살릴 수 있어야 한다 — blog_post_id 도 초안도 그대로 둔다.
+       * ⚠️ 표기만으로는 부족하고 «후보 쿼리에서도» 빼야 한다. final_score DESC 로 20건을
+       *    집는데 낡은 1,696건이 그 자리를 다 먹으면 신선한 54건이 영영 차례를 못 받는다.
+       * ⚠️ draft_ready_at 이 NULL 인 279건은 그 컬럼이 생기기 «전» 에 쌓인 것이라
+       *    전부 오래된 글이다 — 모르는 시각은 «오래된 것» 으로 본다(안전한 쪽).
+       * ⚠️ 3일은 세션 A 제안값이다. 카테고리별 유통기한 실측이 나오면 조정 대상. */
+      const cutoffIso = new Date(Date.now() - STALE_DRAFT_DAYS * 86_400_000).toISOString();
+
+      const staleMarked = await (sb as any)
+        .from('issue_alerts')
+        .update({ publish_decision: 'stale_hold', block_reason: `stale_draft_gt_${STALE_DRAFT_DAYS}d` })
+        .not('blog_post_id', 'is', null)
+        .or('is_published.eq.false,is_published.is.null')
+        .neq('publish_decision', 'stale_hold')
+        .or(`draft_ready_at.lt.${cutoffIso},draft_ready_at.is.null`)
+        .select('id');
+      dbw('issue-publish', 'issue_alerts.update@stale', staleMarked);
+      const staleMarkedN = staleMarked?.data?.length ?? 0;
+
       // s258 patch #4: seo_enriched_at NOT NULL 이미 강제 (latency 음수 불가)
       // draft_ready_at + seo_enriched_at IS NULL row 는 issue-seo-enrich cron 이 처리 (분리 책임)
       const { data: pending, error: fetchErr } = await (sb as any)
@@ -56,12 +88,20 @@ async function handler(_req: NextRequest) {
         .not('seo_enriched_at', 'is', null)
         .not('blog_post_id', 'is', null)
         .or('is_published.eq.false,is_published.is.null')
+        .gte('draft_ready_at', cutoffIso)
         .order('final_score', { ascending: false })
         .limit(MAX_PER_RUN);
 
       if (fetchErr) return { processed: 0, failed: 1, metadata: { error: fetchErr.message } };
       if (!pending || pending.length === 0) {
-        return { processed: 0, metadata: { message: 'no pending publish candidates' } };
+        return {
+          processed: 0,
+          metadata: {
+            message: 'no pending publish candidates',
+            eligible: 0,
+            reasons: staleMarkedN > 0 ? { stale_hold: staleMarkedN } : {},
+          },
+        };
       }
 
       let published = 0;
@@ -220,6 +260,13 @@ async function handler(_req: NextRequest) {
           published,
           gate_blocked: gateBlocked,
           gate_enabled: GATE_ENABLED,
+          /* BG-0 관측 계약 — scanned/eligible/created/reasons.
+             stale_hold 는 «이번 실행에서 새로 보류 표기한 수» 다(누적이 아니다). */
+          eligible: pending.length,
+          created: published,
+          stale_hold_marked: staleMarkedN,
+          stale_draft_days: STALE_DRAFT_DAYS,
+          reasons: { ...gateReasonCounts, ...(staleMarkedN > 0 ? { stale_hold: staleMarkedN } : {}) },
           top_gate_reasons: Object.entries(gateReasonCounts)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 5)

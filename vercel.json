@@ -229,10 +229,6 @@
       "schedule": "30 8,12,18,21 * * *"
     },
     {
-      "path": "/api/cron/issue-pipeline-orchestrator",
-      "schedule": "*/15 * * * *"
-    },
-    {
       "path": "/api/cron/check-price-alerts",
       "schedule": "9 */2 * * *"
     },

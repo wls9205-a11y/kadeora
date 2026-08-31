@@ -8,13 +8,18 @@ interface Props {
   order?: string[];
 }
 
+/* ⚠️ 2026-08-31 — 두 곳이 어긋나 있었다(BG-1 실측).
+   ① 'issue-pipeline-orchestrator' 는 폐기됐다(287회 전부 401 · pg_cron 개별 등록과 중복).
+   ② 'issue-seo-enrich' 는 «빠져 있었다» — 그런데 그 단계는 이 파이프라인에서 유일하게
+      산출이 나오고 있었다(일 6~8건). 안 재는 것은 초록이 아니라 «모르는» 것이다.
+   순서는 실제 파이프라인 순서(감지→초안→팩트→이미지→SEO→발행)를 따른다. */
 const DEFAULT_ORDER = [
   'issue-detect',
   'issue-draft',
   'issue-fact-check',
   'issue-image-attach',
+  'issue-seo-enrich',
   'issue-publish',
-  'issue-pipeline-orchestrator',
 ];
 
 const SHORT: Record<string, string> = {
@@ -22,8 +27,8 @@ const SHORT: Record<string, string> = {
   'issue-draft':                 '초안',
   'issue-fact-check':            '팩트',
   'issue-image-attach':          '이미지',
+  'issue-seo-enrich':            'SEO',
   'issue-publish':               '발행',
-  'issue-pipeline-orchestrator': '오케스트레이터',
 };
 
 function statusColor(stat: StageStat): string {

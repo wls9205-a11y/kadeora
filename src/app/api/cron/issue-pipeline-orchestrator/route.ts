@@ -1,149 +1,53 @@
 /**
- * [CI-v1 Phase 2] issue-pipeline-orchestrator — 4 단계 파이프라인 1 cron 통합 실행.
+ * ⛔ 폐기됨 — issue-pipeline-orchestrator (2026-08-31 · BG-1 판정 1)
  *
- *  s192: vercel.json crons 100 한도 초과 → 4개 entry 를 1개로 합침.
- *  fact-check → image-attach → seo-enrich → publish 를 internal fetch 로 순차 호출.
- *  각 단계 best-effort: 실패해도 다음 단계 진행 (멱등 cron 이라 안전).
+ * ── 무엇이었나 ──
+ * s192 에서 vercel.json crons 100 한도를 피하려고 4 단계(fact-check → image-attach →
+ * seo-enrich → publish)를 internal fetch 로 «한 크론에» 묶은 자다.
  *
- *  보안: withCronAuth (CRON_SECRET / x-vercel-cron / pg_cron 헤더). 자체 호출 시
- *  Bearer CRON_SECRET 사용.
+ * ── 왜 폐기하나 — 두 가지가 «동시에» 참이었다 ──
+ * ① **한 번도 작동한 적이 없다.** 3일 287회 전부 `401 Protected deployment`.
+ *    base 를 «요청 origin» 에서 잡았는데(아래) pg_cron 은 배포별 URL 로 들어오고
+ *    그 호스트에는 Vercel Deployment Protection 이 걸려 있다. 전 스테이지가 401 이었다.
  *
- *  스케줄: every 15min  (4 단계 직렬, max 240s + 50s 여유 < 290s)
+ *      let base = SITE_URL;                          // ← 사문. try 가 «항상» 성공한다
+ *      try { const u = new URL(req.url);
+ *            base = `${u.protocol}//${u.host}`; }    // ← 보호된 배포 호스트가 들어온다
+ *      catch { }
+ *
+ * ② **그리고 애초에 중복이었다.** 같은 4 단계가 pg_cron 에 «개별로» 등록돼 있고
+ *    (jobid 76 fact-check · 77 image-attach · 78 seo-enrich · 79 publish · 각 15분)
+ *    그쪽은 정상 가동한다 — 실측에서 publish·image-attach 는 매 실행 20건씩 처리 중이다.
+ *
+ * ⛔ 그래서 «고치면 안 된다». base 를 SITE_URL 로 고치면 그 순간부터 같은 4 단계가
+ *    15분마다 «이중 실행» 된다 — BG-3 이 경고한 중복 기동을 우리 손으로 만드는 셈이다.
+ *    고장이면서 중복인 자는 수리 대상이 아니라 폐기 대상이다.
+ *
+ * ── 집행 ──
+ * vercel.json 등록 제거(crons 82 → 81)가 본체다. 이 파일은 «흔적으로» 남긴다 —
+ * 지우면 다음 사람이 같은 이유로 다시 만들 수 있고, 410 은 되살아났을 때 «시끄럽게» 실패한다.
+ * ⚠️ 되살릴 일이 생기면 먼저 pg_cron jobid 76~79 를 끄고 와야 한다. 순서가 반대면 이중 실행이다.
+ *
+ * ── 남긴 인벤토리 (수리 아님 · 다음 판정 자료) ──
+ * 같은 「origin 우선 base」 패턴이 저장소에 하나 더 있다:
+ *   src/app/api/admin/issues/run-pipeline/route.ts:80-83
+ * 그쪽은 어드민 화면(kadeora.app)에서 호출되므로 origin 이 곧 운영 도메인이라 «오늘은» 산다.
+ * 보호된 프리뷰에서 누르면 같은 401 이 난다 — 잠재 결함으로 등재만 해 둔다.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { withCronAuth } from '@/lib/cron-auth';
-import { withCronLogging } from '@/lib/cron-logger';
-import { SITE_URL } from '@/lib/constants';
+import { NextResponse } from 'next/server';
 
-export const maxDuration = 290;
-export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-interface Stage {
-  path: string;
-  timeoutMs: number;
-}
-
-const STAGES: Stage[] = [
-  { path: '/api/cron/issue-fact-check',   timeoutMs: 60_000 },
-  { path: '/api/cron/issue-image-attach', timeoutMs: 80_000 },
-  { path: '/api/cron/issue-seo-enrich',   timeoutMs: 50_000 },
-  { path: '/api/cron/issue-publish',      timeoutMs: 50_000 },
-];
-
-interface StageResult {
-  step: string;
-  status: number;
-  ok: boolean;
-  duration_ms: number;
-  body_preview?: string;
-  processed?: number;
-  created?: number;
-  failed?: number;
-  error?: string;
-}
-
-async function callStage(base: string, secret: string, stage: Stage): Promise<StageResult> {
-  const start = Date.now();
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), stage.timeoutMs);
-  try {
-    const res = await fetch(`${base}${stage.path}`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${secret}`,
-        'Content-Type': 'application/json',
-      },
-      signal: ctrl.signal,
-    });
-    const duration_ms = Date.now() - start;
-    let body: any = null;
-    try { body = await res.json(); } catch { body = await res.text().catch(() => null); }
-    const preview = typeof body === 'string'
-      ? body.slice(0, 500)
-      : JSON.stringify(body || {}).slice(0, 500);
-    return {
-      step: stage.path,
-      status: res.status,
-      ok: res.ok,
-      duration_ms,
-      body_preview: preview,
-      processed: body?.processed,
-      created: body?.created,
-      failed: body?.failed,
-    };
-  } catch (e: any) {
-    return {
-      step: stage.path,
-      status: 0,
-      ok: false,
-      duration_ms: Date.now() - start,
-      error: e?.name === 'AbortError' ? `timeout_${stage.timeoutMs}ms` : (e?.message || String(e)),
-    };
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-async function handler(req: NextRequest) {
+export async function GET() {
   return NextResponse.json(
-    await withCronLogging('issue-pipeline-orchestrator', async () => {
-      const start = Date.now();
-
-      const secret = process.env.CRON_SECRET;
-      if (!secret) {
-        return {
-          processed: 0,
-          failed: 1,
-          metadata: { error: 'CRON_SECRET missing', stages: [] },
-        };
-      }
-
-      // base url: 요청 origin 우선, fallback SITE_URL
-      let base = SITE_URL;
-      try {
-        const u = new URL(req.url);
-        base = `${u.protocol}//${u.host}`;
-      } catch { /* fallback */ }
-
-      const stages: StageResult[] = [];
-      let totalProcessed = 0;
-      let totalCreated = 0;
-      let totalFailed = 0;
-
-      for (const stage of STAGES) {
-        const r = await callStage(base, secret, stage);
-        stages.push(r);
-        totalProcessed += r.processed || 0;
-        totalCreated += r.created || 0;
-        totalFailed += r.failed || 0;
-        // best-effort: 실패해도 다음 단계 진행
-      }
-
-      return {
-        processed: totalProcessed,
-        created: totalCreated,
-        failed: totalFailed,
-        metadata: {
-          base,
-          stages: stages.map(s => ({
-            step: s.step,
-            status: s.status,
-            ok: s.ok,
-            duration_ms: s.duration_ms,
-            processed: s.processed,
-            created: s.created,
-            failed: s.failed,
-            error: s.error,
-            body_preview: s.body_preview,
-          })),
-          total_duration_ms: Date.now() - start,
-        },
-      };
-    }, { redisLockTtlSec: 270 }),
+    {
+      error: 'gone',
+      message:
+        'issue-pipeline-orchestrator 는 2026-08-31 에 폐기됐다. ' +
+        '4 단계는 pg_cron 에 개별 등록(jobid 76~79)되어 각자 돈다. ' +
+        '되살리기 전에 그 넷을 먼저 끌 것 — 아니면 이중 실행이 된다.',
+    },
+    { status: 410 },
   );
 }
-
-export const GET = withCronAuth(handler);
-export const POST = withCronAuth(handler);
