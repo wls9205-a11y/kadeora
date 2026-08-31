@@ -122,12 +122,25 @@ async function fetchBigEventContext(sb: any, issue: any): Promise<string> {
 /* ═══════════ AI 기사 생성 (v2: 에러 로깅 + og-infographic 제거) ═══════════ */
 
 /** A2 — 실패 사유 5분류. 「왜 못 만들었나」가 로그에 남아야 B1 에서 판단할 수 있다. */
-export type DraftFailReason = 'model_error' | 'parse' | 'token_limit' | 'duplicate' | 'no_match';
+/* BG-0(2026-08-31) — 'model_error' 하나에 «성질이 다른 넷» 이 뭉쳐 있었다:
+   API 4xx(요청이 거절됨) · API 5xx(서버 문제) · 키 없음 · 빈 응답 · 예외.
+   14일 실측에서 issue-draft 는 성공 597 · 에러 3,001(83%) 인데, 그 3,001 이
+   «무엇인지» 를 아무도 말할 수 없었다 — 사유가 한 낱말로 뭉개져 있었기 때문이다.
+   ⚠️ 기존 값 'model_error' 는 «지우지 않는다» — issue_alerts.fail_reason 에 쌓여 있다.
+      새 값을 더할 뿐이고, 옛 행은 「가르기 전에 쌓인 것」으로 읽는다. */
+export type DraftFailReason =
+  | 'model_error'   // (레거시) 8/31 이전에 쌓인 뭉친 값
+  | 'api_4xx'       // API 가 요청을 거절 — 같은 요청을 다시 보내도 같은 답이다
+  | 'api_5xx'       // API 쪽 일시 장애 — 재시도에 의미가 있다
+  | 'no_key'
+  | 'empty_text'
+  | 'exception'
+  | 'parse' | 'token_limit' | 'duplicate' | 'no_match';
 type GenResult = { title: string; content: string; slug: string; keywords: string[]; meta_description: string; infographic_data: Record<string, any> };
 
 async function generateArticle(issue: any, bigEventContext = ''): Promise<{ article: GenResult | null; failReason: DraftFailReason | null }> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) { console.error('[issue-draft] ANTHROPIC_API_KEY missing'); return { article: null, failReason: 'model_error' }; }
+  if (!apiKey) { console.error('[issue-draft] ANTHROPIC_API_KEY missing'); return { article: null, failReason: 'no_key' }; }
 
   const template = selectDraftTemplate(issue.category, issue.issue_type);
   const isPreempt = ['pre_announcement', 'preempt_coverage', 'new_subscription', 'search_spike'].includes(issue.issue_type);
@@ -232,13 +245,24 @@ ${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑,
     if (!res.ok) {
       const errBody = await res.text().catch(() => '');
       console.error(`[issue-draft] AI API ${res.status}: ${errBody.slice(0, 200)}`);
+      /* ⛔⛔ BG-0 — 응답 «본문» 을 DB 에 남긴다.
+         이 한 줄이 없어서 14일 3,001건의 400 이 «왜» 400 인지 아무도 몰랐다.
+         console.error 는 남았지만 런타임 로그는 보존 기간·조회 예산에 걸려
+         「3일 전 그 장애가 무엇이었나」에 답하지 못한다. 판정에 쓸 사실은 DB 에 둔다.
+         ⚠️ 400 의 본문에는 사유가 «문장으로» 들어 있다(잘못된 파라미터인지, 한도인지).
+            그 문장이 곧 수리 대상을 정한다 — 없으면 추측만 남는다. */
       logAnthropicUsage({
         cron_name: 'issue-draft', model: MODEL,
         duration_ms: Date.now() - llmStart,
         status: 'error', error_code: String(res.status),
-        metadata: { max_tokens: 12000, issue_id: issue?.id ?? null },
+        metadata: {
+          max_tokens: 12000,
+          issue_id: issue?.id ?? null,
+          http_status: res.status,
+          error_body: errBody.slice(0, 500),
+        },
       });
-      return { article: null, failReason: 'model_error' };
+      return { article: null, failReason: res.status >= 500 ? 'api_5xx' : 'api_4xx' };
     }
     const data = await res.json();
     logAnthropicUsage({
@@ -249,7 +273,7 @@ ${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑,
       metadata: { max_tokens: 12000, issue_id: issue?.id ?? null, category: issue?.category ?? null },
     });
     const text = data.content?.[0]?.text || '';
-    if (!text) { console.error('[issue-draft] AI returned empty text'); return { article: null, failReason: 'model_error' }; }
+    if (!text) { console.error('[issue-draft] AI returned empty text'); return { article: null, failReason: 'empty_text' }; }
 
     // JSON 파싱 (```json 제거)
     const clean = text.replace(/```json|```/g, '').trim();
@@ -285,7 +309,7 @@ ${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑,
       status: 'error', error_code: 'exception',
       metadata: { max_tokens: 12000, issue_id: issue?.id ?? null, error: (e as Error).message?.slice(0, 200) },
     });
-    return { article: null, failReason: 'model_error' };
+    return { article: null, failReason: 'exception' };
   }
 }
 
@@ -825,10 +849,17 @@ async function handler(_req: NextRequest) {
     const _start = Date.now();
     const MAX_PER_RUN = 15;
 
-    // 25점 미만 자동 스킵 (큐 정리)
-    dbw('issue-draft', 'issue_alerts.update@780', await (sb as any).from('issue_alerts')
+    /* BG-0 — 문턱에서 «몇 개가» 떨어졌는지를 센다.
+       예전에는 이 update 가 조용히 지나가서 「25점 미만 몇 건이 잘렸나」를 알 수 없었다.
+       ⚠️ 동작은 그대로다. 세기만 더한다(관측 계약 · S9 로깅 계열). */
+    const { count: scannedTotal } = await (sb as any).from('issue_alerts')
+      .select('id', { count: 'exact', head: true }).eq('is_processed', false);
+
+    const belowThreshold = await (sb as any).from('issue_alerts')
       .update({ is_processed: true, publish_decision: 'below_threshold', processed_at: new Date().toISOString() })
-      .eq('is_processed', false).lt('final_score', 25));
+      .eq('is_processed', false).lt('final_score', 25).select('id');
+    dbw('issue-draft', 'issue_alerts.update@780', belowThreshold);
+    const belowThresholdN = belowThreshold?.data?.length ?? 0;
 
     // 미처리 이슈 조회 (최고 점수 우선 + ai_failed 재시도 포함)
     const { data: issues } = await (sb as any).from('issue_alerts')
@@ -839,7 +870,15 @@ async function handler(_req: NextRequest) {
       .limit(MAX_PER_RUN);
 
     if (!issues || issues.length === 0) {
-      return { processed: 0, created: 0, failed: 0, metadata: { message: 'no pending issues' } };
+      return {
+        processed: 0, created: 0, failed: 0,
+        metadata: {
+          message: 'no pending issues',
+          scanned: scannedTotal ?? 0,
+          eligible: 0,
+          reasons: belowThresholdN > 0 ? { below_threshold: belowThresholdN } : {},
+        },
+      };
     }
 
     const results: any[] = [];
@@ -876,6 +915,16 @@ async function handler(_req: NextRequest) {
         stopped_reason: stoppedReason ?? 'all_processed',
         elapsed_ms: Date.now() - _start,
         remaining_queue: Math.max(0, issues.length - results.length),
+        /* BG-0 관측 계약 — scanned / eligible / created / 사유별 롤업.
+           ⚠️ results[] 는 «건별» 이라 길고 잘릴 수 있다. 판정에 쓰는 것은 이 롤업이고,
+              results[] 는 개별 추적용으로 남긴다. 한 쿼리로 사유 분포가 나와야 한다. */
+        scanned: scannedTotal ?? 0,
+        eligible: issues.length,
+        created: published,
+        reasons: results.reduce((acc: Record<string, number>, r) => {
+          acc[r.decision] = (acc[r.decision] ?? 0) + 1;
+          return acc;
+        }, belowThresholdN > 0 ? { below_threshold: belowThresholdN } : {}),
         results: results.map(r => ({ decision: r.decision, score: r.score, title: r.title?.slice(0, 40) })),
       },
     };
