@@ -55,6 +55,8 @@ export interface PostContext {
   sub_category?: string | null;
   tags?: string[] | null;
   source_ref?: string | null;
+  /** s268(가): apt_sites 를 이름 ilike 로 더듬지 않고 직행하기 위한 FK. 있으면 이름 검색보다 우선. */
+  apt_site_id?: string | null;
 }
 
 export interface ImageCandidate {
@@ -93,8 +95,9 @@ export interface PipelineResult {
 
 /**
  * s268(가-가드): 차단 도메인 판정을 한 곳으로 모은다.
- * s261 이 뉴스·스톡 도메인을 저작권/403 사유로 막았지만 그 검사는 searchNaverImages 안에만
- * 있었고, apt_sites.images 경로는 무필터로 후보에 들어간다. 후보를 만드는 모든 자리에서 같은 자를 쓴다.
+ * s261 이 뉴스·스톡 도메인을 막았지만 그 검사는 searchNaverImages 안에만 있었고,
+ * apt_sites.images 경로는 무필터로 후보에 들어갔다. apt_site_id 직행이 그 경로를
+ * 실제로 열기 때문에, 후보를 만드는 모든 자리에서 같은 자를 쓴다.
  */
 export function isBlockedImageUrl(url: string): boolean {
   const u = String(url || '').toLowerCase();
@@ -165,31 +168,46 @@ export async function collectCandidates(
   // ─── apt / unsold / redev: apt_sites.satellite/images 우선
   if (['apt', 'unsold', 'redev'].includes(category)) {
     const aptName = (post.tags || [])[0] || post.title.split(/[|:—]/)[0]?.trim();
-    if (aptName) {
-      const { data: site } = await (admin as any)
+    // s268(가): apt_site_id 가 있으면 그것으로 직행한다.
+    // 기존 경로는 tags[0] 또는 제목 앞토막을 20자로 잘라 ilike 로 더듬었는데, 제목에 구분자가
+    // 없으면 「일광 더에스 동일스위트 분양가, 주변」 같은 문장이 검색어가 되어 반드시 빗나간다
+    // (112007·112008 이 apt_site_id 를 가진 채로 no_candidates 실패한 직접 원인).
+    const aptLabel = (aptName || post.title).slice(0, 30);
+    let site: any = null;
+    if (post.apt_site_id) {
+      const { data } = await (admin as any)
+        .from('apt_sites')
+        .select('satellite_image_url, images')
+        .eq('id', post.apt_site_id)
+        .maybeSingle();
+      site = data ?? null;
+    }
+    if (!site && aptName) {
+      const { data } = await (admin as any)
         .from('apt_sites')
         .select('satellite_image_url, images')
         .ilike('name', `%${aptName.slice(0, 20)}%`)
         .limit(1)
         .maybeSingle();
-      if (site?.satellite_image_url && !isBlockedImageUrl(site.satellite_image_url)) {
+      site = data ?? null;
+    }
+    if (site?.satellite_image_url && !isBlockedImageUrl(site.satellite_image_url)) {
+      candidates.push({
+        url: String(site.satellite_image_url),
+        alt: `${aptLabel} 위성사진`,
+        caption: '출처: VWorld',
+        source: 'satellite',
+      });
+    }
+    if (Array.isArray(site?.images)) {
+      for (const im of site.images.slice(0, 4)) {
+        const u = typeof im === 'string' ? im : im?.url;
+        if (!u || isBlockedImageUrl(u)) continue;
         candidates.push({
-          url: String(site.satellite_image_url),
-          alt: `${aptName} 위성사진`,
-          caption: '출처: VWorld',
-          source: 'satellite',
+          url: String(u),
+          alt: `${aptLabel} 단지 사진`,
+          source: 'apt_images',
         });
-      }
-      if (Array.isArray(site?.images)) {
-        for (const im of site.images.slice(0, 4)) {
-          const u = typeof im === 'string' ? im : im?.url;
-          if (!u || isBlockedImageUrl(u)) continue;
-          candidates.push({
-            url: String(u),
-            alt: `${aptName} 단지 사진`,
-            source: 'apt_images',
-          });
-        }
       }
     }
   }

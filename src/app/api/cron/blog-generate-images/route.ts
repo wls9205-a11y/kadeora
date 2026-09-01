@@ -100,7 +100,7 @@ async function handler(req: NextRequest) {
     const postIds = queueRows.map((r: any) => r.post_id).filter(Boolean);
     const { data: posts } = await admin
       .from('blog_posts')
-      .select('id, slug, title, excerpt, category, sub_category, tags, source_ref')
+      .select('id, slug, title, excerpt, category, sub_category, tags, source_ref, apt_site_id')
       .in('id', postIds);
     const postMap = new Map<number, any>();
     for (const p of (posts || []) as any[]) postMap.set(p.id, p);
@@ -150,6 +150,7 @@ async function handler(req: NextRequest) {
         sub_category: post.sub_category,
         tags: post.tags,
         source_ref: post.source_ref,
+        apt_site_id: post.apt_site_id,
       };
 
       try {

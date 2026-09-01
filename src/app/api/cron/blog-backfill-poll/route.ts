@@ -141,7 +141,7 @@ async function handler(req: NextRequest) {
       // 각 post 에 대해 pipeline 실행
       const { data: posts } = await admin
         .from('blog_posts')
-        .select('id, slug, title, excerpt, category, sub_category, tags, source_ref')
+        .select('id, slug, title, excerpt, category, sub_category, tags, source_ref, apt_site_id')
         .in('id', Array.from(keywordsByPostId.keys()));
       const postMap = new Map<number, any>();
       for (const p of (posts || []) as any[]) postMap.set(p.id, p);
@@ -160,6 +160,7 @@ async function handler(req: NextRequest) {
           sub_category: post.sub_category,
           tags: Array.from(new Set([...(post.tags || []), ...kws])).slice(0, 10),
           source_ref: post.source_ref,
+          apt_site_id: post.apt_site_id,
         };
 
         try {
