@@ -91,6 +91,17 @@ export interface PipelineResult {
 
 // ─────────── 1) 후보 수집 ───────────
 
+/**
+ * s268(가-가드): 차단 도메인 판정을 한 곳으로 모은다.
+ * s261 이 뉴스·스톡 도메인을 저작권/403 사유로 막았지만 그 검사는 searchNaverImages 안에만
+ * 있었고, apt_sites.images 경로는 무필터로 후보에 들어간다. 후보를 만드는 모든 자리에서 같은 자를 쓴다.
+ */
+export function isBlockedImageUrl(url: string): boolean {
+  const u = String(url || '').toLowerCase();
+  if (!u) return true;
+  return IMG_BLOCK_DOMAINS.some((d) => u.includes(d));
+}
+
 interface NaverItem {
   url: string;
   alt: string;
@@ -120,7 +131,7 @@ async function searchNaverImages(query: string, display = 10): Promise<NaverItem
         if (w < 400 || h < 250) return false;
         const u = String(it?.link || '').toLowerCase();
         if (!u) return false;
-        if (IMG_BLOCK_DOMAINS.some((d) => u.includes(d))) return false;
+        if (isBlockedImageUrl(u)) return false;
         return true;
       })
       .map((it) => ({
@@ -161,7 +172,7 @@ export async function collectCandidates(
         .ilike('name', `%${aptName.slice(0, 20)}%`)
         .limit(1)
         .maybeSingle();
-      if (site?.satellite_image_url) {
+      if (site?.satellite_image_url && !isBlockedImageUrl(site.satellite_image_url)) {
         candidates.push({
           url: String(site.satellite_image_url),
           alt: `${aptName} 위성사진`,
@@ -172,7 +183,7 @@ export async function collectCandidates(
       if (Array.isArray(site?.images)) {
         for (const im of site.images.slice(0, 4)) {
           const u = typeof im === 'string' ? im : im?.url;
-          if (!u) continue;
+          if (!u || isBlockedImageUrl(u)) continue;
           candidates.push({
             url: String(u),
             alt: `${aptName} 단지 사진`,
