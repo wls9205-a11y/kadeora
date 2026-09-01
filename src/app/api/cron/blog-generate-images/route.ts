@@ -167,7 +167,13 @@ async function handler(req: NextRequest) {
         allFailures.push(...pipe.failures);
 
         // 세션 145: og_placeholder 단독으로는 성공 아님 (real image 가 없으면 queue 재시도 허용)
-        const isSuccess = pipe.storage_real > 0;
+        // s268(나): 그 판단은 «자체 생성 바닥이 없던 때» 의 것이다. 후보가 구조적으로 차단된
+        // 글(사이트 이미지가 전량 뉴스 핫링크인 경우 등)은 재시도해도 실사진이 영원히 안 생기고,
+        // 성공한 실행이 no_images_generated 로 적혀 큐가 오염된다(112007·112008 실측:
+        // 카드 3장으로 게이트가 열렸는데 큐는 failed). 게이트 기준(3장)을 채웠으면 성공으로 본다.
+        // real_image_warning 은 게이트 checks 에 그대로 남으므로 실사진 부재는 계속 보인다.
+        const gateFloor = pipe.storage_real + pipe.og_placeholder;
+        const isSuccess = pipe.storage_real > 0 || gateFloor >= 3;
         if (isSuccess) {
           stats.completed++;
           dbw('blog-generate-images', 'blog_image_backfill_queue.update@171', await (admin as any)
