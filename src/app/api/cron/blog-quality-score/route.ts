@@ -138,6 +138,64 @@ export async function GET(req: NextRequest) {
     if (error) throw new Error(`query error: ${error.message}`);
     if (!posts?.length) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'no_targets' } };
 
+    /* ─── s268(산식-가): 미발행 글 «티어» 채점 — seo-score-refresh 에서 옮겨 왔다 ───────
+     *
+     * seo-score-refresh 는 .eq('is_published', true) 라 미발행 글의 seo_tier 를 갱신한 적이
+     * 없고(30일 0회 실행 · 등록도 없음), auto_publish_eligible 은 seo_tier ∈ {S,A,...} 를
+     * 요구한다 → 미발행 글은 영원히 발행 후보에 들지 못한다.
+     *
+     * 산식 교정: view_count(25)와 반응(10)을 뺀다. 둘 다 «발행 이후에만 생기는 값» 이라
+     * 발행 자격 판정에 넣는 것은 순환 참조다. 만점 100 → 65, 문턱은 같은 비율(×0.65):
+     * S 46 · A 33 · B 20 · C 10 — 정규화라 문턱을 낮추지 않았음이 산술로 보인다.
+     *
+     * 대상 한정: 백필 큐를 «탄» 글만. 전면 적용 시 미발행 30,474편이 eligible 이 되어
+     * BATCH 50 × 매시로 약 25일간 자동 발행된다(실측).
+     *
+     * 이 크론 안에 두는 이유: 이미 02:00 에 등록돼 있고 이미 미발행 글을 대상으로 돈다.
+     * 별도 크론을 만들면 중복 기동이고, seo-score-refresh 에 두면 등록이 필요해진다.
+     */
+    let unpubTierUpdated = 0;
+    try {
+      const since7 = new Date(Date.now() - 7 * 86400000).toISOString();
+      const { data: qRows } = await (sb as any)
+        .from('blog_image_backfill_queue')
+        .select('post_id')
+        .or(`completed_at.gte.${since7},queued_at.gte.${since7}`)
+        .limit(2000);
+      const qIds = Array.from(new Set((qRows || []).map((r: any) => r.post_id))).slice(0, 500);
+      if (qIds.length) {
+        const { data: unpub } = await (sb as any)
+          .from('blog_posts')
+          .select('id, content, sub_category, source_ref, rewritten_at, title, seo_tier')
+          .eq('is_published', false)
+          .in('id', qIds)
+          .not('seo_tier', 'in', '(restore_candidate,restored,cooldown)');
+        for (const p of (unpub || [])) {
+          const len = (p.content || '').length;
+          const sc =
+            (len >= 5000 ? 25 : len >= 4000 ? 22 : len >= 3000 ? 18 : len >= 2000 ? 10 : 5) +
+            (p.sub_category ? 15 : 0) +
+            (p.source_ref ? 10 : 0) +
+            (p.rewritten_at && len >= 3000 ? 10 : p.rewritten_at ? 5 : 0) +
+            (p.title && !p.title.includes('시세 분석') && !p.title.includes('투자 전망') ? 5 : 2);
+          const tier = sc >= 46 ? 'S' : sc >= 33 ? 'A' : sc >= 20 ? 'B' : sc >= 10 ? 'C' : 'D';
+          if (p.seo_tier !== tier) {
+            await (sb as any).from('blog_posts')
+              .update({ seo_score: sc, seo_tier: tier })
+              .eq('id', p.id);
+            unpubTierUpdated++;
+            // 아래 채점 루프는 위에서 «이미 읽어 온» posts 배열을 쓴다. 여기서 메모리도 같이
+            // 고치지 않으면 티어가 올라간 그 실행에서는 옛 값으로 eligible 을 판정하고,
+            // 반영은 다음 날로 밀린다 — 하루를 잃는다.
+            const inMem = (posts as any[]).find((x) => x.id === p.id);
+            if (inMem) { inMem.seo_tier = tier; inMem.seo_score = sc; }
+          }
+        }
+      }
+    } catch (e: any) {
+      console.error('[blog-quality-score] unpublished tier pass failed:', e?.message);
+    }
+
     let updated = 0;
     let eligible = 0;
     let failed = 0;
