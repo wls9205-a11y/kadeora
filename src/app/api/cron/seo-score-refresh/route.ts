@@ -71,10 +71,13 @@ export async function GET(req: NextRequest) {
     let unpubUpdated = 0;
     try {
       const since = new Date(Date.now() - 7 * 86400000).toISOString();
+      // 대상은 «백필 큐를 탄 글» 이다. blog_post_images 기준으로 잡으면 issue-draft 가
+      // 넣은 글까지 걸려 범위가 143편(발행 가능 99편)으로 번진다 — 실측으로 확인하고 좁혔다.
+      // 큐 기준이면 20편(A 진입 16 · 발행 조건 충족 10)으로 의도한 크기가 나온다.
       const { data: recentImgs } = await (admin as any)
-        .from('blog_post_images')
+        .from('blog_image_backfill_queue')
         .select('post_id')
-        .gte('created_at', since)
+        .or(`completed_at.gte.${since},queued_at.gte.${since}`)
         .limit(2000);
       const ids = Array.from(new Set((recentImgs || []).map((r: any) => r.post_id))).slice(0, 500);
       if (ids.length) {
