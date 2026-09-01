@@ -371,12 +371,12 @@ export async function hydrateAndRecord(
         p_post_id: post.id,
         p_position: position,
         p_image_url: res.url,
-        p_image_kind: 'storage_real',
+        p_image_kind: cand.source === 'infographic' ? 'infographic' : 'storage_real',
         p_alt_text: cleanScrapedAlt(cand.alt, post.title),
         p_caption: (cand.caption || `출처: ${cand.source}`).slice(0, 200),
         p_storage_path: res.storagePath,
       });
-      result.storage_real++;
+      if (cand.source === 'infographic') result.og_placeholder++; else result.storage_real++;
       if (position === 0) result.cover_url = res.url;
     } catch (err: any) {
       result.skipped++;
@@ -387,7 +387,9 @@ export async function hydrateAndRecord(
   // 3c) position 7: infographic OG — 세션 145 fix:
   //   1) real image 가 하나라도 성공했을 때만 infographic 부가 (단독 placeholder 금지)
   //   2) hydration 실패 시 raw /api/og URL 삽입 금지 — Storage 에 저장된 것만 기록
-  if (includeInfo && result.storage_real > 0) {
+  // s268(나): storage_real > 0 전제 해제. 실사진이 0장일 때야말로 자체 생성 카드가 필요한데,
+  // 기존 조건은 정확히 그 경우에 카드를 만들지 않아 결손이 결손을 부르는 고리를 만들었다.
+  if (includeInfo) {
     const catWord = ({ apt: '부동산', stock: '주식', unsold: '미분양', redev: '재개발', finance: '재테크', general: '분석' } as Record<string, string>)[post.category] || '정보';
     const design = 1 + (Math.abs(hashString(post.title)) % 6);
     const ogUrl = `${SITE_URL.replace(/\/$/, '')}/api/og?title=${encodeURIComponent(post.title.slice(0, 50))}&category=${post.category}&author=${encodeURIComponent(`카더라 ${catWord}팀`)}&design=${design}`;
@@ -421,6 +423,83 @@ export async function hydrateAndRecord(
   return result;
 }
 
+// ─────────── s268(나): 자체 생성 카드 (infographic_gen 실구현) ───────────
+
+/**
+ * 실데이터로만 카드를 만든다. 항목이 2개 미만이면 카드를 만들지 않는다 —
+ * 게이트의 3장 요건을 빈 카드로 채우는 것은 자를 휘는 것과 같다.
+ * 모든 카드에 기준일을 박고, 집계값에는 집계임을 밝힌다.
+ */
+export async function buildSelfMadeCards(
+  admin: SupabaseClient,
+  post: PostContext,
+): Promise<ImageCandidate[]> {
+  const cards: ImageCandidate[] = [];
+  const base = SITE_URL.replace(/\/$/, '');
+  const category = (post.category || 'general').toLowerCase();
+  const clean = (v: string) => String(v).replace(/[,:]/g, ' ').replace(/[ ]+/g, ' ').trim();
+  const mkUrl = (type: string, title: string, items: Array<[string, string]>) =>
+    `${base}/api/og-infographic?type=${type}`
+    + `&title=${encodeURIComponent(title.slice(0, 40))}`
+    + `&category=${encodeURIComponent(category === 'apt' || category === 'unsold' || category === 'redev' ? 'apt' : category)}`
+    + `&items=${encodeURIComponent(items.map(([k, v]) => `${clean(k)}:${clean(v)}`).join(','))}`;
+
+  if (!['apt', 'unsold', 'redev'].includes(category) || !post.apt_site_id) return cards;
+
+  const { data: site } = await (admin as any)
+    .from('apt_sites')
+    .select('name, region, sigungu, dong, builder, total_units, built_year, move_in_date, updated_at')
+    .eq('id', post.apt_site_id)
+    .maybeSingle();
+
+  if (site) {
+    const items: Array<[string, string]> = [];
+    if (site.total_units) items.push(['총 세대수', `${Number(site.total_units)}세대`]);
+    const loc = [site.region, site.sigungu, site.dong].filter(Boolean).join(' ');
+    if (loc) items.push(['위치', loc]);
+    if (site.builder) items.push(['시공', String(site.builder)]);
+    if (site.built_year) items.push(['준공', `${site.built_year}년`]);
+    if (site.move_in_date) items.push(['입주', String(site.move_in_date)]);
+    if (site.updated_at) items.push(['기준일', String(site.updated_at).slice(0, 10)]);
+    if (items.length >= 2) {
+      cards.push({
+        url: mkUrl('summary', `${site.name || post.title} 단지 개요`, items.slice(0, 5)),
+        alt: `${site.name || post.title} 단지 개요 — 세대수·위치·시공 (기준일 ${String(site.updated_at || '').slice(0, 10)})`,
+        caption: '카더라 자체 작성 — 단지 등록 정보',
+        source: 'infographic',
+      });
+    }
+
+    // 지역 실거래 집계 — 추정이 아니라 집계값이므로 「집계」와 기준일을 함께 밝힌다.
+    if (site.sigungu) {
+      const { data: rows } = await (admin as any)
+        .from('apt_complex_profiles')
+        .select('latest_sale_date, latest_sale_price')
+        .eq('sigungu', site.sigungu)
+        .not('latest_sale_date', 'is', null)
+        .limit(1000);
+      const arr: any[] = Array.isArray(rows) ? rows : [];
+      if (arr.length >= 10) {
+        const prices = arr.map((r) => Number(r.latest_sale_price) || 0).filter((n) => n > 0);
+        const latest = arr.map((r) => String(r.latest_sale_date)).sort().at(-1) || '';
+        const avg = prices.length ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : 0;
+        const items2: Array<[string, string]> = [['집계 단지', `${arr.length}곳`]];
+        if (avg) items2.push(['평균 실거래', `${(avg / 10000).toFixed(1)}억`]);
+        if (latest) items2.push(['최근 거래일', latest]);
+        if (items2.length >= 2) {
+          cards.push({
+            url: mkUrl('comparison', `${site.sigungu} 실거래 집계`, items2),
+            alt: `${site.sigungu} 실거래 집계 — 단지 ${arr.length}곳 평균 (기준일 ${latest})`,
+            caption: `카더라 자체 집계 — ${site.sigungu} 등록 단지 기준, ${latest} 기준일`,
+            source: 'infographic',
+          });
+        }
+      }
+    }
+  }
+  return cards;
+}
+
 // ─────────── 최상위 runPipeline ───────────
 
 export async function runImagePipeline(
@@ -434,16 +513,23 @@ export async function runImagePipeline(
     .eq('category', (post.category || 'general'))
     .maybeSingle();
   const candidates = await collectCandidates(admin, post, strategy, opts.candidatePerQuery ?? 10);
+  // s268(나): 자체 생성 카드는 관련성 점수를 매기지 않는다 — 우리가 만든 사실 카드라
+  // 외부 후보와 같은 자로 잴 대상이 아니다. 실사진이 모자랄 때 바닥을 받친다.
+  const selfMade = (await buildSelfMadeCards(admin, post))
+    .map((c) => ({ ...c, score: 1, verdict: 'keep' as const }));
   if (candidates.length === 0) {
-    return {
-      post_id: post.id,
-      storage_real: 0,
-      og_placeholder: 0,
-      skipped: 0,
-      candidates_count: 0,
-      scored_keep: 0,
-      failures: ['no_candidates'],
-    };
+    if (selfMade.length === 0) {
+      return {
+        post_id: post.id,
+        storage_real: 0,
+        og_placeholder: 0,
+        skipped: 0,
+        candidates_count: 0,
+        scored_keep: 0,
+        failures: ['no_candidates'],
+      };
+    }
+    return hydrateAndRecord(admin, post, selfMade, opts);
   }
   const scored = await scoreAndFilter(candidates, post, { threshold: opts.relevanceThreshold ?? 0.55 });
   if (scored.length === 0) {
@@ -452,7 +538,7 @@ export async function runImagePipeline(
       .filter((c) => c.source === 'satellite' || c.source === 'naver' || c.source === 'apt_images')
       .slice(0, 3)
       .map((c) => ({ ...c, score: 0.5, verdict: 'maybe' as const }));
-    if (fallback.length === 0) {
+    if (fallback.length === 0 && selfMade.length === 0) {
       return {
         post_id: post.id,
         storage_real: 0,
@@ -463,9 +549,9 @@ export async function runImagePipeline(
         failures: ['all_below_threshold'],
       };
     }
-    return hydrateAndRecord(admin, post, fallback, opts);
+    return hydrateAndRecord(admin, post, [...fallback, ...selfMade], opts);
   }
-  return hydrateAndRecord(admin, post, scored, opts);
+  return hydrateAndRecord(admin, post, [...scored, ...selfMade], opts);
 }
 
 function hashString(s: string): number {

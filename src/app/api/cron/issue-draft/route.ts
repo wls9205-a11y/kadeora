@@ -7,6 +7,7 @@ import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { submitIndexNow } from '@/lib/indexnow';
 import { selectDraftTemplate } from '@/lib/issue-scoring';
 import { SITE_URL } from '@/lib/constants';
+import { isBlockedImageUrl } from '@/lib/image-pipeline';
 // s189: SEO 마스터 (내부링크/EAT 외부인용은 master 가 내부 호출) + 관련 hub footer
 import { runBlogSeoMaster } from '@/lib/blog-seo-master';
 import { appendRelatedHubFooter } from '@/lib/internal-link-injector';
@@ -64,7 +65,9 @@ async function searchNaverImages(query: string, count = 5): Promise<{ url: strin
     return (data.items || []).map((item: any) => ({
       url: (item.link || '').replace('http://', 'https://'),
       alt: item.title?.replace(/<[^>]+>/g, '') || query,
-    })).filter((img: any) => img.url && !img.url.includes('daumcdn') && !img.url.includes('tistory'));
+    // s268(3): 자체 필터가 daumcdn·tistory 둘뿐이라 뉴스사 핫링크가 그대로 통과했다.
+    // image-pipeline 의 차단 목록을 같이 쓴다 — 후보를 만드는 자리는 모두 같은 자를 쓴다.
+    })).filter((img: any) => img.url && !isBlockedImageUrl(img.url));
   } catch (err: any) {
     console.error(`[issue-draft] Naver fetch error: ${err.message} | query="${query}"`);
     return [];
