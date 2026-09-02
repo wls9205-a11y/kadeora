@@ -323,6 +323,10 @@
     {
       "path": "/api/cron/verify-facts",
       "schedule": "50 19 * * *"
+    },
+    {
+      "path": "/api/cron/builder-presale-crawl",
+      "schedule": "20 20 * * *"
     }
   ],
   "headers": [
