@@ -267,6 +267,49 @@ INSERT/UPDATE OF name·sigungu·dong·builder) → `apt_sites_auto_variants()` �
 | `trg_apt_active_change` | AFTER UPD (is_active) | `log_apt_active_change` | 로그 |
 | `trg_apt_change_log` | AFTER UPD (전 컬럼) | `fn_log_apt_change` | 변경 로그 |
 
+⚠️ 대장은 트리거만이 아니다. `name_variants` 를 만드는 **함수가 둘** 이었다 —
+`generate_apt_name_variants_jsonb`(정본, 트리거가 부름) 와
+`generate_apt_name_variants`(**구형·고아**, 부르는 곳 0). §8 참조.
+
+### 8. CV-B ①-2 — 시공사 법인명 별칭 (2026-09-02, 가드 반영 / 데이터 정리 대기)
+
+**9/6 게이트로 격상.** Node 실측: 부울경 광고 적격 현장에서 「김해시 (주)일동」·
+「남구 삼정건설 주식회사」·「사하구 두산건설(주)」류가 짧은순 **2순위** 에 앉아 있었다.
+`kw_name()` 이 괄호를 지우면 「사하구 두산건설」 이라는 **지역+시공사 일반 키워드** 가 되어
+그 현장을 가리키지 못한다.
+
+**CC 실측(광고 대상 모집단 = sa.py SQL 조건)**: 법인 표기 별칭 **2,004건 / 2,003현장**,
+그중 **짧은순 상위 4 안에 1,899건**(=1,899현장이 실제로 그 키워드를 내보낸다) ·
+부울경 307현장 · 2순위 547현장. 조각 355건보다 **다섯 배 큰** 오염이다.
+
+**생산자 규명 — 라우트가 아니라 «두 번째 DB 함수» 였다.**
+`generate_apt_name_variants(name, region, sigungu, dong, builder)` — 구형 생성기이고
+**트리거에 붙어 있지 않으며 부르는 곳이 DB·리포 통틀어 0** 이다(과거 백필의 잔재).
+산출물이 관측된 오염과 정확히 일치한다:
+
+| 이 함수가 만드는 것 | 관측된 오염 |
+|---|---|
+| `sigungu \|\| ' ' \|\| builder` | 「동구 (주)태영건설」·「사하구 두산건설(주)」 |
+| `dong \|\| ' ' \|\| builder`, 역순 | 「유천동 태영건설」류 |
+| `replace(name,' ','-')` | 「더-팰리스트-데시앙」 — R3 가 132건 지운 **slug 형태 키워드** 의 유입 경로 |
+| 이름의 **모든 토큰** | 「데시앙」·「팰리스트」 — PL-A ① 이 끈 브랜드 단독 |
+
+⛔ **고아지만 살아 있는 총이다** — 누가 부르면 세 오염이 한꺼번에 재발한다.
+DROP 판단은 Node 몫(§4-1 대장 원칙의 첫 적용). 마이그레이션은 `DROP FUNCTION public.
+generate_apt_name_variants(text,text,text,text,text);` 한 줄이면 된다.
+
+**가드(9/6 전 필수) 반영 완료** — `sa.py name_pool()` 에 `alias_is_corp()` 문을 달았다.
+판정 신호는 «법인 표기» 뿐이다: `(주)·㈜·주식회사·유한회사·외 N개(업체)·… 등` 원문 검사
+(⚠️ 괄호는 `kw_name` 이 지우므로 **원문도 함께** 본다) + 회사 꼬리(건설·산업개발·이앤씨·
+종합건설·토건·건업·주택공사·도시공사) + 그 행의 `builder`/`builder_normalized` 문자열 포함.
+⚠️ 꼬리 목록에 「개발」·「공사」 단독을 넣으면 **「양정3 재개발」이 죽는다** — 실제로 한 번
+죽였고 테스트가 잡았다. ⚠️ 대표명이 그 문자열을 품으면 면제(회사명이 곧 단지명인 경우).
+sa.py 는 SQL 에 `builder, builder_normalized` 를 추가로 읽는다.
+`test_name_pool.py` 에 ④(11케이스)·④-b(과잉 차단 3케이스)·⑤(회귀 2케이스) 추가 — 전부 통과.
+
+⚠️ 전수 스윕(③)은 `SUPABASE_DB_URL` 로컬 접속이 pooler 인증에서 막혀 못 돌렸다.
+대신 같은 판정을 MCP SQL 로 전수 재현한 것이 위 1,899 수치다.
+
 **시크릿 규약**: CRON_SECRET·NAVER_SA_* · API 키는 터미널·채팅·리포에 평문 금지. 크론 수동
 트리거는 `_call_vercel_cron` 단일 경로. 리포 추적 파일 PAT 스캔(`ghp_`·`github_pat_`) 0건 —
 ⚠️ 다만 **과거 노출분 로테이션은 스캔으로 해결되지 않는다**. GitHub PAT 재발급은 Node 몫

@@ -107,7 +107,7 @@ ALIAS = {
 }
 
 SQL = """
-SELECT slug, name, region, sigungu, total_units, content_score,
+SELECT slug, name, region, sigungu, total_units, content_score, builder, builder_normalized,
   CASE
     WHEN lifecycle_stage IN ('subscription_open','contract_signing','award_announced') THEN 'A_분양중'
     WHEN lifecycle_stage = 'pre_announcement'                                          THEN 'B_분양예정'
@@ -299,6 +299,45 @@ def alias_is_fragment(alias, main=None):
     return alias in SUFFIX_ALONE
 
 
+# 법인 표기. 「(주)일동」·「삼정건설 주식회사」·「제일건설 주식회사 외 1개업체」 처럼
+# «회사 이름» 이 별칭 자리에 앉은 것들이다. 사람은 이렇게 검색하지 않는다.
+CORP_MARK = re.compile(r"\(주\)|\(유\)|㈜|㈔|주식회사|유한회사|외\s*\d+\s*(개)?\s*(업체|사|개사)?|\s등$")
+# 회사 이름의 «꼬리». 브랜드(롯데캐슬·자이)와 회사(롯데건설·GS건설)를 가르는 신호다.
+# ⚠️ 「개발」·「공사」 단독을 넣으면 안 된다 — 「재개발」·「도시개발」이 걸린다.
+#    실측: 「양정3 재개발」이 그 규칙에 걸려 죽었다. 회사 꼬리만 «명시» 로 적는다.
+CORP_TAIL = re.compile(r"(건설|산업개발|이앤씨|종합건설|토건|건업|주택공사|도시공사|건설산업)$")
+
+
+def alias_is_corp(raw, cleaned, main, builders=()):
+    """별칭이 «시공사 법인명» 인가 — 채택하지 않는다 (CV-B ①-2).
+
+    실측(2026-09-02): 부울경 광고 적격 275현장에서 이 부류가 짧은순 «2순위» 에 앉아 있었다.
+    「사하구 두산건설(주)」 는 kw_name() 이 괄호를 지우면 「사하구 두산건설」 이 되어
+    지역+시공사 일반 키워드로 나간다 — 그 현장을 가리키지 못하는 돈 새는 키워드다.
+
+    ⚠️ 판정은 «법인 표기» 라는 신호로만 한다. 이름 구조 규칙이 아니다 —
+       「창원자이」·「경남아너스빌」을 죽였던 그 규칙과 다른 축이다.
+    ⚠️ 괄호는 kw_name() 이 지우므로 «원문» 도 함께 본다. 지운 뒤만 보면 「(주)」가 사라져
+       통과한다.
+    ⚠️ 대표명 자체가 그 문자열을 품고 있으면 건드리지 않는다 — 회사명이 곧 단지명인 경우다.
+    """
+    bare_main = (main or "").replace(" ", "")
+    for text in (raw or "", cleaned or ""):
+        if not text:
+            continue
+        if CORP_MARK.search(text) and not CORP_MARK.search(bare_main):
+            return True
+    words = (cleaned or "").split()
+    if any(CORP_TAIL.search(w) for w in words) and not CORP_TAIL.search(bare_main):
+        return True
+    bare = (cleaned or "").replace(" ", "")
+    for b in builders:
+        b = re.sub(r"\(주\)|㈜|주식회사|\s", "", b or "")
+        if len(b) >= 3 and b in bare and b not in bare_main:
+            return True
+    return False
+
+
 def reject_slug_keywords(keywords):
     """slug 형태 키워드를 «생성 단계에서» 걸러 낸다. 뚫려도 나갈 수 없게 하는 마지막 문이다.
 
@@ -361,12 +400,17 @@ def name_pool(site, max_alias=4):
       - 4~30자                     짧으면 일반명사, 길면 검색되지 않음
       - 대표명과 공백제거 후 다름   표기 변형은 네이버가 어차피 합친다
       - 짧은 것 우선               '서면 롯데캐슬'이 '부산진구 양정3 재개발'보다 검색량이 많다
+      - 시공사 법인명 제외         '사하구 두산건설(주)' 는 그 현장을 가리키지 못한다
+
+    ⚠️ 「짧은 것 우선」이 이 문들을 «필수» 로 만든다. 조각·법인명은 대체로 짧아서
+       거르지 않으면 그 현장의 1~2순위 키워드가 된다 (CV-B ① · ①-2 실측).
     """
     main = kw_name(site["name"])
     # ⚠️ 이름 «자체» 가 브랜드 접미어뿐인 현장이 실제로 있다(『월드메르디앙』·『대광로제비앙』).
     #    그 이름으로 만든 키워드는 14~22개 현장에 걸쳐 어느 곳도 가리키지 못한다.
     out = [main] if len(main) >= 4 and not alias_is_fragment(main) else []
     seen = {main.replace(" ", "")}
+    builders = [b for b in (site.get("builder"), site.get("builder_normalized")) if b]
     cands = []
     for v in (site.get("variants") or []):
         n = kw_name(v)
@@ -374,6 +418,8 @@ def name_pool(site, max_alias=4):
         if not (4 <= len(n) <= 30) or k in seen:
             continue
         if alias_is_fragment(n, main):      # PL-A 판정 ① — 접미어 단독 금지
+            continue
+        if alias_is_corp(v, n, main, builders):   # CV-B ①-2 — 시공사 법인명 금지
             continue
         seen.add(k); cands.append(n)
     cands.sort(key=lambda x: (len(x), x))

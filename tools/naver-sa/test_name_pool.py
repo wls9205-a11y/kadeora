@@ -69,6 +69,50 @@ for s in SAMPLES:
     bad = [p for p in pool if p in BANNED]
     check(not bad, '%-28s → %s' % (s['name'][:26], pool))
 
+print()
+print('■ ④ 단위 — alias_is_corp (CV-B ①-2 시공사 법인명 금지)')
+for raw, main, builders, want in [
+    ('사하구 두산건설(주)',            '사하 괴정5 재개발', ['두산건설(주)'], True),
+    ('김해시 (주)일동',                '김해 외동 재건축사업', ['(주)일동'],   True),
+    ('남구 삼정건설 주식회사',          '대연 가로주택정비',  ['삼정건설'],    True),
+    ('경산시 제일건설 주식회사 외 1개업체', '경산 중산 코아루', ['제일건설'],   True),
+    ('강서구 금호건설(주) 등',          '강서 금호어울림',    ['금호건설'],    True),
+    ('동구 (주)태영건설',              '더 팰리스트 데시앙',  ['태영건설'],    True),
+    # 살아야 하는 것들 — 브랜드·구역·결합형은 시공사명이 아니다
+    ('서면 롯데캐슬',                  '양정3 재개발',       ['롯데건설'],    False),
+    ('양정 롯데캐슬',                  '양정3 재개발',       ['롯데건설'],    False),
+    ('창원자이',                       '창원자이 더 스카이',  ['GS건설'],      False),
+    ('감만1구역',                      '부산 감만1 재개발',   ['한화건설'],    False),
+    ('김해 외동 데시앙',               '김해 외동 재건축사업', ['태영건설'],   False),
+]:
+    got = sa.alias_is_corp(raw, sa.kw_name(raw), main, builders)
+    check(got == want, '%-26s / %-20s → %s (기대 %s)' % (raw[:24], main[:18], got, want))
+
+print()
+print('■ ④-b 과잉 차단 — 「재개발」·「도시개발」은 회사 꼬리가 아니다')
+for raw, main, builders, want in [
+    ('양정3 재개발',   '양정3구역',        ['롯데건설'],   False),
+    ('감만1 재개발',   '부산 감만1구역',   ['한화건설'],   False),
+    ('명지 국제신도시', '명지 더샵',        ['포스코이앤씨'], False),
+]:
+    got = sa.alias_is_corp(raw, sa.kw_name(raw), main, builders)
+    check(got == want, '%-18s / %-16s → %s (기대 %s)' % (raw, main, got, want))
+
+print()
+print('■ ⑤ 회귀 — name_pool 이 법인명을 내놓지 않는다')
+CORP_SAMPLES = [
+    {'name': '사하 괴정5 재개발', 'builder': '두산건설(주)', 'builder_normalized': '두산건설',
+     'variants': ['사하구 두산건설(주)', '괴정5구역', '사하 두산위브']},
+    {'name': '대연 가로주택정비', 'builder': '삼정건설', 'builder_normalized': '삼정건설',
+     'variants': ['남구 삼정건설 주식회사', '대연 포레나', '대연동 가로주택정비']},
+]
+for s_ in CORP_SAMPLES:
+    pool = sa.name_pool(s_, max_alias=4)
+    bad = [p for p in pool
+           if sa.alias_is_corp(p, p, s_['name'],
+                               [s_.get('builder'), s_.get('builder_normalized')])]
+    check(not bad, '%-24s → %s' % (s_['name'][:22], pool))
+
 if os.environ.get('SUPABASE_DB_URL'):
     print('\n■ ③ 전수 — 전 현장 name_pool 스윕')
     sites = sa.fetch_sites()
