@@ -217,11 +217,60 @@ INSERT/UPDATE OF name·sigungu·dong·builder) → `apt_sites_auto_variants()` �
 32,259개 · 조각 0.** 김해 외동은 「외동 데시앙」·「김해 외동 데시앙」이 이제 «자동으로» 나온다
 (어제 손으로 넣은 그 둘이다). 유천1의 「중 데시앙」류 4건도 재생성에서 사라진다.
 
-**남은 것 — 기존 행 정리(게이트 대기)**: 삭제 후보 355건 = ⓐ「<한 글자> + 대표명 그대로」
-344건(339현장·부울경 106) · ⓑ「<한 글자> + 브랜드」 9건(「남 포레나」·「중 데시앙」·
-「동 롯데캐슬」…) · ⓒ 수기 2건(「남 감만1 재개발」·「남 우동2재개발 재개발」).
-당초 안이던 `^[가-힣] ` 단순 패턴이면 정상 45건을 «같이 지우고»(「더 팰리스트 데시앙」·
-「라 아르티엠 테라스」) 조각 27건을 «놓친다».
+**기존 행 정리 — 집행 완료(Node 승인 1안, 355건 전부)**. 순서는 «생산자 → 정리» 다.
+
+| 단계 | 실측 |
+|---|---|
+| 백업 선행 | `apt_variants_cleanup_backup_20260902` 에 355행 = ⓐ344(339현장)·ⓑ9·ⓒ2. 되돌림 SQL 파일에 동봉 |
+| 목록 기반 삭제 | 342현장 UPDATE. 패턴(`^[가-힣] `)이 아니라 백업 표의 목록으로만 지웠다 — 그 패턴이면 정상 45건을 같이 지우고(「더 팰리스트 데시앙」·「라 아르티엠 테라스」) 조각 27건을 놓친다 |
+| 재검증 ① 조각 잔존 | ⓐ 0 · ⓑ 0 · ⓒ 0 |
+| 재검증 ② 정상 무손실 | 별칭 38,382 → 38,027 (**정확히 −355**) · 선두 1글자 381 → 26 · 활성 현장 6,258 불변 |
+
+⚠️ `name_variants` 만 쓰는 UPDATE 는 트리거를 깨우지 않는다(트리거는 name·sigungu·dong·builder
+갱신에만 건다). 그래서 삭제분이 되채워지지 않는다 — 확인함.
+유천1 「중 데시앙」·대연3 「남 포레나」·오티에르 해운대 「중 더샵」 제거, 「해운대 더샵」·
+「대연 디아이엘」·「더 팰리스트 데시앙」 보존.
+
+**이중 생산자 금지 — TS 사본 삭제(§3 A안).** `src/lib/apt-name-variants.ts` 는 참조 0 을
+재확인하고 테스트와 함께 지웠다. 사라진 단위 11케이스는
+`supabase/migrations/cvb1_name_variants_regression_2026-09-02.sql` 로 옮겨 «DB에서 직접»
+돌린다(적용·통과 확인). 규칙을 고치면 이 파일을 돌리는 것이 게이트다.
+
+#### 남은 오염 3종 — 이번 게이트 밖 (CV-B ①″ 후보, 9/6 시한과 무관)
+
+| 종류 | 건수 | 예 | 9/6 위험 |
+|---|---|---|---|
+| 붙여쓴 지역 중복 | 652 | 「성남성남시신흥2」·「의정부의정부시가능4구역」 | 낮음 — 길어서 `name_pool` 짧은순 4개에 안 든다 |
+| 붙여쓴 한 글자 접두 | 257 | 「중삼부1」·「중보수에코팰리스」 | 낮음(동상) |
+| 중간 위치 한 글자 | 28 | 「대전 중 유천1구역 지역주택조합」 | 낮음(동상) |
+| 시공사 문자열이 별칭 | 2,269(상한) | 「동구 (주)태영건설」·「경산시 제일건설 주식회사 외 1개업체」 | 별건 — 생산자 미상, 조사 필요 |
+
+⚠️ 셋 다 «수정된 생산자는 더 이상 만들지 않는다» — 전수 시뮬레이션에서 0/0/0. 남은 것은
+과거 적재분이고, 짧은순 채택에 걸리지 않아 9/6 첫 회전을 막지 않는다. 지운 355건은
+「<한 글자>+대표명」·「<한 글자>+브랜드」로 **짧아서 1순위 키워드가 되던** 것들이었다.
+
+### 7. apt_sites 쓰기 트리거 대장 (2026-09-02 실측 · 갱신은 커밋 조건)
+
+⛔ 「숨은 생산자」 사고의 재발 방지 장치다. apt_sites 에 자동으로 쓰는 주체는 이 8종뿐이다.
+자동 쓰기 로직을 새로 달면 **이 표 갱신이 커밋 조건**이고, DB 함수·트리거 변경은
+`apply_migration` + 마이그레이션 파일 리포 동봉이 의무다. **DB에만 존재하는 로직 금지** —
+그것이 「TS를 실물로 오인」한 이번 사고의 구조적 원인이다.
+
+| 트리거 | 시점 | 함수 | 쓰는 것 |
+|---|---|---|---|
+| `trg_apt_sites_auto_variants` | BEFORE INS/UPD (name·sigungu·dong·builder) | `apt_sites_auto_variants` | **name_variants** (변형 <3 일 때만 재생성) |
+| `trg_normalize_builder` | BEFORE INS/UPD (builder) | `normalize_builder_name` | builder 정규화 |
+| `trg_sync_builder_normalized` | BEFORE INS/UPD (builder) | `apt_sites_sync_builder_normalized` | builder_normalized |
+| `apt_sites_stage_change` | BEFORE UPD (lifecycle_stage) | `trg_apt_site_stage_change` | 단계 전이 |
+| `trg_apt_lifecycle_change_alert` | AFTER UPD (lifecycle_stage) | `fn_apt_lifecycle_change_alert` | 알림 |
+| `trg_apt_price_change_alert` | AFTER UPD (price_max) | `fn_apt_price_change_alert` | 알림 |
+| `trg_apt_active_change` | AFTER UPD (is_active) | `log_apt_active_change` | 로그 |
+| `trg_apt_change_log` | AFTER UPD (전 컬럼) | `fn_log_apt_change` | 변경 로그 |
+
+**시크릿 규약**: CRON_SECRET·NAVER_SA_* · API 키는 터미널·채팅·리포에 평문 금지. 크론 수동
+트리거는 `_call_vercel_cron` 단일 경로. 리포 추적 파일 PAT 스캔(`ghp_`·`github_pat_`) 0건 —
+⚠️ 다만 **과거 노출분 로테이션은 스캔으로 해결되지 않는다**. GitHub PAT 재발급은 Node 몫
+(이번 주 내, `gh auth refresh` 또는 GitHub Settings → Developer settings → Tokens).
 
 ---
 
