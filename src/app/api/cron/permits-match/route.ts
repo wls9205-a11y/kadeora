@@ -19,6 +19,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { fetchAll } from '@/lib/db/fetchBatched';
 import {
   extractDong, isOutOfWindow, judgeMatch,
   type PermitFact, type SiteFact,
@@ -83,10 +84,13 @@ async function handler(req: NextRequest) {
   const limit = Math.min(Number(sp.get('limit') || BATCH), 2000);
   const started = Date.now();
 
-  const { data: siteRows } = await admin.from('apt_sites')
-    .select('id, name, display_name, name_variants, address, region, sigungu, dong, total_units, complex_units')
-    .eq('is_active', true).limit(20000);
-  const idx = indexByDong((siteRows ?? []) as SiteRow[]);
+  // ⚠️ 한 장(1,000행)만 받으면 후보 색인이 6,261 중 1,000 으로 줄고, 대부분의 인허가가
+  //    「후보 없음」으로 떨어진다 — 배선을 고쳐 놓고 결과는 여전히 0에 가까웠을 것이다.
+  //    PostgREST db-max-rows=1000 (fetchAll 이 그 우회다).
+  const siteRows = (await fetchAll(admin, 'apt_sites',
+    'id, name, display_name, name_variants, address, region, sigungu, dong, total_units, complex_units',
+    (q: any) => q.eq('is_active', true))) as SiteRow[];
+  const idx = indexByDong(siteRows);
 
   // ⚠️ 아직 «본 적 없는» 것부터 본다(pending). review·unmatched 는 재판정 대상이 아니다 —
   //    같은 입력에 같은 답이 나오고, 사람이 큐에서 내린 판단을 덮어쓸 위험만 있다.
@@ -145,7 +149,7 @@ async function handler(req: NextRequest) {
   return {
     processed,
     metadata: {
-      dry, stopped_by: stoppedBy, sites_indexed: (siteRows ?? []).length,
+      dry, stopped_by: stoppedBy, sites_indexed: siteRows.length,
       dongs: idx.size, by_status: tally, by_method: byMethod,
       remaining_pending: dry ? remaining : Math.max((remaining ?? 0) - (dry ? 0 : 0), 0),
       samples, elapsed_ms: Date.now() - started,

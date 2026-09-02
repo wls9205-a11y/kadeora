@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { fetchAll } from '@/lib/db/fetchBatched';
 import {
   GAP_METRICS, digestSeverity, formatDigest, severityOf,
   type GapReading,
@@ -98,10 +99,12 @@ async function handler(req: NextRequest) {
   const { data: healthRows } = await admin.from('presale_source_health')
     .select('source_key, zero_streak, last_ok_at').gte('zero_streak', 2);
 
-  const { data: siteRows } = await admin.from('apt_sites')
-    .select('id, name, region, sigungu, dong')
-    .eq('is_active', true).not('dong', 'is', null).limit(20000);
-  const similar = countSimilarPairs((siteRows ?? []) as any);
+  // ⚠️ `.limit(20000)` 은 «거짓말» 이다 — PostgREST `db-max-rows` 가 1,000 이라 첫 장만 온다.
+  //    실측으로 잡혔다: 이 지표의 첫 라이브 값이 8 이었는데 DB 로 직접 세면 129 였다.
+  //    한 장만 받고 「유사쌍이 적다」고 적을 뻔했다 — 지표가 스스로를 낮추는 전형이다.
+  const siteRows = await fetchAll(admin, 'apt_sites', 'id, name, region, sigungu, dong',
+    (q: any) => q.eq('is_active', true).not('dong', 'is', null));
+  const similar = countSimilarPairs(siteRows as any);
 
   // 직전 관측 — 델타의 기준이다. 없으면 «첫 관측» 으로 적는다.
   const { data: prevRows } = await admin.from('gap_watch_snapshots')

@@ -26,6 +26,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { verifyCronAuth } from '@/lib/cron-auth';
+import { fetchAll } from '@/lib/db/fetchBatched';
 import { PRESALE_SOURCES, type PresaleSource } from '@/lib/builder-sites/presale-registry';
 import { BACKFILL_CARDS, BACKFILL_SOURCE, type DocCard } from '@/lib/presale/backfill';
 import { extractCards, fetchListHtml, type ExtractedCard } from '@/lib/presale/extract';
@@ -301,17 +302,17 @@ async function loadPool(admin: any, cards: ExtractedCard[]): Promise<SiteRow[]> 
   const COLS = 'id, slug, name, display_name, name_variants, address, sigungu, region';
   const rows: SiteRow[] = [];
 
+  // ⚠️ `.limit(2000)` 은 실제로 «1,000행» 이다(PostgREST db-max-rows). 매칭 풀이 조용히
+  //    잘리면 이미 있는 현장을 못 찾아 «새 페이지를 또 만든다» — 이 트랙이 가장 두려워하는 실패다.
   if (sigungus.length) {
-    const { data } = await admin.from('apt_sites').select(COLS)
-      .in('sigungu', sigungus).eq('is_active', true).limit(2000);
-    rows.push(...((data ?? []) as SiteRow[]));
+    rows.push(...(await fetchAll(admin, 'apt_sites', COLS,
+      (q: any) => q.in('sigungu', sigungus).eq('is_active', true)) as SiteRow[]));
   }
   // ⚠️ 시군구를 못 읽은 카드가 있으면 시도 단위로 한 번 더 받는다.
   //    좁히지 못했다고 «매칭을 포기하면» 이미 있는 현장 옆에 새 페이지를 또 만든다.
   if (cards.some((c) => !c.sigungu) && regions.length) {
-    const { data } = await admin.from('apt_sites').select(COLS)
-      .in('region', regions).eq('is_active', true).limit(4000);
-    rows.push(...((data ?? []) as SiteRow[]));
+    rows.push(...(await fetchAll(admin, 'apt_sites', COLS,
+      (q: any) => q.in('region', regions).eq('is_active', true)) as SiteRow[]));
   }
   const seen = new Set<string>();
   return rows.filter((r) => (seen.has(r.id) ? false : (seen.add(r.id), true)));
