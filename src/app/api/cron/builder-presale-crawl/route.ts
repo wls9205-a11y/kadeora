@@ -30,7 +30,7 @@ import { PRESALE_SOURCES, type PresaleSource } from '@/lib/builder-sites/presale
 import { extractCards, fetchListHtml, type ExtractedCard } from '@/lib/presale/extract';
 import {
   adBlockedFor, isProvisional, judgeSupplyType, normName, provisionalSlug,
-  seedGate, similarKey, stripProvisional, type SupplyType,
+  isSameArea, isSameSiteHint, seedGate, similarKey, stripProvisional, type SupplyType,
 } from '@/lib/presale/candidate';
 import { tally } from '@/lib/net/outcome';
 
@@ -163,6 +163,11 @@ async function handler(req: NextRequest) {
     // 매칭 풀 — 시군구(없으면 시도)로 좁힌다. 전수 비교는 오매칭의 온상이다.
     const pool = await loadPool(admin, cards);
 
+    const pending: Array<{
+      card: ExtractedCard; supplyType: SupplyType; resolution: Resolution;
+      method: MatchMethod; site: SiteRow | null; seededSlug?: string; note: string;
+    }> = [];
+
     for (const card of cards) {
       const supplyType = judgeSupplyType(card.rawName, card.addrRaw, src.brand);
       const { site, method } = matchSite(card, pool);
@@ -183,7 +188,10 @@ async function handler(req: NextRequest) {
         } else {
           // ⚠️ 시드 «직전» 유사명 검색. 대연3 ↔ 디아이엘 재발 방지 —
           //    비슷한 이름이 있으면 만들지 «않고» 병합 제안으로 큐에 남긴다.
-          const near = pool.filter((s) => namesOf(s).some((n) => {
+          // ⚠️ 울타리는 «그 카드의 지역» 이다(CV-B ②). loadPool 은 소스의 모든 카드
+          //    시군구·시도를 «합친» 풀이라, 울타리가 없으면 고창(전북) 카드에 창원(경남)
+          //    2건이 유사 후보로 걸린다 — CV-A 본실행에서 실제로 그랬다.
+          const near = pool.filter((s) => isSameArea(card, s) && namesOf(s).some((n) => {
             const a = normName(n), b = similarKey(card.rawName);
             return a.length >= 4 && b.length >= 4 && (a.includes(b) || b.includes(a));
           }));
@@ -206,16 +214,33 @@ async function handler(req: NextRequest) {
         }
       }
 
+      pending.push({ card, supplyType, resolution, method, site, seededSlug, note });
+    }
+
+    // ⚠️ 소스 «안» 의 상호 대조(CV-B ③). 카드를 DB 풀하고만 맞추면 같은 목록에 사업명과
+    //    브랜드명으로 두 번 올라온 현장을 못 본다 — 동탄 A78BL ↔ 자연&데시앙.
+    //    붙이지는 않는다. 큐로 가는 카드에 «같은 소스 안의 짝» 을 적어 사람이 보게 한다.
+    for (const p of pending) {
+      if (p.resolution !== 'queued') continue;
+      const twins = pending.filter((q) => q !== p && isSameSiteHint(p.card, q.card));
+      if (twins.length === 0) continue;
+      const label = twins
+        .map((q) => `${q.card.rawName}${q.seededSlug ? ` → ${q.seededSlug}` : ''}(${q.resolution})`)
+        .slice(0, 2).join(', ');
+      p.note = `${p.note ? `${p.note} · ` : ''}같은 소스 안의 동일 현장 후보(세대수 ${p.card.totalUnits}): ${label}`;
+    }
+
+    for (const p of pending) {
       decisions.push({
-        source: `crawl:${src.key}`, rawName: card.rawName, region: card.region ?? null,
-        units: card.totalUnits ?? null, supplyType, resolution, matchMethod: method,
-        matchedSlug: site?.slug, seededSlug, note,
+        source: `crawl:${src.key}`, rawName: p.card.rawName, region: p.card.region ?? null,
+        units: p.card.totalUnits ?? null, supplyType: p.supplyType, resolution: p.resolution,
+        matchMethod: p.method, matchedSlug: p.site?.slug, seededSlug: p.seededSlug, note: p.note,
       });
 
       if (!dry) {
-        await upsertCandidate(admin, src, card, {
-          supplyType, resolution, matchMethod: method,
-          matchedSiteId: site?.id ?? null, seededSlug, note,
+        await upsertCandidate(admin, src, p.card, {
+          supplyType: p.supplyType, resolution: p.resolution, matchMethod: p.method,
+          matchedSiteId: p.site?.id ?? null, seededSlug: p.seededSlug, note: p.note,
         });
       }
     }

@@ -167,3 +167,44 @@ export function seedGate(c: CandidateFact): SeedVerdict {
  * 유사 후보가 있으면 시드 «대신» 큐에 병합 제안으로 남긴다.
  */
 export const similarKey = (name: string): string => normName(stripProvisional(name));
+
+/**
+ * 유사명 검색의 «지역 울타리» (CV-B ②).
+ *
+ * ⚠️ 매칭 풀은 그 소스의 «모든 카드» 시군구·시도를 합쳐 한 번에 읽는다. 그래서 유사명
+ *    검색을 풀 전체에 걸면 다른 카드의 지역이 섞인다 — CV-A 본실행 실측: 고창(전북)
+ *    카드의 「유사 현장」 후보로 창원(경남) 2건이 걸려 시드 대신 큐로 갔다.
+ *    「공공분양」 같은 공통 토큰이 이름축을 통과시킨 것이고, 안전측이지만 진짜 신규가
+ *    큐에서 늦어진다.
+ * ⚠️ 한쪽 값이 «없으면» 막지 않는다. region 을 못 읽은 행까지 울타리로 쳐내면
+ *    이미 있는 현장 옆에 새 페이지를 또 만드는, 더 비싼 실패로 되돌아간다.
+ */
+export const isSameArea = (
+  a: { region?: string | null; sigungu?: string | null },
+  b: { region?: string | null; sigungu?: string | null },
+): boolean =>
+  (!a.region || !b.region || a.region === b.region) &&
+  (!a.sigungu || !b.sigungu || a.sigungu === b.sigungu);
+
+/**
+ * 같은 소스 «안» 의 두 카드가 같은 현장인가 (CV-B ③).
+ *
+ * 실측(CV-A 본실행): 태영 목록 한 장에 「화성동탄2 A78BL 공공주택사업」(사업명)과
+ * 「동탄 자연&데시앙」(브랜드명)이 «따로» 올라와 있었다. 사업명 카드는 region 을 못 읽어
+ * 주소축까지 못 타고 큐에 남았다 — 카드끼리는 대조하지 않기 때문이다.
+ *
+ * ⛔ 이 판정으로 «붙이지 않는다». 세대수+지역이 같다는 것은 같은 현장의 «강한 힌트» 일
+ *    뿐이고, 같은 택지지구의 다른 블록이 같은 세대수를 쓰는 일이 있다. 큐에 메모만 남기고
+ *    판단은 사람이 한다 — 자동 병합은 되돌리기 어려운 쪽의 실패다.
+ * ⚠️ 세대수가 «양쪽 다» 있어야 한다. null 을 같음으로 세면 그 소스의 카드가 전부 서로
+ *    후보가 된다.
+ */
+export const isSameSiteHint = (
+  a: { region?: string | null; totalUnits?: number | null; rawName?: string },
+  b: { region?: string | null; totalUnits?: number | null; rawName?: string },
+): boolean => {
+  if (!a.totalUnits || !b.totalUnits || a.totalUnits !== b.totalUnits) return false;
+  if (a.rawName && b.rawName && normName(a.rawName) === normName(b.rawName)) return false;
+  // region 은 한쪽이라도 없으면 «막지 않는다» — 못 읽은 카드가 정확히 이 힌트가 필요한 쪽이다.
+  return !a.region || !b.region || a.region === b.region;
+};

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   adBlockedFor, isKnownRegion, isProvisional, judgeSupplyType, normName,
-  provisionalSlug, seedGate, similarKey, stripProvisional,
+  isSameArea, isSameSiteHint, provisionalSlug, seedGate, similarKey, stripProvisional,
   type CandidateFact,
 } from '@/lib/presale/candidate';
 import { htmlToText, validateCards } from '@/lib/presale/extract';
@@ -184,5 +184,58 @@ describe('htmlToText', () => {
   it('어떤 입력에도 던지지 않는다', () => {
     expect(htmlToText('')).toBe('');
     expect(htmlToText(null as unknown as string)).toBe('');
+  });
+});
+
+describe('유사명 검색의 지역 울타리 (CV-B ②)', () => {
+  it('고창(전북) 카드에 창원(경남) 현장이 후보로 들어오지 않는다', () => {
+    expect(isSameArea({ region: '전북', sigungu: '고창군' },
+                      { region: '경남', sigungu: '창원시 의창구' })).toBe(false);
+  });
+
+  it('같은 시·도 안의 다른 시군구는 막지 않는다 — 병합 후보일 수 있다', () => {
+    expect(isSameArea({ region: '부산', sigungu: null },
+                      { region: '부산', sigungu: '남구' })).toBe(true);
+  });
+
+  it('같은 시군구는 통과', () => {
+    expect(isSameArea({ region: '부산', sigungu: '남구' },
+                      { region: '부산', sigungu: '남구' })).toBe(true);
+  });
+
+  it('같은 시·도라도 시군구가 다르면 막는다', () => {
+    expect(isSameArea({ region: '경남', sigungu: '김해시' },
+                      { region: '경남', sigungu: '창원시 성산구' })).toBe(false);
+  });
+
+  it('한쪽 값이 없으면 막지 않는다 — 중복 페이지 생성이 더 비싼 실패다', () => {
+    expect(isSameArea({ region: null, sigungu: null }, { region: '경남', sigungu: '김해시' })).toBe(true);
+    expect(isSameArea({ region: '전북', sigungu: '고창군' }, { region: null, sigungu: null })).toBe(true);
+  });
+});
+
+describe('소스 내 동일 현장 힌트 (CV-B ③)', () => {
+  const a78 = { rawName: '화성동탄2 A78BL 공공주택사업', region: null, totalUnits: 1140 };
+  const dsn = { rawName: '동탄 자연&데시앙', region: '경기', totalUnits: 1140 };
+
+  it('region 을 못 읽은 사업명 카드와 브랜드명 카드를 짝으로 본다', () => {
+    expect(isSameSiteHint(a78, dsn)).toBe(true);
+  });
+
+  it('세대수가 다르면 짝이 아니다', () => {
+    expect(isSameSiteHint(a78, { ...dsn, totalUnits: 930 })).toBe(false);
+  });
+
+  it('세대수가 한쪽이라도 없으면 짝이 아니다 — null 을 같음으로 세지 않는다', () => {
+    expect(isSameSiteHint({ ...a78, totalUnits: null }, dsn)).toBe(false);
+    expect(isSameSiteHint(a78, { ...dsn, totalUnits: null })).toBe(false);
+  });
+
+  it('시·도가 둘 다 있고 다르면 짝이 아니다', () => {
+    expect(isSameSiteHint({ ...a78, region: '전북' }, dsn)).toBe(false);
+  });
+
+  it('이름이 같은 카드(중복 행)는 짝으로 세지 않는다', () => {
+    expect(isSameSiteHint({ ...dsn }, { ...dsn, region: null })).toBe(false);
   });
 });
