@@ -266,7 +266,7 @@ INSERT/UPDATE OF name·sigungu·dong·builder) → `apt_sites_auto_variants()` �
 ⚠️ 세대수가 «양쪽 다» 있어야 한다 — null 을 같음으로 세면 그 소스 카드가 전부 서로
 후보가 된다. 라우트는 카드 판정을 `pending` 으로 모은 뒤 상호 대조 → 기록 순으로 돈다.
 
-단위 41케이스 통과(`presale-candidate.test.ts`) · 전체 767 → 776 통과 · tsc 통과.
+단위 41케이스 통과(`presale-candidate.test.ts`) · 전체 767 → 777 통과 · tsc 통과.
 
 ### 7. apt_sites 쓰기 트리거 대장 (2026-09-02 실측 · 갱신은 커밋 조건)
 
