@@ -47,7 +47,7 @@ describe('CV-4 갭워치 심각도', () => {
     expect(body).toContain('손볼 것 1건');
     expect(body).toContain('(변화 없음)');
     expect(body).toContain('(+3)');
-    expect(body).toContain('백필·매칭 대상');
+    expect(body).toContain('detail.by_status');   // 할 일이 pending/unmatched 로 갈린다
     expect(digestSeverity(readings)).toBe('critical');
   });
 

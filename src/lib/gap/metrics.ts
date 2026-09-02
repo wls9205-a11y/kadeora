@@ -40,7 +40,7 @@ export const GAP_METRICS: GapMetricDef[] = [
     label: '미매칭 인허가',
     direction: 'lower_is_better',
     warnAt: 200, critAt: 1000,
-    action: '인허가 «근거는 있는데» 현장에 안 붙은 것들 — 백필·매칭 대상 후보다',
+    action: 'detail.by_status 를 먼저 본다 — pending 이면 PV-3b(permits-match)가 안 돈 것이고, unmatched 면 «붙을 현장이 없는» 것이라 신규 시드 후보다',
   },
   {
     key: 'confidence_conflicting',

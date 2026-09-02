@@ -1,0 +1,15 @@
+-- PV-3b — 인허가 매칭 배선 (2026-09-02)
+--
+-- 스키마 변경은 없다. 이 파일은 «증분 훅을 언제 켜는가» 를 남기려고 있다.
+--
+-- ⚠️ 1회전(1,465건)은 «수동 3단» 으로 돈다: dry → 검토 → live.
+--    오늘 백필에서 dry 가 남천2 오시드를 잡아냈다. 같은 절차를 여기서도 지킨다.
+--      SELECT public._call_vercel_cron('/api/cron/permits-match?dry=1&limit=500');
+--      SELECT public._call_vercel_cron('/api/cron/permits-match?limit=500');   -- 3회
+--
+-- ⛔ 아래 스케줄은 «1회전을 끝내고» 켠다. 지금 켜면 사람이 dry 를 보기 전에
+--    배치가 1,465건을 먼저 써 버린다 — 3단 절차를 코드가 앞질러 버리는 셈이다.
+--    permits-sync 가 매시 25분에 돌므로 45분에 붙인다(증분만 남는다).
+--
+-- SELECT cron.schedule('permits_match_hourly', '45 * * * *',
+--   $$SELECT public._call_vercel_cron('/api/cron/permits-match?limit=300')$$);

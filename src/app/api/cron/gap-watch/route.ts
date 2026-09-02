@@ -88,6 +88,13 @@ async function handler(req: NextRequest) {
   const redevNoTs = await count('apt_sites', (q: any) =>
     q.eq('is_active', true).eq('site_type', 'redevelopment').is('stage_updated_at', null));
 
+  // ⚠️ 「미매칭 인허가」는 한 숫자로는 두 상태를 못 가른다 — «아직 안 봤다(pending)» 와
+  //    «봤는데 붙을 현장이 없다(unmatched)» 는 할 일이 완전히 다르다(PV-3b / 신규 시드).
+  const permitStatus: Record<string, number> = {};
+  for (const st of ['pending', 'review', 'unmatched']) {
+    permitStatus[st] = await count('apt_permits', (q: any) => q.eq('match_status', st));
+  }
+
   const { data: healthRows } = await admin.from('presale_source_health')
     .select('source_key, zero_streak, last_ok_at').gte('zero_streak', 2);
 
@@ -107,7 +114,10 @@ async function handler(req: NextRequest) {
 
   const readings: GapReading[] = [
     { def: def('pre_announcement'), value: preAnn, prev: prev.get('pre_announcement') ?? null },
-    { def: def('permits_unmatched'), value: permitsUnmatched, prev: prev.get('permits_unmatched') ?? null },
+    {
+      def: def('permits_unmatched'), value: permitsUnmatched,
+      prev: prev.get('permits_unmatched') ?? null, detail: { by_status: permitStatus },
+    },
     { def: def('confidence_conflicting'), value: conflicting, prev: prev.get('confidence_conflicting') ?? null },
     {
       def: def('same_dong_similar_pairs'), value: similar.pairs,
