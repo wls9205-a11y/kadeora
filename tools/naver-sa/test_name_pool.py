@@ -118,6 +118,32 @@ for s_ in CORP_SAMPLES:
                                [s_.get('builder'), s_.get('builder_normalized')])]
     check(not bad, '%-24s → %s' % (s_['name'][:22], pool))
 
+print()
+print('■ ⑥ 록아웃 캘린더 — 계정에 «쓰는» 명령만 막는다')
+for day, want in [('2026-09-02', False), ('2026-09-03', True), ('2026-09-06', True), ('2026-09-07', False)]:
+    got = sa.lockout_active(day) is not None
+    check(got == want, '%s → %s (기대 %s)' % (day, '잠김' if got else '열림', '잠김' if want else '열림'))
+
+# ⚠️ --live 가 없으면 애초에 아무것도 바꾸지 않으므로 문이 열려 있어야 한다.
+#    록아웃이 읽기까지 막으면 창 안에서 «관측» 을 못 하게 되어 목적과 반대가 된다.
+class _A:
+    def __init__(self, **kw): self.__dict__.update(kw)
+sa.assert_lockout_clear(_A(live=False))
+check(True, '--live 없는 실행은 록아웃과 무관 (통과)')
+
+print()
+print('■ ⑦ 계정 실존 스캔 — keyword_flags')
+for kw, main, want in [
+    ('사하구 두산건설', '사하 괴정5 재개발', ['법인명']),
+    ('사하구두산건설',  '사하 괴정5 재개발', ['법인명']),      # 공백이 지워져도 잡힌다
+    ('외 데시앙',       '김해 외동 재건축사업', ['조각']),
+    ('동래-반도-유보라', '반도유보라',        ['slug형']),
+    ('서면 롯데캐슬',   '양정3 재개발',       []),
+    ('가평 센트럴파크 더 스카이', '가평센트럴파크더스카이', []),  # 이름에 있는 한 글자
+]:
+    got = sa.keyword_flags(kw, main)
+    check(got == want, '%-22s → %s (기대 %s)' % (kw, got or '깨끗', want or '깨끗'))
+
 if os.environ.get('SUPABASE_DB_URL'):
     print('\n■ ③ 전수 — 전 현장 name_pool 스윕')
     sites = sa.fetch_sites()

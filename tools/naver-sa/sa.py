@@ -821,6 +821,158 @@ def cmd_rollback(args):
         print("   그 판단을 스크립트가 대신하지 않는다.")
 
 
+# ─────────────────────────────────────────────── 록아웃 캘린더
+
+# 광고 계정에 «쓰는» 명령이 돌면 안 되는 창.
+#
+# ⚠️ 창 안에서 광고를 건드리면 그 기간의 지표가 «무엇 때문에 움직였는지» 를 잃는다.
+#    9/2 CV-A 본실행(시드 2건·조각 355 정리·법인명 가드)의 효과를 재려면 그 뒤 며칠은
+#    광고 쪽 변수를 0으로 두어야 한다. 록아웃은 게으름이 아니라 «측정 설계» 다.
+# ⚠️ 날짜를 코드 바깥(캘린더)에 두는 이유: 창을 여는 것도 «의도한 행위» 로 남기기 위해서다.
+#    급해서 --ignore-lockout 을 붙인 실행은 로그에 그 사실이 크게 남는다.
+LOCKOUTS = [
+    ("2026-09-03", "2026-09-06",
+     "PL-B′ 측정 창 — 9/2 CV-A 본실행 지표 관측. 첫 sa-sync 회전은 이 창을 «닫은 뒤» 돈다"),
+]
+
+# 계정을 바꾸는 명령. 읽기(plan·verify·scan)는 록아웃과 무관하다.
+def lockout_active(today=None):
+    """오늘이 록아웃 창 안이면 (시작, 끝, 사유). 아니면 None."""
+    d = today or datetime.date.today().isoformat()
+    for start, end, why in LOCKOUTS:
+        if start <= d <= end:
+            return (start, end, why)
+    return None
+
+
+def assert_lockout_clear(args):
+    """계정에 «쓰기» 전에 부르는 문. --live 가 없으면 애초에 아무것도 바꾸지 않는다."""
+    if not getattr(args, "live", False):
+        return
+    win = lockout_active()
+    if not win:
+        return
+    start, end, why = win
+    if getattr(args, "ignore_lockout", False):
+        print("!! 록아웃(%s~%s)을 «의도적으로» 무시하고 실행합니다 — %s" % (start, end, why))
+        return
+    msg = [
+        "",
+        "록아웃 중입니다: %s ~ %s" % (start, end),
+        "  사유: %s" % why,
+        "  · 읽기 전용(plan·verify·scan)은 그대로 됩니다.",
+        "  · 첫 회전을 이 창 «안에서» 돌려야 한다면 LOCKOUTS 의 끝 날짜를 줄이거나"
+        "  --ignore-lockout 을 붙이세요.",
+        "    어느 쪽이든 «창을 연 것이 의도였다» 는 기록이 남는 것이 목적입니다.",
+    ]
+    sys.exit(chr(10).join(msg))
+
+
+# ─────────────────────────────────────────────── scan (CV-B ①·①-2 계정 실존)
+
+SCAN_CSV = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        "..", "..", "docs", "m6", "CVB_광고_조각법인명_스캔.csv")
+
+# 붙여쓴 키워드에서도 살아남는 회사 신호. 네이버가 공백을 지워도 「두산건설」은 남는다.
+# 생성기(generate_apt_name_variants_jsonb)와 «같은» 브랜드 목록. 「<한 글자> + 브랜드」가
+# CV-B ① 에서 지운 ⓑ형이다 — 「외 데시앙」·「남 포레나」·「중 더샵」.
+BRANDS = frozenset("""
+래미안 자이 힐스테이트 푸르지오 아크로 더샵 롯데캐슬 포레나 호반써밋 아이파크 두산위브 데시앙 비스타
+""".split())
+
+CORP_GLUED = re.compile(r"(주식회사|건설|이앤씨|산업개발|종합건설|토건|주택공사|도시공사)")
+
+
+def keyword_flags(kw, main=None):
+    """계정에 «이미 올라간» 키워드 하나의 오염 사유. 없으면 빈 목록.
+
+    ⚠️ 생성기를 고쳐도 계정에 나가 있는 것은 스스로 사라지지 않는다. 그래서 만드는 층·
+       내보내는 층에 더해 «이미 나간 층» 을 한 번 훑는 문이 따로 필요하다.
+    ⚠️ 판정은 name_pool 이 쓰는 것과 «같은 함수» 를 부른다. 여기서 조건을 다시 쓰면
+       두 판정이 갈린다(_load_off_targets 의 교훈과 같다).
+    """
+    why = []
+    if SLUG_KEYWORD.search(kw or ""):
+        why.append("slug형")
+    # ⚠️ 「한 글자 토큰이면 조각」이 아니다 — 「가평 센트럴파크 더 스카이」의 「더」,
+    #    「우미 린」의 「린」은 이름에 원래 있다. 반대로 「외 데시앙」은 «대표명에 외 가 있어도»
+    #    조각이다(외동→외). 그래서 위치·모양으로 가른다 — CV-B ① 정리에서 실제로 지운
+    #    두 형태 그대로다: ⓐ「<한 글자> + 대표명」 ⓑ「<한 글자> + 브랜드」.
+    #    테스트 ⑦ 이 이 자리를 두 번 잡았다(면제 과잉 → 차단 과잉).
+    bare_main = (main or "").replace(" ", "")
+    toks = (kw or "").split()
+    if toks and len(toks[0]) == 1 and re.search(r"[가-힣]", toks[0]):
+        rest = "".join(toks[1:])
+        if not bare_main:
+            # 대표명을 못 찾았으면 면제 여부를 «모른다». OFF 로 바로 넘기지 않게 표시한다.
+            why.append("조각(대표명 미상)")
+        elif rest == bare_main or (len(toks) == 2 and toks[1] in BRANDS):
+            why.append("조각")
+    if alias_is_corp(kw, kw, main or "") or (
+            " " not in (kw or "") and CORP_GLUED.search(kw or "")
+            and not CORP_GLUED.search((main or "").replace(" ", ""))):
+        why.append("법인명")
+    return why
+
+
+def cmd_scan(args):
+    """계정에 나가 있는 키워드를 조각·법인명·slug형으로 훑는다. «읽기 전용» 이다.
+
+    산출물은 off 가 그대로 먹는 CSV 다(키워드 ID·키워드·광고그룹 이름·사유).
+    ⚠️ 삭제가 아니라 OFF 다 — 되돌릴 수 있어야 노출이 붙은 뒤 다시 판단할 수 있다.
+    """
+    if not API_KEY:
+        sys.exit("NAVER_SA_* 환경변수가 필요합니다.")
+    names = {}
+    try:
+        for s_ in fetch_sites():
+            names[s_["slug"]] = s_["name"]
+    except SystemExit:
+        print("(DB 미접속 — 대표명 면제 없이 검사합니다. 오탐이 늘 수 있습니다.)")
+
+    st = json.load(open(STATE, encoding="utf-8")) if os.path.exists(STATE) else {"adgroups": {}}
+    targets = dict(EXISTING_GROUPS); targets.update(st.get("adgroups", {}))
+
+    rows, total = [], 0
+    for gname, gid in targets.items():
+        try:
+            for k in call("GET", "/ncc/keywords", params={"nccAdgroupId": gid}) or []:
+                total += 1
+                kw = (k.get("keyword") or "").strip()
+                u = ((k.get("links") or {}).get("pc") or {}).get("final") or ""
+                slug = unquote(u.split("/apt/", 1)[1]) if "/apt/" in u else ""
+                why = keyword_flags(kw, names.get(slug))
+                if why:
+                    rows.append((k.get("nccKeywordId") or "", kw, gname, "·".join(why),
+                                 "OFF" if k.get("userLock") is True else "ON"))
+        except Exception as e:
+            print("조회실패 %s %s" % (gname, str(e)[:100]))
+
+    on = [r for r in rows if r[4] == "ON"]
+    print("검사 %d개 · 오염 %d개 (그중 ON %d)" % (total, len(rows), len(on)))
+    by = {}
+    for r in rows:
+        by[r[3]] = by.get(r[3], 0) + 1
+    for k in sorted(by, key=lambda x: -by[x]):
+        print("   %-16s %4d" % (k, by[k]))
+    for r in on[:20]:
+        print("   ON  %-14s %-22s %s" % (r[3], r[2][:20], r[1][:32]))
+    if len(on) > 20:
+        print("   ... 외 %d건" % (len(on) - 20))
+
+    out = args.csv
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    with io.open(out, "w", encoding="utf-8-sig", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["키워드 ID", "키워드", "광고그룹 이름", "사유", "현재상태"])
+        for r in rows:
+            w.writerow(list(r))
+    print("")
+    print("CSV: %s" % os.path.normpath(out))
+    print("끄려면: python tools/naver-sa/sa.py off --csv \"%s\" --live" % os.path.normpath(out))
+    print("⚠️ OFF 는 되돌릴 수 있다. 삭제하지 않는다.")
+
+
 # ─────────────────────────────────────────────── off (R3-1)
 
 OFF_CSV = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -964,7 +1116,15 @@ def main():
     o.add_argument("--live", action="store_true", help="없으면 대상 목록만 출력하고 아무것도 바꾸지 않는다")
     o.add_argument("--csv", default=OFF_CSV, help="중단 대상 CSV 경로")
     o.set_defaults(fn=cmd_off)
-    args = p.parse_args(); args.fn(args)
+    sc = s.add_parser("scan", help="계정에 나가 있는 키워드를 조각·법인명·slug형으로 훑는다(읽기 전용)")
+    sc.add_argument("--csv", default=SCAN_CSV, help="산출 CSV 경로 (off 가 그대로 먹는 양식)")
+    sc.set_defaults(fn=cmd_scan)
+    for x in (a, o, r):
+        x.add_argument("--ignore-lockout", action="store_true", dest="ignore_lockout",
+                       help="록아웃 창 안에서도 실행한다 — 실행 사실이 로그에 남는다")
+    args = p.parse_args()
+    assert_lockout_clear(args)      # 계정에 «쓰기» 전 마지막 문
+    args.fn(args)
 
 
 if __name__ == "__main__":
