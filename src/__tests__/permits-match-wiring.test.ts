@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { confidenceOf, indexByDong, toSiteFact } from '@/app/api/cron/permits-match/route';
+import { confidenceOf, indexByDong, toColumnStatus, toSiteFact } from '@/app/api/cron/permits-match/route';
 import { judgeMatch, type PermitFact } from '@/lib/permits/match';
 
 /**
@@ -70,9 +70,22 @@ describe('PV-3b 배선 — 실측 케이스가 실제로 붙는가', () => {
     expect(v.siteId).toBeNull();
   });
 
-  it('confidence 어휘는 세 값뿐이다', () => {
+  // ⚠️ 2026-09-02 실측 사고 — 판정기 어휘와 «컬럼» 어휘가 다르다.
+  //    unmatched 1,190건의 UPDATE 가 CHECK 에 걸려 전량 거부됐는데 에러를 안 봐서
+  //    「후보 없음 1,190」으로 보고까지 됐다. 행은 pending 그대로였다.
+  it('판정기 unmatched 는 컬럼에서 no_target 이다', () => {
+    expect(toColumnStatus('unmatched')).toBe('no_target');
+    expect(toColumnStatus('matched')).toBe('matched');
+    expect(toColumnStatus('review')).toBe('review');
+  });
+
+  it('confidence 는 CHECK 가 허용하는 낱말만 쓴다 — low 는 없는 말이다', () => {
+    const allowed = ['rumor', 'estimated', 'confirmed', 'verified', 'conflicting'];
+    for (const sc of [1, 0.95, 0.9, 0.85, 0.8, 0.4, 0]) {
+      expect(allowed).toContain(confidenceOf(sc));
+    }
     expect(confidenceOf(1)).toBe('verified');
-    expect(confidenceOf(0.85)).toBe('estimated');
-    expect(confidenceOf(0.4)).toBe('low');
+    expect(confidenceOf(0.9)).toBe('confirmed');
+    expect(confidenceOf(0.8)).toBe('estimated');
   });
 });

@@ -56,11 +56,29 @@ export function toSiteFact(r: SiteRow): SiteFact {
   };
 }
 
-/** score → match_confidence. ⚠️ 어휘는 D6 의 5값 중 세 개만 쓴다. */
-export function confidenceOf(score: number): 'verified' | 'estimated' | 'low' {
+/**
+ * score → `match_confidence`.
+ * ⚠️ 어휘는 «컬럼이» 정한다. `apt_permits_match_confidence_chk` 가 허용하는 것은
+ *    rumor·estimated·confirmed·verified·conflicting 뿐이다. 여기서 'low' 같은 새 낱말을
+ *    만들면 CHECK 가 거부하고, 그 거부가 조용하면 아무 일도 안 일어난 것처럼 보인다.
+ */
+export function confidenceOf(score: number): 'verified' | 'confirmed' | 'estimated' {
   if (score >= 0.95) return 'verified';
-  if (score >= 0.8) return 'estimated';
-  return 'low';
+  if (score >= 0.85) return 'confirmed';
+  return 'estimated';
+}
+
+/**
+ * 판정기 어휘 → 컬럼 어휘. **두 어휘가 다르다.**
+ * 판정기는 `unmatched` 를 쓰고, 컬럼은 `pending|matched|review|rejected|no_target` 만 받는다.
+ *
+ * ⚠️ 2026-09-02 1회전에서 이것이 실제로 터졌다. `unmatched` 1,190건의 UPDATE 가 CHECK 에
+ *    걸려 전부 거부됐는데 **에러를 안 보고 있어서** 「후보 없음 1,190」이라고 응답까지 하고
+ *    행은 `pending` 그대로였다. 그 결과 매시 훅이 같은 1,155건을 영원히 다시 판정한다.
+ *    침묵 성공은 이 리포가 반복해서 잡아 온 결함형이다(R1 「0카드를 성공으로 적지 않는다」).
+ */
+export function toColumnStatus(s: 'matched' | 'review' | 'unmatched'): string {
+  return s === 'unmatched' ? 'no_target' : s;
 }
 
 /** 법정동 이름 → 그 동의 사이트들. 후보를 여기서 좁힌다 — 전수 비교는 오매칭의 온상이다. */
@@ -102,6 +120,8 @@ async function handler(req: NextRequest) {
   const byMethod: Record<string, number> = {};
   const samples: Array<Record<string, unknown>> = [];
   let processed = 0, stoppedBy: string | null = null;
+  let writeFails = 0;
+  let firstWriteError: string | null = null;
 
   for (const p of (permits ?? []) as Array<Record<string, any>>) {
     if (Date.now() - started > TIME_BUDGET_MS) { stoppedBy = 'time_budget'; break; }
@@ -130,8 +150,8 @@ async function handler(req: NextRequest) {
     }
 
     if (!dry) {
-      await admin.from('apt_permits').update({
-        match_status: v.status,
+      const { error } = await admin.from('apt_permits').update({
+        match_status: toColumnStatus(v.status),
         // ⛔ 확정이 아니면 비워 둔다. 후보 id 는 note 에만 남는다.
         matched_site_id: v.status === 'matched' ? v.siteId : null,
         match_method: v.method,
@@ -139,6 +159,12 @@ async function handler(req: NextRequest) {
         match_note: note,
         matched_at: new Date().toISOString(),
       }).eq('id', p.id);
+      // ⛔ 쓰기 실패를 «세지 않으면» 판정만 하고 아무것도 안 바뀐 실행이 성공으로 보고된다.
+      if (error) {
+        writeFails++;
+        if (firstWriteError == null) firstWriteError = String(error.message ?? error).slice(0, 200);
+        continue;   // 세지 않은 것을 «처리했다» 고 세지 않는다
+      }
     }
     processed++;
   }
@@ -151,6 +177,8 @@ async function handler(req: NextRequest) {
     metadata: {
       dry, stopped_by: stoppedBy, sites_indexed: siteRows.length,
       dongs: idx.size, by_status: tally, by_method: byMethod,
+      // ⚠️ 0 이 아니면 그 실행은 «판정만» 하고 아무것도 못 바꾼 것이다.
+      write_fails: writeFails, first_write_error: firstWriteError,
       remaining_pending: dry ? remaining : Math.max((remaining ?? 0) - (dry ? 0 : 0), 0),
       samples, elapsed_ms: Date.now() - started,
     },

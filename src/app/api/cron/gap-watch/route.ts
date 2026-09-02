@@ -92,7 +92,7 @@ async function handler(req: NextRequest) {
   // ⚠️ 「미매칭 인허가」는 한 숫자로는 두 상태를 못 가른다 — «아직 안 봤다(pending)» 와
   //    «봤는데 붙을 현장이 없다(unmatched)» 는 할 일이 완전히 다르다(PV-3b / 신규 시드).
   const permitStatus: Record<string, number> = {};
-  for (const st of ['pending', 'review', 'unmatched']) {
+  for (const st of ['pending', 'review', 'no_target', 'rejected']) {
     permitStatus[st] = await count('apt_permits', (q: any) => q.eq('match_status', st));
   }
 
