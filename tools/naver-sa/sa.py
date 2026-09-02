@@ -106,6 +106,15 @@ ALIAS = {
  "에코델타시티 금강펜테리움 6BL": "에코델타시티 금강펜테리움",
 }
 
+# 생성기(generate_apt_name_variants_jsonb)와 «같은» 브랜드 목록. 「<한 글자> + 브랜드」가
+# CV-B ① 에서 지운 ⓑ형이다 — 「외 데시앙」·「남 포레나」·「중 더샵」.
+BRANDS = frozenset("""
+래미안 자이 힐스테이트 푸르지오 아크로 더샵 롯데캐슬 포레나 호반써밋 아이파크 두산위브 데시앙 비스타
+""".split())
+
+# 길이 필터 A안(§ SQL)과 「<한 글자>+브랜드」 판정이 «같은 목록» 을 쓴다.
+SA_BRAND_RE = "|".join(sorted(BRANDS, key=len, reverse=True))
+
 SQL = """
 SELECT slug, name, region, sigungu, total_units, content_score, builder, builder_normalized,
   CASE
@@ -133,10 +142,18 @@ WHERE is_active
   AND content_score >= 40
   AND name NOT LIKE '%%미분양'
   AND name !~ '임대|행복주택|사전청약|모집|공공분양|희망타운|분양전환|리츠|^[0-9]'
-  AND length(name) >= 6
+  -- 길이 필터 개정 A∪B (2026-09-02 Node 판정 `!`) — 9/6 첫 회전부터 적용.
+  --   A: 명시 «브랜드 토큰» 이 든 짧은 이름은 살린다 — 광안자이·남천자이·엘시티더샵·
+  --      래미안장전·거제더샵·물금자이·삼산자이·중산자이·명륜자이·두산위브 …
+  --   B: 300세대 이상은 살린다 — 라엘에스(1,073)·정촌올리움(794)·더폴 우정(316).
+  -- ⚠️ 토큰은 «명시 목록만» 이다. 1차 정규식에 「리버」 같은 일반어를 넣었더니 윤성리버티류가
+  --    오탐됐다 — 「개발·공사」 꼬리 사고와 같은 함정이다. 목록에 없는 새 브랜드는
+  --    B(세대수)가 받는다.
+  AND (length(name) >= 6 OR coalesce(total_units, 0) >= 300 OR name ~ '__BRAND_RE__')
   AND region IS NOT NULL
 ORDER BY region, cat, content_score DESC, coalesce(total_units,0) DESC
 """
+SQL = SQL.replace("__BRAND_RE__", SA_BRAND_RE)
 
 
 # ─────────────────────────────────────────────── 소재 문구
@@ -830,9 +847,14 @@ def cmd_rollback(args):
 #    광고 쪽 변수를 0으로 두어야 한다. 록아웃은 게으름이 아니라 «측정 설계» 다.
 # ⚠️ 날짜를 코드 바깥(캘린더)에 두는 이유: 창을 여는 것도 «의도한 행위» 로 남기기 위해서다.
 #    급해서 --ignore-lockout 을 붙인 실행은 로그에 그 사실이 크게 남는다.
+# ⚠️ 해제 기준은 «달력이 아니라 판독 종결» 이다(2026-09-02 판정). 날짜가 지났다고 저절로
+#    열리는 것이 아니라, 이 순서를 밟는다:
+#      9/6 오전 PL-B′ 판독(`scan` — 읽기라 창 안에서도 된다)
+#        → 중단점 PL-B′ 회신 → «그 판정 커밋에» 아래 표의 해제 한 줄을 동봉 → 같은 날 첫 회전.
+#    끝 날짜를 미리 줄이는 커밋은 금지다 — 판독 없이 창을 여는 셈이 된다.
 LOCKOUTS = [
     ("2026-09-03", "2026-09-06",
-     "PL-B′ 측정 창 — 9/2 CV-A 본실행 지표 관측. 첫 sa-sync 회전은 이 창을 «닫은 뒤» 돈다"),
+     "PL-B′ 측정 창 — 9/2 CV-A 본실행 지표 관측. 해제는 9/6 판독 종결 커밋으로만 한다"),
 ]
 
 # 계정을 바꾸는 명령. 읽기(plan·verify·scan)는 록아웃과 무관하다.
@@ -874,12 +896,6 @@ SCAN_CSV = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                         "..", "..", "docs", "m6", "CVB_광고_조각법인명_스캔.csv")
 
 # 붙여쓴 키워드에서도 살아남는 회사 신호. 네이버가 공백을 지워도 「두산건설」은 남는다.
-# 생성기(generate_apt_name_variants_jsonb)와 «같은» 브랜드 목록. 「<한 글자> + 브랜드」가
-# CV-B ① 에서 지운 ⓑ형이다 — 「외 데시앙」·「남 포레나」·「중 더샵」.
-BRANDS = frozenset("""
-래미안 자이 힐스테이트 푸르지오 아크로 더샵 롯데캐슬 포레나 호반써밋 아이파크 두산위브 데시앙 비스타
-""".split())
-
 CORP_GLUED = re.compile(r"(주식회사|건설|이앤씨|산업개발|종합건설|토건|주택공사|도시공사)")
 
 

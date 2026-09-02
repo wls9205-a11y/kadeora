@@ -27,6 +27,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { PRESALE_SOURCES, type PresaleSource } from '@/lib/builder-sites/presale-registry';
+import { BACKFILL_CARDS, BACKFILL_SOURCE, type DocCard } from '@/lib/presale/backfill';
 import { extractCards, fetchListHtml, type ExtractedCard } from '@/lib/presale/extract';
 import {
   adBlockedFor, isProvisional, judgeSupplyType, normName, provisionalSlug,
@@ -128,7 +129,11 @@ async function handler(req: NextRequest) {
   const admin = getSupabaseAdmin() as any;
   const net = tally();
 
-  const sources = PRESALE_SOURCES.filter((s) => !only || s.key === only);
+  // ⚠️ 문서 백필 소스는 «부를 때만» 돈다. 매일 도는 목록에 끼우면 같은 카드를 날마다
+  //    다시 판정하게 되고, 로그에서 진짜 신규가 묻힌다. (`?source=doc:PV_20260829`)
+  const sources = only === BACKFILL_SOURCE.key
+    ? [BACKFILL_SOURCE]
+    : PRESALE_SOURCES.filter((s) => !only || s.key === only);
   const decisions: Decision[] = [];
   const health: Array<Record<string, unknown>> = [];
   let seeded = 0;
@@ -141,23 +146,37 @@ async function handler(req: NextRequest) {
     //    신규 현장이 통째로 사라지는 것이 이 트랙이 고치려는 병이다.
     let cards: ExtractedCard[] = [];
     let outcome = 'ok', detail = '';
-    try {
-      const page = net.add(await fetchListHtml(src), `${src.key} fetch`);
-      if (page.kind !== 'ok' || !page.value) {
-        outcome = page.kind; detail = page.detail;
-      } else {
-        const ex = net.add(await extractCards(src, page.value, { modelOverride }), `${src.key} extract`);
-        if (ex.kind === 'ok' && ex.value) cards = ex.value;
-        else { outcome = ex.kind; detail = ex.detail; }
-      }
-    } catch (e) {
-      outcome = 'call_failed'; detail = String(e).slice(0, 120);
-    }
 
-    // ── R1 어댑터 부패 감시 ────────────────────────────────────────────────
-    // ⛔ 0카드를 «성공» 으로 적지 않는다. 침묵 성공이 이 트랙의 구조 결함 ③이다.
-    health.push({ source_key: src.key, cards: cards.length, outcome, detail });
-    if (!dry) await bumpHealth(admin, src, cards.length, outcome, detail);
+    // 문서 백필 — fetch·AI 추출을 타지 않는다. 카드가 이미 «검토된 목록» 이기 때문이다.
+    // ⛔ 그래도 뒤 문(matchSite·seedGate·seedSite·upsertCandidate)은 «똑같이» 지난다.
+    //    손 INSERT 를 두지 않는 이유가 그것이다 — 문이 하나여야 규칙이 하나다.
+    if (src.key === BACKFILL_SOURCE.key) {
+      // 문서 백필 — fetch·AI 추출을 타지 않는다. 카드가 이미 «검토된 목록» 이라서다.
+      // ⛔ 뒤 문(matchSite·seedGate·seedSite·upsertCandidate)은 «똑같이» 지난다.
+      //    손 INSERT 를 두지 않는 이유가 그것이다 — 문이 하나여야 규칙이 하나다.
+      // ⚠️ health 에 적지 않는다. 그 표는 «어댑터가 썩었는가» 를 보는 곳이고,
+      //    문서 소스에는 어댑터가 없다. 0카드가 사고인 소스와 섞으면 표가 거짓말을 한다.
+      cards = BACKFILL_CARDS;
+      outcome = 'doc';
+    } else {
+      try {
+        const page = net.add(await fetchListHtml(src), `${src.key} fetch`);
+        if (page.kind !== 'ok' || !page.value) {
+          outcome = page.kind; detail = page.detail;
+        } else {
+          const ex = net.add(await extractCards(src, page.value, { modelOverride }), `${src.key} extract`);
+          if (ex.kind === 'ok' && ex.value) cards = ex.value;
+          else { outcome = ex.kind; detail = ex.detail; }
+        }
+      } catch (e) {
+        outcome = 'call_failed'; detail = String(e).slice(0, 120);
+      }
+
+      // ── R1 어댑터 부패 감시 ──────────────────────────────────────────────
+      // ⛔ 0카드를 «성공» 으로 적지 않는다. 침묵 성공이 이 트랙의 구조 결함 ③이다.
+      health.push({ source_key: src.key, cards: cards.length, outcome, detail });
+      if (!dry) await bumpHealth(admin, src, cards.length, outcome, detail);
+    }
     if (cards.length === 0) continue;
 
     // 매칭 풀 — 시군구(없으면 시도)로 좁힌다. 전수 비교는 오매칭의 온상이다.
@@ -180,8 +199,13 @@ async function handler(req: NextRequest) {
         resolution = 'matched';
         note = `기존 현장에 붙음 (${method})`;
       } else {
+        const hold = (card as DocCard).holdReason;
         const gate = seedGate(card);
-        if (!gate.seed) {
+        if (hold) {
+          // ⚠️ 게이트를 통과하더라도 «앉히지 않는다». 근거 등급이 낮다고 사람이 판정한 카드다.
+          //    「없다」가 아니라 「아직 앉히지 않는다」를 표에 남기는 것이 목적이다.
+          note = `보류 — ${hold}`;
+        } else if (!gate.seed) {
           note = gate.reason;
         } else if (seeded >= SEED_CAP) {
           note = `시드 상한 ${SEED_CAP} 도달 — 다음 실행으로 이월`;

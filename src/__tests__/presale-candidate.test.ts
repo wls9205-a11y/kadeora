@@ -6,6 +6,7 @@ import {
 } from '@/lib/presale/candidate';
 import { htmlToText, validateCards } from '@/lib/presale/extract';
 import type { PresaleSource } from '@/lib/builder-sites/presale-registry';
+import { BACKFILL_CARDS, BACKFILL_SOURCE, type DocCard } from '@/lib/presale/backfill';
 
 const SRC: PresaleSource = {
   key: 'desian:presale', builder: '태영건설', brand: '데시앙',
@@ -237,5 +238,46 @@ describe('소스 내 동일 현장 힌트 (CV-B ③)', () => {
 
   it('이름이 같은 카드(중복 행)는 짝으로 세지 않는다', () => {
     expect(isSameSiteHint({ ...dsn }, { ...dsn, region: null })).toBe(false);
+  });
+});
+
+describe('CV-B 백필 목록 (doc:PV_20260829)', () => {
+  const seedable = BACKFILL_CARDS.filter((c) => !c.holdReason);
+  const held = BACKFILL_CARDS.filter((c) => c.holdReason);
+
+  it('시드 후보는 전부 seedGate 를 통과한다 — 통과 못 할 카드를 목록에 두지 않는다', () => {
+    for (const c of seedable) {
+      const g = seedGate(c);
+      expect(`${c.rawName}: ${g.reason}`).toBe(`${c.rawName}: `);
+    }
+  });
+
+  it('시드 후보의 출처는 «행 하나» 로 돌아간다 — permits 는 #pk, 보도는 기사 URL', () => {
+    for (const c of seedable) {
+      expect(c.sourceUrl).toMatch(/^https:\/\//);
+      if (c.sourceUrl.includes('apis.data.go.kr')) {
+        expect(c.sourceUrl).toContain('#pk=');
+        expect(c.sourceUrl).not.toContain('serviceKey');  // 키는 기록에 남기지 않는다
+      }
+    }
+  });
+
+  it('보류 카드는 전부 사유를 들고 있다 — 「없다」가 아니라 「아직 앉히지 않는다」', () => {
+    expect(held.length).toBeGreaterThan(0);
+    for (const c of held) expect(c.holdReason && c.holdReason.length > 5).toBe(true);
+  });
+
+  it('리치벨트는 목록에 없다 — 현장이 아니라 지역 용어다(2026-09-02 철회)', () => {
+    expect(BACKFILL_CARDS.some((c) => c.rawName.includes('리치벨트'))).toBe(false);
+  });
+
+  it('밀양 나노융합 유승한내들은 «보류» 다 — apt_permits 에 밀양 행이 없다', () => {
+    const m = BACKFILL_CARDS.find((c: DocCard) => c.rawName.includes('밀양'));
+    expect(m?.holdReason).toBeTruthy();
+  });
+
+  it('소스는 fetch 대상이 아니다 — 카드가 코드에 있고 listUrl 은 근거 표식이다', () => {
+    expect(BACKFILL_SOURCE.key).toBe('doc:PV_20260829');
+    expect(BACKFILL_CARDS.length).toBeGreaterThan(20);
   });
 });

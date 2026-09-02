@@ -96,6 +96,35 @@ export interface PermitQuery {
   numOfRows?: number;
 }
 
+/**
+ * 인허가 «한 행» 으로 돌아가는 주소. `apt_permits.source_url` 에 그대로 들어간다.
+ *
+ * ⚠️ 실측(2026-09-02): 이 컬럼이 1,465행 «전부 NULL» 이었다. 컬럼은 있는데 채우는 코드가
+ *    없던 자리다 — CV-B 백필이 「원본으로 돌아갈 수 없는 값은 앉히지 않는다」(seedGate)에
+ *    걸려 멈추면서 드러났다.
+ * ⚠️ serviceKey 는 «넣지 않는다». 주소는 기록이지 호출이 아니고, 키는 기록에 남기지 않는다.
+ * ⚠️ 택지 블록(platGbCd=2)은 bun·ji 가 0000 이라 지번으로 좁혀지지 않는다. 그 경우에도
+ *    행을 특정할 수 있도록 관리대장 PK 를 «프래그먼트» 로 붙인다 — 요청에는 영향이 없고
+ *    사람이 그 행을 집어낼 수 있다.
+ */
+export function permitRecordUrl(
+  track: PermitTrack,
+  item: Record<string, string>,
+  requested?: { sigunguCd?: string; bjdongCd?: string },
+): string | null {
+  const spec = PERMIT_TRACKS[track];
+  const sigunguCd = item.sigunguCd || requested?.sigunguCd;
+  if (!sigunguCd) return null;
+  const q = new URLSearchParams({ sigunguCd });
+  const bjdongCd = item.bjdongCd || requested?.bjdongCd;
+  if (bjdongCd) q.set('bjdongCd', bjdongCd);
+  if (item.platGbCd) q.set('platGbCd', item.platGbCd);
+  if (item.bun) q.set('bun', item.bun);
+  if (item.ji) q.set('ji', item.ji);
+  const pk = item.mgmHsrgstPk || item.mgmBldrgstPk || '';
+  return `${BASE}/${spec.service}/${spec.operation}?${q.toString()}${pk ? `#pk=${pk}` : ''}`;
+}
+
 export function buildPermitUrl(track: PermitTrack, key: string, q: PermitQuery): string {
   const spec = PERMIT_TRACKS[track];
   return buildDataGoKrUrl(`${BASE}/${spec.service}/${spec.operation}`, key, {
@@ -226,6 +255,8 @@ export function toPermitInsert(
   return {
     source: spec.source,
     source_key: pk,
+    // 원본 «행» 으로 돌아가는 주소. 이게 비면 그 행은 시드 근거가 되지 못한다(seedGate).
+    source_url: permitRecordUrl(track, item, requested),
     raw: item,
     sido: region?.region ?? null,
     sigungu: region?.sigungu ?? null,
