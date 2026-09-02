@@ -1,0 +1,55 @@
+-- CV-B ①-2 — 구형 고아 생성기 제거 (2026-09-02)
+--
+-- ⛔ 되돌림 경로는 «이 파일뿐» 이다. DROP 하면 DB 에서 소스가 사라지므로 원문 전체를
+--    아래에 보존한다. 되살리려면 주석 블록을 그대로 실행하면 된다.
+--
+-- ── 왜 지우는가 ────────────────────────────────────────────────────────────
+-- name_variants 를 만드는 함수가 «둘» 이었다:
+--   · generate_apt_name_variants_jsonb  — 정본. trg_apt_sites_auto_variants 가 부른다.
+--   · generate_apt_name_variants        — 구형. 트리거 미부착 · 호출처 0 (DB·리포·삼중 확인).
+-- 구형이 만드는 것이 지금까지 나온 오염 3종과 정확히 일치한다:
+--   · `sigungu || ' ' || builder`  → 「동구 (주)태영건설」·「사하구 두산건설(주)」
+--       실측: 광고 대상 2,004건 중 1,899건이 짧은순 상위 4 안(부울경 307현장·2순위 547).
+--       sa.py `alias_is_corp()` 가 «내보내기» 를 막았지만, 만드는 쪽이 남아 있으면 재발한다.
+--   · `replace(name,' ','-')`      → 「더-팰리스트-데시앙」. R3 가 132건 지운 slug 키워드의 유입구.
+--   · 이름의 모든 토큰             → 「데시앙」·「팰리스트」. PL-A ① 이 끈 브랜드 단독.
+-- EXECUTE 권한이 postgres·service_role 뿐이라 외부 RPC 로는 못 부른다(Node 확인). 즉 위험은
+-- «바깥» 이 아니라 관리자·크론 코드의 오발이다 — 그래서 보관 가치가 0이고, 지우는 것이 맞다.
+-- 이중 생산자 금지 원칙(§4-1)의 첫 적용이다.
+--
+-- ── 되돌림용 원문 (2026-09-02 pg_get_functiondef 그대로) ────────────────────
+-- CREATE OR REPLACE FUNCTION public.generate_apt_name_variants(
+--   p_name text, p_region text, p_sigungu text, p_dong text, p_builder text)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  IMMUTABLE
+--  SET search_path TO 'public', 'pg_temp'
+-- AS $function$
+-- DECLARE
+--   v_variants TEXT[] := ARRAY[]::TEXT[];
+--   v_words TEXT[];
+-- BEGIN
+--   IF p_name IS NULL THEN RETURN '[]'::jsonb; END IF;
+--   v_variants := array_append(v_variants, p_name);
+--   v_variants := array_append(v_variants, replace(p_name, ' ', ''));
+--   v_variants := array_append(v_variants, regexp_replace(p_name, ' ', '-', 'g'));
+--   v_words := string_to_array(p_name, ' ');
+--   IF array_length(v_words, 1) > 1 THEN v_variants := v_variants || v_words; END IF;
+--   IF p_builder IS NOT NULL AND p_dong IS NOT NULL THEN
+--     v_variants := array_append(v_variants, p_dong || ' ' || p_builder);
+--     v_variants := array_append(v_variants, p_builder || ' ' || p_dong);
+--   END IF;
+--   IF p_sigungu IS NOT NULL AND p_builder IS NOT NULL THEN
+--     v_variants := array_append(v_variants, p_sigungu || ' ' || p_builder);
+--   END IF;
+--   RETURN to_jsonb(ARRAY(
+--     SELECT DISTINCT v FROM unnest(v_variants) v WHERE v IS NOT NULL AND length(v) > 1
+--   ));
+-- END $function$;
+
+DROP FUNCTION IF EXISTS public.generate_apt_name_variants(text, text, text, text, text);
+
+-- 확인: 남은 생성기는 하나여야 한다.
+--   SELECT proname FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+--    WHERE n.nspname = 'public' AND proname LIKE 'generate_apt_name_variants%';
+--   → generate_apt_name_variants_jsonb (1행)

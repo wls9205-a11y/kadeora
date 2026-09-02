@@ -286,9 +286,12 @@ INSERT/UPDATE OF name·sigungu·dong·builder) → `apt_sites_auto_variants()` �
 | `trg_apt_active_change` | AFTER UPD (is_active) | `log_apt_active_change` | 로그 |
 | `trg_apt_change_log` | AFTER UPD (전 컬럼) | `fn_log_apt_change` | 변경 로그 |
 
-⚠️ 대장은 트리거만이 아니다. `name_variants` 를 만드는 **함수가 둘** 이었다 —
-`generate_apt_name_variants_jsonb`(정본, 트리거가 부름) 와
-`generate_apt_name_variants`(**구형·고아**, 부르는 곳 0). §8 참조.
+⚠️ 대장은 트리거만이 아니다. `name_variants` 를 만드는 **함수가 둘이었고, 이제 하나다** —
+`generate_apt_name_variants_jsonb`(정본, 트리거가 부름). 구형 고아
+`generate_apt_name_variants`(트리거 미부착·호출처 0·EXECUTE 는 postgres/service_role 뿐)는
+**2026-09-02 DROP** 했다. 되돌림용 원문은
+`supabase/migrations/cvb1_2_drop_legacy_variants_fn_2026-09-02.sql` 주석에 통째로 있다 —
+DROP 하면 DB 에 소스가 남지 않으므로 그 파일이 **유일한** 되돌림 경로다. §8 참조.
 
 ### 8. CV-B ①-2 — 시공사 법인명 별칭 (2026-09-02, 가드 반영 / 데이터 정리 대기)
 
@@ -313,9 +316,12 @@ INSERT/UPDATE OF name·sigungu·dong·builder) → `apt_sites_auto_variants()` �
 | `replace(name,' ','-')` | 「더-팰리스트-데시앙」 — R3 가 132건 지운 **slug 형태 키워드** 의 유입 경로 |
 | 이름의 **모든 토큰** | 「데시앙」·「팰리스트」 — PL-A ① 이 끈 브랜드 단독 |
 
-⛔ **고아지만 살아 있는 총이다** — 누가 부르면 세 오염이 한꺼번에 재발한다.
-DROP 판단은 Node 몫(§4-1 대장 원칙의 첫 적용). 마이그레이션은 `DROP FUNCTION public.
-generate_apt_name_variants(text,text,text,text,text);` 한 줄이면 된다.
+⛔ **고아지만 살아 있는 총이었다** — 누가 부르면 세 오염이 한꺼번에 재발한다.
+Node 삼중 검증(트리거 참조 0 · DB 호출 0 · 리포 호출 0 + EXECUTE 권한이 postgres·
+service_role 뿐이라 외부 RPC 불가) 후 **DROP 승인·집행 완료**(2026-09-02). 위험은 바깥이
+아니라 관리자·크론 코드의 오발이었고, 보관 가치가 0이라 남길 이유가 없었다.
+⚠️ 집행은 채팅에서 DDL 을 치지 않고 **마이그레이션 경로**로 했다 — §4-3 을 세운 날
+그 원칙을 깨지 않기 위해서다. 남은 생성기가 하나임을 사후 확인했다.
 
 **가드(9/6 전 필수) 반영 완료** — `sa.py name_pool()` 에 `alias_is_corp()` 문을 달았다.
 판정 신호는 «법인 표기» 뿐이다: `(주)·㈜·주식회사·유한회사·외 N개(업체)·… 등` 원문 검사
