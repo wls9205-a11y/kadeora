@@ -19,6 +19,8 @@
  * ── 실행 ────────────────────────────────────────────────────────────────────
  *   ?dry=1                    추출·매칭·판정까지. DB 에 «아무것도 쓰지 않는다»
  *   ?source=desian:presale    소스 하나만
+ *   ?model=claude-sonnet-5    섀도 평가 — «같은 입력» 을 다른 모델에 태워 판정 일치율을 잰다.
+ *                             ⚠️ `dry=1` 과 함께 쓴다. 허용 목록 밖 값은 기본 모델로 접힌다
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -88,6 +90,13 @@ function namesOf(s: SiteRow): string[] {
  * ⛔ «부분 문자열로 붙이지 않는다» — 느슨한 이름 매칭이 「문수로대공원 에일린의 뜰」을
  *    「그랑라크」로 잡았던 것이 그 사고다. 정확 일치(정규화 후) 또는 「같은 동 + 같은 지번」만이다.
  * ⛔ 후보가 2건 이상이면 «고르지 않는다»(a5 의 「2건 이상이면 null」). 큐로 보낸다.
+ *
+ * ⚠️ 주소축의 «알려진 한계» — 같은 현장이 지번을 둘 쓴다.
+ *    실측(2026-09-02 Node 교차검증): 「서면 어반센트 데시앙」은 공식 모델하우스
+ *    사업개요가 «부암동 705-1», 언론·분양자료가 «부암동 690-8» 을 쓴다. 둘 다 실재하는
+ *    표기다. 지번 정확일치는 이 쌍을 «못 붙인다» — 그래도 느슨하게 풀지 않는다.
+ *    지번을 느슨히 보면 서로 다른 필지가 같은 현장으로 붙는다(택지지구가 특히 그렇다).
+ *    이 형태는 이름축이 잡거나, 아니면 큐에서 사람이 본다. 그것이 옳은 실패다.
  */
 function matchSite(card: ExtractedCard, pool: SiteRow[]): { site: SiteRow | null; method: MatchMethod } {
   const key = normName(stripProvisional(card.rawName));
@@ -113,6 +122,8 @@ async function handler(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const dry = sp.get('dry') === '1';
   const only = sp.get('source');
+  // 섀도 평가(Node 판정 ②). 허용 목록 밖 값은 extract 쪽에서 기본 모델로 접힌다.
+  const modelOverride = sp.get('model');
   const started = Date.now();
   const admin = getSupabaseAdmin() as any;
   const net = tally();
@@ -135,7 +146,7 @@ async function handler(req: NextRequest) {
       if (page.kind !== 'ok' || !page.value) {
         outcome = page.kind; detail = page.detail;
       } else {
-        const ex = net.add(await extractCards(src, page.value), `${src.key} extract`);
+        const ex = net.add(await extractCards(src, page.value, { modelOverride }), `${src.key} extract`);
         if (ex.kind === 'ok' && ex.value) cards = ex.value;
         else { outcome = ex.kind; detail = ex.detail; }
       }
@@ -215,6 +226,7 @@ async function handler(req: NextRequest) {
     processed: decisions.length,
     details: {
       dry,
+      model_override: modelOverride,
       sources: sources.length,
       health,
       seeded,

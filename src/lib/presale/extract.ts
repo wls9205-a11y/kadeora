@@ -18,6 +18,7 @@
  *    그날 다른 19개 소스의 신규 현장이 통째로 사라진다.
  */
 import { badJson, callFailed, fetchJson, noResult, ok, type Outcome } from '@/lib/net/outcome';
+import { logAnthropicUsage } from '@/lib/llm/usage-tracker';
 import { canonicalBuilder, parseUnits } from '@/lib/verify/builders';
 import { parseAddress } from '@/lib/builder-sites/parse';
 import type { PresaleSource } from '@/lib/builder-sites/presale-registry';
@@ -26,10 +27,24 @@ import type { CandidateFact } from './candidate';
 /**
  * ⚠️ 추출 정확도가 이 트랙의 «단일 경로» 다 — 여기서 놓친 현장은 아래 어느 단계도
  *    복구해 주지 않는다. 그래서 싼 모델로 내리지 않았다.
- *    비용이 문제가 되면 Node 가 판단할 자리이지 여기서 조용히 내릴 자리가 아니다.
- *    (참고: 소스 20개 × 1콜/일 규모다.)
+ *
+ * ⛔ 다만 «감으로 유지하지도 않는다»(Node 판정 ②). 셋을 건다:
+ *    ① 콜당 입력 상한 — 태그를 걷어낸 본문 텍스트로 추리고 MAX_INPUT_CHARS 로 자른다
+ *    ② 실사용량 실측 — 콜마다 `llm_usage_logs` 에 토큰을 남긴다. 첫 주 비용은
+ *       추정이 아니라 이 표에서 나온다
+ *    ③ 섀도 평가 — `modelOverride` 로 «같은 입력» 을 다른 모델에 태워 판정 일치율을
+ *       잰다(CV-B). 일치율이 기준을 넘으면 그때 «데이터로» 내린다
  */
 const MODEL = 'claude-opus-5';
+/** 섀도 평가용 허용 목록. ⛔ 임의 문자열을 모델 이름으로 흘려보내지 않는다. */
+const ALLOWED_MODELS = new Set([MODEL, 'claude-sonnet-5', 'claude-haiku-4-5-20251001']);
+/**
+ * 콜당 입력 상한(문자).
+ * ⚠️ 실측 근거: 태영 목록 3장이 태그 포함 17.5~22KB 이고, htmlToText 를 거치면
+ *    그 1/5 수준이다. 40,000자는 «그보다 훨씬 큰 목록도 통째로» 들어가면서
+ *    한 소스가 폭주해도 콜 하나의 비용이 예측 가능한 선이다.
+ */
+const MAX_INPUT_CHARS = 40_000;
 const UA = 'Mozilla/5.0 (compatible; kadeora-bot)';
 
 /** AI 가 뱉는 카드 한 장. ⚠️ 여기 없는 필드는 «검증에서 버린다». */
@@ -170,39 +185,67 @@ export function validateCards(arr: unknown, src: PresaleSource): ExtractedCard[]
  * 목록 텍스트 → 카드 배열. 실패는 «세 갈래로» 돌려준다(PV-5).
  * ⚠️ 자격 부재(401·403 포함)는 call_failed 가 아니다 — 재시도해도 같다.
  */
-export async function extractCards(src: PresaleSource, html: string): Promise<Outcome<ExtractedCard[]>> {
+export async function extractCards(
+  src: PresaleSource,
+  html: string,
+  opts: { modelOverride?: string | null } = {},
+): Promise<Outcome<ExtractedCard[]>> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return badJson<ExtractedCard[]>(0, 'ANTHROPIC 자격 없음');
 
   const text = htmlToText(html);
   if (text.length < 100) return noResult<ExtractedCard[]>(200, `본문 텍스트 ${text.length}자`);
 
+  // ⚠️ 허용 목록에 없는 값은 «조용히 기본 모델로 접는다». 오타 하나로 콜이
+  //    통째로 400 이 되면 그날 그 소스의 신규 현장이 사라진다.
+  const model = opts.modelOverride && ALLOWED_MODELS.has(opts.modelOverride) ? opts.modelOverride : MODEL;
+  const body = text.slice(0, MAX_INPUT_CHARS);
+
   const user = `시공사: ${src.builder} (브랜드 ${src.brand})
 목록 성격: ${src.kind}
 목록 URL: ${src.listUrl}
 
 페이지 본문:
-${text.slice(0, 40_000)}`;
+${body}`;
 
-  const call = await fetchJson<string>(
+  const started = Date.now();
+  // ⚠️ 응답 «전체» 를 받는다. text 만 뽑으면 usage 가 같이 버려지고,
+  //    그러면 첫 주 비용을 «추정» 으로만 말하게 된다(Node 판정 ②).
+  const call = await fetchJson<any>(
     'https://api.anthropic.com/v1/messages',
     {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
-        model: MODEL,
+        model,
         max_tokens: 4000,
         system: SYSTEM,
         messages: [{ role: 'user', content: user }],
       }),
     },
-    { timeoutMs: 90_000, retries: 1, pick: (j: any) => j?.content?.find((b: any) => b?.type === 'text')?.text ?? null },
+    { timeoutMs: 90_000, retries: 1 },
   );
+
+  logAnthropicUsage({
+    cron_name: 'builder-presale-crawl',
+    model,
+    usage: call.kind === 'ok' ? call.value?.usage : null,
+    duration_ms: Date.now() - started,
+    status: call.kind === 'ok' ? 'success' : 'error',
+    error_code: call.kind === 'ok' ? null : `${call.kind}:${call.status}`,
+    metadata: { source_key: src.key, kind: src.kind, input_chars: body.length, truncated: text.length > MAX_INPUT_CHARS },
+  });
+
   if (call.kind !== 'ok' || !call.value) return { ...call, value: null } as Outcome<ExtractedCard[]>;
 
-  const m = call.value.match(/\[[\s\S]*\]/);
+  const raw = call.value?.content?.find((b: any) => b?.type === 'text')?.text;
+  if (typeof raw !== 'string' || !raw) {
+    return noResult<ExtractedCard[]>(call.status, 'text 블록 없음');
+  }
+
+  const m = raw.match(/\[[\s\S]*\]/);
   // ⚠️ 「배열이 없다」는 호출 실패가 아니라 «읽을 수 없는 응답» 이다. 재시도해도 같다.
-  if (!m) return badJson<ExtractedCard[]>(call.status, `배열 없음: ${call.value.slice(0, 80)}`);
+  if (!m) return badJson<ExtractedCard[]>(call.status, `배열 없음: ${raw.slice(0, 80)}`);
 
   let parsed: unknown;
   try { parsed = JSON.parse(m[0]); }
