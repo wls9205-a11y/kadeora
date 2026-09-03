@@ -9,7 +9,7 @@
  *    슬러그 이름을 둘 두지 못한다(빌드가 죽는다). 지시서가 요구한 «주소» 는 /apt/unsold/{시도}
  *    이고 그 주소는 이 파일로 그대로 낼 수 있다. 갈림은 REGIONS 정확일치 하나뿐이고,
  *    시도명은 Number() 로 NaN 이라 옛 경로와 겹치지 않는다.
- * ⚠️ 가드는 REGIONS «상수 자체» 를 본다(지역 목록을 여기에 다시 적지 않는다 — Rule #67).
+ * ⚠️ 가드는 REGIONS «상수 자체» 를 본다 — 지역 목록을 여기에 다시 적지 않는다.
  */
 import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
@@ -25,13 +25,16 @@ import { SITE_URL } from '@/lib/constants';
 
 interface Props { params: Promise<{ id: string }> }
 
-/* ⛔ 이 라우트를 «정적으로 굽지 않는다» — generateStaticParams·revalidate 를 두지 않는다.
+/* ⛔ 이 라우트에 스트리밍 경계(loading.tsx)를 두지 않는다 — 그리고 정적으로도 굽지 않는다.
  *
- *    2026-09-03 실측: 정적 렌더로 돌리자 옛 숫자 id 의 permanentRedirect 가 서버 308 이 아니라
- *    «meta refresh + 200» 으로 나갔다(/apt/unsold/20 → content="0;url=/apt/경산-상방공원…").
- *    소프트 리다이렉트는 색인 이전 신호가 아니다 — 옛 주소가 들고 있던 것을 잃는다.
- *    지역 허브의 조회 비용은 아래 unstable_cache(1시간) 가 맡는다. 캐시는 페이지가 아니라
- *    «조회» 에 건다. */
+ *    2026-09-03 실측: 옛 숫자 id 의 permanentRedirect 가 서버 308 이 아니라 «meta refresh + 200»
+ *    으로 나가고 있었다(/apt/unsold/20 → content="0;url=/apt/경산-상방공원…").
+ *    ⚠️ 처음엔 내가 단 generateStaticParams·revalidate 탓으로 봤는데, 그것을 걷어내도 200 이었다.
+ *       기전은 «셸을 먼저 흘려보내는 것» 이다 — 이 폴더에 loading.tsx 가 있어 응답 헤더가
+ *       이미 나간 뒤라 Next 가 상태코드를 못 바꾸고 소프트 리다이렉트로 떨어뜨린다.
+ *       같은 이유로 notFound() 도 404 가 아니라 200 으로 나간다(앱 전역 동일 증상).
+ *    ⛔ 소프트 리다이렉트는 색인 이전 신호가 아니다. 스켈레톤 한 장과 바꾸지 않는다.
+ *    조회 비용은 페이지가 아니라 «조회» 에 건다 — 아래 unstable_cache(1시간). */
 
 const isRegion = (v: string): boolean => (REGIONS as readonly string[]).includes(v);
 
@@ -66,7 +69,9 @@ const fetchUnsoldCached = unstable_cache(fetchUnsoldUncached, ['apt-unsold-regio
 
 /**
  * ⚠️ 실패(null)를 «한 시간 굳히지» 않는다. 캐시가 null 을 돌려주면 한 번 더 직접 친다 —
- *    getAptHub 이 s269c 회귀(빈 페이지 영구화, Rule #66) 뒤에 쓰는 것과 같은 형태다.
+ *    getAptHub 이 s269c 「빈 페이지가 캐시에 영구화」 회귀 뒤에 쓰는 것과 같은 형태다.
+ *    ⚠️ 저장소 곳곳이 이 패턴을 「Rule #66」이라 부르지만 «그 번호는 등재된 적이 없다»
+ *       (docs/RULES.md·ARCHITECTURE_RULES.md 둘 다 0건, 2026-09-03 확인). 번호로 부르지 않는다.
  * ⚠️ 바깥의 cache() 는 «한 요청 안» 중복 호출(generateMetadata + 본문)을 접는다.
  */
 const fetchRegionUnsold = cache(async (region: string): Promise<any[] | null> => {
