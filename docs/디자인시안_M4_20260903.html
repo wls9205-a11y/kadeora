@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>디자인시안 M4 — 메인 4화면 컴팩트 리뉴얼 (v2 확정, 2026-09-03)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+/* ============================================================
+   시안 M4 v2 — 판정 종결(9/3 "좋아 이렇게 진행해보자")
+   해석 계층: Node 지시 > 지시서+증분 > 저장소 기확정 표준 > 시안 시각 언어 > 시안 데이터(예시=무효)
+   시안 hex → 의도 토큰 매핑 (CC는 실토큰으로 치환, 신설 금지):
+     #0B2A6B  마스트·네이비 면        → --brand-navy 계열
+     #123A8F  네이비 보조 면          → 브랜드 그라디언트 중간값 재사용
+     #FFC53D  골드(룰·배지·활성 언더라인) → --brand-gold 계열 (골드 "텍스트"는 네이비 위에서만)
+     #1E40AF  강조 텍스트·링크        → --brand-dark
+     #EAEEF4  섹션 8px 밴드           → 페이지 배경(--surface/page) 계열 실토큰 — 매핑 실측 후 확정
+     #0F172A/#111827 제목·수치        → --text-primary 계열
+     #6B7280/#8A94A6 보조 메타        → --text-secondary/tertiary 계열
+   숫자·단지·종목·글 제목은 9/3 라이브 예시 — 정본은 실물 데이터.
+   ============================================================ */
+:root{--navy:#0B2A6B;--navy2:#123A8F;--gold:#FFC53D;--bdark:#1E40AF;--band:#EAEEF4;--t1:#0F172A;--t2:#111827;--m1:#6B7280;--m2:#8A94A6;--m3:#9AA3B2;--line:#EEF1F6;--bd:#E5E9F0;--up:#B91C1C;--dn:#1D4ED8}
+*{box-sizing:border-box;margin:0}
+body{font-family:Pretendard,-apple-system,sans-serif;background:#DDE3EC;padding:28px 20px;color:var(--t1)}
+h1{font-size:17px;font-weight:700;margin-bottom:4px}
+.note{font-size:12px;color:#3C4658;max-width:900px;line-height:1.6;margin-bottom:20px}
+.stage{display:flex;gap:22px;overflow-x:auto;align-items:flex-start;padding-bottom:16px}
+.frame{flex:none;width:376px;background:#F5F7FA;border:1px solid #B9C2D0;border-radius:20px;overflow:hidden}
+.fcap{font-size:12px;font-weight:600;color:#3C4658;margin:0 0 8px 4px}
+.mast{background:var(--navy);border-bottom:2px solid var(--gold);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.mast .ttl{color:#fff;font-size:15px;font-weight:600;letter-spacing:.02em}
+.mast .eng{color:var(--gold);font-size:11px;letter-spacing:.14em;font-family:ui-monospace,monospace}
+.mast .sub{margin-top:4px;font-size:11.5px;color:#C7D2E5}
+.mast .sub b{font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.mast.col{display:block}
+.mast.col .top{display:flex;justify-content:space-between;align-items:center}
+.ic-s{width:18px;height:18px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round}
+.band{height:8px;background:var(--band)}
+.sec{background:#fff;padding:16px}
+.eyebrow{font-size:11px;letter-spacing:.14em;color:var(--m1);font-family:ui-monospace,monospace}
+.h{font-size:16px;font-weight:600;color:var(--t1);margin-top:3px}
+.h .meta{font-weight:400;font-size:12px;color:var(--m2)}
+.rule{width:22px;height:3px;background:var(--gold);margin:7px 0 2px}
+.row{display:flex;justify-content:space-between;align-items:center;min-height:46px;border-bottom:.5px solid var(--line)}
+.row:last-of-type{border-bottom:none}
+.rt{font-size:14px;font-weight:600;color:var(--t2)}
+.rm{margin-top:2px;font-size:11.5px;color:var(--m1)}
+.rm b{font-weight:600}
+.num{font-size:14px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;white-space:nowrap}
+.num small{font-size:11px;font-weight:500;color:var(--m1)}
+.numk{font-size:15px;font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums;white-space:nowrap}
+.numk small{font-size:11px;font-weight:500;color:var(--m2);margin-left:3px}
+.bdg{display:inline-block;font-size:11px;font-weight:600;border-radius:4px;padding:2px 7px;margin-right:7px}
+.bdg.blue{color:var(--bdark);background:#E8EEFB}
+.bdg.violet{color:#5B21B6;background:#F1ECFB}
+.bdg.amber{color:#7A5208;background:#FCEFD0;font-weight:700;font-variant-numeric:tabular-nums}
+.bdg.gold{color:#3F2E00;background:var(--gold);font-weight:700}
+.chip{display:inline-block;font-size:12px;font-weight:500;color:var(--navy);border:.5px solid #C7D2E5;border-radius:999px;padding:5px 11px;white-space:nowrap}
+.glabel{margin:10px 0 3px;font-size:12px;font-weight:700;letter-spacing:.02em}
+.link{margin-top:10px;font-size:12.5px;font-weight:500;color:var(--bdark)}
+.foot{margin-top:9px;font-size:11px;color:var(--m3)}
+.center{text-align:center}
+.tabs{background:#fff;display:flex;gap:2px;padding:0 10px;border-bottom:.5px solid var(--bd)}
+.tab{min-height:44px;display:flex;align-items:center;gap:4px;padding:0 11px;font-size:14px;color:var(--m1)}
+.tab.on{font-weight:600;color:var(--navy);border-bottom:2px solid var(--gold)}
+.tab small{font-size:11px;color:var(--m3);font-variant-numeric:tabular-nums}
+.stat3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.stat4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
+.cell{background:#F5F7FA;border-radius:10px;padding:10px 12px}
+.cell.c{text-align:center;padding:8px 0}
+.cell .l{font-size:11px;color:var(--m1)}
+.cell .v{margin-top:3px;font-size:18px;font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums}
+.cell.c .v{font-size:16px;margin-top:0}
+.cell.c .l{margin-top:1px}
+.thumb{flex:none;border-radius:10px;background:var(--navy)}
+.spec{background:#fff;border:1px solid #B9C2D0;border-radius:14px;padding:18px 20px;max-width:900px;margin-top:8px;font-size:12.5px;line-height:1.7;color:#26303F}
+.spec b{font-weight:700}
+</style>
+</head>
+<body>
+
+<h1>디자인시안 M4 — 메인 4화면 컴팩트 리뉴얼 <span style="font-weight:400;color:#5A6472">(v2 확정 · 2026-09-03)</span></h1>
+<p class="note">판정 종결: Q1ⓐ 공고전 행 · Q2ⓐ 게이트 제거 · Q3 홈 신설 2건 가 · Q4ⓐ 피처드 부동산 우선 · Q5ⓐ 홈 링크그리드 제거 · Q6ⓐ 보류 · Q7 가 + 블로그 현장별 필터 제거 · 8px 밴드 · 골드 룰 섹션 기본 · 위계 600/700. 이 파일의 숫자·목록은 예시이며 정본은 실물 데이터(관통 원칙).</p>
+
+<div class="stage">
+
+<!-- ============ 홈 ============ -->
+<div>
+<p class="fcap">① 홈 / — 검색 스테이지 + 지표 3분할 + 공고 전 승격</p>
+<div class="frame">
+  <div class="mast"><span class="ttl">카더라</span><span class="eng">KADEORA</span></div>
+
+  <div class="sec" style="padding:22px 16px 18px">
+    <p style="font-size:20px;line-height:1.32;font-weight:700;margin-bottom:14px">아직 시작 안 한 현장까지<br>분양 소식을 가장 먼저</p>
+    <div style="display:flex;align-items:center;gap:8px;height:54px;border:1.5px solid var(--navy);border-radius:12px;padding:0 14px;background:#fff">
+      <svg class="ic-s" style="stroke:var(--navy)" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <span style="font-size:14px;color:var(--m2)">단지명·지역·시공사로 검색</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:10px;overflow:hidden">
+      <span style="font-size:11px;font-weight:600;color:#4B5563;flex:none">지금 계약 가능</span>
+      <span class="chip">엄궁역 트라비스 하늘채</span><span class="chip">두산위브 대연</span>
+    </div>
+    <p class="foot" style="margin-top:12px;color:var(--m2)">현장 <b style="font-weight:600;color:#4B5563">1,467곳</b> · 분석 <b style="font-weight:600;color:#4B5563">8,773편</b></p>
+  </div>
+
+  <div class="band"></div>
+
+  <div class="sec" style="padding:14px 16px">
+    <div class="stat3">
+      <div class="cell"><p class="l">이번 주 실거래</p><p class="v">790<span style="font-size:11px;font-weight:600;color:var(--up);margin-left:4px">▲57%</span></p></div>
+      <div class="cell"><p class="l">공고 전</p><p class="v">400<span style="font-size:12px;font-weight:500;color:var(--m1)">곳</span></p></div>
+      <div class="cell"><p class="l">접수중</p><p class="v">14<span style="font-size:12px;font-weight:500;color:var(--m1)">곳</span></p></div>
+    </div>
+    <p class="foot" style="margin:8px 2px 0">국토부 신고 기준 · 최신 9/1 · 지연 반영 8/30 집계</p>
+  </div>
+
+  <div class="band"></div>
+
+  <div class="sec">
+    <p class="eyebrow">PIPELINE — 공고 전</p>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:3px"><span class="h" style="margin:0">공고 전 현장</span><span class="bdg gold" style="font-size:10.5px;margin:0">카더라 단독</span></div>
+    <div class="rule" style="margin-bottom:4px"></div>
+    <div class="row"><div><span class="bdg blue">착공</span><span class="rt">엄궁3 재개발</span><p class="rm">부산 사상구 · 포스코이앤씨</p></div><span class="num">1,305<small>세대</small></span></div>
+    <div class="row"><div><span class="bdg blue">착공</span><span class="rt">대연3 재개발</span><p class="rm">부산 남구 · 롯데건설, HDC</p></div><span class="num">4,488<small>세대</small></span></div>
+    <div class="row"><div><span class="bdg violet">조합설립</span><span class="rt">부산 망미 재건축</span><p class="rm">부산 수영구</p></div><span class="num">2,600<small>세대</small></span></div>
+    <p class="link">공고 전 400곳 전체 — 진행 단계순 →</p>
+  </div>
+
+  <div class="band"></div>
+
+  <div class="sec">
+    <p class="eyebrow">APT — 최근 갱신</p><p class="h">최근 움직인 현장</p><div class="rule" style="margin-bottom:4px"></div>
+    <div class="row"><div><span class="rt">포레나힐스테이트 진주</span><p class="rm">발표 대기 → <b style="color:var(--bdark)">당첨자 발표</b> · 9/1</p></div><span style="font-size:13px;font-weight:600;color:#374151;font-variant-numeric:tabular-nums">398세대</span></div>
+    <div class="row"><div><span class="rt">거제역 양우내안애 아시아드</span><p class="rm">착공 → <b style="color:#0F766E">입주중</b> · 9/1</p></div><span style="font-size:13px;font-weight:600;color:#374151;font-variant-numeric:tabular-nums">168세대</span></div>
+    <p class="foot center">… 7행</p>
+  </div>
+
+  <div class="band"></div>
+
+  <div class="sec">
+    <p class="eyebrow">APT — 정비사업</p><p class="h">재개발·재건축</p><div class="rule" style="margin-bottom:4px"></div>
+    <div class="row"><div><span class="bdg blue">착공</span><span class="rt">금정산 하늘채 루미엘</span><p class="rm">부산 장전동</p></div><span class="num">213<small>세대</small></span></div>
+    <p class="foot center">… 5행</p>
+  </div>
+
+  <div class="band"></div>
+
+  <div class="sec">
+    <p class="eyebrow">REGION — 지역별</p><p class="h">지역별 보기</p><div class="rule" style="margin-bottom:6px"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip">부산 <b style="font-variant-numeric:tabular-nums">833</b></span><span class="chip">울산 <b style="font-variant-numeric:tabular-nums">200</b></span><span class="chip">경남 <b style="font-variant-numeric:tabular-nums">434</b></span></div>
+  </div>
+
+  <div class="band"></div>
+
+  <div class="sec" style="padding-bottom:20px">
+    <p class="eyebrow">BLOG — 부동산</p><p class="h">분석 최신</p><div class="rule" style="margin-bottom:4px"></div>
+    <div class="row" style="min-height:44px"><span class="rt" style="font-weight:500">방배 재건축 단지 분석</span><span class="foot" style="margin:0;font-variant-numeric:tabular-nums">9.2</span></div>
+    <div class="row" style="min-height:44px"><span class="rt" style="font-weight:500">성수 재개발 사업 총정리</span><span class="foot" style="margin:0;font-variant-numeric:tabular-nums">9.2</span></div>
+    <p class="foot center" style="margin-top:6px">링크 그리드 없음 — 푸터 네비로 일원화(Q5ⓐ)</p>
+  </div>
+</div>
+</div>
+
+<!-- ============ 부동산 ============ -->
+<div>
+<p class="fcap">② 부동산 /apt — 10+→6섹션 · 청약 단일화(상태 그룹)</p>
+<div class="frame">
+  <div class="mast col"><div class="top"><span class="ttl">부동산</span><svg class="ic-s" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><p class="sub">전국 <b>6,256곳</b> · 상태 → 마감 임박 순</p></div>
+
+  <div class="sec" style="padding:12px 16px 14px">
+    <button style="width:100%;min-height:46px;display:flex;justify-content:space-between;align-items:center;border:1px solid #B9C6DD;border-radius:10px;padding:0 14px;background:#fff;font-size:14px;font-weight:600;color:var(--t1);font-family:inherit">전국 — 지역을 골라 보세요 <span style="color:var(--m1)">⌄</span></button>
+    <div class="stat4" style="margin-top:10px">
+      <div class="cell c"><p class="v">208</p><p class="l">분양예정</p></div>
+      <div class="cell c"><p class="v">96</p><p class="l">분양중</p></div>
+      <div class="cell c"><p class="v">41</p><p class="l">선착순</p></div>
+      <div class="cell c"><p class="v">733</p><p class="l">재개발</p></div>
+    </div>
+  </div>
+
+  <div class="band"></div>
+
+  <div class="sec" style="padding:14px 0 14px 16px">
+    <div style="display:flex;gap:10px;overflow:hidden">
+      <div style="flex:none;width:268px;border:.5px solid var(--bd);border-radius:12px;overflow:hidden">
+        <div style="background:var(--navy);height:100px;padding:12px 14px;position:relative">
+          <span class="bdg gold" style="position:absolute;top:10px;left:12px;margin:0">D-5 접수중</span>
+          <p style="margin-top:36px;color:#fff;font-size:14.5px;font-weight:700;line-height:1.3">성남복정2 A1블록<br>신혼희망타운</p>
+        </div>
+        <div style="padding:9px 14px;border-top:2px solid var(--gold);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:11.5px;color:var(--m1)">경기 · <b style="font-weight:700;color:var(--t1)">594세대</b></span>
+          <span style="font-size:11.5px;font-weight:600;color:var(--bdark)">알림받기</span>
+        </div>
+      </div>
+      <div style="flex:none;width:66px;border:.5px solid var(--bd);border-radius:12px 0 0 12px;border-right:none;background:var(--navy2);opacity:.5"></div>
+    </div>
+  </div>
+
+  <div class="band"></div>
+
+  <div class="sec">
+    <p class="eyebrow">FEATURED — 청약</p><p class="h">청약 일정 · 결과</p><div class="rule"></div>
+    <p class="glabel" style="color:var(--navy)">접수중 · 임박 <span style="font-variant-numeric:tabular-nums">5</span></p>
+    <div class="row"><div><span class="bdg amber">D-Day</span><span class="rt">세종 우미 린 센터파크</span><p class="rm">세종 · 우미건설</p></div><span class="num">676<small>세대</small></span></div>
+    <div class="row" style="border-bottom:.5px solid var(--line)"><div><span class="bdg amber">D-1</span><span class="rt">한강 푸르지오 리버프론트</span><p class="rm">경기 · 대우건설</p></div><span class="num">2,432<small>세대</small></span></div>
+    <p class="glabel" style="color:#4B5563">발표대기 <span style="font-variant-numeric:tabular-nums">2</span></p>
+    <div class="row" style="border-bottom:.5px solid var(--line)"><div><span class="rt">시티오씨엘 9단지 오션파크뷰</span><p class="rm">인천 · 9/2 마감 · <b style="color:var(--bdark)">발표 D-5</b></p></div><span class="num">1,949<small>세대</small></span></div>
+    <p class="glabel" style="color:#4B5563">계약중 <span style="font-variant-numeric:tabular-nums">12</span></p>
+    <div class="row"><div><span class="rt">상동역 롯데캐슬 시그니처</span><p class="rm">경기 · 롯데건설</p></div><span class="num">1,859<small>세대</small></span></div>
+    <p class="link">지난 공고 더보기 — 경쟁률·가점컷 연도별 →</p>
+    <p class="foot">타임라인·이번 주 결과·이번 주 움직인 섹션은 이 목록에 흡수 — 별도 렌더 금지</p>
+  </div>
+
+  <div class="band"></div>
+
+  <div class="sec">
+    <p class="eyebrow">PIPELINE — 공고 전</p><p class="h">공고 전 현장 <span class="meta">362곳 · 진행 단계순</span></p><div class="rule" style="margin-bottom:4px"></div>
+    <div class="row" style="min-height:48px;gap:10px;justify-content:flex-start"><div class="thumb" style="width:40px;height:40px"></div><div style="flex:1"><span class="rt">우동2 재개발</span><p class="rm">착공 · 부산 · 삼한종합건설</p></div><span class="num" style="font-size:12.5px">660<small>세대</small></span></div>
+    <div class="row" style="min-height:48px;gap:10px;justify-content:flex-start"><div class="thumb" style="width:40px;height:40px;background:var(--navy2)"></div><div style="flex:1"><span class="rt">광안2 재개발</span><p class="rm">착공 · 부산 · SK건설</p></div><span class="num" style="font-size:12.5px">1,237<small>세대</small></span></div>
+    <p class="foot center">카드 그리드 → 행+40px 썸네일(Q1ⓐ)</p>
+  </div>
+
+  <div class="band"></div>
+
+  <div class="sec" style="padding-bottom:20px">
+    <p class="eyebrow">GICHUK — 기축 실거래</p><p class="h">최근 거래된 기축 단지</p><div class="rule" style="margin-bottom:4px"></div>
+    <div class="row"><div><span class="rt">레이카운티</span><p class="rm">부산 연제구 · 146건 · 최근 8/23</p></div><span class="numk">10.4억<small>85㎡</small></span></div>
+    <div class="row"><div><span class="rt">양정 포레힐즈 스위첸</span><p class="rm">부산진구 · 55건 · 최근 8/28</p></div><span class="numk">7.5억<small>85㎡</small></span></div>
+    <p class="foot">국토부 신고 기준 · 최다 거래 평형 고정 평균</p>
+    <p class="foot">본문 관련분석·바로가기 없음 — 데스크탑 레일 일원화, 모바일 종단 축약 1회(Q7)</p>
+  </div>
+</div>
+</div>
+
+<!-- ============ 주식 ============ -->
+<div>
+<p class="fcap">③ 주식 /stock — 게이트 제거 · 행 정규화 · 지수 제외</p>
+<div class="frame">
+  <div class="mast col"><div class="top"><span class="ttl">주식</span><svg class="ic-s" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><p class="sub">분양 시장을 움직이는 숫자까지 한 화면에</p></div>
+
+  <div class="tabs"><span class="tab on">이슈</span><span class="tab">시총</span><span class="tab">급등</span><span class="tab">급락</span><span class="tab">외인</span><span class="tab">관심</span></div>
+
+  <div class="sec" style="padding:6px 16px 12px">
+    <div class="row" style="min-height:47px;gap:11px;justify-content:flex-start">
+      <span style="flex:none;width:26px;font-size:13px;font-weight:600;color:var(--navy);font-family:ui-monospace,monospace;font-variant-numeric:tabular-nums">49</span>
+      <div style="flex:1;min-width:0"><span class="rt">MongoDB</span><p class="rm" style="font-size:11px;color:var(--m2)">NASDAQ · IT · 등락폭</p></div>
+      <div style="text-align:right"><p class="numk">375.4</p><p style="font-size:12px;font-weight:600;color:var(--dn);font-variant-numeric:tabular-nums">-13.54%</p></div>
+    </div>
+    <div class="row" style="min-height:47px;gap:11px;justify-content:flex-start">
+      <span style="flex:none;width:26px;font-size:13px;font-weight:600;color:var(--navy);font-family:ui-monospace,monospace;font-variant-numeric:tabular-nums">49</span>
+      <div style="flex:1;min-width:0"><span class="rt">AST스페이스모바일</span><p class="rm" style="font-size:11px;color:var(--m2)">NASDAQ · 우주 · 등락폭</p></div>
+      <div style="text-align:right"><p class="numk">62.4</p><p style="font-size:12px;font-weight:600;color:var(--up);font-variant-numeric:tabular-nums">+11.83%</p></div>
+    </div>
+    <div class="row" style="min-height:47px;gap:11px;justify-content:flex-start">
+      <span style="flex:none;width:26px;font-size:13px;font-weight:600;color:var(--navy);font-family:ui-monospace,monospace;font-variant-numeric:tabular-nums">48</span>
+      <div style="flex:1;min-width:0"><span class="rt">페니트리움바이오</span><p class="rm" style="font-size:11px;color:var(--m2)">KOSDAQ · 바이오 · 신선도 · 댓글 3</p></div>
+      <div style="text-align:right"><p class="numk">5,200</p><p style="font-size:12px;font-weight:600;color:var(--up);font-variant-numeric:tabular-nums">+9.24%</p></div>
+    </div>
+    <p class="foot center" style="margin-top:8px">6~30위 게이트 카드 없이 연속(Q2ⓐ) · 태그는 사유 1개 · 댓글은 ≥1만 표기</p>
+  </div>
+
+  <div class="band"></div>
+
+  <div class="sec" style="padding-bottom:20px">
+    <p class="eyebrow">MARKET — 시총 상위</p><p class="h">시가총액 순위 <span class="meta">지수 제외</span></p><div class="rule" style="margin-bottom:2px"></div>
+    <div class="row" style="min-height:42px;gap:10px;justify-content:flex-start"><span style="flex:none;width:18px;font-size:12.5px;font-weight:600;color:var(--m1);font-variant-numeric:tabular-nums">1</span><span style="flex:1;font-size:13.5px;font-weight:600;color:var(--t2)">삼성전자</span><span class="numk" style="font-size:14px">254,000</span><span style="width:58px;text-align:right;font-size:12px;font-weight:600;color:var(--up);font-variant-numeric:tabular-nums">+1.40%</span></div>
+    <div class="row" style="min-height:42px;gap:10px;justify-content:flex-start"><span style="flex:none;width:18px;font-size:12.5px;font-weight:600;color:var(--m1);font-variant-numeric:tabular-nums">2</span><span style="flex:1;font-size:13.5px;font-weight:600;color:var(--t2)">SK하이닉스</span><span class="numk" style="font-size:14px">1,642,000</span><span style="width:58px;text-align:right;font-size:12px;font-weight:600;color:var(--up);font-variant-numeric:tabular-nums">+1.80%</span></div>
+    <p class="link">시총 전체 보기 →</p>
+    <p class="foot">KOSPI_IDX·KOSDAQ_IDX는 종목 정렬에서 제외 — 지수 수집 크론 신설 금지 불변</p>
+  </div>
+</div>
+</div>
+
+<!-- ============ 블로그 ============ -->
+<div>
+<p class="fcap">④ 블로그 /blog — 현장별 필터 제거 · 무절단 목록</p>
+<div class="frame">
+  <div class="mast col"><div class="top"><span class="ttl">블로그</span><svg class="ic-s" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><p class="sub">매일 업데이트되는 투자 인사이트 · <b>8,773편</b></p></div>
+
+  <div class="tabs"><span class="tab on">전체</span><span class="tab">부동산 <small>5,529</small></span><span class="tab">주식</span><span class="tab">재테크</span><span class="tab">시리즈</span></div>
+
+  <div class="sec" style="padding:12px 16px 14px">
+    <div style="border:.5px solid var(--bd);border-radius:12px;overflow:hidden">
+      <div style="background:var(--navy);padding:14px;border-bottom:2px solid var(--gold)">
+        <span style="font-size:11px;color:var(--gold);letter-spacing:.14em;font-family:ui-monospace,monospace">FEATURED — 부동산</span>
+        <p style="margin-top:6px;color:#fff;font-size:15.5px;font-weight:700;line-height:1.38">목동 14개 단지 재건축 총정리 (2026)</p>
+        <p style="margin-top:6px;color:#C7D2E5;font-size:11.5px">9.1 · 읽는 시간 18분</p>
+      </div>
+    </div>
+    <p class="foot">현장별 필터 없음(Node 9/3) · 피처드는 부동산 최신 우선(Q4ⓐ)</p>
+  </div>
+
+  <div class="band"></div>
+
+  <div class="sec" style="padding:12px 16px 10px">
+    <p class="eyebrow">LATEST — 최신 글</p><div class="rule" style="margin-bottom:2px"></div>
+    <div class="row" style="min-height:64px;gap:11px;justify-content:flex-start"><div class="thumb" style="width:56px;height:56px;border-bottom:2px solid var(--gold)"></div><div style="flex:1;min-width:0"><span style="font-size:11px;font-weight:700;color:var(--bdark)">부동산</span><p class="rt" style="margin-top:2px;line-height:1.35">방배 재건축 단지 분석</p><p class="rm" style="font-size:11px;color:var(--m2);font-variant-numeric:tabular-nums">9.2</p></div></div>
+    <div class="row" style="min-height:64px;gap:11px;justify-content:flex-start"><div class="thumb" style="width:56px;height:56px;background:var(--navy2);border-bottom:2px solid var(--gold)"></div><div style="flex:1;min-width:0"><span style="font-size:11px;font-weight:700;color:var(--bdark)">부동산</span><p class="rt" style="margin-top:2px;line-height:1.35">성수 재개발 사업 총정리</p><p class="rm" style="font-size:11px;color:var(--m2);font-variant-numeric:tabular-nums">9.2</p></div></div>
+    <div class="row" style="min-height:47px"><div style="min-width:0"><span style="font-size:11px;font-weight:700;color:var(--m1)">주식</span><p style="margin-top:1px;font-size:14px;font-weight:500;color:#1F2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">미국증시 급등에 코스피 반등 · 9월 심층분석</p></div><span class="foot" style="margin:0 0 0 10px;flex:none">오늘</span></div>
+    <div class="row" style="min-height:47px"><div style="min-width:0"><span style="font-size:11px;font-weight:700;color:var(--bdark)">부동산</span><p style="margin-top:1px;font-size:14px;font-weight:500;color:#1F2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">상도역롯데캐슬파크엘 18.9억 신고가 분석</p></div><span class="foot" style="margin:0 0 0 10px;flex:none;font-variant-numeric:tabular-nums">9.2</span></div>
+    <p class="foot center" style="margin-top:7px">썸네일은 상위 2건만(V4-3 유지) · 30행 삽입물 없이 연속 · 「다음 페이지 미리보기」 삭제</p>
+  </div>
+
+  <div class="band"></div>
+
+  <div class="sec" style="padding:14px 16px 20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;border:.5px solid var(--bd);border-radius:10px;padding:11px 13px">
+      <div><p style="font-size:13px;font-weight:700">매일 투자 분석 받아보기</p><p class="rm" style="font-size:11px;color:var(--m2)">가입하면 전체 글 무제한 · 알림 무료</p></div>
+      <span style="flex:none;font-size:12.5px;font-weight:600;color:#fff;background:var(--navy);border-radius:8px;padding:8px 15px">가입</span>
+    </div>
+    <p class="foot" style="margin-top:11px;font-size:11.5px;color:var(--m1)">시리즈 — <b style="color:#374151">청약 일정·분석 2,666</b> · 실거래가 2,104 · 미분양 675</p>
+    <p class="foot">가입 배너·시리즈는 목록 종단 1회 — 목록 중간 삽입 금지</p>
+  </div>
+</div>
+</div>
+
+</div>
+
+<div class="spec">
+<b>공통 확정 스펙</b> — ①섹션 = 흰 블록, 사이 8px 밴드(#EAEEF4는 근사치 — 페이지 배경 실토큰으로 매핑, 신설 금지) ②섹션 제목 = eyebrow 모노 + 제목 600 + 골드 룰 22×3px(텍스트 신호 동반 필수 — 골드 단독 신호 금지) ③위계 = 행 제목·단지명 600 / 핵심 수치(가격·세대수·현재가·D-day) 700 캡 / 보조 메타 한 톤 하강 / 본문 400→500(TY2 흡수) ④행 = 인터랙티브 44px+ · 정보 40px · tabular-nums 전역 ⑤이모지 0 ⑥조건부는 조건부(댓글 0·카운트 0 미표기) ⑦카피=동작(거짓 게이트 금지) ⑧더보기 = 목록 바닥 문장형 SectionLink. 활성 탭 = 네이비 600 + 골드 2px 언더라인(뷰 전환 전용), 칩 = 필터(기확정 의미론 불변).
+</div>
+
+</body>
+</html>
