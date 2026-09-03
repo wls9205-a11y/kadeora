@@ -359,24 +359,36 @@ export default async function BlogPage({ searchParams }: Props) {
 
   /* H5-3 — 첫 카드 승격. 1페이지·검색 아닐 때만. 목록의 머리를 그대로 쓴다. */
   const canPromote = pageNum === 1 && !q && (posts ?? []).length > 0;
-  /* M4-2(Q4ⓐ) — 승격은 «부동산 최신 1건» 이 먼저다.
-   * ⚠️ 주식 자동발행이 최신순 머리를 늘 차지해 부동산 80% 방침과 역행하는 자리였다.
-   *    이미 받은 목록(지역·카테고리 반영)에서 부동산 첫 글을 고르고, 없으면 머리로 폴백한다.
-   * ⛔ 별도 조회를 만들지 않는다. */
-  const promotedIdx = canPromote
-    ? (() => {
-        const arr = (posts ?? []) as any[];
-        /* ⚠️ 실측 정정 — 「realestate」는 «탭 키» 이고 blog_posts.category 에는 없는 값이다.
-           실 카테고리는 apt·unsold·redev·stock·finance·general 이라(2026-09-03 DB 확인)
-           탭 키로 비교하면 «영원히 못 찾는 조건» 이 된다. CAT_GROUPS 를 정본으로 쓴다. */
-        const RE = CAT_GROUPS.realestate;
-        const k = arr.findIndex((x) => RE.includes(String(x?.category)));
-        return k >= 0 ? k : 0;
+  /* M4-2(Q4ⓐ) — 피처드는 «부동산 최신 1건» 이 먼저다.
+   * ⚠️ 목록 안에서 고르면 규칙이 발동하지 않는다 — 실측(2026-09-03): 최신 30편이 주식 21·재테크 8·
+   *    일반 1 로 부동산 «0편» 이었다. 자동발행이 머리를 통째로 채우는 날이 잦다.
+   *    그래서 그 한 건은 «직접» 집는다(1행 조회). 없으면 목록 머리로 폴백한다.
+   * ⚠️ 그룹 판정은 뷰의 group_key 를 쓴다 — 프론트 CAT_GROUPS 는 탭 건수용 사본이라
+   *    DB 의 fn_blog_group 에 카테고리가 추가되면 그 글이 조용히 빠진다(C5 의 redev 287편 전례).
+   * ⚠️ 탭이 «전체» 일 때만 건다. 주식 탭 머리에 부동산 글을 세우지 않는다.
+   * ⛔ 실패해도 화면을 무너뜨리지 않는다 — 폴백이 곧 예전 동작이다. */
+  const promotedRe = canPromote && category === 'all'
+    ? await (async () => {
+        try {
+          let pq = (sb as any).from('v_blog_posts_listing')
+            .select('id, slug, title, excerpt, category, sub_category, tags, created_at, view_count, cover_image, image_alt, apt_region, apt_sigungu, published_at, read_minutes')
+            .eq('is_published', true)
+            .or(`published_at.is.null,published_at.lte.${now}`)
+            .eq('group_key', 'realestate');
+          if (region) pq = pq.eq('apt_region', region);
+          if (sgg) pq = pq.eq('apt_sigungu', sgg);
+          const { data, error } = await pq.order('created_at', { ascending: false }).limit(1).maybeSingle();
+          if (error) { console.error(`[blog] featured realestate: ${error.message?.slice(0, 160)}`); return null; }
+          return (data as any) ?? null;
+        } catch (e: any) {
+          console.error(`[blog] featured realestate caught: ${e?.message ?? String(e)}`);
+          return null;
+        }
       })()
-    : -1;
-  const promoted: any = promotedIdx >= 0 ? (posts as any[])[promotedIdx] : null;
-  const listPosts: any[] = promotedIdx >= 0
-    ? (posts as any[]).filter((_, k) => k !== promotedIdx)
+    : null;
+  const promoted: any = canPromote ? (promotedRe ?? (posts as any[])[0]) : null;
+  const listPosts: any[] = promoted
+    ? ((posts ?? []) as any[]).filter((x) => x.id !== promoted.id)
     : ((posts ?? []) as any[]);
 
   /* H5-3 — 구군 칩 건수. ⚠️ 배지는 «현장 수» 다(글 수 아님).
