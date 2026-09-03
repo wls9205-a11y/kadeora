@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { SITE_URL } from '@/lib/constants';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { REGIONS } from '@/lib/regions';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600;
@@ -35,6 +36,14 @@ export async function GET() {
     if (!CATEGORIES.includes(c.site_type)) continue;
     const loc = `${SITE_URL}/apt/region/${encodeURIComponent(c.region)}/${encodeURIComponent(c.sigungu)}/${encodeURIComponent(c.site_type)}`;
     urls.push(`<url><loc>${escapeXml(loc)}</loc><lastmod>${now}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`);
+  }
+
+  /* NV-2 — 시도 미분양 허브 17경로.
+     ⚠️ 0건 지역도 «등재한다». 색인 여부는 그 응답의 robots 가 말한다(0건이면 noindex, follow) —
+        사이트맵에서 빼 버리면 물량이 들어온 날에도 수집기가 다시 오지 않는다. */
+  for (const r of REGIONS) {
+    const loc = `${SITE_URL}/apt/unsold/${encodeURIComponent(r)}`;
+    urls.push(`<url><loc>${escapeXml(loc)}</loc><lastmod>${now}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>`);
   }
 
   const rankingSet = new Set<string>();

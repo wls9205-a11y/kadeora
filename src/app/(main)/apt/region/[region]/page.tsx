@@ -299,7 +299,7 @@ export default async function RegionLandingPage({ params }: Props) {
           ⛔ 문장에 숫자를 «쓰지» 않는다. 전부 조회 결과 변수다(하드코딩 금지). */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
         {"@type":"Question","name":`${decoded} 아파트 분양 일정은 어디서 확인하나요?`,"acceptedAnswer":{"@type":"Answer","text":`이 페이지에서 ${decoded} 아파트 분양·청약 일정을 매일 갱신합니다. 지금은 청약 ${data.subscriptions.length}건을 접수 일정·분양가와 함께 보고 있습니다.`}},
-        {"@type":"Question","name":`${decoded} 미분양·줍줍(무순위)은 어디서 보나요?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 미분양·선착순 현장 ${data.unsolds.length}건을 카더라 미분양 페이지(${SITE_URL}/apt/unsold)에서 잔여세대와 함께 확인할 수 있습니다.`}},
+        {"@type":"Question","name":`${decoded} 미분양·줍줍(무순위)은 어디서 보나요?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 미분양·선착순 현장 ${data.unsolds.length}건을 카더라 미분양 페이지(${SITE_URL}/apt/unsold/${encodeURIComponent(decoded)})에서 잔여세대와 함께 확인할 수 있습니다.`}},
         {"@type":"Question","name":`${decoded} 재개발 진행 단계는 어떻게 보나요?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 재개발·재건축 ${data.redevelopments.length}건의 조합설립·사업시행·관리처분 단계를 재개발 현황 페이지(${SITE_URL}/apt/redev)에서 단계별로 볼 수 있습니다.`}},
         {"@type":"Question","name":`${decoded} 실거래가는 어떻게 조회하나요?`,"acceptedAnswer":{"@type":"Answer","text":`카더라에서 ${decoded} 지역 아파트 실거래 ${data.transactions.length}건을 단지별·면적별로 조회할 수 있습니다.`}},
         {"@type":"Question","name":`${decoded} 모집공고는 어디서 확인하나요?`,"acceptedAnswer":{"@type":"Answer","text":`각 현장 상세 페이지에서 ${decoded} 아파트 입주자모집공고 요약과 분양 조건(분양가상한제·전매제한·거주의무), 평형별 공급 정보를 제공합니다.`}},
@@ -583,7 +583,7 @@ export default async function RegionLandingPage({ params }: Props) {
           <dt style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: 8 }}>{decoded} 미분양·줍줍(무순위)은 어디서 보나요?</dt>
           <dd style={{ margin: '2px 0 0' }}>
             {decoded} 미분양·선착순 현장 {data.unsolds.length}건을{' '}
-            <Link href="/apt/unsold" style={{ color: 'var(--brand)', fontWeight: 600 }}>미분양 페이지</Link>에서 잔여세대와 함께 볼 수 있습니다.
+            <Link href={`/apt/unsold/${encodeURIComponent(decoded)}`} style={{ color: 'var(--brand)', fontWeight: 600 }}>{decoded} 미분양 페이지</Link>에서 잔여세대와 함께 볼 수 있습니다.
           </dd>
           <dt style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: 8 }}>{decoded} 재개발 진행 단계는 어떻게 보나요?</dt>
           <dd style={{ margin: '2px 0 0' }}>

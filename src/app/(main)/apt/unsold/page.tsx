@@ -7,6 +7,8 @@ import { applySort } from '@/lib/apt/card-sort';
 import { AptCardGrid } from '@/components/apt/AptCardCompact';
 import type { AptSortKey } from '@/lib/apt/card-types';
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { REGIONS } from '@/lib/regions';
 import { SITE_URL } from '@/lib/constants';
 
 // s8: 메타데이터가 없어 루트 layout 기본값을 그대로 쓰고 있었다 — 제목·설명이
@@ -48,6 +50,28 @@ export default async function UnsoldPage({
         <AptListSorter category="unsold" defaultSort="newest" />
       </div>
       <AptCardGrid cards={(cards ?? []) as any} category="unsold" />
+
+      {/* NV-2 — 시도별 진입은 «경로형» 하나로 통일한다(?region= 쿼리형과 섞지 않는다).
+          ⚠️ 쿼리형 ?region= 은 뷰의 `region`(시군구·동) 축이라 시도명을 물리면 0건이 된다 —
+             사람이 치는 「부산 미분양」의 착지점은 경로형 쪽이다. */}
+      <nav aria-label="시도별 미분양">
+        <h2 className="text-sm font-bold" style={{ margin: '4px 0 8px' }}>시도별 미분양 아파트</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(88px, 1fr))', gap: 6 }}>
+          {REGIONS.map((r) => (
+            <Link
+              key={r}
+              href={`/apt/unsold/${encodeURIComponent(r)}`}
+              style={{
+                padding: '9px 10px', fontSize: 12, fontWeight: 600, textAlign: 'center', textDecoration: 'none',
+                color: 'var(--text-secondary)', background: 'var(--bg-surface)',
+                border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+              }}
+            >
+              {r} 미분양
+            </Link>
+          ))}
+        </div>
+      </nav>
     </div>
   );
 }
