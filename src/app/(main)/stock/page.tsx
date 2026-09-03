@@ -14,6 +14,7 @@ import StockTabCarousel from '@/components/carousel/StockTabCarousel';
 import CurationCarousel from '@/components/ui/CurationCarousel';
 import StockCurationCard from '@/components/stock/StockCurationCard';
 import StockListRow from '@/components/stock/StockListRow';
+import { SectionLink } from '@/components/apt/SectionHeader';
 import StockFilterBars from '@/components/stock/StockFilterBars';
 import StockIndexStrip, { type StripData, type MarketBreadth } from '@/components/stock/StockIndexStrip';
 import StockHubRail, { type MoverRow } from '@/components/stock/StockHubRail';
@@ -28,6 +29,9 @@ export const revalidate = 60;
 export const maxDuration = 10;
 
 const CAROUSEL_ENABLED = process.env.NEXT_PUBLIC_CAROUSEL_ENABLED === 'true';
+
+/** M4-1b — 탭 하나당 미리보기 행 수. 전체는 ?full=1 이 받는다. */
+const TAB_PREVIEW_ROWS = 10;
 
 const TAB_LABELS: { key: string; label: string }[] = [
   { key: 'issue',   label: '이슈' },
@@ -329,7 +333,7 @@ async function fetchForeign(
 export default async function StockPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; market?: string; sort?: string; theme?: string }>;
+  searchParams: Promise<{ tab?: string; market?: string; sort?: string; theme?: string; full?: string }>;
 }) {
   const sp = await searchParams;
   // v7-C1: ?market= ?sort= ?theme= 3축. 기존 ?tab= 은 sort 로 매핑해 계속 받는다
@@ -338,8 +342,13 @@ export default async function StockPage({
   const tab = (sp.tab ?? 'issue') as string;
 
   // s262 Phase E: CAROUSEL 모드 — 7 탭 모두 prefetch + Embla carousel
-  if (CAROUSEL_ENABLED) {
-    const allResults = await Promise.all(TAB_LABELS.map((t) => fetchByTab(t.key, 30)));
+  /* M4-1b — 탭은 «미리보기» 다. 각 뷰 10행 + 문장형 SectionLink.
+   * ⚠️ 「전체 보기」의 착지점을 새로 만들지 않는다 — 이 파일의 «기본 분기» 가 이미 전체 목록이다.
+   *    ?full=1 이면 캐러셀을 건너뛰고 그 분기로 간다(정렬은 ?sort= 가 그대로 판정).
+   * ⚠️ 30 → 10 은 판정 ④(증분11 §1). 순위표 화면이라 5 는 상위권만 보여 비교가 죽는다. */
+  const wantsFull = (sp.full ?? '') === '1';
+  if (CAROUSEL_ENABLED && !wantsFull) {
+    const allResults = await Promise.all(TAB_LABELS.map((t) => fetchByTab(t.key, TAB_PREVIEW_ROWS)));
     const initialIdx = Math.max(0, TAB_LABELS.findIndex((t) => t.key === tab));
     const issueRows = (allResults[0]?.rows ?? []) as StockIssueScore[];
     const itemListJsonLd = stockItemListJsonLd('이슈', issueRows.slice(0, 5));
@@ -366,10 +375,16 @@ export default async function StockPage({
                   {/* M4-1(Q2ⓐ): 6위 자리의 게이트 카드를 걷었다. 「로그인하면 30개」라 적었지만
                       6~30위는 로그인과 무관하게 전부 서버 렌더되고 있었다 — 카피가 동작과 달랐다. */}
                   {issues.map((s) => <StockIssueCardV2 key={s.symbol} data={s} />)}
+                  <SectionLink href={`/stock?sort=${t.key}&full=1`}>{t.label} 전체 보기</SectionLink>
                 </div>
               );
             }
-            return <PlainList key={t.key} rows={r.rows as StockRow[]} tab={t.key} />;
+            return (
+              <div key={t.key}>
+                <PlainList rows={r.rows as StockRow[]} tab={t.key} />
+                <SectionLink href={`/stock?sort=${t.key}&full=1`}>{t.label} 전체 보기</SectionLink>
+              </div>
+            );
           })}
         </StockTabCarousel>
       </div>
