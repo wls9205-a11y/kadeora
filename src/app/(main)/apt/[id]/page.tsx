@@ -1143,7 +1143,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
               {/* U-1a §7-1 — 분양예정시기. 「말한 만큼만」 말한다.
                   ⚠️ 한정어(「분양예정」)·출처·기준일·confidence 가 «함께» 가야 §7-1 이다.
                      D-2 로 기준일 컬럼이 생겼고, 이제 «넷이 안 모이면 줄을 내지 않는다» —
-                     판정은 salePeriodDisplay 가 하고 테스트로 잠겨 있다(Rule #116).
+                     판정은 salePeriodDisplay 가 하고 테스트로 잠겨 있다(RULES#143).
                   ⛔ 부분 표시를 하지 않는다. 출처와 등급만 붙은 시기는 「검증된 일정」으로
                      읽히는데, 기준일이 없으면 «언제 기준인지 모르는» 검증이 된다. */}
               {(() => {
@@ -1350,7 +1350,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
            ⛔ 지난 행을 지우지 않는다 — 지우면 일대기가 아니다. 완료 톤으로 남긴다.
            ⚠️ D-day 는 «도래 전 최근접 한 곳» 에만 붙는다. 여러 곳에 붙으면 어느 것이
               다음인지 화면이 말하지 못한다. 그 판정은 lib/apt/schedule.ts 가 하고
-              테스트로 잠겨 있다(Rule #116).
+              테스트로 잠겨 있다(RULES#143).
            ⚠️ 분양유형·분양가상한제는 «일정이 아니라 조건» 이라 여기 두지 않았다
               — 아래 시세·분양가 섹션으로 옮겼다. */}
       {schedule.length > 0 && (

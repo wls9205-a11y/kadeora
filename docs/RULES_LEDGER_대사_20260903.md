@@ -42,6 +42,37 @@
 
 ## 4. 발효된 인용 규율 (증분5 §3)
 
-- 인용은 **파일 접두**: `RULES#68` · `ARCH#107` · `DS_RULES#n`. 맨 번호 단독 인용 금지.
+- 인용은 **파일 접두**: `RULES#68` · `DS_RULES#n`. 맨 번호 단독 인용 금지. (`ARCH#n` 은 2026-09-03 퇴역 — 전부 `RULES#n` 으로 옮겨졌다.)
 - 신규 등재는 **RULES.md 단일**. ARCHITECTURE_RULES.md 신규 등재 동결.
 - 이 표의 처리 결과는 G-4 ② 통합 커밋에 반영한다.
+
+## 5. ARCH 퇴역 이전 매핑 (2026-09-03 · G-4 ③)
+
+`docs/ARCHITECTURE_RULES.md` 실규칙 21건 전부를 `RULES#123~#143` 으로 연속 재등재하고 그 파일을 스텁 색인으로 퇴역시켰다. 폐대역(#21~#42) 재사용 18건 + 잔여 3건(#107·#115·#116)을 한 번에 정리한 것이다.
+
+| 구 | 신 | 규칙 |
+|---|---|---|
+| ARCH#21 | RULES#123 | /apt region resolution = Edge → SSR → Client 단일 흐름 ( |
+| ARCH#22 | RULES#124 | CTA click 트래킹: navigation 일으키는 onClick 은 helper 통과 ( |
+| ARCH#23 | RULES#125 | signup flow: frictionless → /onboarding → 거주지+관심사 (s |
+| ARCH#24 | RULES#126 | 모달 cooldown = localStorage 7일 timestamp (s231 신설) |
+| ARCH#25 | RULES#127 | blog 작성 cron 은 freshness-context inject + auto-unpub |
+| ARCH#27 | RULES#128 | /apt 하위 컨텐츠 배치 표준 (s235 신설) |
+| ARCH#28 | RULES#129 | inline raw fontSize/padding 금지, CSS var + class 통일 ( |
+| ARCH#30 | RULES#130 | /apt cover image 우선순위 + 위성/OG fallback 차단 (s236 신설) |
+| ARCH#31 | RULES#131 | 메인/상세 페이지 og:image 6장 패턴 (s238 신설) |
+| ARCH#32 | RULES#132 | Server Component BAILOUT_TO_CSR 즉시 fix (s238 신설) |
+| ARCH#33 | RULES#133 | image-sitemap 단지/글당 4-7 이미지 entry (s238 신설) |
+| ARCH#34 | RULES#134 | news-sitemap 48h 신선도 + 카테고리 우선순위 (s238 신설) |
+| ARCH#36 | RULES#135 | SITE_URL 사용 의무 (s239 신설) |
+| ARCH#37 | RULES#136 | NEXT_PUBLIC_SUPABASE_URL env var 사용 (s239 신설) |
+| ARCH#38 | RULES#137 | OG 토큰 단일 source `src/lib/og-tokens.ts` (s239 신설) |
+| ARCH#39 | RULES#138 | console.error 분할 출력 (s239 신설) |
+| ARCH#40 | RULES#139 | light mode `!important` body/html 만 제거 (s239 신설) |
+| ARCH#41 | RULES#140 | onboarded 컬럼 변경 권한 (s239 신설) |
+| ARCH#107 | RULES#141 | `apt_sites.page_views` 를 사용자 노출 순위에 쓰지 말 것 (H4-1 신설) |
+| ARCH#115 | RULES#142 | 값이 이상하면 «함수를 고치기 전에» 그 컬럼의 기록자를 전부 나열한다 (H7-2 신설) |
+| ARCH#116 | RULES#143 | `scripts/` 의 판정·변환 로직은 lib 으로 꺼낸다 (PV-2 신설 · 전 트랙 공통 |
+
+- 인용 치환 범위: `src/` + 현행 원장(`RULES.md`·본 대사표). 과거 `STATUS.md`·핸드오프 기록은 **역사라 불변** — 대신 STATUS head 에 매핑 공지 1줄을 남겼다.
+- hex 오탐 차단: `#N` 뒤 `[^0-9a-fA-F]` 경계로만 잡았다(`#21` ↔ `#212121` 구분).

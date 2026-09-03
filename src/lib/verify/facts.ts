@@ -7,7 +7,7 @@
  *    조합이 흘린 미확정 수치가 하루 만에 `verified` 로 승격된다 —
  *    그리고 그 값이 §7-1 의 「확정 표기」를 얻는다.
  *
- * ⚠️ Rule #116. 판정만 한다. 네이버 검색·AI 추출·DB 쓰기는 라우트가 한다.
+ * ⚠️ RULES#143. 판정만 한다. 네이버 검색·AI 추출·DB 쓰기는 라우트가 한다.
  * ⛔ D4 경계: 자동 반영은 display_name·name_variants·builder «만». 세대수·가격·
  *    lifecycle_stage·slug 는 verified 여도 «검수 큐» 로 간다. 이 파일은 그 경계를
  *    `autoApplicable()` 로 못박는다.

@@ -1,6 +1,6 @@
 /**
  * 법정동코드 판정 (PV-2).
- * ⚠️ 이 판정이 스크립트 안에 있으면 tsc 가 안 본다(Rule #116). 그래서 lib 에 두고 잠근다.
+ * ⚠️ 이 판정이 스크립트 안에 있으면 tsc 가 안 본다(RULES#143). 그래서 lib 에 두고 잠근다.
  */
 import { describe, expect, it } from 'vitest';
 import { dongName, isBjdongLevel, isRiCode, splitRegionCd } from '@/lib/region/bjdong';
