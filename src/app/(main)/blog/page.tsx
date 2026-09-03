@@ -359,8 +359,21 @@ export default async function BlogPage({ searchParams }: Props) {
 
   /* H5-3 — 첫 카드 승격. 1페이지·검색 아닐 때만. 목록의 머리를 그대로 쓴다. */
   const canPromote = pageNum === 1 && !q && (posts ?? []).length > 0;
-  const promoted: any = canPromote ? (posts as any[])[0] : null;
-  const listPosts: any[] = canPromote ? (posts as any[]).slice(1) : ((posts ?? []) as any[]);
+  /* M4-2(Q4ⓐ) — 승격은 «부동산 최신 1건» 이 먼저다.
+   * ⚠️ 주식 자동발행이 최신순 머리를 늘 차지해 부동산 80% 방침과 역행하는 자리였다.
+   *    이미 받은 목록(지역·카테고리 반영)에서 부동산 첫 글을 고르고, 없으면 머리로 폴백한다.
+   * ⛔ 별도 조회를 만들지 않는다. */
+  const promotedIdx = canPromote
+    ? (() => {
+        const arr = (posts ?? []) as any[];
+        const k = arr.findIndex((x) => x?.category === 'realestate');
+        return k >= 0 ? k : 0;
+      })()
+    : -1;
+  const promoted: any = promotedIdx >= 0 ? (posts as any[])[promotedIdx] : null;
+  const listPosts: any[] = promotedIdx >= 0
+    ? (posts as any[]).filter((_, k) => k !== promotedIdx)
+    : ((posts ?? []) as any[]);
 
   /* H5-3 — 구군 칩 건수. ⚠️ 배지는 «현장 수» 다(글 수 아님).
    *   글 수로 세면 한 현장에 16편이 붙은 구가 실제 현장은 1곳인데 가장 커 보인다
@@ -657,40 +670,9 @@ export default async function BlogPage({ searchParams }: Props) {
         />
       )}
 
-      {/* ── H4-5 · 현장별 묶음 ──
-           부동산 글이 «어느 현장 이야기인지» 를 목록에서 알 수 없었다.
-           ⚠️ 0건이면 통째로 미렌더한다. 빈 제목만 남기지 않는다. */}
-      {aptGroups.length > 0 && (
-        <section aria-labelledby="blog-apt-groups" style={{ marginBottom: 'var(--sp-md)' }}>
-          <h2
-            id="blog-apt-groups"
-            style={{ fontSize: 'var(--fs-2xs)', fontWeight: 500, letterSpacing: 0, color: 'var(--text-tertiary)', margin: '0 0 var(--sp-sm)' }}
-          >
-            현장별로 모아 보기
-          </h2>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)' }}>
-            {aptGroups.map((g) => (
-              <Link
-                key={g.slug}
-                href={`/apt/${encodeURIComponent(g.slug)}`}
-                style={{
-                  minHeight: 44, display: 'inline-flex', alignItems: 'center',
-                  padding: '5px var(--sp-md)',
-                  borderRadius: 'var(--radius-pill)',
-                  fontSize: 'var(--fs-2xs)', fontWeight: 400, letterSpacing: 0,
-                  background: 'var(--bg-surface)',
-                  border: '1px solid var(--border)',
-                  color: 'var(--text-secondary)',
-                  textDecoration: 'none',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {g.name} <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{g.n}</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
+      {/* M4-2(Node 9/3) — 「현장별로 모아 보기」 칩 줄을 걷었다.
+           목록 위에서 폭을 먹으면서 «글» 이 아니라 «현장» 으로 나가는 줄이었다.
+           ⚠️ 데이터·라우트는 그대로다 — 현장별 글 묶음 진입은 현장 상세의 관련 분석 링크가 진다. */}
 
       {/* 카테고리 탭 — V4 언더라인 문법(.kd-utabs / .kd-utab).
           ⚠️ 이건 «필터가 아니라 뷰 전환» 이다(증분6 의미론). 아래 주석이 말하듯
@@ -712,9 +694,11 @@ export default async function BlogPage({ searchParams }: Props) {
         {/* 시리즈는 «탭이 아니라 다른 화면으로 나가는 링크» 다 — 활성 상태를 갖지 않는다.
             그래서 aria-current 를 주지 않는다(줄 수도 없다). 같은 줄에 서지만 성격이 다르다. */}
         <Link href="/blog/series" className="kd-utab" style={{ fontSize: 'var(--fs-sm)', gap: 'var(--sp-xs)' }}>
-          📚 시리즈
+          시리즈
         </Link>
       </div>
+
+      <div className="kd-band" aria-hidden="true" />
 
       {/* 검색 결과 안내 */}
       {q && (
@@ -747,7 +731,7 @@ export default async function BlogPage({ searchParams }: Props) {
       {/* 글 목록 — .kd-lrow */}
       {(posts ?? []).length === 0 ? (
         <EmptyState
-          icon={q ? '🔍' : '📝'}
+          icon=""
           title={q ? `"${q}"에 대한 검색 결과가 없습니다` : '아직 블로그 글이 없어요'}
           description={q ? '다른 검색어로 시도해보세요' : '곧 새로운 분석이 올라옵니다'}
         />
@@ -800,7 +784,7 @@ export default async function BlogPage({ searchParams }: Props) {
                       ⚠️ 계측이 붙어 값이 실측이 되면 그때 되살린다. 컬럼은 그대로 둔다. */}
                   {((p.comment_count || 0) > 0 || (p.helpful_count || 0) > 0) && (
                     <span className="kd-lrow-m">
-                      {(p.comment_count || 0) > 0 && <span className="kd-lrow-m-fix">💬 {p.comment_count}</span>}
+                      {(p.comment_count || 0) > 0 && <span className="kd-lrow-m-fix">{p.comment_count}</span>}
                       {(p.helpful_count || 0) > 0 && <span className="kd-lrow-m-fix" style={{ color: 'var(--accent-green)' }}>👍 {p.helpful_count}</span>}
                     </span>
                   )}
@@ -902,10 +886,12 @@ export default async function BlogPage({ searchParams }: Props) {
         )}
       </div>
 
-      {/* ⛔ 「🔥 인기 글」 블록을 걷어냈다 — 근거 컬럼이 합성값이다(위 주석).
+      {/* ⛔ 「인기 글」 블록을 걷어냈다 — 근거 컬럼이 합성값이다(위 주석).
            계측이 붙어 실측이 되면 그때 되살린다. */}
 
       </details>
+
+      <div className="kd-band" aria-hidden="true" />
 
       {/* 인기 시리즈 (SEO 내부링크) */}
       {/* 세션70: 블로그 목록 회원가입 유도 */}
@@ -916,7 +902,6 @@ export default async function BlogPage({ searchParams }: Props) {
           border: '1px solid var(--brand-border)',
           display: 'flex', alignItems: 'center', gap: 10,
         }}>
-          <span style={{ fontSize: 'var(--fs-lg)', flexShrink: 0 }}>📬</span>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)' }}>매일 투자 분석 받아보기</div>
             <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-secondary)' }}>가입하면 전체 글 무제한 · 알림까지 무료</div>
@@ -931,7 +916,7 @@ export default async function BlogPage({ searchParams }: Props) {
       {topSeries.length > 0 && (
         <div style={{ marginTop: 'var(--sp-2xl)', padding: 'var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
-            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>📚 글이 많은 시리즈</span>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>글이 많은 시리즈</span>
             <Link href="/blog/series" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>전체 보기 →</Link>
           </div>
           <div style={{ display: 'flex', gap: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
@@ -949,30 +934,17 @@ export default async function BlogPage({ searchParams }: Props) {
         </div>
       )}
 
-      {/* 다음 페이지 미리보기 */}
-      {nextPagePosts.length > 0 && (
-        <div style={{ marginTop: 'var(--sp-lg)', padding: 12, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
-          <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>다음 페이지 미리보기</div>
-          {nextPagePosts.map((p: any) => (
-            <Link key={p.id} href={`/blog/${p.slug}`} style={{
-              display: 'block', padding: '4px 0', fontSize: 13, color: 'var(--text-secondary)',
-              textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>
-              <span style={{ color: CAT_COLORS[p.category] || 'var(--text-tertiary)', marginRight: 4, fontSize: 11 }}>●</span>
-              {p.title}
-            </Link>
-          ))}
-        </div>
-      )}
+      {/* M4-2 — 「다음 페이지 미리보기」를 지웠다. 페이지네이션과 기능이 겹치는데
+           목록처럼 생겨서 «어디까지가 이 페이지인지» 를 흐렸다. */}
 
       {/* 관련 서비스 (내부 링크 — SEO 교차 참조) */}
       <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginTop: 'var(--sp-md)' }}>
-        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🔗 카더라 서비스</div>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>카더라 서비스</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {[
-            { href: '/apt', label: '🏠 부동산 청약' },
-            { href: '/stock', label: '📈 주식 시세' },
-            { href: '/apt/complex', label: '📖 단지백과' },
+            { href: '/apt', label: '부동산 청약' },
+            { href: '/stock', label: '주식 시세' },
+            { href: '/apt/complex', label: '단지백과' },
             { href: '/stock/compare', label: '⚖️ 종목 비교' },
             { href: '/daily/서울', label: '📰 데일리 리포트' },
             { href: '/apt/diagnose', label: '🎯 가점 계산기' },
