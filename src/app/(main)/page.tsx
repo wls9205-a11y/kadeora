@@ -243,7 +243,10 @@ export default async function HomePage() {
       const { data, error } = await (getSupabaseAdmin() as any)
         .from('blog_posts')
         .select('id, slug, title, published_at')
-        .eq('is_published', true).eq('category', 'realestate')
+        /* ⚠️ 실측 정정 — blog_posts.category 에 'realestate' 라는 값은 «없다»(탭 키다).
+           부동산은 apt·unsold·redev 셋이다(2026-09-03 DB 확인). eq 로 걸면 항상 0건이고,
+           그 0건은 「글이 없다」로 보여서 조용히 섹션이 사라진다. */
+        .eq('is_published', true).in('category', ['apt', 'unsold', 'redev'])
         .order('published_at', { ascending: false })
         .limit(3);
       if (error) { console.error(`[home] latest blogs: ${error.message?.slice(0, 160)}`); return []; }
@@ -522,7 +525,7 @@ export default async function HomePage() {
               </Link>
             ))}
           </div>
-          <MoreLink href="/blog?category=realestate" label="부동산 분석 전체" />
+          <MoreLink href="/blog?category=realestate" label="부동산 분석 전체" />  {/* ?category= 는 «탭 키» 라 realestate 가 맞다 — DB 값과 다른 축이다. */}
         </section>
       )}
 

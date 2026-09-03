@@ -366,7 +366,11 @@ export default async function BlogPage({ searchParams }: Props) {
   const promotedIdx = canPromote
     ? (() => {
         const arr = (posts ?? []) as any[];
-        const k = arr.findIndex((x) => x?.category === 'realestate');
+        /* ⚠️ 실측 정정 — 「realestate」는 «탭 키» 이고 blog_posts.category 에는 없는 값이다.
+           실 카테고리는 apt·unsold·redev·stock·finance·general 이라(2026-09-03 DB 확인)
+           탭 키로 비교하면 «영원히 못 찾는 조건» 이 된다. CAT_GROUPS 를 정본으로 쓴다. */
+        const RE = CAT_GROUPS.realestate;
+        const k = arr.findIndex((x) => RE.includes(String(x?.category)));
         return k >= 0 ? k : 0;
       })()
     : -1;
