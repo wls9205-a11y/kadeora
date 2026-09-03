@@ -371,10 +371,13 @@ export default async function BlogPage({ searchParams }: Props) {
     ? await (async () => {
         try {
           let pq = (sb as any).from('v_blog_posts_listing')
-            .select('id, slug, title, excerpt, category, sub_category, tags, created_at, view_count, cover_image, image_alt, apt_region, apt_sigungu, published_at, read_minutes')
+            .select('id, slug, title, excerpt, category, sub_category, tags, created_at, view_count, cover_image, image_alt, published_at, reading_time_min, comment_count, helpful_count, rewritten_at')
             .eq('is_published', true)
             .or(`published_at.is.null,published_at.lte.${now}`)
             .eq('group_key', 'realestate');
+          /* ⚠️ 컬럼 목록은 위 목록 조회와 «같은 것» 을 쓴다. 첫 판에 read_minutes·apt_region 을
+             지어냈다가 뷰에 없어 조회가 통째로 에러났다 — 폴백이 받아 화면은 살았지만
+             규칙은 또 무발동이었다(런타임 로그가 잡았다). 컬럼을 «기억으로» 적지 않는다. */
           if (region) pq = pq.eq('apt_region', region);
           if (sgg) pq = pq.eq('apt_sigungu', sgg);
           const { data, error } = await pq.order('created_at', { ascending: false }).limit(1).maybeSingle();
