@@ -95,7 +95,8 @@ async function getBlogs(): Promise<BusanBlogPost[]> {
 const TITLE = '부산 분양 현장 — 선착순·분양중·분양예정';
 
 export const metadata: Metadata = {
-  title: `${TITLE} | 카더라`,
+  // G-3: layout 의 `%s | 카더라` 템플릿이 붙는다 — 여기서 브랜드를 또 붙이지 않는다.
+  title: TITLE,
   description:
     '부산 주요 분양 현장을 선착순·분양중·분양예정으로 나눠 정리했습니다. ' +
     '분양가와 세대수, 청약 일정, 관련 분석을 한 화면에서 확인하세요.',

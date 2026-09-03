@@ -16,7 +16,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   if (!data) return { title: '용어를 찾을 수 없습니다' };
 
-  const title = `${data.term}이란? — 주식 용어사전 | 카더라`;
+  // G-3: layout 의 `%s | 카더라` 템플릿이 붙는다 — 여기서 브랜드를 또 붙이지 않는다.
+  const title = `${data.term}이란? — 주식 용어사전`;
   const desc = data.definition_ko.slice(0, 155);
 
   return {

@@ -117,14 +117,17 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   if (!t) return { title: '테마 검색' };
 
   const regionLabel = region && REGIONS.includes(region) ? `${region} ` : '전국 ';
-  const title = `${regionLabel}${t.title} TOP 100 | 2026 카더라`;
+  // G-3: layout 의 `%s | 카더라` 템플릿이 붙는다 — 여기서 브랜드를 또 붙이지 않는다.
+  const title = `${regionLabel}${t.title} TOP 100 (2026)`;
+  // 공유 카드(og)는 템플릿이 안 붙는 자리라 브랜드를 그대로 둔다 — 문안 불변.
+  const shareTitle = `${title} | 카더라`;
   const desc = `${regionLabel}${t.title} 순위. ${t.desc} 데이터 출처: 국토교통부 실거래가 공개시스템.`;
 
   return {
     title, description: desc,
     alternates: { canonical: `${SITE_URL}/apt/theme/${theme}` },
     robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
-    openGraph: { title, description: desc, siteName: '카더라', locale: 'ko_KR', type: 'website',
+    openGraph: { title: shareTitle, description: desc, siteName: '카더라', locale: 'ko_KR', type: 'website',
       images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(regionLabel + t.title)}&design=2&subtitle=${encodeURIComponent('TOP 100')}&author=${encodeURIComponent('카더라')}`, width: 1200, height: 630 }] },
     other: {
       'naver:author': '카더라', 'naver:updated_time': new Date().toISOString(), 'article:section': '부동산', 'article:tag': t.keywords.join(','),

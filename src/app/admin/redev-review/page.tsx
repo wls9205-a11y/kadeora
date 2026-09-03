@@ -11,7 +11,7 @@ import ReviewQueueClient from './ReviewQueueClient';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '정비사업 공시 검수 | 카더라 어드민',
+  title: '정비사업 공시 검수 · 어드민',
   robots: { index: false, follow: false },
 };
 

@@ -13,7 +13,7 @@ import AlertsClient from './AlertsClient';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '경보함 | 카더라 어드민',
+  title: '경보함 · 어드민',
   robots: { index: false, follow: false },
 };
 

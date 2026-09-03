@@ -26,7 +26,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const ogImg = `${SITE_URL}/api/og-calc?slug=${encodeURIComponent(slug)}&result=${encodeURIComponent(String(mainResult))}&label=${encodeURIComponent(rec.result?.main?.label || calc.titleShort)}`;
 
   return {
-    title: `${calc.title} 결과: ${mainResult} | 카더라`,
+  // G-3: layout 의 `%s | 카더라` 템플릿이 붙는다 — 여기서 브랜드를 또 붙이지 않는다.
+    title: `${calc.title} 결과: ${mainResult}`,
     description: `${calc.titleShort} 계산 결과: ${mainResult}. ${calc.description.slice(0, 100)} 같은 조건의 다른 사례도 비교하세요.`,
     keywords: [...calc.keywords, '카더라', `${calc.titleShort} 결과`, `${calc.titleShort} 사례`],
     alternates: { canonical: url },

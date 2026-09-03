@@ -16,7 +16,10 @@ interface SP { page?: string; region?: string }
 export async function generateMetadata({ searchParams }: { searchParams: Promise<SP> }): Promise<Metadata> {
   const sp = await searchParams;
   const region = sp.region?.trim();
-  const title = region ? `${region} 인기 단지 — 카더라` : '지금 인기 단지 — 카더라';
+  // G-3: layout 의 `%s | 카더라` 템플릿이 붙는다 — 여기서 브랜드를 또 붙이지 않는다.
+  const title = region ? `${region} 인기 단지` : '지금 인기 단지';
+  // 공유 카드(og)는 템플릿이 안 붙는 자리라 브랜드를 그대로 둔다 — 문안 불변.
+  const shareTitle = `${title} | 카더라`;
   const desc = region
     ? `${region}에서 가장 많이 검색·관심받는 아파트 단지 목록.`
     : '카더라 사용자들이 지금 가장 많이 보는 아파트 단지 — 청약·재개발·실거래 통합 인기순.';
@@ -28,7 +31,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     alternates: { canonical },
     // s8: PV 미달 죽은 라우트. robots.txt 로 막으면 이 noindex 를 못 읽어 URL 만 색인된다.
     robots: { index: false, follow: true },
-    openGraph: { title, description: desc, url: canonical, siteName: '카더라', locale: 'ko_KR', type: 'website' },
+    openGraph: { title: shareTitle, description: desc, url: canonical, siteName: '카더라', locale: 'ko_KR', type: 'website' },
   };
 }
 

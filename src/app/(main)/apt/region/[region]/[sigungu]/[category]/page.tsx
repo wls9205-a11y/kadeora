@@ -69,7 +69,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cat = CATEGORY[category];
   if (!cat) return {};
   const url = `${SITE_URL}/apt/region/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}/${encodeURIComponent(category)}`;
-  const title = `${region} ${sigungu} ${cat.label} 단지 가이드 | 카더라`;
+  // G-3: layout 의 `%s | 카더라` 템플릿이 붙는다 — 여기서 브랜드를 또 붙이지 않는다.
+  const title = `${region} ${sigungu} ${cat.label} 단지 가이드`;
+  // 공유 카드(og·twitter)는 템플릿이 안 붙는 자리라 브랜드를 그대로 둔다 — 문안 불변.
+  const shareTitle = `${title} | 카더라`;
   const desc = `${region} ${sigungu} ${cat.label} 단지 시세·평형·세대수·시공사 한눈에. 카더라가 정리한 ${region} ${sigungu} ${cat.label} 단지 종합 가이드.`;
   return {
     title,
@@ -77,7 +80,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: { canonical: url },
     robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const, googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const } },
     openGraph: {
-      title,
+      title: shareTitle,
       description: desc,
       url,
       siteName: '카더라',
@@ -85,7 +88,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'website',
       images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${region} ${sigungu} ${cat.label}`)}&category=apt`, width: 1200, height: 630, alt: title }],
     },
-    twitter: { card: 'summary_large_image', title, description: desc },
+    twitter: { card: 'summary_large_image', title: shareTitle, description: desc },
   };
 }
 

@@ -55,7 +55,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const ogImg = `${SITE_URL}/api/og?title=${encodeURIComponent(topic.topic_label)}&design=2&category=blog&subtitle=${encodeURIComponent(`${calcCount}종 무료 계산기`)}`;
 
   return {
-    title: `${topic.topic_label} — 2026 무료 온라인 계산기 | 카더라`,
+  // G-3: layout 의 `%s | 카더라` 템플릿이 붙는다 — 여기서 브랜드를 또 붙이지 않는다.
+    title: `${topic.topic_label} — 2026 무료 온라인 계산기`,
     description: topic.meta_description ||
       `${topic.topic_label} 무료 사용. 2026년 최신 세법·법령 반영. ${(topic.related_keywords || []).slice(0, 3).join('·')} 등 종합 계산.`,
     keywords: [topic.topic_label, ...(topic.related_keywords || []), '카더라', '무료 계산기'],

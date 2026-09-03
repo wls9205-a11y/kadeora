@@ -1,7 +1,7 @@
 import { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
-  title: '🎛️ Mission Control | 카더라',
+  title: '🎛️ Mission Control',
   robots: { index: false, follow: false },
 };
 

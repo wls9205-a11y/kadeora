@@ -9,7 +9,7 @@ import StageInputClient from './StageInputClient';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '현장 단계 입력 | 카더라 어드민',
+  title: '현장 단계 입력 · 어드민',
   robots: { index: false, follow: false },
 };
 

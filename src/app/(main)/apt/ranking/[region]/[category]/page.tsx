@@ -35,7 +35,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cat = CATEGORY[category];
   if (!cat) return {};
   const url = `${SITE_URL}/apt/ranking/${encodeURIComponent(region)}/${encodeURIComponent(category)}`;
-  const title = `${region} ${cat.label} 인기 단지 TOP 30 | 카더라`;
+  // G-3: layout 의 `%s | 카더라` 템플릿이 붙는다 — 여기서 브랜드를 또 붙이지 않는다.
+  const title = `${region} ${cat.label} 인기 단지 TOP 30`;
+  // 공유 카드(og·twitter)는 템플릿이 안 붙는 자리라 브랜드를 그대로 둔다 — 문안 불변.
+  const shareTitle = `${title} | 카더라`;
   const desc = `${region} ${cat.label} 단지 인기 순위 TOP 30. 관심등록·후기·페이지뷰 기준 가중평균 popularity_score로 정렬한 카더라 ranking.`;
   return {
     title,
@@ -43,10 +46,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: { canonical: url },
     robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const, googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const } },
     openGraph: {
-      title, description: desc, url, siteName: '카더라', locale: 'ko_KR', type: 'website',
+      title: shareTitle, description: desc, url, siteName: '카더라', locale: 'ko_KR', type: 'website',
       images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${region} ${cat.label} TOP 30`)}&category=apt`, width: 1200, height: 630, alt: title }],
     },
-    twitter: { card: 'summary_large_image', title, description: desc },
+    twitter: { card: 'summary_large_image', title: shareTitle, description: desc },
   };
 }
 

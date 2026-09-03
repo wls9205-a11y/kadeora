@@ -35,7 +35,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!VALID_REGIONS.includes(decodedRegion)) return {};
   const ogImg = `${SITE_URL}/api/og?title=${encodeURIComponent(`${decodedRegion} 재개발·재건축 현황`)}&category=apt&design=2`;
   return {
-    title: `${decodedRegion} 재개발 재건축 현황 — 진행 단계·시공사·세대수 | 카더라`,
+  // G-3: layout 의 `%s | 카더라` 템플릿이 붙는다 — 여기서 브랜드를 또 붙이지 않는다.
+    title: `${decodedRegion} 재개발 재건축 현황 — 진행 단계·시공사·세대수`,
     description: `${decodedRegion} 지역 재개발·재건축 구역의 진행 단계, 시공사, 세대수, 용적률 정보. 정비구역지정부터 착공까지 단계별 현황과 투자 분석.`,
     keywords: [`${decodedRegion} 재개발`, `${decodedRegion} 재건축`, `${decodedRegion} 정비사업`, `${decodedRegion} 재개발 현황`, '재개발 투자', '정비구역'],
     alternates: { canonical: `${SITE_URL}/apt/redev/${encodeURIComponent(decodedRegion)}` },
