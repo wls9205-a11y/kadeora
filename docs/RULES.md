@@ -313,7 +313,16 @@ grep -r "<route>" src/
 
 **적용 실례**: `src/app/(main)/apt/unsold/[id]/page.tsx`(`REGIONS`) · `src/app/(main)/apt/region/[region]/{layout,page}.tsx`.
 
+### RULES#122 — 메인 페이지 ISR `revalidate=600` (s239 신설)  
+> 2026-09-03 G-4 정정 재등재 — 구 `ARCHITECTURE_RULES.md` #42. 의미 변경 없음.
+
+**Rule**:
+- `/apt`, `/blog`, `/stock` 메인 페이지: `export const revalidate = 600` (10분 ISR).
+- cold start 감소 + 봇 캐시 hit rate 향상.
+- 단지/글 상세 페이지는 `force-static` (Rule #32 / s238 적용).
+- 더 짧은 revalidate (60s) 는 트래픽 적은 페이지 한정 — 봇 hit rate 가 cold start 비용 못 갚음.
+
 ### 결번 확정
 - **#65** — 두 원장·코드·STATUS 어디에도 문안이 없다(2026-09-03 전수 0건). 등재하지 않고 결번으로 못 박는다.
 - **#67** — 동번호 이의로 폐기. 두 문안은 위 #119·#120.
-- **#21~#42** — RULES 아카이브 대역. `ARCHITECTURE_RULES.md` 가 이 대역을 재사용 중이니 **새 규칙에 쓰지 않는다**(다음 번호는 #121부터).
+- **#21~#42** — RULES 아카이브 대역(#42 는 2026-09-03 정정으로 #122 재등재). `ARCHITECTURE_RULES.md` 가 이 대역을 재사용 중이니 **새 규칙에 쓰지 않는다**(다음 번호는 #121부터).

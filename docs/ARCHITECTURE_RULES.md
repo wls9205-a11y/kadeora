@@ -511,13 +511,10 @@ Server Component 페이지의 BAILOUT 진단 + fix 순서:
 
 **Discovered**: s239 (2026-05-07) — auto_rescue 5분 → 24h + 조건 추가, 2 client + 1 server route fix.
 
-## Rule #42 — 메인 페이지 ISR `revalidate=600` (s239 신설)
+## Rule #42 — (재등재됨)
 
-**Rule**:
-- `/apt`, `/blog`, `/stock` 메인 페이지: `export const revalidate = 600` (10분 ISR).
-- cold start 감소 + 봇 캐시 hit rate 향상.
-- 단지/글 상세 페이지는 `force-static` (Rule #32 / s238 적용).
-- 더 짧은 revalidate (60s) 는 트래픽 적은 페이지 한정 — 봇 hit rate 가 cold start 비용 못 갚음.
+→ `RULES#122` 로 재등재(2026-09-03 G-4 정정). #21~#42 는 `docs/RULES.md` 가 아카이브로 비운 대역이라 여기서 재사용하면 언젠가 같은 번호가 두 규칙을 가리킨다.
+⛔ #42 를 다시 쓰지 않는다.
 
 ## Rule #43 — (재등재됨)
 
