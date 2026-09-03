@@ -5,11 +5,14 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import Link from 'next/link';
 
 // s188: 댓글 미션 동선 — 피드보다 블로그가 댓글 진입 자연스러움. 글쓰기는 /write 유지.
+/* M4 이모지 0 — 이 바는 전역 셸이라 4화면 «전부» 에 뜬다.
+   화면 커밋만으로는 이모지 게이트가 안 닫혔다(/blog 배포본에 💬 1건 잔존 — 출처가 여기였다).
+   ⚠️ 라벨 텍스트는 그대로다. 완료 표시는 ✅ 대신 「완료 · 」 접두로 말한다. */
 const MISSIONS = [
-  { key: 'interest', label: '관심 단지 등록', icon: '🏠', reward: 50, link: '/apt' },
-  { key: 'watchlist', label: '관심 종목 등록', icon: '📈', reward: 50, link: '/stock' },
-  { key: 'comment', label: '첫 댓글 달기', icon: '💬', reward: 30, link: '/blog' },
-  { key: 'post', label: '첫 글 작성', icon: '✍️', reward: 100, link: '/write' },
+  { key: 'interest', label: '관심 단지 등록', icon: '', reward: 50, link: '/apt' },
+  { key: 'watchlist', label: '관심 종목 등록', icon: '', reward: 50, link: '/stock' },
+  { key: 'comment', label: '첫 댓글 달기', icon: '', reward: 30, link: '/blog' },
+  { key: 'post', label: '첫 글 작성', icon: '', reward: 100, link: '/write' },
 ];
 
 export default function GlobalMissionBar() {
@@ -130,7 +133,7 @@ export default function GlobalMissionBar() {
                   }}
                 >
                   <span style={{ fontSize: 13 }}>
-                    {isDone ? '✅' : m.icon} {m.label}
+                    {isDone ? '완료 · ' : ''}{m.label}
                   </span>
                   <span style={{ fontSize: 12, color: isDone ? 'var(--accent-green)' : 'var(--brand)', fontWeight: 600 }}>
                     {isDone ? '완료' : `+${m.reward}P`}
