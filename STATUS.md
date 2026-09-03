@@ -3968,7 +3968,7 @@ Pending next:
 - **W5 (P0)**: `blog-meta-rewrite-poll` — batch select 에 `'completed'` status 포함 (results_processed=false 인 stuck 케이스). 404/410 = batch 만료 분기 추가, batch 자체만 expired 마킹하고 큐는 pending 유지 (재제출용).
 - **W6 (P0)**: `blog-image-supplement` — errors 를 `{post_id, msg, stack}` 객체 배열로. cron_logs.metadata 에 첫 5개 보존. 24h 440/440 fail 의 진짜 원인을 다음 1회 실행 후 파악.
 - **W7 (P1)**: `stock-logo-fetch` — KOSPI/KOSDAQ 6자리 심볼용 fallback chain 보강. `/imgstock/icons/` + `/imgstock/item/logo/` + Google/DuckDuckGo favicon. 1,317건 모두 NULL → 1h 후 30%+ 회복 목표. push 직후 `reset_kr_stock_logo_queue()` 호출 필요.
-- **W8 (P0)**: STATUS.md 본 섹션 + Architecture Rule #17 추가.
+- **W8 (P0)**: STATUS.md 본 섹션 + Architecture Rule #17 추가. (2026-09-03 G-4: 그 규칙은 RULES#117 로 재등재)
 - **W9 (P0)**: `/api/og-blog`, `/api/og-apt` catch 로깅 prefix 통일 (`[og-blog] FULL:` / `[og-apt] FULL:`). og-apt 는 fetchSite 도 try 로 감싸 ImageResponse 영역과 분리. TypeError 24h 의 진짜 message+stack 노출.
 
 ## DB 측 사전 적용

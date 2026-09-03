@@ -5438,7 +5438,7 @@ empty_images = 973건 stuck.
 vercel.json `functions` catch-all maxDuration 은 per-route export 를 override 한다.
 catch-all 은 짧은 외부 fetch 라우트 한정, cron / 무거운 SSR 은 vercel.json 에 경로별
 명시 또는 per-route export 단독. 둘 충돌 시 vercel.json 이 이긴다.
-(Rule #17 = s205 Anthropic Batch API polling, ARCHITECTURE_RULES.md 참조)
+(RULES#117 = s205 Anthropic Batch API polling — 2026-09-03 G-4 재등재, 구 ARCH#17)
 
 ### Pending
 - NAVER_CLIENT_ID / NAVER_CLIENT_SECRET Vercel env (코드 외 작업)

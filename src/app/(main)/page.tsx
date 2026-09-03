@@ -132,7 +132,7 @@ async function fetchRecentMoves(): Promise<RecentMove[]> {
 /**
  * H4-1 (c) — 칩 «큐레이션 층». 실제로 계약이 가능한 현장만 낸다.
  *
- * ⚠️ `content_score` 정렬을 버렸다. 그건 중복 생존자를 고르는 값이지(Rule #43)
+ * ⚠️ `content_score` 정렬을 버렸다. 그건 중복 생존자를 고르는 값이지(RULES#118)
  *    사람이 본 흔적이 아니다. 이제 «담당이 손으로 올린 것» 만 본다 —
  *    is_curated=true AND curated_status IN (선착순·잔여세대·분양중), curated_at DESC.
  *    실측 부울경 4건(부산 4 · 울산 0 · 경남 0).

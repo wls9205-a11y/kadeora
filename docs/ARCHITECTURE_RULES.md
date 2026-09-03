@@ -2,27 +2,15 @@
 
 본 문서는 코드 변경 시 반드시 지켜야 할 architecture-level 규칙 모음. 새 규칙은 추가만 하고 삭제/번호 재할당 금지 (PR/세션 노트와 cross-reference 됨).
 
-## Rule #11 — STATUS.md 갱신 (existing)
+## Rule #11 — (이관됨)
 
-코드 변경 commit 마다 `STATUS.md` head 에 세션/변경 요약을 추가한다. 변경 이유와 검증 방법까지 포함. (DB 측 변경은 supabase mcp 마이그레이션으로 별도 관리.)
+→ `RULES#11` 로 이관(2026-09-03 G-4 원장 통합). 문안은 `docs/RULES.md` 가 정본이다.
+⛔ 여기에 다시 적지 않는다 — 두 원장에 같은 규칙이 있으면 오늘 잡은 대역 충돌이 되돌아온다.
 
-## Rule #17 — Anthropic Batch API polling 워커는 결과를 한 번에 적용한다 (s205 신설)
+## Rule #17 — (재등재됨)
 
-**Rule**: Batch API polling 워커는 `batch.processing_status === 'ended'` 분기에서 다음 세 단계를 한 번에 (또는 graceful fallback 가능한 형태로) 처리한다:
-
-1. `client.messages.batches.results(batch.id)` 또는 results URL fetch 로 JSONL 스트림 수신
-2. `custom_id` 매핑 으로 도메인 테이블 (예: `blog_posts.meta_description`) UPDATE
-3. 큐 entry 의 `status='completed'`, `completed_at=now()` 마킹 + batch row 의 `results_processed=true` 마킹
-
-**Why**: 한 번 ended 된 batch 의 results URL 은 Anthropic 쪽에서 ~29일 내에 만료된다. ended 시점에 결과를 안 적용하면 이미 지불된 비용 (succeeded 5,504건/$수십) 이 회수 불가능해질 수 있다. s205 사례: 11개 batch ended, 큐 4,780 건이 13일째 in_progress 로 stuck.
-
-**How to apply**:
-- 워커 SELECT 시 `status IN ('submitted','in_progress','completed')` + `results_processed=false` 둘 다 조건. status 마킹은 됐는데 결과 적용 안 된 케이스를 다시 잡기 위함.
-- results URL 또는 status fetch 가 404/410 반환 시 (=만료) `batch.status='expired'` + `results_processed=true` 만 마킹. 큐 entry 는 `pending` 으로 유지 → 다음 submit 워커가 재제출.
-- 중간 단계 실패 (DB UPDATE) 시 batch 마킹은 보류 → 다음 polling tick 에 재시도. `batch_id` 는 큐 entry 에 보존되어야 한다.
-- 비슷한 구조의 다른 큐 (예: `blog_image_batch` purpose=image, `apt_ai_batch`) 도 동일 패턴 적용.
-
-**참고**: 직접 영향 워커 — `app/api/cron/blog-meta-rewrite-poll/route.ts`. 동일 패턴 워커 — `app/api/cron/blog-image-batch-poll/*`, `app/api/cron/apt-ai-batch-poll/*`.
+→ `RULES#117` 로 재등재(2026-09-03 G-4). 이 번호는 `RULES#17`(다른 규칙)와 충돌해서 비운다.
+⛔ #17 를 다시 쓰지 않는다.
 
 ## Rule #116 — `scripts/` 의 판정·변환 로직은 lib 으로 꺼낸다 (PV-2 신설 · 전 트랙 공통)
 
@@ -126,106 +114,20 @@ tsconfig.json  exclude: [node_modules, supabase/functions, appintoss-build, scri
 
 ⚠️ 남는 1곳처럼 «자동에서 빠지는 것» 은 반드시 검수 큐에 올린다. 알고 빠뜨리는 것과
    모르고 빠뜨리는 것은 다르다.
-## Rule #18 — ⚠️ 2026-08-27 정정: 캐치올은 per-route export 를 «덮지 않는다»
+## Rule #18 — (이관됨)
 
-**⚠️ 이 규칙은 2026-05-04(s223)에 세워졌고 2026-08-27 실측에서 «성립하지 않았다». 아래가 현행이다.**
+→ `RULES#18` 로 이관(2026-09-03 G-4 원장 통합). 문안은 `docs/RULES.md` 가 정본이다.
+⛔ 여기에 다시 적지 않는다 — 두 원장에 같은 규칙이 있으면 오늘 잡은 대역 충돌이 되돌아온다.
 
-### 오늘의 실측 (2026-08-27 · 최근 14일 cron_logs 전수)
+## Rule #19 — (이관됨)
 
-캐치올 `src/app/api/**/*.ts → maxDuration 30` 은 «지금도 그대로 있다». 그런데:
+→ `RULES#19` 로 이관(2026-09-03 G-4 원장 통합). 문안은 `docs/RULES.md` 가 정본이다.
+⛔ 여기에 다시 적지 않는다 — 두 원장에 같은 규칙이 있으면 오늘 잡은 대역 충돌이 되돌아온다.
 
-- **functions 항목이 «없는»** 라우트 **14개** 가 30초를 넘겨 «성공» 했다.
-  전부 라우트에 `export const maxDuration` 만 있다:
+## Rule #20 — (이관됨)
 
-  | 라우트 | 최대 실행 | functions | 라우트 export |
-  |---|---|---|---|
-  | issue-draft | 281.2s | 없음 | 300 |
-  | stock-analysis-gen | 218.0s | 없음 | 300 |
-  | issue-image-attach | 151.7s | 없음 | 300 |
-  | apt-enrich-location | 142.8s | 없음 | 300 |
-  | apt-analysis-gen | 128.2s | 없음 | 300 |
-  | batch-cluster-submit | 104.0s | 없음 | 300 |
-
-  `apt-enrich-location` 은 **6일 연속 매일 136~143초로 전부 성공** 했다. 우연이 아니다.
-
-- **functions 도 없고 라우트 export 도 «없는» 채 30초를 넘긴 것: 0개.**
-  즉 둘 다 없을 때 30초가 걸리는 것 자체는 반증되지 않았다.
-
-### 그래서 무엇이 참인가
-
-> **라우트의 `export const maxDuration` 하나로 «충분하다».**
-> 캐치올은 그것을 덮지 않는다.
-
-⚠️ 둘 «다» 있고 값이 다를 때 어느 쪽이 이기는지는 **아직 모른다**. 관측된 실행 중
-   더 작은 값을 넘긴 사례가 없어 가려지지 않았다(blog-quality-score functions 300 /
-   export 120 / 최대 116.9s 등). 모르는 것을 안다고 적지 않는다.
-
-⚠️ s223 당시(stock-fundamentals-kr · data-quality-fix 가 export 60 인데 30초에 죽음)의
-   관측이 틀렸는지, 그 사이 Vercel 동작이 «바뀐» 것인지는 가릴 수 없다. 어느 쪽이든
-   **현행 판단 근거는 오늘의 실측** 이다.
-
-### 운용 지침 (개정)
-
-- 30초를 넘는 라우트는 **라우트에 `export const maxDuration` 을 적는다.** 이것이 1순위다.
-- `functions` 항목은 «라우트가 스스로 선언할 수 없을 때» 만 추가한다.
-  ⚠️ `functions` 는 **50개가 스키마 상한** 이다(Rule #112). 「Rule #18 때문에 항목을 늘 같이
-     넣는다」는 옛 지침이 항목을 51개까지 밀어올려 **배포 3건을 연속으로 죽였다**(2026-08-27).
-     그 지침이 이 규칙의 가장 비싼 부작용이었다.
-- 새 cron 추가 시 라우트 export 를 «반드시» 적고, functions 는 손대지 않는다.
-
-### observe 504 사후 정정 (2026-08-27)
-
-⚠️ `2c0d9a07` 커밋은 observe 504 의 원인을 「캐치올이 덮었다」로 적었다. **그 진단은 틀렸다.**
-observe 는 당시 `export const maxDuration = 60` 이었으므로 한도는 60초였고, 실행이 그것을
-넘긴 것이다. 같은 커밋이 `apt_transactions(region_nm, deal_date)` 복합 인덱스도 함께
-넣었는데 — **고친 것은 그 인덱스다**. functions 항목 추가는 효과가 없었을 가능성이 크다.
-두 변경을 한 커밋에 넣어 원인이 가려졌다.
-
-## Rule #19 — cron route 삭제 전 3종 검증 (s223 신설)
-
-cron route 를 dead 로 판정하고 삭제하기 전에 반드시 다음 3가지를 모두 확인:
-
-1. **cron_logs 30일 실행 기록**: 최근 30일간 한 번도 실행되지 않았는지
-
-```sql
-SELECT route, COUNT(*) FROM cron_logs
- WHERE route = '<route>' AND created_at > now() - interval '30 days';
-```
-
-2. **Supabase pg_cron job 등록 여부**: cron.job 테이블에 _call_vercel_cron 패턴으로 외부 호출되는지 — vercel.json 에 없어도 pg_cron 이 호출하는 케이스 다수 존재
-
-```sql
-SELECT * FROM cron.job WHERE command LIKE '%<route>%';
-```
-
-3. **src/ fetch/import grep**: 다른 코드가 fetch 하거나 import 하는지
-
-```bash
-grep -r "<route>" src/
-```
-
-세 검증 모두 통과 시에만 삭제 가능. vercel.json crons 등록 여부만으로 활성/dead 판단 금지 — s223 Phase 0 검증에서 "dead 추정 30개" 중 27개가 실제 pg_cron 으로 활성 상태였음 (3개만 진짜 dead).
-
-**Discovered**: s223 Big Cleanup (2026-05-04) — vercel.json crons 에서 빠진 cron 들도 pg_cron `_call_vercel_cron` 으로 외부 호출되는 사례 21건 발견. 검증 없이 30개 모두 삭제했으면 production 즉시 손상.
-
-## Rule #20 — 광고성 메시지 발송 5중 가드 (s227 신설)
-
-**Symptom**: 광고성('ad') 카카오 메시지를 발송했는데 정보통신망법 위반 (야간 발송, 동의 만료, 채널 친구 아님 등) 사후 적발 — 감사 증거가 없어 면책 불가.
-
-**Cause**: 발송 직전 가드 체크가 분산되어 있거나 특정 경로에서 누락. 가드 통과 여부와 무관하게 발송 시도 자체가 로그로 남지 않으면 정보통신망법 50조 (광고성 정보 전송 제한) + 62조의3 (자료 보관) 감사 시 면책 근거가 사라진다.
-
-**Rule**:
-
-모든 광고성('ad') 카카오 메시지는 발송 직전 RPC `kakao_send_guard_check` 통과 필수: (1) 활성 사용자, (2) 마케팅 수신 동의, (3) 동의 2년 미만 또는 재확인, (4) 카카오 채널 친구, (5) 발송 시각 KST 08-21시 또는 야간 동의. 가드 통과 여부와 무관하게 모든 시도는 `kakao_message_send_logs` 기록 (정보통신망법 50조 + 62조의3 감사 증거).
-
-**How to apply**:
-- 광고성 메시지 발송 코드는 단일 진입점 (예: `src/lib/kakao-send.ts` 또는 admin/marketing 라우트) 으로 통합. 가드 체크 우회 경로 금지.
-- RPC 호출: `kakao_send_guard_check(p_user_id, p_message_type, p_send_at)`. `message_type='ad'` 외에도 'info' 등 광고성 외 메시지에도 적용 가능 (야간 발송 가드는 'info' 에도 권장).
-- 가드 차단 케이스도 반드시 `kakao_message_send_logs` 에 `delivery_status='blocked'` + `metadata.reason` 기록 — "가드가 막아서 안 보냄" 이력 자체가 감사 증거.
-- 가드 통과 시 실제 발송 결과 (`delivered` / `failed`) 도 동일 테이블에 기록. 모킹 환경은 `delivery_status='mock'`.
-- consent 만료 (Rule #20 항목 3) 검증은 `consent-renewal-check` (T-14d 알림) + `consent-expiry-revoke` (T+0 자동 철회) 두 cron 으로 보장.
-
-**Discovered**: s227 (2026-05-03) — 마케팅 카카오 채널 발송 파이프라인 신설 시 정보통신망법 50조/62조의3 감사 요건 정식화. cron `kakao-channel-sync` / `consent-renewal-check` / `consent-expiry-revoke` 와 admin route `marketing/kakao/send` 가 모두 동일 가드 + 동일 로그 테이블 사용해야 함.
+→ `RULES#20` 로 이관(2026-09-03 G-4 원장 통합). 문안은 `docs/RULES.md` 가 정본이다.
+⛔ 여기에 다시 적지 않는다 — 두 원장에 같은 규칙이 있으면 오늘 잡은 대역 충돌이 되돌아온다.
 
 ## Rule #21 — /apt region resolution = Edge → SSR → Client 단일 흐름 (s229 신설)
 
@@ -617,42 +519,10 @@ Server Component 페이지의 BAILOUT 진단 + fix 순서:
 - 단지/글 상세 페이지는 `force-static` (Rule #32 / s238 적용).
 - 더 짧은 revalidate (60s) 는 트래픽 적은 페이지 한정 — 봇 hit rate 가 cold start 비용 못 갚음.
 
-## Rule #43 — 중복 생존자를 `content_score` 로 고르지 말 것 (M2 B-4 신설)
+## Rule #43 — (재등재됨)
 
-**Rule**:
-같은 현장의 중복 행 중 무엇을 남길지(생존자) 정할 때 **`content_score` 를 판정 축으로 쓰지 않는다.**
-판정 축은 **슬러그 품질**이다 — 영문·블록 토큰이 온전한 쪽이 생존자다.
-
-```
-꺼짐  ---아이파크포레                 cs100   ← 점수가 높다
-살음  dmc-sk-view-아이파크포레         cs94    ← 이쪽이 생존자다
-```
-
-**왜**:
-`content_score` 는 은퇴한 행에도 그대로 남는다. 페이지 품질이 아니라 잔여값이다.
-점수로 고르면 **깨진 슬러그가 이긴다** — 토큰이 빠진 쪽이 먼저 만들어져 데이터가 더 쌓여
-있는 경우가 많기 때문이다.
-
-**이미 두 번 사고가 났다**:
-1. V15 A-1 병합 — 생존자 선정에 슬러그 품질 기준이 빠져 **23쌍이 거꾸로** 잡혔다.
-   DB 담당이 방향을 뒤집었고 `src/lib/apt/merged-slugs.ts` 헤더에 기록이 남아 있다.
-2. 지시서 M2 B-4 — "비활성인데 content_score 80+ 30건을 되살려라"로 **같은 기준이 다시 적혔다.**
-   실측하니 219건이었고 그중 210건이 `apt_site_merges.dead_slug` 였다. 그대로 켰다면
-   middleware 가 301 로 넘기고 있는 URL 이 통째로 되살아났다.
-
-**How to apply**:
-- 중복 판정 쿼리를 쓸 때 `ORDER BY content_score DESC` 로 생존자를 고르지 않는다.
-- 생존자 후보가 갈리면 슬러그를 본다. `--` 나 앞뒤 하이픈으로 토큰이 빠진 쪽이 은퇴 대상이다.
-- 이미 `apt_site_merges` 에 등재된 쌍은 **다시 판정하지 않는다.** 그 표가 유일한 근거다.
-- 비활성 행을 되살리기 전에 반드시 확인:
-  `SELECT 1 FROM apt_site_merges WHERE dead_slug = :slug` — 있으면 켜지 않는다.
-- 중복을 정리할 때 순서는 **① 생존자 `name_variants` 에 은퇴자 이름 편입 → ② 은퇴자
-  `is_active=false` → ③ `apt_site_merges` 등록 → ④ `node scripts/gen-merged-slugs.mjs`** 다.
-  ①을 빠뜨리면 구역명 검색어가 사라진다 (`sa.py` 가 `name_variants` 를 키워드로 확장한다).
-- `apt_sites` 에서 `DELETE` 금지. `is_active=false` 로만 은퇴시킨다.
-
-**Discovered**: M2 B-4 (2026-08-25) — 219건 중 조치 대상 0건. 병합표 미등재 9건만
-등록해 404 → 301 로 복구했다. `is_active` 는 한 행도 켜지 않았다.
+→ `RULES#118` 로 재등재(2026-09-03 G-4). 이 번호는 `RULES#43`(다른 규칙)와 충돌해서 비운다.
+⛔ #43 를 다시 쓰지 않는다.
 
 ## Rule #107 — `apt_sites.page_views` 를 사용자 노출 순위에 쓰지 말 것 (H4-1 신설)
 
@@ -688,7 +558,7 @@ Server Component 페이지의 BAILOUT 진단 + fix 순서:
 
 | 소스 | 실측 | 판정 |
 |---|---|---|
-| `content_score` | 은퇴 행에도 남는 잔여값 | Rule #43 |
+| `content_score` | 은퇴 행에도 남는 잔여값 | RULES#118 |
 | `trending_keywords` | heat_score 전부 100 · `2026` `아파트` 혼입 · 경기·서울 혼입 | H3-3 |
 | `search_logs` (42,576) | 30일 클릭 0 · 로그인 0 · 새벽 4~5시 최고치 | 크롤러 |
 | `gsc_search_analytics` | 마지막 적재 2026-04-22 · 상위 20개 전부 주식 종목 | 낡음 |
