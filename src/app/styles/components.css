@@ -974,3 +974,14 @@
     .kd-band { margin-left: -6px; margin-right: -6px; }
   }
 }
+
+
+/* M4-3 — 레일-본문 상호배타의 «모바일 대체» 자리.
+   ⚠️ 데스크탑(≥1024)에는 레일이 같은 정보를 이미 들고 있다. 본문에 또 그리면 한 화면이
+      같은 말을 두 번 한다 — 그래서 이 블록은 모바일에서만 산다. 종단 1회만 허용. */
+@layer patterns {
+  .kd-mobile-only { display: block; }
+  @media (min-width: 1024px) {
+    .kd-mobile-only { display: none; }
+  }
+}

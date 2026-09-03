@@ -39,10 +39,7 @@ import RegionBlockList from '@/components/apt/RegionBlockList';
 import SubscriptionCarousel from '@/components/apt/SubscriptionCarousel';
 import { getRegionBlocks, getRegionTotals, getSigunguTotals, getRegionBlockTotals, getSiteTotal } from '@/lib/apt/region-blocks';
 import { REGION_COOKIE, resolveRegion, normalizeSido } from '@/lib/region/cookie';
-import SubscriptionTimeline from '@/components/apt/SubscriptionTimeline';
 import SubscriptionCard from '@/components/apt/SubscriptionCard';
-import SubscriptionResults from '@/components/apt/SubscriptionResults';
-import AptToolChips from '@/components/apt/AptToolChips';
 import AptRelatedBlogs from '@/components/apt/AptRelatedBlogs';
 import SectionHeader from '@/components/apt/SectionHeader';
 import CurationCarousel from '@/components/ui/CurationCarousel';
@@ -59,12 +56,12 @@ import EmptyState from '@/components/ui/EmptyState';
 //   이 목록에 닿지 못했다. get_apt_pipeline 은 공고 없는 현장만 내므로 위 목록과 겹치지 않는다.
 import { getAptPipeline, normalizePipelineRegion, BUGYEONG, BUGYEONG_REGIONS, PIPELINE_SECTION_LIMIT } from '@/lib/apt/pipeline';
 import PipelineCard from '@/components/apt/PipelineCard';
-// V16 E-3 — 이번 주 움직인 현장. 카더라가 남보다 빠르다는 걸 보여주는 자리다.
-import { getAptRecentMoves } from '@/lib/apt/recent-moves';
+// M4-3 — 「이번 주 움직인 현장」·타임라인·이번 주 결과·도구 칩은 /apt 에서 렌더를 끊었다.
+//   ⛔ 컴포넌트·조회 파일은 지우지 않는다 — 홈이 자기 조회로 같은 성격의 섹션을 들고 있고,
+//      되돌릴 판단(중단점 G-1′)이 아직 열려 있다. 여기서는 임포트만 뺐다.
 import GichukActivity from '@/components/apt/GichukActivity';
 import AptViewSwitch from '@/components/apt/AptViewSwitch';
 import { fetchGichukActivity } from '@/lib/apt/gichuk-activity';
-import RecentMovesStrip from '@/components/apt/RecentMovesStrip';
 import { SectionLink } from '@/components/apt/SectionHeader';
 import { regionLabel, metaLine } from '@/lib/region/display';
 import RegionSelectPanel from '@/components/region/RegionSelectPanel';
@@ -160,12 +157,10 @@ export default async function AptPage({
    * fetchGichukActivity 는 자체 try/catch 로 절대 reject 하지 않는다. */
   const gichukPromise = fetchGichukActivity(pipelineRegion);
 
-  const [hub, pipeline, recentMoves] = await Promise.all([
+  const [hub, pipeline] = await Promise.all([
     getAptHub(region),
     // V17 F-1 게이트는 RPC 안에 있다(gated: true) — 받은 건 그대로 낸다.
     getAptPipeline(pipelineRegion, PIPELINE_SECTION_LIMIT),
-    // 움직인 현장도 파이프라인과 같은 지역 규칙을 따른다 — 두 섹션이 다른 지역을 말하면 안 된다.
-    getAptRecentMoves(pipelineRegion),
   ]);
 
   const gichuk = await gichukPromise;
@@ -269,7 +264,7 @@ export default async function AptPage({
   //   이미지가 아예 없는 현장은 넣지 않는다. 크게 나가므로 이니셜 블록으로 채우지 않는다
   //   ('있는 척' 이 되는 건 큰 이미지 자리다 — 목록 64px 칸과 판단 기준이 다르다).
   //   보유분이 3건에 못 미치면 있는 만큼만 낸다 (없는 자리를 만들지 않는다).
-  const curated = pickCuration(cards, 3);
+  const curated = pickCuration(cards, 5); // M4-3: 3 → 5장(카드 유일 자리 안에서 장수만)
   // 선택 시도 밖은 뺀다. '전국' 이면 그대로 둔다.
   const curatedInRegion = region === '전국' ? curated : curated.filter((it) => it.region_nm === region);
 
@@ -424,6 +419,23 @@ export default async function AptPage({
           )}
 
           <StageSummaryStrip items={stageItems} current={activeSt} baseQuery={baseQuery} />
+
+      {/* M4-3 — 큐레이션 캐러셀을 단계 스트립 «다음» 으로 올렸다(카드가 허용되는 유일한 자리).
+          ②-2 큐레이션 5건.
+          ⚠️ H6-2 — 선택 시도 밖의 현장은 «내지 않는다». 부산을 고른 화면 최상단에
+             「청약 D-4 · 인천」이 떠 있었다 — 지역을 고른 의미가 사라진다.
+             0건이면 미렌더한다. 전국으로 «바꾸지 않는다». */}
+      {curatedInRegion.length > 0 && (
+        <div style={{ padding: '0 var(--sp-sm)' }}>
+          <CurationCarousel
+            title={`${hub.region} 지금 주목할 청약`}
+            items={curatedInRegion.map((it) => (
+              <AptCurationCard key={it.id} item={it} today={hub.today} />
+            ))}
+          />
+        </div>
+      )}
+
         </>
       )}
 
@@ -579,8 +591,8 @@ export default async function AptPage({
 
       </AptViewSwitch>
 
-      {/* ④ 이번 주 청약 결과 */}
-      <SubscriptionResults items={hub.results} />
+      {/* M4-3 — 「이번 주 청약 결과」 섹션 제거. 전 항목이 위 청약 목록의 부분집합이라
+           같은 단지가 한 화면에 두 번 섰다(한 데이터 한 자리). 조회·컴포넌트는 남아 있다. */}
 
       {/* v5-V3: 지난 공고 진입점. 허브는 최근(60/180/365)만 보여주므로
            이 링크가 없으면 그 이전 2,842건을 아무도 찾지 못한다. */}
@@ -615,35 +627,19 @@ export default async function AptPage({
       {/* ── H4-4 재배치 · 아래 네 블록은 «내린 것이지 지운 것이 아니다» ──
            첫 화면을 제어 UI 가 다 먹고 현장이 스크롤 3~4번 뒤에 있었다.
            청약·공고 전·기축을 위로 올리고 이 넷을 그 아래로 옮겼다. 링크·라우트·조회 전부 그대로다. */}
-      {/* ① 청약 타임라인 히어로 */}
-      <SubscriptionTimeline items={hub.timeline} region={hub.region} />
+      {/* M4-3 — 「청약 타임라인」 제거. 같은 이유다 — 청약 목록이 이미 상태·D-day 로 말한다. */}
 
-      {/* ①-2 · V16 E-3 이번 주 움직인 현장.
-           히어로 바로 다음 = 콘텐츠 스택의 맨 위다. 여기가 비면 아무것도 그리지 않는다 —
-           "움직인 현장 없음" 을 내지 않는다. */}
-      <RecentMovesStrip items={recentMoves} region={pipeline.region} now={pipelineNow} />
+      {/* M4-3 — 「이번 주 움직인 현장」은 /apt 에서 걷었다. 청약 그룹과 공고 전이 단계 변화를
+           이미 말한다. ⚠️ 홈의 같은 섹션은 «존속» 이다 — 조회·컴포넌트를 지우지 않고 렌더만 끊었다. */}
 
-      {/* ②-2 큐레이션 3건.
-          ⚠️ H6-2 — 선택 시도 밖의 현장은 «내지 않는다». 부산을 고른 화면 최상단에
-             「청약 D-4 · 인천」이 떠 있었다 — 지역을 고른 의미가 사라진다.
-             0건이면 미렌더한다. 전국으로 «바꾸지 않는다». */}
-      {curatedInRegion.length > 0 && (
-        <div style={{ padding: '0 var(--sp-sm)' }}>
-          <CurationCarousel
-            title={`${hub.region} 지금 주목할 청약`}
-            items={curatedInRegion.map((it) => (
-              <AptCurationCard key={it.id} item={it} today={hub.today} />
-            ))}
-          />
-        </div>
-      )}
+      {/* M4-3 — 도구 칩 7종은 본문에서 걷고 레일 ④로 일원화했다(레일-본문 상호배타).
+           ⚠️ 모바일에는 레일이 없다 — 아래 관련 분석 블록이 종단 축약 1회를 겸한다. */}
 
-      {/* §I-3 도구 칩. 7개가 첫 화면 절반을 먹어 청약 타임라인·현장 목록보다 위에 있었다.
-           `지금 주목할 청약` 아래로 내린다 — **위치만**. 링크·라우트는 그대로다. */}
-      <AptToolChips region={hub.region} />
-
-      {/* ⑤ 관련 블로그 분석 */}
-      <AptRelatedBlogs posts={relatedBlogs} />
+      {/* ⑤ 관련 블로그 분석 — 데스크탑은 레일 ③이 가지고, 본문은 «모바일 종단 1회» 만.
+           ⚠️ 두 자리에 동시에 그리지 않는다(레일-본문 상호배타, M4-5 에서 DS_RULES 등재). */}
+      <div className="kd-mobile-only">
+        <AptRelatedBlogs posts={relatedBlogs} />
+      </div>
 
       {/* SEO: 접수중/예정 단지 Event + ItemList */}
       {events.map((ev, i) => (
