@@ -2,7 +2,7 @@
 // (v8-A1: 이전 UI 스냅샷 _legacy/s262/stock_page_v0.tsx + StockClient + TrendingKeywords 삭제.
 //  셋이 사슬로 물려 도달 불가 사문이었다 — 필요하면 git history 에서 꺼낸다.)
 // 7 sub-tab: 이슈/시총/급등/급락/거래폭증/외인/관심
-// default = 이슈 (stock_issue_scores). 비로그인 시 6번째 카드 자리에 IssueGateCard 노출.
+// default = 이슈 (stock_issue_scores). M4-1 에서 6번째 자리 게이트 카드를 걷었다(Q2ⓐ).
 // s262 Phase E (CAROUSEL v1): NEXT_PUBLIC_CAROUSEL_ENABLED 시 swipe carousel 모드.
 import { Suspense } from 'react';
 import Link from 'next/link';
@@ -10,7 +10,6 @@ import type { Metadata } from 'next';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 import StockIssueCardV2 from '@/components/cards/v2/StockIssueCardV2';
-import IssueGateCard from '@/components/cta/IssueGateCard';
 import StockTabCarousel from '@/components/carousel/StockTabCarousel';
 import CurationCarousel from '@/components/ui/CurationCarousel';
 import StockCurationCard from '@/components/stock/StockCurationCard';
@@ -246,8 +245,14 @@ async function fetchStocks(
   const quotes = () => applyFilters((sb as any).from('stock_quotes').select(baseCols).eq('is_active', true));
 
   if (sort === 'mcap') {
-    const { data } = await quotes().order('market_cap', { ascending: false, nullsFirst: false }).limit(limit);
-    return { kind: 'plain', rows: (data ?? []) as StockRow[] };
+    /* M4-1: 지수는 종목이 아니다.
+     * ⚠️ KOSPI_IDX·KOSDAQ_IDX 는 market_cap 이 99,999,999,999,999 로 박혀 있어 시총 정렬의
+     *    3·4위를 차지하고 있었다(실측 2026-09-03). 종목 순위에 지수를 섞지 않는다.
+     * ⚠️ 거르는 만큼 여유분을 더 받아 목록 길이를 지킨다. LIKE 대신 코드에서 거른다 —
+     *    PostgREST 의 `_` 는 와일드카드라 `%_IDX` 가 「…XIDX」까지 잡는다. */
+    const { data } = await quotes().order('market_cap', { ascending: false, nullsFirst: false }).limit(limit + 5);
+    const rows = ((data ?? []) as StockRow[]).filter((r) => !/_IDX$/.test(r.symbol)).slice(0, limit);
+    return { kind: 'plain', rows };
   }
   if (sort === 'gain') {
     const { data } = await quotes().order('change_pct', { ascending: false, nullsFirst: false }).limit(limit);
@@ -347,6 +352,8 @@ export default async function StockPage({
             V4-2 첫판이 서브마스트를 아래 기본 분기에만 붙여 «live 화면에는 안 나왔다».
             두 분기가 있는 화면은 «둘 다» 확인한다. */}
         <StockSubmast />
+        {/* M4 공통 — 섹션 사이 8px 밴드(--bg-base). 흰 블록을 띠가 가른다. */}
+        <div className="kd-band" aria-hidden="true" />
         <StockTabCarousel tabs={TAB_LABELS} initialIndex={initialIdx} paramDefault="issue" trackSource="stock_carousel">
           {TAB_LABELS.map((t, i) => {
             const r = allResults[i];
@@ -356,9 +363,9 @@ export default async function StockPage({
               if (issues.length === 0) return <Empty key={t.key} label="이슈 종목 데이터 준비 중" />;
               return (
                 <div key={t.key}>
-                  {issues.slice(0, 5).map((s) => <StockIssueCardV2 key={s.symbol} data={s} />)}
-                  <IssueGateCard source="issue_gate_stock" redirect="/stock" totalCount={issues.length} />
-                  {issues.slice(5).map((s) => <StockIssueCardV2 key={s.symbol} data={s} />)}
+                  {/* M4-1(Q2ⓐ): 6위 자리의 게이트 카드를 걷었다. 「로그인하면 30개」라 적었지만
+                      6~30위는 로그인과 무관하게 전부 서버 렌더되고 있었다 — 카피가 동작과 달랐다. */}
+                  {issues.map((s) => <StockIssueCardV2 key={s.symbol} data={s} />)}
                 </div>
               );
             }
@@ -395,9 +402,11 @@ export default async function StockPage({
         </h1>
 
         <StockSubmast />
+        <div className="kd-band" aria-hidden="true" />
 
         {/* v7-C2: 지수 스트립 3칸 한 줄 */}
         <StockIndexStrip data={strip} />
+        <div className="kd-band" aria-hidden="true" />
 
         {/* v7-C1: 단일 축 탭 7개 → 시장 × 정렬 2축 (+ 테마 선택) */}
         <StockFilterBars params={params} themes={themes} />
@@ -412,6 +421,7 @@ export default async function StockPage({
           />
         )}
 
+        <div className="kd-band" aria-hidden="true" />
         {kind === 'issue' ? (
           <IssueList rows={rows as StockIssueScore[]} />
         ) : (
@@ -476,8 +486,7 @@ function IssueList({ rows }: { rows: StockIssueScore[] }) {
   if (rows.length === 0) {
     return <Empty label="이슈 종목 데이터 준비 중" />;
   }
-  // 5번째 다음 IssueGateCard 삽입 — 비로그인일 때만 실제 렌더 (컴포넌트 내부에서 useAuth 체크).
-  // 로그인 사용자에게는 6번째 카드부터 정상 노출.
+  // M4-1(Q2ⓐ): 게이트 카드 제거. 아무것도 막지 않으면서 막는다고 적던 자리다.
   return (
     <div>
       <div className="kd-lhead" aria-hidden="true">
@@ -485,9 +494,7 @@ function IssueList({ rows }: { rows: StockIssueScore[] }) {
         <span>종목 · 이슈 근거</span>
         <span>현재가</span>
       </div>
-      {rows.slice(0, 5).map((s) => <IssueRow key={s.symbol} data={s} />)}
-      <IssueGateCard source="issue_gate_stock" redirect="/stock" totalCount={rows.length} />
-      {rows.slice(5).map((s) => <IssueRow key={s.symbol} data={s} />)}
+      {rows.map((s) => <IssueRow key={s.symbol} data={s} />)}
     </div>
   );
 }

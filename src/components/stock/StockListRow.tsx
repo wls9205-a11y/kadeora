@@ -17,8 +17,8 @@ import Link from 'next/link';
 import MiniSparkline from '@/components/MiniSparkline';
 import { getStockTone, stockChipStyle, formatChangePct } from '@/lib/stockColor';
 import { scoreToDisplay } from '@/lib/issue/calc';
-import IssueReasonChips from '@/components/issue/IssueReasonChips';
 import WarningLabel from '@/components/issue/WarningLabel';
+import { REASON_LABELS, REASON_MIN_VALUE } from '@/lib/issue/labels';
 import type { IssueReason, IssueWarning } from '@/lib/issue/types';
 
 /** 점수 80 이상은 붉은 칩으로 올린다. 그 아래는 단계 없이 기본 톤. */
@@ -48,6 +48,13 @@ export type StockListRowProps = {
 export default function StockListRow({
   symbol, name, price, changePct, score, rank, reasons, warning, meta, spark,
 }: StockListRowProps) {
+  /* M4-1 행 정규화 — 최상위 사유 «하나» 만 텍스트로 쓴다.
+     ⚠️ 값이 REASON_MIN_VALUE 미만이면 라벨을 달지 않는다 — 근거가 약한 말을 붙이지 않는다. */
+  const topReasonLabel = (Array.isArray(reasons) ? reasons : [])
+    .filter((r) => typeof r?.value === 'number' && r.value >= REASON_MIN_VALUE && REASON_LABELS[r.tag])
+    .sort((a, b) => b.value - a.value)
+    .map((r) => REASON_LABELS[r.tag])[0] ?? null;
+
   const tone = getStockTone(changePct);
   const chip = stockChipStyle(tone);
   const isIssue = score != null;
@@ -77,10 +84,11 @@ export default function StockListRow({
           {name}
         </span>
         <span className="kd-lrow-m">
-          {reasons && reasons.length > 0 ? (
-            <span className="kd-lrow-m-fix"><IssueReasonChips reasons={reasons} max={4} /></span>
-          ) : meta ? (
-            <span>{meta}</span>
+          {/* M4-1 행 정규화 — 사유 칩 4개가 매 행에 반복되면 그건 정보가 아니라 배경이 된다.
+              «최상위 사유 하나» 만 보조 메타에 인라인 텍스트로 붙인다(칩 아님).
+              ⚠️ 값이 REASON_MIN_VALUE 미만이면 붙이지 않는다 — 근거가 약한 라벨을 달지 않는다. */}
+          {topReasonLabel || meta ? (
+            <span>{[meta, topReasonLabel].filter(Boolean).join(' · ')}</span>
           ) : null}
           {warning ? <span className="kd-lrow-m-fix"><WarningLabel warning={warning} /></span> : null}
         </span>

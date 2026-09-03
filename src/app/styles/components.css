@@ -282,11 +282,12 @@
   .kd-lrow-k.is-soon { background: var(--accent-blue-bg);   color: var(--brand); }
 
   /* 제목 — 기본 1줄 말줄임 */
+  /* M4 위계 — 제목은 600, 700 은 «수치» 가 가진다(제목과 수치가 같은 굵기면 위계가 없다). */
   .kd-lrow-t {
     display: block;
     min-width: 0;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: var(--fw-title);
     line-height: 1.35;
     letter-spacing: -.03em;
     color: var(--text-primary);
@@ -328,7 +329,7 @@
     flex-shrink: 0;
     text-align: right;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: var(--fw-num);
     line-height: 1.3;
     font-variant-numeric: tabular-nums;
     color: var(--text-primary);
@@ -955,5 +956,21 @@
 @layer patterns {
   @media (max-width: 1023.98px) {
     .kd-submast--bleed { margin: -8px -6px 0; }
+  }
+}
+
+
+/* M4 공통 — 섹션 사이 8px 풀블리드 밴드.
+   ⚠️ 색은 «페이지 배경 계열 실토큰» 이다(--bg-base = #F5F7FA). 시안의 #EAEEF4 는 근사치였고
+      새 토큰을 만들지 않는다. 섹션은 흰 블록, 그 사이를 이 띠가 가른다.
+   ⚠️ -6px 좌우는 .kd-list 의 padding(8px 6px)을 되돌리는 값이다 — .kd-submast--bleed 와 같은 쌍.
+      ≥1024 에서는 2단 그리드라 상쇄를 걸지 않는다(레일 거터 침범 방지). */
+@layer patterns {
+  .kd-band {
+    height: 8px;
+    background: var(--bg-base);
+  }
+  @media (max-width: 1023.98px) {
+    .kd-band { margin-left: -6px; margin-right: -6px; }
   }
 }
