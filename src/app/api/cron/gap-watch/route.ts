@@ -17,46 +17,11 @@ import {
   GAP_METRICS, digestSeverity, formatDigest, severityOf,
   type GapReading,
 } from '@/lib/gap/metrics';
+// ⚠️ 라우트 모듈은 헬퍼를 export 하지 못한다(생성 타입이 거부). 판정 본문은 lib 에 산다.
+import { countSimilarPairs } from '@/lib/gap/similar-pairs';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
-
-const bare = (s: string | null | undefined) => (s ?? '').replace(/\s+/g, '');
-
-/**
- * 같은 법정동 안의 «유사쌍» 수. 중복 페이지 후보다.
- * ⚠️ 부분 문자열 포함으로만 본다. 느슨한 유사도(편집거리)를 쓰면
- *    「1차 ↔ 2차」처럼 «다른 단지» 가 대량으로 걸린다 — 지표가 울면 아무도 안 본다.
- * ⚠️ 법정동이 같은 것만 센다. 지역 울타리는 CV-B ② 와 같은 원칙이다.
- */
-export function countSimilarPairs(
-  rows: Array<{ id: string; name: string; region: string | null; sigungu: string | null; dong: string | null }>,
-): { pairs: number; samples: string[] } {
-  const groups = new Map<string, Array<{ id: string; name: string; b: string }>>();
-  for (const r of rows) {
-    if (!r.dong) continue;
-    const b = bare(r.name);
-    if (b.length < 4) continue;
-    const k = `${r.region ?? ''}|${r.sigungu ?? ''}|${r.dong}`;
-    const arr = groups.get(k) ?? [];
-    arr.push({ id: r.id, name: r.name, b });
-    groups.set(k, arr);
-  }
-  let pairs = 0;
-  const samples: string[] = [];
-  for (const arr of groups.values()) {
-    for (let i = 0; i < arr.length; i++) {
-      for (let j = i + 1; j < arr.length; j++) {
-        const a = arr[i], c = arr[j];
-        if (a.b.includes(c.b) || c.b.includes(a.b)) {
-          pairs++;
-          if (samples.length < 10) samples.push(`${a.name} <-> ${c.name}`);
-        }
-      }
-    }
-  }
-  return { pairs, samples };
-}
 
 const def = (key: string) => {
   const d = GAP_METRICS.find((m) => m.key === key);

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   GAP_METRICS, digestSeverity, formatDigest, severityOf, type GapReading,
 } from '@/lib/gap/metrics';
-import { countSimilarPairs } from '@/app/api/cron/gap-watch/route';
+import { countSimilarPairs } from '@/lib/gap/similar-pairs';
 
 const def = (k: string) => GAP_METRICS.find((m) => m.key === k)!;
 

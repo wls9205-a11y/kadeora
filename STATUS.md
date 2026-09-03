@@ -1,3 +1,16 @@
+## M4NV 공통 게이트 정상화 (2026-09-03) — 라우트 비허용 export 2건 → `src/lib`
+
+`npx tsc --noEmit` 이 `.next/types` 에서 빨갛게 나고 있었다. Next 라우트 모듈은 GET/POST·설정
+상수 말고는 export 하지 못하는데 `gap-watch`(`countSimilarPairs`)·`permits-match`
+(`toSiteFact`·`confidenceOf`·`toColumnStatus`·`indexByDong`)가 테스트용으로 내보내고 있었다.
+`next build` 는 통과하므로 «빌드는 초록인데 게이트만 빨간» 상태였고, 그 빨강은 이후 모든
+커밋의 공통 자산을 오염시킨다.
+
+본문·시그니처·크론 동작은 그대로 두고 자리만 옮겼다 — `src/lib/gap/similar-pairs.ts` ·
+`src/lib/permits/site-fact.ts`. 소비자는 두 라우트와 테스트 둘뿐이었고(외부 0), 테스트 임포트
+경로만 따라 옮겼다. 검증: 두 스위트 21케이스 통과 · `npm run build` 통과 ·
+`npx tsc --noEmit` 무출력(생성 타입 포함). CV/PV 세션 통지를 이 항목으로 갈음한다.
+
 ## CV 커버리지 폐루프 (2026-09-02) — CV-2 스키마 · CV-1 태영 소스 · [CV-A] 리허설 → 본실행 통과
 
 광고 계정 무접촉. PL-B′(9/3~9/6) 록아웃과 무관하다 — 사이트·DB 작업뿐이다.

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { confidenceOf, indexByDong, toColumnStatus, toSiteFact } from '@/app/api/cron/permits-match/route';
+import { confidenceOf, indexByDong, toColumnStatus, toSiteFact } from '@/lib/permits/site-fact';
 import { judgeMatch, type PermitFact } from '@/lib/permits/match';
 
 /**
