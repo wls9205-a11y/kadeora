@@ -43,14 +43,20 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { region } = await params;
   const decoded = decodeURIComponent(region);
+  /* NV-1 — 검색 표현을 앞에 세운다.
+   *
+   * ⚠️ 뒤에 「| 카더라」를 붙이지 «않는다». layout 의 title template 이 `%s | 카더라` 라
+   *    페이지가 또 붙이면 배포본이 「… | 카더라 | 카더라」가 된다(9/3 실측 — 구 문자열의
+   *    실제 증상이었다). 지시서 공식의 꼬리는 이 템플릿이 담당한다. */
+  const year = new Date().getFullYear();
   return {
-    title: `${decoded} 부동산 — 아파트 청약·실거래가·미분양·재개발 ${new Date().getFullYear()} | 카더라`,
-    description: `${decoded} 지역 아파트 청약 일정, 분양가, 실거래가 시세, 재개발 현황, 미분양 정보를 한눈에. 카더라에서 ${decoded} 부동산 데이터를 무료로 확인하세요.`,
+    title: `${decoded} 아파트 분양·청약 일정 — 미분양·선착순·재개발 현황 (${year})`,
+    description: `${decoded} 아파트 분양 일정과 청약·분양가를 한눈에. 미분양·무순위(줍줍)·잔여세대와 재개발 진행 단계까지 카더라가 매일 갱신합니다.`,
     alternates: { canonical: `${SITE_URL}/apt/region/${encodeURIComponent(decoded)}` },
     robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
     openGraph: {
-      title: `${decoded} 부동산 종합 정보`,
-      description: `${decoded} 청약·실거래·재개발·미분양 한눈에`,
+      title: `${decoded} 아파트 분양·청약 일정 (${year})`,
+      description: `${decoded} 아파트 분양·청약 일정과 미분양·줍줍·재개발 현황을 매일 갱신`,
       url: `${SITE_URL}/apt/region/${encodeURIComponent(decoded)}`,
       siteName: '카더라',
       locale: 'ko_KR',
@@ -60,7 +66,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         { url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded + ' 부동산')}&category=apt`, width: 630, height: 630, alt: `${decoded} 부동산` },
       ],
     },
-    twitter: { card: 'summary_large_image' as const, title: `${decoded} 부동산`, description: `청약·실거래·재개발·미분양 종합 정보` },
+    twitter: { card: 'summary_large_image' as const, title: `${decoded} 아파트 분양·청약`, description: `${decoded} 아파트 분양 일정·미분양·줍줍·재개발 현황` },
     other: {
       'naver:written_time': new Date().toISOString(),
       'naver:updated_time': new Date().toISOString(),
@@ -227,7 +233,7 @@ const EXISTING_STAGES = new Set(['post_move_in', 'active_trade', 'landmark_activ
  *    남색이 돼 현장이 구분되지 않는다 — SiteThumb 주석의 금지사항.
  * ⚠️ leadContext 도 넘기지 않는다(기본 false). 목록은 광고 랜딩이 아니다.
  */
-function RegionThumb({ meta, name, w, size }: { meta?: SiteMeta; name: string; w: number; size: number }) {
+function RegionThumb({ meta, name, w, size, region }: { meta?: SiteMeta; name: string; w: number; size: number; region?: string }) {
   return (
     <SiteThumb
       slug={meta?.slug ?? ''}
@@ -237,6 +243,7 @@ function RegionThumb({ meta, name, w, size }: { meta?: SiteMeta; name: string; w
       cardImageUrl={meta?.card_image_url}
       lifecycleStage={meta?.lifecycle_stage}
       heroLicenseTier={meta?.hero_license_tier}
+      region={region}
       width={w}
       size={size}
     />
@@ -286,16 +293,16 @@ export default async function RegionLandingPage({ params }: Props) {
           };
         }),
       })}} />}
-      {/* JSON-LD: FAQ (지역 검색 SERP 아코디언) */}
+      {/* NV-1 — FAQPage 는 «한 페이지에 하나» 다.
+          이 파일엔 FAQPage JSON-LD 가 «두 블록» 있었다(여기 8문답 + 하단 3~4문답). 같은 페이지가
+          두 FAQ 를 말하면 수집기가 어느 쪽을 쓰는지 우리가 모른다 — 하나로 합치고 하단 블록은 지웠다.
+          ⛔ 문장에 숫자를 «쓰지» 않는다. 전부 조회 결과 변수다(하드코딩 금지). */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
-        {"@type":"Question","name":`${decoded} 아파트 청약 일정은?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 지역에는 현재 ${data.subscriptions.length}건의 청약이 진행 중입니다. 카더라에서 접수 일정, 경쟁률, 분양가를 실시간으로 확인하세요.`}},
-        {"@type":"Question","name":`${decoded} 미분양 아파트 현황은?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 지역에는 ${data.unsolds.length}건의 미분양 현장이 있습니다. 할인 분양, 중도금 혜택 등을 비교해보세요.`}},
-        {"@type":"Question","name":`${decoded} 재개발 진행 현황은?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 지역에서 ${data.redevelopments.length}건의 재개발·재건축 사업이 진행 중입니다. 사업 단계, 조합 현황, 예상 분양 시기를 확인하세요.`}},
-        {"@type":"Question","name":`${decoded} 모집공고 확인 방법은?`,"acceptedAnswer":{"@type":"Answer","text":`카더라에서 ${decoded} 지역 아파트 입주자모집공고 핵심 요약, 분양 조건(분양가상한제·전매제한·거주의무), 평형별 공급 정보를 확인할 수 있습니다. 각 현장 상세 페이지에서 모집공고 요약을 제공합니다.`}},
-        {"@type":"Question","name":`${decoded} 실거래가 조회 방법은?`,"acceptedAnswer":{"@type":"Answer","text":`카더라에서 ${decoded} 지역 ${data.transactions.length}건의 아파트 실거래가를 조회할 수 있습니다. 단지별, 면적별, 기간별 필터로 원하는 정보를 찾아보세요.`}},
-        {"@type":"Question","name":`${decoded} 아파트 평균 시세는?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 지역의 최근 실거래 ${data.transactions.length}건을 기준으로 평균 매매가를 확인할 수 있습니다. 카더라 단지백과에서 단지별 상세 시세를 비교해보세요.`}},
-        {"@type":"Question","name":`${decoded} 분양중인 아파트는?`,"acceptedAnswer":{"@type":"Answer","text":`현재 ${decoded} 지역에서 분양 진행 중인 현장을 카더라 부동산 페이지에서 확인할 수 있습니다. 분양가, 시공사, 입주 예정일까지 한눈에 비교하세요.`}},
-        {"@type":"Question","name":`${decoded} 전세 시세는?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 지역 아파트 전세·월세 시세는 카더라 단지백과에서 단지별로 확인할 수 있습니다. 전세가율, 월세 보증금 등 임대차 정보를 제공합니다.`}},
+        {"@type":"Question","name":`${decoded} 아파트 분양 일정은 어디서 확인하나요?`,"acceptedAnswer":{"@type":"Answer","text":`이 페이지에서 ${decoded} 아파트 분양·청약 일정을 매일 갱신합니다. 지금은 청약 ${data.subscriptions.length}건을 접수 일정·분양가와 함께 보고 있습니다.`}},
+        {"@type":"Question","name":`${decoded} 미분양·줍줍(무순위)은 어디서 보나요?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 미분양·선착순 현장 ${data.unsolds.length}건을 카더라 미분양 페이지(${SITE_URL}/apt/unsold)에서 잔여세대와 함께 확인할 수 있습니다.`}},
+        {"@type":"Question","name":`${decoded} 재개발 진행 단계는 어떻게 보나요?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 재개발·재건축 ${data.redevelopments.length}건의 조합설립·사업시행·관리처분 단계를 재개발 현황 페이지(${SITE_URL}/apt/redev)에서 단계별로 볼 수 있습니다.`}},
+        {"@type":"Question","name":`${decoded} 실거래가는 어떻게 조회하나요?`,"acceptedAnswer":{"@type":"Answer","text":`카더라에서 ${decoded} 지역 아파트 실거래 ${data.transactions.length}건을 단지별·면적별로 조회할 수 있습니다.`}},
+        {"@type":"Question","name":`${decoded} 모집공고는 어디서 확인하나요?`,"acceptedAnswer":{"@type":"Answer","text":`각 현장 상세 페이지에서 ${decoded} 아파트 입주자모집공고 요약과 분양 조건(분양가상한제·전매제한·거주의무), 평형별 공급 정보를 제공합니다.`}},
       ]}) }} />
       {/* 헤더 */}
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
@@ -308,7 +315,8 @@ export default async function RegionLandingPage({ params }: Props) {
         </nav>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={`/api/og?title=${encodeURIComponent(decoded + ' 부동산')}&design=2&category=apt&subtitle=${encodeURIComponent('청약·실거래·재개발·미분양')}`} alt={`${decoded} 부동산 정보 — 청약 실거래 재개발 미분양 종합`} width={1200} height={630} style={{ width: '100%', maxHeight: 160, objectFit: 'cover', display: 'block', borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-md)', border: '1px solid var(--border)' }} loading="lazy" />
-        <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)' }}>🏙️ {decoded} 부동산 종합</h1>
+        {/* NV-1 — h1 도 title 과 같은 공식(개정 근거: 최종지시서_M4NV §4 A-2). 이모지는 뺀다. */}
+        <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)' }}>{decoded} 아파트 분양·청약 일정</h1>
         <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
         <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
           청약 {data.subscriptions.length}건 · 실거래 {data.transactions.length}건 · 재개발 {data.redevelopments.length}건 · 미분양 {data.unsolds.length}건
@@ -421,7 +429,7 @@ export default async function RegionLandingPage({ params }: Props) {
               borderRadius: 'var(--radius-md)', marginBottom: 6,
             }}>
               {/* R1: hero 체인 — 청약. 이 자리엔 뉴스 사진 핫링크가 있었다. */}
-              <RegionThumb meta={data.siteMeta.get(s.house_nm)} name={s.house_nm} w={72} size={54} />
+              <RegionThumb region={decoded} meta={data.siteMeta.get(s.house_nm)} name={s.house_nm} w={72} size={54} />
               <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                 <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.house_nm}</span>
@@ -499,7 +507,7 @@ export default async function RegionLandingPage({ params }: Props) {
               borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-xs)',
             }}>
               {/* R1: hero 체인 — 재개발. 부산 11건 중 9건이 조감도로 바뀐다(최대 수확). */}
-              <RegionThumb meta={data.siteMeta.get(r.district_name)} name={r.district_name} w={56} size={42} />
+              <RegionThumb region={decoded} meta={data.siteMeta.get(r.district_name)} name={r.district_name} w={56} size={42} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{r.district_name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{r.region}</div>
@@ -526,7 +534,7 @@ export default async function RegionLandingPage({ params }: Props) {
               borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-xs)',
             }}>
               {/* R1: hero 체인 — 미분양. */}
-              <RegionThumb meta={data.siteMeta.get(u.house_nm)} name={u.house_nm} w={56} size={42} />
+              <RegionThumb region={decoded} meta={data.siteMeta.get(u.house_nm)} name={u.house_nm} w={56} size={42} />
               <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1, minWidth: 0 }}>{u.house_nm}</div>
               <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-red)', flexShrink: 0 }}>{u.tot_unsold_hshld_co}세대</span>
             </div>
@@ -566,6 +574,25 @@ export default async function RegionLandingPage({ params }: Props) {
         </div>
       </section>
 
+      {/* NV-1 — 가시 FAQ 3문답. 위 JSON-LD 와 «같은 말» 이다(구조화 데이터만 있는 FAQ 금지). */}
+      <section style={{ marginBottom: 'var(--sp-xl)' }}>
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>{decoded} 분양 자주 묻는 질문</h2>
+        <dl style={{ margin: 0, fontSize: 12, lineHeight: 1.7, color: 'var(--text-secondary)', wordBreak: 'keep-all' }}>
+          <dt style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: 8 }}>{decoded} 아파트 분양 일정은 어디서 확인하나요?</dt>
+          <dd style={{ margin: '2px 0 0' }}>이 페이지에서 {decoded} 아파트 분양·청약 일정을 매일 갱신합니다. 지금은 청약 {data.subscriptions.length}건을 접수 일정·분양가와 함께 보고 있습니다.</dd>
+          <dt style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: 8 }}>{decoded} 미분양·줍줍(무순위)은 어디서 보나요?</dt>
+          <dd style={{ margin: '2px 0 0' }}>
+            {decoded} 미분양·선착순 현장 {data.unsolds.length}건을{' '}
+            <Link href="/apt/unsold" style={{ color: 'var(--brand)', fontWeight: 600 }}>미분양 페이지</Link>에서 잔여세대와 함께 볼 수 있습니다.
+          </dd>
+          <dt style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: 8 }}>{decoded} 재개발 진행 단계는 어떻게 보나요?</dt>
+          <dd style={{ margin: '2px 0 0' }}>
+            {decoded} 재개발·재건축 {data.redevelopments.length}건의 조합설립·사업시행·관리처분 단계를{' '}
+            <Link href="/apt/redev" style={{ color: 'var(--brand)', fontWeight: 600 }}>재개발 현황</Link>에서 단계별로 확인하세요.
+          </dd>
+        </dl>
+      </section>
+
       {/* CTA */}
       <div style={{ textAlign: 'center', padding: 20 }}>
         <Link href="/apt" style={{
@@ -576,16 +603,6 @@ export default async function RegionLandingPage({ params }: Props) {
         </Link>
       </div>
 
-      {/* JSON-LD: FAQPage */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        '@context': 'https://schema.org', '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: `${decoded} 아파트 청약 일정은?`, acceptedAnswer: { '@type': 'Answer', text: `현재 ${decoded} 지역에서 ${data.subscriptions.length}건의 청약이 진행 중입니다. 카더라에서 일정과 경쟁률을 확인하세요.` } },
-          { '@type': 'Question', name: `${decoded} 미분양 현황은?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded} 지역 미분양은 ${data.unsolds.length}개 단지입니다.` } },
-          { '@type': 'Question', name: `${decoded} 재개발 현황은?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded} 지역에서 ${data.redevelopments.length}건의 재개발·재건축이 진행 중입니다.` } },
-          ...(data.priceStats ? [{ '@type': 'Question', name: `${decoded} 평균 분양가는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded} 지역 평균 분양가는 ${fmtPrice(data.priceStats.avgMin)}~${fmtPrice(data.priceStats.avgMax)} 수준입니다.` } }] : []),
-        ],
-      })}} />
     </article>
   );
 }

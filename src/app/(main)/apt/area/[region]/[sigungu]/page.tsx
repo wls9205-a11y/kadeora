@@ -48,8 +48,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const wp = profiles.filter((p: any) => p.latest_sale_price > 0);
   const avg = wp.length > 0 ? Math.round(wp.reduce((s: number, p: any) => s + p.latest_sale_price, 0) / wp.length) : 0;
   const totalTrades = profiles.reduce((s: number, p: any) => s + (p.sale_count_1y || 0), 0);
-  const title = `${sigungu} 아파트 실거래가·시세 2026 | ${profiles.length}개 단지 비교`;
-  const desc = `${region} ${sigungu} ${profiles.length}개 아파트 단지 실거래가·전세·월세 비교. 평균 매매가 ${fmtAmount(avg)}, 최근 1년 거래 ${totalTrades.toLocaleString()}건. 연차별·가격대별 시세를 카더라에서 확인하세요.`;
+  /* NV-1 — 검색 표현을 앞에 세운다. 「{구군} 아파트 분양」이 선두, 기존 시세 문구는 뒤에 보존한다.
+   * ⚠️ 연도는 «박지 않는다». 구 문자열의 '2026' 은 해가 바뀌면 그날로 거짓이 된다.
+   * ⚠️ 위 10프로필 noindex 게이트는 손대지 않는다 — 얇은 페이지를 색인에 올리는 변경이 아니다. */
+  const year = new Date().getFullYear();
+  const title = `${sigungu} 아파트 분양·청약 — 시세·미분양 (${year})`;
+  const desc = `${region} ${sigungu} 아파트 분양·청약 일정과 미분양을 한눈에. ${profiles.length}개 단지 실거래가·전세·월세 비교, 평균 매매가 ${fmtAmount(avg)}, 최근 1년 거래 ${totalTrades.toLocaleString()}건. 연차별·가격대별 시세를 카더라에서 확인하세요.`;
   const geo = GEO[region];
   const avgLat = profiles.filter((p: any) => p.latitude).length > 0 ? profiles.filter((p: any) => p.latitude).reduce((s: number, p: any) => s + Number(p.latitude), 0) / profiles.filter((p: any) => p.latitude).length : Number(geo?.lat || 0);
   const avgLng = profiles.filter((p: any) => p.longitude).length > 0 ? profiles.filter((p: any) => p.longitude).reduce((s: number, p: any) => s + Number(p.longitude), 0) / profiles.filter((p: any) => p.longitude).length : Number(geo?.lng || 0);

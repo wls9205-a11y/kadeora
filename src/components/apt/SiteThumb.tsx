@@ -98,6 +98,13 @@ export interface SiteThumbProps {
    *    퍼센트 스타일이 같이 붙으면 브라우저가 종횡비를 잘못 잡는다.
    */
   width?: number | string;
+  /**
+   * NV-3 — alt 에 붙일 지역. 허브(지역·구군) 호출부만 넘긴다.
+   *
+   * ⚠️ 안 넘기면 최소형(`{name} 아파트`)으로 폴백한다 — 호출부를 전수 고치지 않아도
+   *    빈 alt 가 남지 않는다.
+   */
+  region?: string | null;
 }
 
 export default function SiteThumb({
@@ -112,6 +119,7 @@ export default function SiteThumb({
   className,
   palette = 'auto',
   width,
+  region,
 }: SiteThumbProps) {
   const src = pickThumbSrc({ thumbUrl, cardImageUrl, lifecycleStage, heroLicenseTier, leadContext });
 
@@ -125,11 +133,18 @@ export default function SiteThumb({
 
   if (src) {
     const fluid = typeof box.width === 'string';
+    /* NV-3 — 장식(빈 alt) 에서 정보 alt 로 전환한다.
+     *
+     * 근거: 이 이미지는 «그 현장의 사진» 이고, 네이버 이미지 수확의 표적이다. 인접 텍스트는
+     *   단지명뿐이라 지역·용도(아파트 분양)를 얹으면 완전 중복이 아니다.
+     * ⚠️ 지역을 안 받은 호출부는 최소형으로 떨어진다 — 빈 alt 로 되돌리지 않는다.
+     * ⛔ CSS 폴백 카드는 <img> 가 아니다(aria-hidden 유지) — alt 이야기가 아니다. */
+    const alt = region ? `${name} — ${region} 아파트 분양` : `${name} 아파트`;
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={src}
-        alt=""
+        alt={alt}
         {...(fluid ? {} : { width: size, height: size })}
         loading="lazy"
         decoding="async"
