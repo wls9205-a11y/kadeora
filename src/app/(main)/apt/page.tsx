@@ -311,6 +311,22 @@ export default async function AptPage({
    */
   const regionSiteCount = siteTotal;
 
+  /* M4-3 청약 단일화 — 한 목록 안에서 «상태 그룹» 으로 나눈다.
+   * ⚠️ 섹션을 넷으로 쪼개던 것을 하나로 접었으므로, 사람이 상태를 잃지 않게 그룹 머리를 둔다.
+   *    그룹 안 정렬은 RPC 가 이미 준 순서(weight → dday → 마감일)를 그대로 쓴다 — 다시 정렬하지 않는다.
+   * ⚠️ 계약중은 5건까지만. 「지난 공고 더보기」가 그 뒤를 받는다.
+   * ⚠️ 예정·무순위는 지시서 목록에 없지만 «있는 데이터» 라 조용히 버리지 않는다 — 5건 그룹으로 남긴다. */
+  const CARD_GROUPS: { key: string; label: string; statuses: string[]; cap?: number }[] = [
+    { key: 'live', label: '접수중 · 임박', statuses: ['open', 'upcoming'] },
+    { key: 'wait', label: '발표대기', statuses: ['announced_wait'] },
+    { key: 'contract', label: '계약중', statuses: ['contract'], cap: 5 },
+    { key: 'other', label: '예정 · 무순위', statuses: ['scheduled', 'leftover'], cap: 5 },
+  ];
+  const cardGroups = CARD_GROUPS
+    .map((g) => ({ ...g, items: cards.filter((it) => g.statuses.includes(String(it.status))) }))
+    .map((g) => ({ ...g, shown: g.cap ? g.items.slice(0, g.cap) : g.items }))
+    .filter((g) => g.shown.length > 0);
+
   const stLabel = activeSt === 'open' ? '접수중' : activeSt === 'soon' ? '임박 D-7' : activeSt === 'leftover' ? '무순위' : '';
   const scopeLabel = [activeSgg || hub.region, stLabel].filter(Boolean).join(' · ');
   const cardsMeta = windowLabel
@@ -501,6 +517,7 @@ export default async function AptPage({
           id="apt-cards-heading"
           eyebrow="FEATURED — 분양중"
           title="청약"
+          rule
           meta={cardsMeta}
         />
 
@@ -511,13 +528,32 @@ export default async function AptPage({
               <span>단지</span>
               <span>규모</span>
             </div>
-            {cards.map((it) => (
-              <SubscriptionCard key={it.id} item={it} />
+            {cardGroups.map((g) => (
+              <div key={g.key}>
+                {/* 그룹 머리 — 카운트는 «캡 전» 실제 건수다(캡을 실측인 척 적지 않는다). */}
+                <p style={{
+                  margin: 'var(--sp-md) 2px var(--sp-xs)',
+                  fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
+                  color: 'var(--text-secondary)', letterSpacing: '.02em',
+                }}>
+                  {g.label}{' '}
+                  <span style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--text-tertiary)' }}>
+                    {g.items.length.toLocaleString('ko-KR')}
+                  </span>
+                </p>
+                {g.shown.map((it) => (
+                  <SubscriptionCard key={it.id} item={it} />
+                ))}
+              </div>
             ))}
+            {/* 더보기는 목록 «바닥에 문장으로» — 기확정 SectionLink 하나로 통일한다. */}
+            <SectionLink href={region !== '전국' ? `/apt/archive?region=${encodeURIComponent(region)}` : '/apt/archive'}>
+              지난 공고 더보기 — 경쟁률·가점컷 연도별로
+            </SectionLink>
           </div>
         ) : (
           <EmptyState
-            icon="🏗️"
+            icon=""
             title="지금 접수중인 청약이 없습니다"
             description="새 공고가 뜨면 이 자리에 바로 올라옵니다. 위 도구로 미리 가점을 확인해 두세요."
             cta={{ label: '청약 가점 계산기 열기', href: '/apt/diagnose' }}
@@ -535,6 +571,7 @@ export default async function AptPage({
             id="apt-pipeline-heading"
             eyebrow="PIPELINE — 공고 전"
             title="공고 전 현장"
+            rule
             meta={metaLine(`${regionLabel(pipeline.region)} ${pipeline.total.toLocaleString('ko-KR')}곳`.trim(), '진행 단계순')}
           />
 
@@ -570,6 +607,7 @@ export default async function AptPage({
             id="apt-gichuk-heading"
             eyebrow="GICHUK — 기축 실거래"
             title="최근 거래된 기축 단지"
+            rule
             meta={metaLine(regionLabel(pipeline.region), '최근 180일', '거래 많은 순')}
           />
           <GichukActivity items={gichuk} />
@@ -594,35 +632,8 @@ export default async function AptPage({
       {/* M4-3 — 「이번 주 청약 결과」 섹션 제거. 전 항목이 위 청약 목록의 부분집합이라
            같은 단지가 한 화면에 두 번 섰다(한 데이터 한 자리). 조회·컴포넌트는 남아 있다. */}
 
-      {/* v5-V3: 지난 공고 진입점. 허브는 최근(60/180/365)만 보여주므로
-           이 링크가 없으면 그 이전 2,842건을 아무도 찾지 못한다. */}
-      <div style={{ padding: '0 var(--sp-sm)', margin: '0 0 var(--sp-md)' }}>
-        <Link
-          href={region !== '전국' ? `/apt/archive?region=${encodeURIComponent(region)}` : '/apt/archive'}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 'var(--sp-sm)',
-            minHeight: 'var(--touch-min)',
-            padding: '0 var(--sp-lg)',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border)',
-            background: 'var(--bg-surface)',
-            textDecoration: 'none',
-          }}
-        >
-          <span style={{ minWidth: 0 }}>
-            <span style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>
-              지난 공고 더보기
-            </span>
-            <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 1 }}>
-              마감된 청약의 경쟁률·가점컷을 연도별로
-            </span>
-          </span>
-          <span aria-hidden style={{ flexShrink: 0, fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>→</span>
-        </Link>
-      </div>
+      {/* M4-3 — 카드형 「지난 공고 더보기」는 걷었다. 같은 링크를 청약 목록 바닥의
+           문장형 SectionLink 가 이미 진다(더보기 문법 일원화). 라우트·링크는 그대로다. */}
 
       {/* ── H4-4 재배치 · 아래 네 블록은 «내린 것이지 지운 것이 아니다» ──
            첫 화면을 제어 UI 가 다 먹고 현장이 스크롤 3~4번 뒤에 있었다.

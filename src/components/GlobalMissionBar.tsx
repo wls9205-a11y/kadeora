@@ -90,7 +90,7 @@ export default function GlobalMissionBar() {
           }}
         >
           <span style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
-            <span style={{ whiteSpace: 'nowrap' }}>🎯 첫 미션</span>
+            <span style={{ whiteSpace: 'nowrap' }}>첫 미션</span>
             <span style={{ display: 'flex', gap: 3, flexShrink: 0 }}>
               {MISSIONS.map(m => (
                 <span key={m.key} style={{
