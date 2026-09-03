@@ -32,10 +32,9 @@ export default function RegionSelectPanel(props: RegionSelectPanelProps) {
           display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', width: '100%',
           minHeight: 44, padding: '0 var(--sp-lg)', borderRadius: 'var(--radius-md)',
           border: '1px solid var(--border-strong)', background: 'var(--bg-base)',
-          fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)', textAlign: 'left',
+          fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', textAlign: 'left',
         }}
       >
-        <span aria-hidden="true">📍</span>
         <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{props.summary}</span>
         <span style={{ color: 'var(--text-tertiary)', fontWeight: 500 }}>{open ? '닫기' : '지역 고르기'}</span>
       </button>

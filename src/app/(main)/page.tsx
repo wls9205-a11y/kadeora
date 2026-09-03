@@ -94,16 +94,7 @@ const DEAL_STATUSES = ['선착순', '잔여세대', '분양중'];
 
 // 홈은 사이트에서 authority 가 가장 높은 페이지다. 네이버 유입 상위 착지 페이지
 // (계산기·재개발 허브)로도 경로를 낸다. 최하단이라 첫 화면을 밀어내지 않는다.
-const QUICK_LINKS: { href: string; label: string }[] = [
-  { href: '/apt',          label: '청약 일정' },
-  { href: '/apt/redev',    label: '재개발·재건축' },
-  { href: '/apt/complex',  label: '단지백과' },
-  { href: '/calc',         label: '계산기' },
-  { href: '/stock/themes', label: '테마주' },
-  { href: '/daily',        label: '데일리 리포트' },
-  /* ⛔ '/feed' 칩 제거 — 잡담 피드 영구 폐쇄(2026-08-31). 301 로 /apt 에 튕기므로
-     남겨 두면 「눌렀더니 딴 데로 가는 칩」이 된다. */
-];
+/* M4-4 — QUICK_LINKS 는 하단 링크 그리드와 함께 걷었다(푸터 네비 중복). */
 
 /**
  * C-3 — 최근 움직인 현장.
@@ -118,7 +109,7 @@ async function fetchRecentMoves(): Promise<RecentMove[]> {
     const sb = getSupabaseAdmin();
     const { data, error } = await (sb as any).rpc('get_apt_recent_moves', {
       p_region: HOME_REGIONS,
-      p_limit: 4,
+      p_limit: 7, // M4-4: 4 → 7행 (지표 통합으로 확보한 세로를 현장에 준다)
       p_days: 30,
     });
     if (error) throw error;
@@ -244,6 +235,25 @@ export default async function HomePage() {
 
   const weekly = await weeklyPromise;
 
+  /* M4-4 신설 ② 「분석 최신 · 부동산」 3행.
+   * ⚠️ 홈↔블로그 회유로가 0 이었다(Q3 가 판정). 조회 하나를 «새로» 붙인다 — 보고 대상이다.
+   * ⛔ 실패해도 홈을 무너뜨리지 않는다. 빈 배열이면 섹션을 통째로 렌더하지 않는다. */
+  const latestBlogs = await (async () => {
+    try {
+      const { data, error } = await (getSupabaseAdmin() as any)
+        .from('blog_posts')
+        .select('id, slug, title, published_at')
+        .eq('is_published', true).eq('category', 'realestate')
+        .order('published_at', { ascending: false })
+        .limit(3);
+      if (error) { console.error(`[home] latest blogs: ${error.message?.slice(0, 160)}`); return []; }
+      return (data ?? []) as { id: string; slug: string; title: string; published_at: string | null }[];
+    } catch (e: any) {
+      console.error(`[home] latest blogs caught: ${e?.message ?? String(e)}`);
+      return [];
+    }
+  })();
+
 
 
   /* ══ H6-4 히어로 데이터 띠 ═══════════════════════════════════════════════
@@ -282,11 +292,13 @@ export default async function HomePage() {
 
     (sbHero as any).from('apt_sites')
 
-      .select('id', { count: 'exact', head: true })
+      .select('id, slug, name, display_name, region, sigungu, lifecycle_stage, total_units', { count: 'exact' })
 
       .eq('is_active', true).eq('region', heroRegion)
 
-      .in('lifecycle_stage', ['pre_announcement', 'site_planning', 'union_established', 'plan_approved', 'mgmt_approved', 'construction']),
+      .in('lifecycle_stage', ['pre_announcement', 'site_planning', 'union_established', 'plan_approved', 'mgmt_approved', 'construction'])
+      .order('stage_updated_at', { ascending: false, nullsFirst: false })
+      .limit(5),
 
   ]);
 
@@ -335,6 +347,13 @@ export default async function HomePage() {
   }
 
   const pipelineCount = pipelineCountR?.count ?? 0;
+  /* M4-4 신설 ① 「공고 전 · 카더라 단독」 — 위 조회가 이제 목록까지 준다(조회 수 그대로).
+     ⚠️ HomeRow 로 «맞춰» 넘긴다. 홈 목록 컴포넌트를 두 벌 만들지 않는다. */
+  const pipelineRows = ((pipelineCountR?.data ?? []) as any[]).map((r) => ({
+    slug: r.slug, name: r.display_name || r.name, region: r.region, sigungu: r.sigungu,
+    lifecycle_stage: r.lifecycle_stage, total_units: r.total_units, price: null,
+    hero_image_url: null, hero_license_tier: null,
+  }));
 
   if (pipelineCount > 0) {
 
@@ -384,7 +403,10 @@ export default async function HomePage() {
        *       첫 화면이 자기 맥락으로 시작한다. */}
       <RecentlyViewed limit={3} />
 
-      {weekly && <WeeklyTrades data={weekly} selectedRegion={heroRegion} />}
+      {/* M4-4 — 실거래 위젯을 걷었다. 같은 숫자(이번 주 실거래)를 히어로 스탯 띠가 이미 말한다.
+           한 화면에서 같은 값을 두 번 그리지 않는다(D7). 데이터·조회는 그대로 스탯이 쓴다. */}
+      <div className="kd-band" aria-hidden="true" />
+
 
       {/* ⛔ H7-3 — 「지금 계약 가능」 섹션을 «걷어냈다». 되살리지 말 것.
        *    그 섹션의 정렬은 content_score 였는데 「부산 기장군 미분양」 같은
@@ -406,7 +428,23 @@ export default async function HomePage() {
                 지우면 응대 못 하는 지역 현장이 홈에 뜬다(C-5). 카피만 뺀다. */}
           <SectionHeader eyebrow="APT — 최근 갱신" title="최근 움직인 현장" id="home-moves" rule />
           <RecentMoves items={moves} />
-          <MoreLink href="/apt" label="부동산 홈에서 더 보기" />
+          <MoreLink href="/apt" label="부동산 홈 — 청약·공고 전 전체" />  {/* M4-3 에서 /apt 의 같은 섹션을 걷었다. 「거기 더 있다」고 말하지 않는다. */}
+        </section>
+      )}
+
+      {/* ── M4-4 신설 ① 공고 전 · 카더라 단독 ──
+           차별점을 홈 인덱스의 «첫 섹션» 자리에 세운다. 데이터는 위 조회가 이미 준 것이다. */}
+      {pipelineRows.length > 0 && (
+        <section style={{ marginBottom: 'var(--sp-xl)' }}>
+          <SectionHeader
+            eyebrow="PIPELINE — 공고 전"
+            title="공고 전 현장"
+            id="home-pipeline"
+            meta="카더라 단독 · 단계 갱신 최신순"
+            rule
+          />
+          <SiteRows items={pipelineRows} />
+          <MoreLink href="/apt" label={`공고 전 ${pipelineCount.toLocaleString('ko-KR')}곳 전체`} />
         </section>
       )}
 
@@ -463,14 +501,33 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* 빠른 이동 — 내부 링크용. 첫 화면을 밀어내지 않게 최하단에 둔다. */}
-      <nav aria-label="주요 메뉴" style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)', padding: '0 3px' }}>
-        {QUICK_LINKS.map((l) => (
-          <Link key={l.href} href={l.href} className="touch-target" style={chipStyle}>
-            {l.label}
-          </Link>
-        ))}
-      </nav>
+      {/* M4-4 신설 ② 분석 최신 · 부동산 — 홈↔블로그 회유로가 0 이었다. */}
+      {latestBlogs.length > 0 && (
+        <section style={{ marginBottom: 'var(--sp-xl)' }}>
+          <SectionHeader eyebrow="BLOG — 부동산" title="분석 최신" id="home-blog" rule />
+          <div>
+            {latestBlogs.map((b) => (
+              <Link
+                key={b.id}
+                href={`/blog/${b.slug}`}
+                className="kd-lrow"
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                <span style={{ minWidth: 0 }}>
+                  <span className="kd-lrow-t">{b.title}</span>
+                </span>
+                <span className="kd-lrow-r">
+                  {b.published_at ? new Date(b.published_at).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }) : ''}
+                </span>
+              </Link>
+            ))}
+          </div>
+          <MoreLink href="/blog?category=realestate" label="부동산 분석 전체" />
+        </section>
+      )}
+
+      {/* M4-4(Q5ⓐ) — 하단 「빠른 이동」 링크 그리드를 걷었다. 푸터 네비가 같은 링크를 이미 진다.
+           한 화면이 같은 진입점을 두 번 말하지 않는다. */}
     </div>
   );
 }

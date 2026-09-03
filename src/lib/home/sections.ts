@@ -176,7 +176,7 @@ export async function fetchHomeSections(regions: string[]): Promise<HomeSections
       .filter((r) => REDEV_STAGES.has(r.lifecycle_stage ?? ''))
       .sort((a, b) => (b.content_score ?? 0) - (a.content_score ?? 0)
         || (b.total_units ?? 0) - (a.total_units ?? 0))
-      .slice(0, 3)
+      .slice(0, 5) /* M4-4: 3 → 5행 */
       .map((r) => toRow(r));
 
     return { popular, deals, redev };
