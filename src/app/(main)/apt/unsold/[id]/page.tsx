@@ -9,9 +9,10 @@
  *    슬러그 이름을 둘 두지 못한다(빌드가 죽는다). 지시서가 요구한 «주소» 는 /apt/unsold/{시도}
  *    이고 그 주소는 이 파일로 그대로 낼 수 있다. 갈림은 REGIONS 정확일치 하나뿐이고,
  *    시도명은 Number() 로 NaN 이라 옛 경로와 겹치지 않는다.
- * ⚠️ 가드와 generateStaticParams 는 «같은 상수»(REGIONS) 를 본다 — Rule #67.
+ * ⚠️ 가드는 REGIONS «상수 자체» 를 본다(지역 목록을 여기에 다시 적지 않는다 — Rule #67).
  */
 import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
@@ -24,14 +25,15 @@ import { SITE_URL } from '@/lib/constants';
 
 interface Props { params: Promise<{ id: string }> }
 
-export const revalidate = 3600;
+/* ⛔ 이 라우트를 «정적으로 굽지 않는다» — generateStaticParams·revalidate 를 두지 않는다.
+ *
+ *    2026-09-03 실측: 정적 렌더로 돌리자 옛 숫자 id 의 permanentRedirect 가 서버 308 이 아니라
+ *    «meta refresh + 200» 으로 나갔다(/apt/unsold/20 → content="0;url=/apt/경산-상방공원…").
+ *    소프트 리다이렉트는 색인 이전 신호가 아니다 — 옛 주소가 들고 있던 것을 잃는다.
+ *    지역 허브의 조회 비용은 아래 unstable_cache(1시간) 가 맡는다. 캐시는 페이지가 아니라
+ *    «조회» 에 건다. */
 
 const isRegion = (v: string): boolean => (REGIONS as readonly string[]).includes(v);
-
-export async function generateStaticParams() {
-  // 17 시도만 미리 굽는다. 숫자 id 리다이렉트는 요청 때 푼다.
-  return REGIONS.map((r) => ({ id: r }));
-}
 
 /**
  * 지역 미분양 목록.
@@ -40,7 +42,7 @@ export async function generateStaticParams() {
  *    거기에 시도를 물리면 17개 화면이 전부 0건이 된다 — 실측 2026-09-03 으로 확인했다.
  * ⛔ 못 읽은 것과 없는 것을 같은 값으로 돌려주지 않는다. 실패는 null 이다.
  */
-const fetchRegionUnsold = cache(async (region: string): Promise<any[] | null> => {
+async function fetchUnsoldUncached(region: string): Promise<any[] | null> {
   try {
     const sb = getSupabaseAdmin();
     let q = (sb as any).from('v_apt_card_unsold').select('*').eq('region_nm', region).limit(60);
@@ -55,6 +57,22 @@ const fetchRegionUnsold = cache(async (region: string): Promise<any[] | null> =>
     console.error(`[apt/unsold/${region}] caught: ${e?.message ?? String(e)}`);
     return null;
   }
+}
+
+const fetchUnsoldCached = unstable_cache(fetchUnsoldUncached, ['apt-unsold-region'], {
+  revalidate: 3600,
+  tags: ['apt-hub'],
+});
+
+/**
+ * ⚠️ 실패(null)를 «한 시간 굳히지» 않는다. 캐시가 null 을 돌려주면 한 번 더 직접 친다 —
+ *    getAptHub 이 s269c 회귀(빈 페이지 영구화, Rule #66) 뒤에 쓰는 것과 같은 형태다.
+ * ⚠️ 바깥의 cache() 는 «한 요청 안» 중복 호출(generateMetadata + 본문)을 접는다.
+ */
+const fetchRegionUnsold = cache(async (region: string): Promise<any[] | null> => {
+  const hit = await fetchUnsoldCached(region);
+  if (hit !== null) return hit;
+  return fetchUnsoldUncached(region);
 });
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
