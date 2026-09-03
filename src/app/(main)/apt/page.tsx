@@ -37,7 +37,7 @@ import RegionCookieSync from '@/components/apt/RegionCookieSync';
 import StageSummaryStrip, { type StageItem } from '@/components/apt/StageSummaryStrip';
 import RegionBlockList from '@/components/apt/RegionBlockList';
 import SubscriptionCarousel from '@/components/apt/SubscriptionCarousel';
-import { getRegionBlocks, getRegionTotals, getSigunguTotals, getRegionBlockTotals } from '@/lib/apt/region-blocks';
+import { getRegionBlocks, getRegionTotals, getSigunguTotals, getRegionBlockTotals, getSiteTotal } from '@/lib/apt/region-blocks';
 import { REGION_COOKIE, resolveRegion, normalizeSido } from '@/lib/region/cookie';
 import SubscriptionTimeline from '@/components/apt/SubscriptionTimeline';
 import SubscriptionCard from '@/components/apt/SubscriptionCard';
@@ -181,6 +181,8 @@ export default async function AptPage({
         getSigunguTotals(region),
         getRegionBlockTotals(region, sgg || null),
       ]);
+  // M4-0 「N곳」. 전국이든 시도든 «같은 조회의 소계 행» 이다 — 위 카운트 조회 캐시에 얹힌다.
+  const siteTotal = await getSiteTotal(region);
 
   // v4-C8: 시군구 칩은 hub.cards 에서 뽑는다 — 조회가 늘지 않고, 목록에 실제로 있는
   //   시군구만 나온다 (부산 16개 구를 전부 내면 C3 에서 고친 문제가 반복된다).
@@ -303,14 +305,16 @@ export default async function AptPage({
     { key: 'leftover', label: '선착순', count: statusCounts.leftover },
     { key: 'redev', label: '재개발', count: redevCount },
   ];
-  /* 뒤로가기 행의 숫자.
+  /* 뒤로가기 행 · 서브마스트의 숫자.
    *
    * ⚠️ 예전엔 «목록 두 덩어리의 길이 합» 이었다(각 limit 40). 그래서 화면에 「부산 80」이
    *    떴는데 바로 아래 구군 칩 배지 합은 360을 넘었다 — 같은 화면이 두 숫자를 말했다.
    *    두 자리가 «한 조회 결과» 를 쓰게 한다: get_apt_region_counts 의 시도 소계.
-   *    그 값이 곧 「전체」 칩 배지이기도 하다.
+   * ⚠️ M4-0: 그 다음엔 «구군 행의 합» 이 됐는데, 전국 진입에는 구군 조회 자체가 돌지 않아
+   *    서브마스트가 「0곳」이라 적었다. 이제 시도 소계 행(전국이면 전국 소계 행)을 그대로 읽는다 —
+   *    분기도 재계산도 없다. 못 셌으면 null 이고, 그 자리는 «지운다»(0곳을 쓰지 않는다).
    */
-  const regionSiteCount = sggTotals.reduce((s, x) => s + x.count, 0);
+  const regionSiteCount = siteTotal;
 
   const stLabel = activeSt === 'open' ? '접수중' : activeSt === 'soon' ? '임박 D-7' : activeSt === 'leftover' ? '무순위' : '';
   const scopeLabel = [activeSgg || hub.region, stLabel].filter(Boolean).join(' · ');
@@ -331,14 +335,17 @@ export default async function AptPage({
              고른 상태인지 말한다」는 계약을 지키려고 요약 문자열을 통째로 물고 있어서
              칩 슬롯에 들어가지 않는다. 폭을 뺏으면 그 계약이 깨진다.
              재구현·개조 금지(§6)라 손대지 않고 «바로 아래» 그대로 둔다.
-          ⚠️ 보조 줄의 정렬 근거는 「모집공고 기준」이다 — 아래 섹션 meta 와 같은 말을 쓴다.
-             두 자리가 다른 기준을 말하면 같은 화면이 두 소리를 낸다. */}
+          ⚠️ M4-0 — 보조 줄은 «실동작과 한 소리» 여야 한다. 예전엔 「모집공고 기준 최신순」이라
+             적었지만 get_apt_subscription_hub 의 cards 는 `ORDER BY weight, dday, rcept_endde` 다
+             (실측 2026-09-03) — 상태 → 마감 임박 순이고, 아래 섹션 meta 가 쓰는 말과 같다.
+             ⛔ 정렬을 바꾸지 않은 채 문구만 되돌리지 않는다. 문구는 조회를 따라간다. */}
       <div className="kd-submast kd-submast--bleed">
         <div className="kd-submast__row">
           <div className="kd-submast__title">부동산</div>
         </div>
         <div className="kd-submast__sub">
-          모집공고 기준 최신순 · {regionSiteCount.toLocaleString('ko-KR')}곳
+          {/* 못 셌으면(=null) 숫자 자리를 통째로 지운다 — 「0곳」은 「없다」로 읽힌다. */}
+          {regionSiteCount ? `${region} ${regionSiteCount.toLocaleString('ko-KR')}곳 · ` : ''}상태 → 마감 임박 순
         </div>
       </div>
 
@@ -406,7 +413,10 @@ export default async function AptPage({
           <Link href="/apt?region=" scroll={false} className="region-back">
             <span className="region-back__caret" aria-hidden="true">&lsaquo;</span>
             <span>{region}</span>
-            <span className="region-back__count">{regionSiteCount.toLocaleString()}</span>
+            {/* 조건부는 조건부 — 못 센 자리에 0 을 그리지 않는다. */}
+            {regionSiteCount ? (
+              <span className="region-back__count">{regionSiteCount.toLocaleString()}</span>
+            ) : null}
           </Link>
 
           {sggTotals.length > 1 && (

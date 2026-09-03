@@ -149,6 +149,24 @@ export async function getRegionTotals(): Promise<{ region: string; count: number
     .sort((a, b) => b.count - a.count);
 }
 
+/**
+ * 「N곳」 한 자리 — 서브마스트 보조 줄과 뒤로가기 행이 «같은 한 조회» 를 쓴다.
+ *
+ * ⚠️ M4-0: 전국 진입 화면이 「0곳」이라 적고 있었다. 원인은 조회가 아니라 «버린 행» 이다 —
+ *    get_apt_region_counts 는 시도 소계 17행 말고 «전국 소계 행(region IS NULL)» 도 같이
+ *    돌려주는데(실측 2026-09-03: 6,496 = 시도 소계 합), getRegionTotals 가 `r.region` 조건으로
+ *    그 행을 떨어뜨렸고 페이지는 전국일 때 구군 합을 아예 []로 두고 있었다.
+ * ⛔ 전국일 때만 «다른 합» 을 만들지 않는다. 시도든 전국이든 이 조회의 소계 행을 그대로 읽는다.
+ * ⛔ 못 셌으면 0 이 아니라 null 이다. 「0곳」은 「없다」로 읽히지만 실제로는 「못 셌다」다.
+ */
+export async function getSiteTotal(region: string): Promise<number | null> {
+  const rows = await cachedCounts();
+  if (!rows.length) return null;
+  const want = region === '전국' ? null : region;
+  const row = rows.find((r) => r.is_region_total && (r.region ?? null) === want);
+  return row ? Number(row.cnt) || 0 : null;
+}
+
 /** 선택 시도의 구군별 건수. 소계·총계 행은 뺀다. */
 export async function getSigunguTotals(region: string): Promise<{ name: string; count: number }[]> {
   const rows = await cachedCounts();
