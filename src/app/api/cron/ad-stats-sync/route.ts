@@ -107,6 +107,9 @@ async function handler(req: NextRequest) {
   // 그것을 기준으로 삼으면 나머지 10개 캠페인의 지출을 통째로 놓친다.
   const keywordIds: string[] = [];
   const kwRows: Array<Record<string, unknown>> = [];
+  // PL C-2: 광고그룹 자체의 스냅샷. 키워드가 useGroupBidAmt 로 «위임» 하면 실효
+  // 입찰가는 이쪽에 있다 — 그 값이 없어서 「E_대표 70원 vs 300원」이 안 닫혔다.
+  const agRows: Array<Record<string, unknown>> = [];
   let campaigns = 0, adgroups = 0;
   {
     const r = await fetchSearchAd(cred, 'GET', '/ncc/campaigns');
@@ -121,9 +124,19 @@ async function handler(req: NextRequest) {
       const g = await fetchSearchAd(cred, 'GET', '/ncc/adgroups', `nccCampaignId=${c.nccCampaignId}`);
       apiCalls += g.calls;
       if (!g.ok) { errorCodes[g.code] = (errorCodes[g.code] ?? 0) + 1; continue; }
-      const groups = JSON.parse(g.body) as Array<{ nccAdgroupId: string; name?: string }>;
+      const groups = JSON.parse(g.body) as Array<Record<string, unknown> & { nccAdgroupId: string; name?: string }>;
       adgroups += groups.length;
       for (const gg of groups) {
+        agRows.push({
+          adgroup_id: gg.nccAdgroupId,
+          campaign_id: c.nccCampaignId,
+          adgroup_name: gg.name ?? null,
+          bid_amt: typeof gg.bidAmt === 'number' ? gg.bidAmt : null,
+          status: gg.status ?? null,
+          // ⚠️ userLock(OFF) 은 status 와 «다른 사실» 이다. 한 칸에 뭉개지 않는다.
+          user_lock: typeof gg.userLock === 'boolean' ? gg.userLock : null,
+          raw: gg,
+        });
         const k = await fetchSearchAd(cred, 'GET', '/ncc/keywords', `nccAdgroupId=${gg.nccAdgroupId}`);
         apiCalls += k.calls;
         if (!k.ok) { errorCodes[k.code] = (errorCodes[k.code] ?? 0) + 1; continue; }
@@ -138,6 +151,10 @@ async function handler(req: NextRequest) {
             adgroup_id: gg.nccAdgroupId,
             adgroup_name: gg.name ?? null,
             bid: typeof x.bidAmt === 'number' ? x.bidAmt : null,
+            // PL C-2: true 면 위의 bid 는 «실효 입찰가가 아니다». 그룹 기본입찰가를 따른다.
+            //   그동안 우리는 이 구분 없이 bid 를 「입찰가」로 적재했고, 그래서
+            //   집행 기록(300원)과 스냅샷(70원)이 서로를 반증하는 것처럼 보였다.
+            use_group_bid: typeof x.useGroupBidAmt === 'boolean' ? x.useGroupBidAmt : null,
             status: x.status ?? null,
             // ⚠️ links 는 문자열일 때도 dict 일 때도 온다(일부 키워드가 {final: ...} 형태).
             //    바로 인덱싱하면 죽는다 — 어떤 모양이 와도 문자열을 낸다.
@@ -155,6 +172,21 @@ async function handler(req: NextRequest) {
   //    오늘 행을 넣는 것이 이 표의 «설계된» 갱신 방식이다.
   // ⚠️ site_slug·landing_* 은 직전 세대에서 이어받는다 — 광고 API 가 키워드별 랜딩을
   //    주지 않으니, 이어받지 않으면 사람이 붙인 현장 연결이 세대마다 증발한다.
+  // ── ①-a 광고그룹 스냅샷 (PL C-2) ─────────────────────────────────────────
+  // 키워드와 «같은 날짜» 로 넣는다. 하루가 어긋나면 실효 입찰가 조인이 통째로 빈다.
+  let agUpserted = 0;
+  if (!dryRun && syncKeywords && agRows.length > 0) {
+    const today = kstDate();
+    const payload = agRows.map((r) => ({ ...r, snapshot_date: today, fetched_at: new Date().toISOString() }));
+    for (let i = 0; i < payload.length; i += 500) {
+      const { error } = await (sb as any)
+        .from('ad_adgroups')
+        .upsert(payload.slice(i, i + 500), { onConflict: 'snapshot_date,adgroup_id' });
+      if (error) errorCodes.ADGROUP_SYNC_FAIL = (errorCodes.ADGROUP_SYNC_FAIL ?? 0) + 1;
+      else agUpserted += Math.min(500, payload.length - i);
+    }
+  }
+
   let kwInserted = 0, kwCarried = 0, carrySize = 0;
   if (!dryRun && syncKeywords && kwRows.length > 0) {
     const carry = new Map<string, { site_slug: unknown; landing_pc: unknown; landing_mobile: unknown }>();
@@ -257,6 +289,8 @@ async function handler(req: NextRequest) {
       keywords: ids.length,
       // ⚠️ slug_carried 가 «딱 1000» 이면 페이지네이션이 안 도는 것이다 — 서버 캡의 지문.
       keyword_sync: syncKeywords ? { upserted: kwInserted, slug_carried: kwCarried, carry_pool: carrySize } : 'skipped',
+      // ⚠️ adgroup_sync.upserted 가 adgroups 보다 작으면 실효 입찰가 조인에 «구멍» 이 난다.
+      adgroup_sync: syncKeywords ? { upserted: agUpserted, seen: agRows.length } : 'skipped',
       dates,
       chunks: chunks.length,
       batches,
