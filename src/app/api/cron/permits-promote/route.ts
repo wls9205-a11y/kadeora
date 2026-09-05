@@ -94,7 +94,7 @@ async function handler(req: NextRequest) {
   //    이미 있는 「광안동 373블럭 가로주택정비」와 «다른 slug» 라 새로 만들어질 뻔했다.
   //    그래서 ① 이름 정규화 키 ② 같은 시군구의 구역 토큰 — 세 축으로 본다.
   const siteRows = (await fetchAll(admin, 'apt_sites',
-    'id, slug, name, display_name, name_variants, region, sigungu, dong, lifecycle_stage, total_units, complex_units, is_active',
+    'id, slug, name, display_name, name_variants, region, sigungu, dong, lifecycle_stage, total_units, complex_units, supply_type, is_active',
     (q: any) => q.in('region', REGIONS))) as Array<Record<string, any>>;
   const existingSlugs = new Set<string>(siteRows.map((r) => r.slug));
   const existingNameKeys = new Set<string>();
@@ -194,11 +194,37 @@ async function handler(req: NextRequest) {
     const dupByZone = rep.sigungu && zoneTokens(rawName).some((t) => existingZoneKeys.has(`${rep.sido}|${rep.sigungu}|${t}`));
     if (dupByName || dupByZone) {
       stat.skipped_dup++;
-      skipped.push({ key, name: rawName, why: dupByName ? '이름 키 중복 — 기존 현장 있음(검수)' : '구역 토큰 중복 — 기존 현장 있음(검수)' });
+      const why = dupByName ? '이름 키 중복 — 기존 현장 있음(검수)' : '구역 토큰 중복 — 기존 현장 있음(검수)';
+      skipped.push({ key, name: rawName, why });
+      // ⚠️ 세션 A 지적(2026-09-05): 5차에서 「광안동 373BL」이 여기서 걸렸는데 permit 행은
+      //    no_target·matched_site_id NULL 그대로였다. 판정을 «기록하지 않으면» 다음 회전이
+      //    같은 것을 또 뒤집는다 — 유령 보류(ghost_hold)와 같은 규율을 여기에도 건다.
+      if (!dry) {
+        for (const r of rows) {
+          const { error: e4 } = await admin.from('apt_permits').update({
+            match_status: 'review', match_method: 'dup_hold',
+            match_note: `PV2-C 보류 — ${why} (${rawName})`.slice(0, 300),
+            matched_at: new Date().toISOString(),
+          }).eq('id', r.id);
+          if (e4) { writeFails++; if (firstWriteError == null) firstWriteError = String(e4.message).slice(0, 200); }
+        }
+      }
       continue;
     }
     // ⛔ 유령 검사 — 매처가 못 이었을 뿐 «있는» 현장일 수 있다. 만들지 않고 큐로 보낸다.
-    const ghosts = collides(rep);
+    // ⚠️ 다만 «공급유형이 다르면» 같은 동·같은 시기여도 다른 사업이다(세션 A 실측 2026-09-05):
+    //    인허가 「범천동 858-6번지 일원 희망더함아파트」(부산도시공사 공공 브랜드)가
+    //    같은 동의 «민간» 분양예정 시드와 같은 시기라 동일 사업으로 오인될 뻔했다.
+    //    공공 사업이 «민간뿐인» 후보군에 걸렸으면 보류하지 않는다.
+    const supplyEarly = judgeSupplyType(rawName, rep.address, rep.developer ?? null);
+    const ghostsAll = collides(rep);
+    const publicVsPrivateOnly = supplyEarly === '공공'
+      && ghostsAll.length > 0
+      && ghostsAll.every((g) => String(g.supply_type ?? '') !== '공공');
+    const ghosts = publicVsPrivateOnly ? [] : ghostsAll;
+    if (publicVsPrivateOnly) {
+      skipped.push({ key, name: rawName, why: `공공↔민간 분기 — 별개 사업으로 본다(후보: ${ghostsAll.map((g) => g.slug).join(', ')})`.slice(0, 200) });
+    }
     if (ghosts.length) {
       stat.held_ghost++;
       const note = `PV2-C 보류 — 같은 동/구의 공고 전 현장과 겹칠 수 있다: ${ghosts.map((g) => `${g.slug}(${g.complex_units ?? g.total_units ?? '세대수 미상'})`).join(', ')}`;
@@ -226,7 +252,7 @@ async function handler(req: NextRequest) {
       continue;
     }
 
-    const supply = judgeSupplyType(rawName, rep.address, rep.developer ?? null);
+    const supply = supplyEarly;
     // 착수조건 ② — 명지 A-5BL·B14BL 은 LH 블록 의심. 판정 전까지 광고 금지.
     const lhSuspect = /명지\s*[AB]-?\d+\s*BL/i.test(rawName.replace(/\s+/g, ' '));
     const adBlocked = adBlockedFor(supply) || lhSuspect;
