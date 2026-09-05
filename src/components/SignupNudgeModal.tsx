@@ -26,6 +26,7 @@ import { isAptSiteDetailPath } from '@/lib/apt/is-site-detail';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { errMsg } from '@/lib/error-utils';
 import { useInAppBrowser } from '@/hooks/useInAppBrowser';
+import { startSignupAttempt } from '@/lib/signup-attempt';
 
 interface ValueProp {
   icon: string;
@@ -122,12 +123,8 @@ export default function SignupNudgeModal() {
     setLoginLoading(provider);
     setLoginError('');
     try {
-      // 가입 시도 추적 (실패해도 무시)
-      fetch('/api/auth/track-attempt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider, source: 'signup_nudge_modal', redirect_path: window.location.pathname, success: false }),
-      }).catch(() => {});
+      // SU A-2: /login 과 같은 순서 — 시작 행을 먼저 앉히고(kd_att 쿠키) OAuth 로 간다.
+      await startSignupAttempt({ provider, source: 'signup_nudge_modal', redirect_path: window.location.pathname });
 
       const sb = createSupabaseBrowser();
       const redirect = window.location.pathname + window.location.search;

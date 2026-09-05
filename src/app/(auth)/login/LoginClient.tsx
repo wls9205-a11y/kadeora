@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { trackCtaClick } from '@/lib/cta-track';
 import { useInAppBrowser } from '@/hooks/useInAppBrowser';
+import { startSignupAttempt, reportSignupAttempt } from '@/lib/signup-attempt';
 import InAppBrowserModal from '@/components/InAppBrowserModal';
 
 interface LoginFormProps {
@@ -25,10 +26,10 @@ function LoginForm({ redirect }: LoginFormProps) {
     setLoading(provider);
     setError('');
     const source = new URLSearchParams(window.location.search).get('source') || 'direct';
-    // 가입 시도 추적 + CTA 클릭 이벤트 (conversion_events)
-    // s260 P0: keepalive — OAuth 리디렉트가 먼저 일어나 fetch drop 되는 race 방지.
-    fetch('/api/auth/track-attempt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true, body: JSON.stringify({ provider, source, redirect_path: redirect, success: false }) }).catch(() => {});
     trackCtaClick({ cta_name: source, category: 'signup', page_path: window.location.pathname });
+    // SU A-2: 시작 행을 «먼저 앉히고» OAuth 로 넘어간다. 응답의 kd_att 쿠키가
+    // 콜백의 1순위 매칭 키. 상한(300ms) 안에 못 오면 쿠키 없이 진행 — 폴백이 받는다.
+    await startSignupAttempt({ provider, source, redirect_path: redirect });
     try {
       const sb = createSupabaseBrowser();
       // s235: kakao 최소 스코프. account_email 은 Kakao 비즈채널 검수 필요해서 제외 — 50% 이탈
@@ -42,10 +43,10 @@ function LoginForm({ redirect }: LoginFormProps) {
       if (err) throw err;
     } catch (e: unknown) {
       // s260 P0: 실패 사유 기록 — track-attempt 두 번째 호출로 error_message 전달.
-      fetch('/api/auth/track-attempt', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true,
-        body: JSON.stringify({ provider, source, redirect_path: redirect, success: false, error_message: (e instanceof Error ? e.message : 'login_oauth_throw').slice(0, 250) }),
-      }).catch(() => {});
+      reportSignupAttempt({
+        provider, source, redirect_path: redirect,
+        error_message: (e instanceof Error ? e.message : 'login_oauth_throw').slice(0, 250),
+      });
       setError(e instanceof Error ? errMsg(e) : '로그인 중 오류가 발생했습니다');
       setLoading(null);
     }

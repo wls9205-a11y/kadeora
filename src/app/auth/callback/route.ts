@@ -29,6 +29,10 @@ export async function GET(request: NextRequest) {
   // s196: 모바일 OAuth callback drop 75% 진단 — UA/provider/code 존재 여부 로깅
   const ua = request.headers.get('user-agent') || '';
   const isMobile = /Mobile|Android|iPhone|iPad|iPod/i.test(ua);
+  // SU A-2: track-attempt 가 시작 시 심은 상관관계 id. 매칭의 1순위이며,
+  // 응답에서 반드시 지운다(다음 로그인이 남의 행을 갱신하지 않게).
+  const attemptCookieRaw = request.cookies.get('kd_att')?.value ?? '';
+  const attemptIdFromCookie = /^\d+$/.test(attemptCookieRaw) ? Number(attemptCookieRaw) : null;
   console.log(`[auth/callback] entry mobile=${isMobile} source="${source}" hasCode=${!!code} redirect="${redirect}" ua="${ua.slice(0, 80)}"`);
 
   // Open redirect 방어
@@ -76,6 +80,12 @@ export async function GET(request: NextRequest) {
   }
 
   const user = data.user;
+  // SU B-2: 「성공 8」과 「실가입 4」의 괴리를 signup_attempts 안에서 가르는 자.
+  //   재로그인도 success=true 라 성공 수만으로는 신규를 셀 수 없었다.
+  const isNewUser = (() => {
+    const createdAt = user.created_at ? new Date(user.created_at).getTime() : NaN;
+    return Number.isFinite(createdAt) ? Date.now() - createdAt < 5 * 60_000 : null;
+  })();
   const meta = user.user_metadata ?? {};
   const avatarUrl = (meta?.avatar_url || meta?.picture || null)?.replace('http://', 'https://') ?? null;
   const provider = (user.app_metadata?.provider ?? 'unknown') as string;
@@ -125,19 +135,33 @@ export async function GET(request: NextRequest) {
     const ipHash = ipRaw ? createHash('sha256').update(ipRaw).digest('hex').slice(0, 16) : null;
 
     // 기존 attempt row (oauth_started_at 있는 것) 을 갱신, 없으면 신규 INSERT
-    const { data: existingAttempt } = await (admin as any)
-      .from('signup_attempts')
-      .select('id')
-      .eq('provider', provider)
-      .eq('source', source)
-      .eq('ip_hash', ipHash)
-      .gte('oauth_started_at', new Date(Date.now() - 15 * 60_000).toISOString())
-      .is('oauth_callback_at', null)
-      .order('id', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    // SU A-2: 매칭 1순위는 «추측» 이 아니라 시작 시 발급한 상관관계 id 다.
+    let attemptId: number | null = attemptIdFromCookie;
+    if (attemptId != null) {
+      const { data: byCookie } = await (admin as any)
+        .from('signup_attempts').select('id').eq('id', attemptId).maybeSingle();
+      if (!byCookie?.id) attemptId = null; // 쿠키가 가리키는 행이 없으면 폴백으로
+    }
 
-    if (existingAttempt?.id) {
+    // 폴백 — 쿠키가 없거나(구버전 탭·차단 환경) 가리키는 행이 없을 때.
+    // ⚠️ source 조건을 뺐다: 콜백 URL 의 source 와 시작 행의 source 가 «다른» 사례가
+    //    실측됐다(고아 콜백의 절반). source 로 좁히면 시작 행을 못 찾고 새 행을 만든다.
+    //    ⛔ 대신 갱신에서 source 를 덮어쓰지 않는다 — 시작 행의 source 가 정본이다(s188).
+    if (attemptId == null && ipHash) {
+      const { data: existingAttempt } = await (admin as any)
+        .from('signup_attempts')
+        .select('id')
+        .eq('provider', provider)
+        .eq('ip_hash', ipHash)
+        .gte('oauth_started_at', new Date(Date.now() - 15 * 60_000).toISOString())
+        .is('oauth_callback_at', null)
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (existingAttempt?.id) attemptId = existingAttempt.id as number;
+    }
+
+    if (attemptId != null) {
       await (admin as any).from('signup_attempts').update({
         oauth_callback_at: nowIso,
         profile_created_at: rpcOk ? nowIso : null,
@@ -145,7 +169,8 @@ export async function GET(request: NextRequest) {
         onboarding_skipped: true,
         redirect_path: safeRedirect,
         error_message: rpcOk ? null : 'frictionless_rpc_failed',
-      }).eq('id', existingAttempt.id);
+        is_new_user: isNewUser,
+      }).eq('id', attemptId);
     } else {
       await (admin as any).from('signup_attempts').insert({
         provider, source, redirect_path: safeRedirect,
@@ -155,6 +180,7 @@ export async function GET(request: NextRequest) {
         profile_created_at: rpcOk ? nowIso : null,
         onboarding_skipped: true,
         error_message: rpcOk ? null : 'frictionless_rpc_failed',
+        is_new_user: isNewUser,
       });
     }
   } catch { /* 로깅 실패는 무시 */ }
@@ -230,5 +256,7 @@ export async function GET(request: NextRequest) {
   pendingResponse.cookies.getAll().forEach((c) => {
     finalResponse.cookies.set(c);
   });
+  // SU A-2: 사용한 상관관계 쿠키는 즉시 소멸시킨다.
+  finalResponse.cookies.set('kd_att', '', { path: '/', maxAge: 0 });
   return finalResponse;
 }
