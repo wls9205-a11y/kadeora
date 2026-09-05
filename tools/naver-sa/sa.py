@@ -382,16 +382,22 @@ def alias_is_dup_prefix(alias, main=None):
     """
     a = re.sub(r"\s+", "", alias or "")
     m = re.sub(r"\s+", "", main or "")
-    if not a or not m or len(a) <= len(m) or not a.endswith(m):
+    if not a or not m or len(a) <= len(m):
         return False
-    prefix = a[: len(a) - len(m)]
-    if not (2 <= len(prefix) <= 5):
-        return False
-    if m.startswith(prefix):
-        return True
-    # 「김해시」처럼 행정 꼬리가 붙은 형태. 꼬리를 떼면 대표명의 머리와 같다.
-    if len(prefix) >= 3 and prefix[-1] in "시군구" and m.startswith(prefix[:-1]):
-        return True
+    # ⚠️ 「접두 + 대표명」으로 «끝난다» 로 보면 파생형을 통째로 놓친다 —
+    #    키워드는 대표명 뒤에 접미어가 붙는 것이 «정상» 이라서
+    #    「동래구동래사적공원오네뜨분양권」은 endswith 로 안 잡힌다.
+    #    2026-09-05 세션 A 실측: 어간 10건 옆에 파생 20건이 그 사각에 숨어 있었다.
+    #    그래서 접두를 «머리에서» 찾고, 대표명 뒤는 무엇이 오든 상관하지 않는다.
+    for n in range(2, 6):                       # 접두 길이 2~5
+        if a[n:n + len(m)] != m:
+            continue
+        prefix = a[:n]
+        if m.startswith(prefix):
+            return True
+        # 「김해시」처럼 행정 꼬리가 붙은 형태. 꼬리를 떼면 대표명의 머리와 같다.
+        if n >= 3 and prefix[-1] in "시군구" and m.startswith(prefix[:-1]):
+            return True
     return False
 
 
