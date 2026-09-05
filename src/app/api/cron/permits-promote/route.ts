@@ -3,7 +3,14 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { fetchAll } from '@/lib/db/fetchBatched';
-import { extractDong, extractZoneTokens as zoneTokens } from '@/lib/permits/match';
+// ⚠️ 구역 식별자는 «두 함수» 가 나눠 갖고 있다. extractZoneTokens 는 「대연8」·「서금사6」
+//    같은 동명+번호형이고, 기존 extractZoneCodes 는 「A-5」·「373BL」·「내이3지구」형이다.
+//    중복 판정에서 한쪽만 쓰면 다른 형태가 통째로 샌다 — 실제로 「광안동 373BL」이
+//    이미 있는 「광안동 373블럭 가로주택정비」를 못 보고 새로 만들 뻔했다(5차 예행).
+import { extractDong, extractZoneCodes, extractZoneTokens } from '@/lib/permits/match';
+
+const zoneTokens = (s: string | null | undefined): string[] =>
+  [...new Set([...extractZoneTokens(s), ...extractZoneCodes(s)])];
 // ⚠️ 이름 판정은 lib 에 있다. 라우트 안에 두었더니 이름 결함을 «배포해야만» 볼 수 있었고
 //    세 번 연속으로 냈다. 지금은 permits-promote-name.test.ts 가 로컬에서 잡는다.
 import { cleanProjectName, projectKey, usableAsProject } from '@/lib/permits/promote-name';
@@ -81,7 +88,7 @@ async function handler(req: NextRequest) {
   //    이미 있는 「광안동 373블럭 가로주택정비」와 «다른 slug» 라 새로 만들어질 뻔했다.
   //    그래서 ① 이름 정규화 키 ② 같은 시군구의 구역 토큰 — 세 축으로 본다.
   const siteRows = (await fetchAll(admin, 'apt_sites',
-    'id, slug, name, display_name, name_variants, sigungu, dong, lifecycle_stage, total_units, complex_units, is_active',
+    'id, slug, name, display_name, name_variants, region, sigungu, dong, lifecycle_stage, total_units, complex_units, is_active',
     (q: any) => q.in('region', REGIONS))) as Array<Record<string, any>>;
   const existingSlugs = new Set<string>(siteRows.map((r) => r.slug));
   const existingNameKeys = new Set<string>();
@@ -92,7 +99,7 @@ async function handler(req: NextRequest) {
     for (const n of names) {
       const k = normName(n);
       if (k) existingNameKeys.add(k);
-      if (r.sigungu) for (const t of zoneTokens(n)) existingZoneKeys.add(`${r.sigungu}|${t}`);
+      if (r.sigungu) for (const t of zoneTokens(n)) existingZoneKeys.add(`${r.region}|${r.sigungu}|${t}`);
     }
   }
 
@@ -125,25 +132,32 @@ async function handler(req: NextRequest) {
   const preSites = siteRows.filter(
     (r) => r.is_active !== false && PRE_STAGES.has(String(r.lifecycle_stage ?? '')),
   );
+  // ⚠️ 5차 예행에서 이 검사가 19건 중 17건을 잡았다 — 과잉이다. 원인 둘:
+  //   ① 「구 전체」 폴백. 동이 없는 현장을 같은 «구» 의 아무 인허가에나 붙였다 —
+  //      「상남1구역 재건축」이 창원의 dong 없는 현장 둘에 걸렸다. 근거가 아니다. 폴백을 없앤다.
+  //   ② 시군구 키에 시도가 없어 «부산 남구» 와 «울산 남구» 가 섞였다
+  //      (울산 신정동 건이 부산 문현4동 현장에 걸렸다). 키에 시도를 넣는다.
+  // 실제로 잡아야 했던 셋(범천동·중동·명륜동)은 «전부 같은 법정동» 이었다.
   const preByDong = new Map<string, Array<Record<string, any>>>();
-  const preBySigunguNoDong = new Map<string, Array<Record<string, any>>>();
   for (const r of preSites) {
-    if (r.dong) preByDong.set(r.dong, [...(preByDong.get(r.dong) ?? []), r]);
-    else if (r.sigungu) preBySigunguNoDong.set(r.sigungu, [...(preBySigunguNoDong.get(r.sigungu) ?? []), r]);
+    if (!r.dong || !r.region) continue;
+    const k = `${r.region}|${r.dong}`;
+    preByDong.set(k, [...(preByDong.get(k) ?? []), r]);
   }
   const UNITS_NEAR = 0.4;
   const collides = (p: Record<string, any>): Array<Record<string, any>> => {
     const dong = extractDong(p.address);
-    const pool = [
-      ...(dong ? (preByDong.get(dong) ?? []) : []),
-      ...(p.sigungu ? (preBySigunguNoDong.get(p.sigungu) ?? []) : []),
-    ];
+    if (!dong) return [];
+    const pool = preByDong.get(`${p.sido}|${dong}`) ?? [];
     const units = Number(p.total_units ?? 0);
     return pool.filter((r) => {
       const u = r.complex_units ?? r.total_units;
-      if (u == null) return true;                       // ⓐ 모른다 = 겹칠 수 있다
-      if (!units) return true;
-      return Math.abs(units - u) / Math.max(units, u) <= UNITS_NEAR;   // ⓑ 가깝다
+      // ⓐ 「공고 전 · 세대수 미상」 시드는 매처의 두 축(세대수·지번)을 다 못 쓴다.
+      //    그 부류만 «모른다» 로 잡는다 — 정비 단계 구역까지 세면 동 하나에 수십 건이 걸린다.
+      if (u == null) return String(r.lifecycle_stage) === 'pre_announcement';
+      // ⓑ 세대수가 가까우면 같은 사업일 수 있다(명륜2 504 ↔ 인허가 747 = 33%).
+      if (!units) return false;
+      return Math.abs(units - u) / Math.max(units, u) <= UNITS_NEAR;
     });
   };
 
@@ -165,7 +179,7 @@ async function handler(req: NextRequest) {
     }
     // ⛔ 이미 있는 현장이면 만들지 않는다. 이름 키 또는 같은 시군구의 구역 토큰이 겹치면 중복이다.
     const dupByName = existingNameKeys.has(normName(rawName));
-    const dupByZone = rep.sigungu && zoneTokens(rawName).some((t) => existingZoneKeys.has(`${rep.sigungu}|${t}`));
+    const dupByZone = rep.sigungu && zoneTokens(rawName).some((t) => existingZoneKeys.has(`${rep.sido}|${rep.sigungu}|${t}`));
     if (dupByName || dupByZone) {
       stat.skipped_dup++;
       skipped.push({ key, name: rawName, why: dupByName ? '이름 키 중복 — 기존 현장 있음(검수)' : '구역 토큰 중복 — 기존 현장 있음(검수)' });
@@ -235,7 +249,7 @@ async function handler(req: NextRequest) {
       created.push({ slug: slug2, name: row.name, units: row.total_units, period: row.expected_sale_period, supply, ad_blocked: adBlocked, split: rows.length });
       existingSlugs.add(slug2);
       existingNameKeys.add(normName(rawName));
-      if (rep.sigungu) for (const t of zoneTokens(rawName)) existingZoneKeys.add(`${rep.sigungu}|${t}`);
+      if (rep.sigungu) for (const t of zoneTokens(rawName)) existingZoneKeys.add(`${rep.sido}|${rep.sigungu}|${t}`);
       continue;
     }
 
@@ -247,7 +261,7 @@ async function handler(req: NextRequest) {
     }
     existingSlugs.add(slug2);
     existingNameKeys.add(normName(rawName));
-    if (rep.sigungu) for (const t of zoneTokens(rawName)) existingZoneKeys.add(`${rep.sigungu}|${t}`);
+    if (rep.sigungu) for (const t of zoneTokens(rawName)) existingZoneKeys.add(`${rep.sido}|${rep.sigungu}|${t}`);
     stat.created++;
     created.push({ slug: slug2, name: row.name, units: row.total_units, period: row.expected_sale_period, supply, ad_blocked: adBlocked, split: rows.length });
 
