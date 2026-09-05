@@ -151,6 +151,8 @@ async function handler(req: NextRequest) {
     preByDong.set(k, [...(preByDong.get(k) ?? []), r]);
   }
   const UNITS_NEAR = 0.4;
+  /** 착공이 눈앞인 단계. 세대수 근접만으로 잡는 ⓑ 는 여기에만 건다. */
+  const LATE_STAGES = new Set(['pre_announcement', 'mgmt_approved', 'constructor_selected']);
   const collides = (p: Record<string, any>): Array<Record<string, any>> => {
     const dong = extractDong(p.address);
     if (!dong) return [];
@@ -162,7 +164,11 @@ async function handler(req: NextRequest) {
       //    그 부류만 «모른다» 로 잡는다 — 정비 단계 구역까지 세면 동 하나에 수십 건이 걸린다.
       if (u == null) return String(r.lifecycle_stage) === 'pre_announcement';
       // ⓑ 세대수가 가까우면 같은 사업일 수 있다(명륜2 504 ↔ 인허가 747 = 33%).
+      //    ⛔ 단, 「착공이 눈앞인 단계」일 때만이다. 조합설립·정비구역 단계 구역은 착공까지
+      //       몇 해가 남아 2026~28 착공 인허가와 «양립 불가» 다 — 세대수가 가깝다는 것만으로
+      //       잡으면 동 하나에 구역이 여럿인 곳에서 전부 걸린다(거제동 129-5, 세션 A 판정).
       if (!units) return false;
+      if (!LATE_STAGES.has(String(r.lifecycle_stage))) return false;
       return Math.abs(units - u) / Math.max(units, u) <= UNITS_NEAR;
     });
   };
