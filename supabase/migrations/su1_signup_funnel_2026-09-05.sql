@@ -47,10 +47,14 @@ create index if not exists idx_signup_attempts_match
 --
 -- ② 고아 콜백 0 (A-2)
 --    기대: 0. 콜백은 도달했는데 시작 행이 없다 = 매칭이 또 빗나갔다는 뜻.
+--    ⚠️ dropped_step='callback_error' 는 «세지 않는다». A-3 의 실패 기록 경로는
+--       kd_att 쿠키가 없으면(= /auth/callback 직접 진입·봇) 시작 행 없이 INSERT 한다.
+--       그 행은 설계대로 「콜백 있고 시작 없음」이고, 매칭 실패가 아니다.
 -- select count(*) as orphan_callbacks
 --   from signup_attempts
 --  where oauth_callback_at is not null
 --    and oauth_started_at is null
+--    and coalesce(dropped_step,'') <> 'callback_error'
 --    and coalesce(oauth_callback_at, created_at) > timestamptz '2026-09-05 00:00+09';
 --
 -- ③ 깔때기 신규 열 채워짐 (B-3)
@@ -62,3 +66,12 @@ create index if not exists idx_signup_attempts_match
 -- select dropped_step, count(*) from signup_attempts
 --  where coalesce(oauth_callback_at, created_at) > timestamptz '2026-09-05 00:00+09'
 --  group by 1 order by 2 desc;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- 배포 후 검증에서 «내가 만든» 행 (2026-09-05 03:33~03:37 UTC · SUPL §E)
+--   ⛔ 실사용 기록이 아니다. 9/5 기준선을 셀 때 제외한다.
+--     · id 341~348 — source 가 'supl_verify%' 인 시작 행(track-attempt 왕복 확인)
+--     · id 340, 349 — /auth/callback?error=server_error 수동 진입(A-3 확인).
+--       error_message 가 'provider_error:server_error:supl_verify_test' 다.
+--   제외 조건: (source like 'supl_verify%' or error_message like '%supl_verify_test%')
+-- ═══════════════════════════════════════════════════════════════════════════
