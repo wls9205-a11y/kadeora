@@ -5,8 +5,9 @@ import { verifyCronAuth } from '@/lib/cron-auth';
 import { fetchAll } from '@/lib/db/fetchBatched';
 import { extractDong } from '@/lib/permits/match';
 import {
-  adBlockedFor, isProvisional, judgeSupplyType, provisionalSlug, stripProvisional,
+  adBlockedFor, isProvisional, judgeSupplyType, normName, provisionalSlug, stripProvisional,
 } from '@/lib/presale/candidate';
+import { extractZoneTokens as zoneTokens } from '@/lib/permits/match';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -34,9 +35,43 @@ export const maxDuration = 300;
  */
 const REGIONS = ['부산', '울산', '경남'];
 
+/**
+ * 인허가 원문에서 «사업명» 만 남긴다.
+ *
+ * ⚠️ 첫 예행이 이걸 안 하고 돌았더니 현장 이름이 이렇게 나왔다:
+ *      「부산광역시 부산진구 범천동 858-6번지 일원 희망더함아파트」
+ *      「울산 광역시 남구 신정동 563-1 일원 주상복합 신축공사」
+ *    이름이자 곧 URL 이다. 행정 접두와 지번을 달고 페이지를 만들면 되돌리기 어렵다.
+ * ⛔ 그렇다고 «지어내지» 않는다 — 원문에서 «빼기만» 한다(D2).
+ */
+function cleanProjectName(raw: string): string {
+  return String(raw ?? '')
+    .replace(/(부산|울산)\s*광역시|경상남도|창원특례시/g, ' ')
+    .replace(/[가-힣]{2,4}(?:시|군|구)(?=\s)/g, ' ')          // 시군구 토큰
+    .replace(/[가-힣]+(?:동|리|가)\s*산?\d+(?:-\d+)?\s*번지/g, ' ')  // 「… 858-6번지」
+    .replace(/\s*일원\s*/g, ' ')
+    .replace(/\s*신축공사\s*$/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * 사업명으로 쓸 수 있는가.
+ * ⛔ 브랜드 «단독» 은 거부한다 — 「힐스테이트」·「호반 써밋」이 실제로 원문에 그렇게 온다.
+ *    그 이름으로 만든 페이지는 어느 현장도 가리키지 못한다(PL-A 판정 ① 과 같은 종).
+ * 통과 조건: 구역·지구·블록 식별자가 있거나, 법정동 이름이 남아 있을 것.
+ */
+function usableAsProject(cleaned: string): boolean {
+  if (cleaned.length < 5) return false;
+  if (/^(아파트|공동주택)( 및|$)/.test(cleaned)) return false;
+  const hasZone = zoneTokens(cleaned).length > 0 || /(구역|지구|BL|블록|블럭)/i.test(cleaned);
+  const hasDong = Boolean(extractDong(cleaned));
+  return hasZone || hasDong;
+}
+
 /** 같은 사업의 분할 인허가를 한 덩어리로 — 단지·블록 꼬리를 턴 이름이 키다. */
 function projectKey(name: string | null | undefined): string {
-  return String(name ?? '')
+  return cleanProjectName(String(name ?? ''))
     .replace(/[()（）\[\]]/g, ' ')
     .replace(/\s+/g, '')
     .replace(/(\d+단지|\d+BL|\d+블록|\d+블럭|[A-Z]-?\d+블록?|[A-Z]-\d+)/g, '')
@@ -84,12 +119,26 @@ async function handler(req: NextRequest) {
     groups.set(k, [...(groups.get(k) ?? []), p]);
   }
 
-  const existingSlugs = new Set<string>(
-    ((await fetchAll(admin, 'apt_sites', 'slug', (q: any) => q.in('region', REGIONS))) as Array<{ slug: string }>)
-      .map((r) => r.slug),
-  );
+  // ⚠️ 중복 판정을 slug 동일성으로만 하면 샌다. 첫 예행에서 「광안동 373BL 가로주택 정비사업」이
+  //    이미 있는 「광안동 373블럭 가로주택정비」와 «다른 slug» 라 새로 만들어질 뻔했다.
+  //    그래서 ① 이름 정규화 키 ② 같은 시군구의 구역 토큰 — 세 축으로 본다.
+  const siteRows = (await fetchAll(admin, 'apt_sites',
+    'slug, name, display_name, name_variants, sigungu',
+    (q: any) => q.in('region', REGIONS))) as Array<Record<string, any>>;
+  const existingSlugs = new Set<string>(siteRows.map((r) => r.slug));
+  const existingNameKeys = new Set<string>();
+  const existingZoneKeys = new Set<string>();
+  for (const r of siteRows) {
+    const names = [r.name, r.display_name, ...(Array.isArray(r.name_variants) ? r.name_variants : [])]
+      .filter((v: unknown): v is string => typeof v === 'string' && v.length > 0);
+    for (const n of names) {
+      const k = normName(n);
+      if (k) existingNameKeys.add(k);
+      if (r.sigungu) for (const t of zoneTokens(n)) existingZoneKeys.add(`${r.sigungu}|${t}`);
+    }
+  }
 
-  const stat = { groups: groups.size, permits: permits.length, created: 0, skipped_slug: 0, skipped_name: 0, absorbed: 0 };
+  const stat = { groups: groups.size, permits: permits.length, created: 0, skipped_slug: 0, skipped_name: 0, skipped_dup: 0, absorbed: 0 };
   const created: Array<Record<string, unknown>> = [];
   const skipped: Array<Record<string, unknown>> = [];
   let writeFails = 0;
@@ -98,11 +147,19 @@ async function handler(req: NextRequest) {
   for (const [key, rows] of groups) {
     if (stat.created >= limit) { stat.skipped_name += 1; continue; }
     const rep = [...rows].sort((a, b) => (b.total_units ?? 0) - (a.total_units ?? 0))[0];
-    const rawName = String(rep.project_name ?? '').trim();
-    // ⛔ 이름이 «사업명이 아닌» 것은 만들지 않는다. 「아파트 및 부대복리시설」류가 실제로 온다.
-    if (!rawName || rawName.length < 4 || /^(아파트|공동주택)( 및|$)/.test(rawName)) {
+    const rawName = cleanProjectName(String(rep.project_name ?? ''));
+    // ⛔ 이름이 «사업명이 아닌» 것은 만들지 않는다 — 브랜드 단독·「아파트 및 부대복리시설」류.
+    if (!usableAsProject(rawName)) {
       stat.skipped_name++;
-      skipped.push({ key, name: rawName, why: '사업명으로 쓸 수 없는 원문' });
+      skipped.push({ key, raw: rep.project_name, cleaned: rawName, why: '사업명으로 쓸 수 없는 원문(브랜드 단독·식별자 없음)' });
+      continue;
+    }
+    // ⛔ 이미 있는 현장이면 만들지 않는다. 이름 키 또는 같은 시군구의 구역 토큰이 겹치면 중복이다.
+    const dupByName = existingNameKeys.has(normName(rawName));
+    const dupByZone = rep.sigungu && zoneTokens(rawName).some((t) => existingZoneKeys.has(`${rep.sigungu}|${t}`));
+    if (dupByName || dupByZone) {
+      stat.skipped_dup++;
+      skipped.push({ key, name: rawName, why: dupByName ? '이름 키 중복 — 기존 현장 있음(검수)' : '구역 토큰 중복 — 기존 현장 있음(검수)' });
       continue;
     }
     const slug = provisionalSlug(rawName);
@@ -149,6 +206,8 @@ async function handler(req: NextRequest) {
       stat.created++;
       created.push({ slug: slug2, name: row.name, units: row.total_units, period: row.expected_sale_period, supply, ad_blocked: adBlocked, split: rows.length });
       existingSlugs.add(slug2);
+      existingNameKeys.add(normName(rawName));
+      if (rep.sigungu) for (const t of zoneTokens(rawName)) existingZoneKeys.add(`${rep.sigungu}|${t}`);
       continue;
     }
 
@@ -159,6 +218,8 @@ async function handler(req: NextRequest) {
       continue;
     }
     existingSlugs.add(slug2);
+    existingNameKeys.add(normName(rawName));
+    if (rep.sigungu) for (const t of zoneTokens(rawName)) existingZoneKeys.add(`${rep.sigungu}|${t}`);
     stat.created++;
     created.push({ slug: slug2, name: row.name, units: row.total_units, period: row.expected_sale_period, supply, ad_blocked: adBlocked, split: rows.length });
 
