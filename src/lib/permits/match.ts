@@ -30,6 +30,8 @@ export interface PermitFact {
   units?: number | null;
   /** YYYYMMDD 또는 YYYY-MM-DD. */
   permitDate?: string | null;
+  /** PV2-B1: 구역 토큰 축이 쓰는 «구» 스코프. 법정동이 없을 때의 유일한 지역 근거다. */
+  sigungu?: string | null;
 }
 
 /** apt_sites 쪽 후보. names 는 name·display_name·name_variants 를 합친 것. */
@@ -39,6 +41,8 @@ export interface SiteFact {
   address?: string | null;
   names: string[];
   units?: number | null;
+  /** PV2-B1: 정비사업 현장은 주소가 «조합 사무실» 이라 동이 안 나온다. 그때의 지역 근거. */
+  sigungu?: string | null;
 }
 
 export type MatchStatus = 'matched' | 'review' | 'unmatched';
@@ -50,6 +54,8 @@ export type MatchMethod =
   | 'units_name'     // 같은 법정동 + 세대수 ±15% + 이름 보조 일치
   | 'units_only'     // 같은 법정동 + 세대수 ±15% 단독 → review
   | 'name_only'      // 이름만 겹침 → «절대 matched 아님» → review
+  | 'units_zone'     // 같은 시군구 + 구역 토큰 일치 + 세대수 ±15% (PV2-B4)
+  | 'zone_only'      // 같은 시군구 + 구역 토큰 일치 단독 → review (PV2-B1)
   | 'none';
 
 export interface MatchVerdict {
@@ -80,9 +86,22 @@ const UNITS_TOLERANCE = 0.15;
  */
 export function parseJibun(addr?: string | null): Jibun | null {
   if (!addr) return null;
-  const m = addr
+  // PV2-B1: 꼬리를 «턴 뒤» 판다. 우리 쪽 주소는 「… 480-31번지 일대」·「… 10-1번지 외 13필지」
+  //   처럼 꼬리가 붙어 오고, 인허가 쪽은 「… 480-31번지」로 깔끔하다. 그 한 낱말 때문에
+  //   지번축이 통째로 죽고 있었다 — 실측: 창원 한신더휴 메가센텀(회원동 480-31)과
+  //   포레나힐스테이트 진주(이현동 10-1)가 같은 지번인데도 「후보 없음」이었다.
+  // ⛔ 지번 «자체» 는 느슨하게 하지 않는다. 동·산·본번·부번은 그대로 전부 같아야 한다.
+  const cleaned = addr
     .trim()
-    .match(/(?:^|\s)([가-힣]+(?:동|리|가))\s+(산)?(\d+)(?:-(\d+))?\s*(?:번지)?\s*$/);
+    .replace(/\([^)]*\)\s*$/, '')                       // 끝의 괄호 설명
+    .replace(/\s*(?:일원|일대)\s*$/, '')
+    .replace(/\s*(?:외|등)\s*\d+\s*필지\s*$/, '')
+    .replace(/\s*,?\s*(?:지하)?\d+\s*층\s*$/, '')      // 「… 785-8번지, 1층」
+    .replace(/\s*(?:일원|일대)\s*$/, '')
+    .trim();
+  // ⚠️ 동과 번지 사이 공백이 «없는» 표기도 온다(「칠산동246번지」). \s* 로 받는다.
+  const m = cleaned
+    .match(/(?:^|\s)([가-힣]+(?:동|리|가))\s*(산)?(\d+)(?:-(\d+))?\s*(?:번지)?\s*$/);
   if (!m) return null;
   return {
     dong: m[1],
@@ -202,6 +221,76 @@ export function extractZoneCodes(s?: string | null): string[] {
 }
 
 /**
+ * PV2-B1 — «구역 토큰» 추출. 「대연8」·「서금사5」·「광안A」·「금곡2-1」.
+ *
+ * ── 왜 두 번째 축이 필요한가 (2026-09-05 실측) ──────────────────────────────
+ * 후보는 지금까지 «법정동 색인 하나» 로만 뽑았다. 그런데 부울경 공고 전 활성 현장
+ * 346 중 306(88%)이 `dong` 결측이다 — 부산시 정비사업 API 가 위치 필드를 안 주고,
+ * 그 현장들의 `address` 는 「가마실로 19, 2층」 같은 **조합 사무실 주소**라
+ * `extractDong` 도 실패한다. 그래서 「대연8 재개발」은 색인에 «실리지도» 않았다.
+ * 미매칭 70건의 다수는 못 찾은 게 아니라 «후보에 오르지도 못한» 것이다.
+ *
+ * 반면 이름은 양쪽이 같은 말을 쓴다:
+ *   인허가 「대연8구역재개발공동주택」 ↔ 현장 「대연8 재개발」
+ *   인허가 「부산광역시 서·금사 재정비촉진6구역 …」 ↔ 현장 「서금사재정비촉진6구역 재개발」
+ *
+ * ── 접두를 «고정 길이로» 자르지 않는다 ─────────────────────────────────────
+ * ⚠️ 「부산광역시서금사재정비촉진6구역」에서 앞 2자를 물면 「금사6」, 4자면 「시서금사6」이
+ *    나온다. 어느 쪽으로 고정해도 한쪽 표기가 어긋난다(기존 `extractZoneCodes` 의 지구
+ *    주석이 남긴 함정과 같은 종). 그래서 **2·3·4자 접미 변형을 전부 낸다** —
+ *    양쪽이 같은 변형을 하나라도 공유하면 그것이 연결이다.
+ *    (「서금사6」은 3자 변형에서, 「회원2」는 2자 변형에서 만난다.)
+ * ⛔ 숫자·영문 식별자가 «없는» 이름(「반월구역」·「문화구역」)은 토큰을 내지 않는다.
+ *    번호 없는 동명 한 낱말은 같은 구 안에서 여러 사업을 가리켜 오매칭의 온상이다.
+ */
+export function extractZoneTokens(s?: string | null): string[] {
+  if (!s) return [];
+  // 「서·금사」의 가운뎃점처럼 표기만 다른 구분자를 턴다. 공백도 같이 턴다.
+  const t = s.replace(/[·ㆍ・\s()（）\[\]]/g, '');
+  const out = new Set<string>();
+  const push = (run: string, id: string) => {
+    if (!id) return;
+    for (const n of [2, 3, 4]) {
+      if (run.length >= n) out.add(`${run.slice(run.length - n)}${id}`);
+    }
+  };
+  // ⓐ 재정비촉진N구역 — 「서금사재정비촉진6구역」
+  for (const m of t.matchAll(/([가-힣]{2,8})재정비촉진(\d{1,2}|[A-Z])구역/g)) push(m[1], m[2]);
+  // ⓑ 동명+번호+구역 — 「대연8구역」·「금곡2-1구역」
+  for (const m of t.matchAll(/([가-힣]{2,8})(\d{1,2}(?:-\d{1,2})?)구역/g)) push(m[1], m[2]);
+  // ⓒ 동명+번호+재개발/재건축 — 「범천4재개발」(구역 글자가 없는 표기)
+  for (const m of t.matchAll(/([가-힣]{2,8})(\d{1,2}(?:-\d{1,2})?)(?:주택)?(?:재개발|재건축)/g)) push(m[1], m[2]);
+  // ⓓ 동명+영문 식별자 — 「광안A 재개발」·「서금사A구역」
+  for (const m of t.matchAll(/([가-힣]{2,8})([A-Z])(?:구역|(?:주택)?(?:재개발|재건축))/g)) push(m[1], m[2]);
+  // ⓔ «머리» 토큰 — 이름의 첫 덩어리가 「동명+번호」면 그것이 구역명이다.
+  //    「괴정5(시범생활권) 재개발」처럼 번호 뒤에 괄호 설명이 끼면 ⓑ·ⓒ 가 닿지 않는다.
+  //    ⛔ 머리에만 적용한다. 문자열 아무 데서나 「동명+번호」를 주우면
+  //       「…정비사업(2단지)」의 '사업2' 같은 쓰레기가 쏟아진다.
+  const head = (s.trim().split(/[\s(（\[]/)[0] ?? '').replace(/[·ㆍ・]/g, '');
+  const hm = head.match(/^([가-힣]{2,8})(\d{1,2}(?:-\d{1,2})?)$/);
+  if (hm) push(hm[1], hm[2]);
+  return [...out];
+}
+
+/** 같은 시군구인가. 구역 토큰 축의 «유일한» 지역 근거다. */
+export function sameSigungu(p: PermitFact, s: SiteFact): boolean {
+  const a = (p.sigungu ?? '').trim();
+  const b = (s.sigungu ?? '').trim();
+  return Boolean(a && b && a === b);
+}
+
+/** 구역 토큰을 공유하는가. ⛔ 시군구가 같을 때만 의미가 있다 — 「대연8」은 남구 안에서만 유일하다. */
+export function zoneTokenShared(p: PermitFact, s: SiteFact): boolean {
+  const pt = extractZoneTokens(p.name);
+  if (pt.length === 0) return false;
+  const set = new Set(pt);
+  for (const n of s.names) {
+    if (extractZoneTokens(n).some((t) => set.has(t))) return true;
+  }
+  return false;
+}
+
+/**
  * 안건 ③ — 백필 시간창. 창 밖이라고 «버리지 않는다».
  * 원문 보존이 스테이징의 존재 이유고, 버리면 「API 커버에 있었는지」조차 모르게 된다.
  * 판정은 통과시키고 표기만 남긴다(match_note 의 out_of_window).
@@ -219,7 +308,12 @@ export function isOutOfWindow(permitDate?: string | null, asOf = new Date(), mon
 /** 후보 하나에 대한 판정. 지역이 다르면 «이름이 같아도» 여기서 끝난다. */
 function judgeOne(p: PermitFact, s: SiteFact): MatchVerdict {
   const none: MatchVerdict = { status: 'unmatched', method: 'none', siteId: null, score: 0, note: '' };
-  if (!sameRegion(p, s)) return none;
+  // PV2-B1: 지역 근거가 «둘» 이 됐다. 법정동(기존)이거나, 같은 시군구 안의 구역 토큰이거나.
+  // ⛔ 시군구만 같은 것은 지역 근거가 아니다 — 구역 토큰이 «함께» 서야 한다.
+  //    구 하나에 현장이 수십 개다. 토큰 없이 구를 열면 세대수 우연일치가 쏟아진다.
+  const regionOk = sameRegion(p, s);
+  const zoneOk = sameSigungu(p, s) && zoneTokenShared(p, s);
+  if (!regionOk && !zoneOk) return none;
 
   const pj = parseJibun(p.address);
   const sj = parseJibun(s.address);
@@ -230,8 +324,13 @@ function judgeOne(p: PermitFact, s: SiteFact): MatchVerdict {
   const u = unitsCloseness(p.units, s.units);
   const nameOk = nameSupports(p, s);
 
-  if (u === 1) {
+  if (regionOk && u === 1) {
     return { status: 'matched', method: 'units_exact', siteId: s.id, score: 0.95, note: `같은 법정동 + 세대수 정확일치 ${p.units}` };
+  }
+  // PV2-B4: 구역 토큰이 같고 세대수가 ±15% 안이면 확정으로 올린다.
+  // 구역명은 그 구 안에서 유일한 식별자이고, 세대수가 그것을 «두 번째 축» 으로 받친다.
+  if (zoneOk && u !== null && u > 0) {
+    return { status: 'matched', method: 'units_zone', siteId: s.id, score: 0.85, note: `구역 토큰 일치 + 세대수 ±15%(${p.units}/${s.units})` };
   }
   if (u !== null && u > 0 && nameOk) {
     return { status: 'matched', method: 'units_name', siteId: s.id, score: 0.8 + 0.1 * u, note: `세대수 ±15%(${p.units}/${s.units}) + 이름 보조` };
@@ -242,6 +341,13 @@ function judgeOne(p: PermitFact, s: SiteFact): MatchVerdict {
   if (nameOk) {
     // ⛔ 오늘의 실패가 여기다. 이름만으로는 «절대» matched 를 주지 않는다.
     return { status: 'review', method: 'name_only', siteId: s.id, score: 0.3, note: '이름만 겹침 — 지번·세대수 근거 없음' };
+  }
+  // PV2-B1: 구역 토큰이 같은데 세대수가 모르거나 어긋난다. ⛔ 확정하지 않지만 «버리지도» 않는다.
+  // ⚠️ 이 문은 regionOk 여부와 무관하게 «마지막» 에 선다. 처음엔 !regionOk 안에 뒀는데,
+  //    법정동까지 같은데 세대수만 어긋나는 경우(중동5: 972 vs 1149, 15.4%)가 오히려
+  //    그 가지에 못 들어와 통째로 unmatched 로 떨어졌다 — 근거가 «더 많은» 쪽이 탈락했다.
+  if (zoneOk) {
+    return { status: 'review', method: 'zone_only', siteId: s.id, score: 0.45, note: `구역 토큰 일치 — 세대수 근거 없음(${p.units ?? '?'}/${s.units ?? '?'})` };
   }
   return none;
 }

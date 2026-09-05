@@ -21,12 +21,12 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { fetchAll } from '@/lib/db/fetchBatched';
 import {
-  extractDong, isOutOfWindow, judgeMatch,
+  extractDong, extractZoneTokens, isOutOfWindow, judgeMatch,
   type PermitFact,
 } from '@/lib/permits/match';
 // ⚠️ 라우트 모듈은 헬퍼를 export 하지 못한다(생성 타입이 거부). 변환 본문은 lib 에 산다.
 import {
-  confidenceOf, indexByDong, toColumnStatus, toSiteFact,
+  confidenceOf, indexByDong, indexByZoneToken, mergeCandidates, toColumnStatus, toSiteFact,
   type SiteRow,
 } from '@/lib/permits/site-fact';
 
@@ -40,6 +40,15 @@ async function handler(req: NextRequest) {
   const admin = getSupabaseAdmin() as any;
   const sp = req.nextUrl.searchParams;
   const dry = sp.get('dry') === '1';
+  /**
+   * PV2-B3 — 재판정 모드.
+   * 평소에는 pending 만 본다(같은 입력에 같은 답이 나오므로). 그런데 «현장 데이터가
+   * 바뀌면» 같은 입력이 아니다 — B-1 의 구역 토큰 축, B-2 의 dong 백필이 그렇다.
+   * 그 뒤에는 no_target·review 를 한 번 다시 물어야 한다.
+   * ⛔ 사람이 큐에서 내린 판단은 덮지 않는다 — `rejected`·`matched` 는 대상이 아니다.
+   */
+  const rematch = sp.get('rematch') === '1';
+  const sido = sp.get('sido');            // 부울경만 돌릴 때
   const limit = Math.min(Number(sp.get('limit') || BATCH), 2000);
   const started = Date.now();
 
@@ -50,12 +59,18 @@ async function handler(req: NextRequest) {
     'id, name, display_name, name_variants, address, region, sigungu, dong, total_units, complex_units',
     (q: any) => q.eq('is_active', true))) as SiteRow[];
   const idx = indexByDong(siteRows);
+  // PV2-B1: 두 번째 축. 동 결측 현장(부울경 공고 전 346 중 306)이 여기서 후보가 된다.
+  const zoneIdx = indexByZoneToken(siteRows);
 
   // ⚠️ 아직 «본 적 없는» 것부터 본다(pending). review·unmatched 는 재판정 대상이 아니다 —
   //    같은 입력에 같은 답이 나오고, 사람이 큐에서 내린 판단을 덮어쓸 위험만 있다.
-  const { data: permits } = await admin.from('apt_permits')
-    .select('id, bjd_cd, address, project_name, total_units, permit_date, match_status')
-    .eq('match_status', 'pending').order('id').limit(limit);
+  let q = admin.from('apt_permits')
+    .select('id, bjd_cd, address, project_name, total_units, permit_date, match_status, sigungu, sido');
+  q = rematch
+    ? q.in('match_status', ['pending', 'no_target', 'review'])
+    : q.eq('match_status', 'pending');
+  if (sido) q = q.in('sido', sido.split(','));
+  const { data: permits } = await q.order('id').limit(limit);
 
   const tally: Record<string, number> = {};
   const byMethod: Record<string, number> = {};
@@ -69,10 +84,14 @@ async function handler(req: NextRequest) {
 
     const fact: PermitFact = {
       bjdCd: p.bjd_cd, address: p.address, name: p.project_name,
-      units: p.total_units, permitDate: p.permit_date,
+      units: p.total_units, permitDate: p.permit_date, sigungu: p.sigungu,
     };
     const dong = extractDong(p.address);
-    const candidates = dong ? (idx.get(dong) ?? []) : [];
+    const byDong = dong ? (idx.get(dong) ?? []) : [];
+    // PV2-B1: 구역 토큰 축. 시군구가 없으면 이 축은 쓰지 않는다(지역 근거가 없다).
+    const tokens = p.sigungu ? extractZoneTokens(p.project_name) : [];
+    const byZone = tokens.flatMap((t) => zoneIdx.get(`${p.sigungu}|${t}`) ?? []);
+    const candidates = mergeCandidates(byDong, byZone);
     const v = judgeMatch(fact, candidates);
 
     const outWindow = isOutOfWindow(p.permit_date);
@@ -82,6 +101,7 @@ async function handler(req: NextRequest) {
       outWindow ? 'out_of_window' : '',
       candidates.length === 0 && dong ? `후보 없음(법정동 ${dong})` : '',
       !dong ? '법정동 추출 실패' : '',
+      byZone.length ? `구역토큰 후보 ${byZone.length}` : '',
     ].filter(Boolean).join(' · ').slice(0, 300);
 
     tally[v.status] = (tally[v.status] ?? 0) + 1;
@@ -116,8 +136,9 @@ async function handler(req: NextRequest) {
   return {
     processed,
     metadata: {
-      dry, stopped_by: stoppedBy, sites_indexed: siteRows.length,
-      dongs: idx.size, by_status: tally, by_method: byMethod,
+      dry, rematch, sido: sido ?? null,
+      stopped_by: stoppedBy, sites_indexed: siteRows.length,
+      dongs: idx.size, zone_keys: zoneIdx.size, by_status: tally, by_method: byMethod,
       // ⚠️ 0 이 아니면 그 실행은 «판정만» 하고 아무것도 못 바꾼 것이다.
       write_fails: writeFails, first_write_error: firstWriteError,
       remaining_pending: dry ? remaining : Math.max((remaining ?? 0) - (dry ? 0 : 0), 0),

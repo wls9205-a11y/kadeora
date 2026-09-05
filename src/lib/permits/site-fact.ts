@@ -6,7 +6,7 @@
  *    만든다(M4NV 공통 게이트). 본문·시그니처는 라우트에 있던 것 그대로다.
  * ⛔ 판정 규칙은 여전히 `@/lib/permits/match` 하나가 들고 있다 — 여기는 «입력 만들기» 뿐이다.
  */
-import { extractDong, type SiteFact } from '@/lib/permits/match';
+import { extractDong, extractZoneTokens, type SiteFact } from '@/lib/permits/match';
 
 export interface SiteRow {
   id: string; name: string | null; display_name: string | null; name_variants: unknown;
@@ -30,6 +30,8 @@ export function toSiteFact(r: SiteRow): SiteFact {
     address: r.address ?? ([r.region, r.sigungu, r.dong].filter(Boolean).join(' ') || null),
     names,
     units: r.complex_units ?? r.total_units ?? null,
+    // PV2-B1: 구역 토큰 축의 지역 근거. 이 현장들은 주소가 조합 사무실이라 동이 안 나온다.
+    sigungu: r.sigungu ?? null,
   };
 }
 
@@ -70,4 +72,42 @@ export function indexByDong(rows: SiteRow[]): Map<string, SiteFact[]> {
     idx.set(dong, arr);
   }
   return idx;
+}
+
+/**
+ * PV2-B1 — «구역 토큰» 색인. 키는 `시군구|토큰` 이다.
+ *
+ * ⚠️ 시군구를 키에 «넣는다». 「대연8」은 남구 안에서 유일하지만 전국에서는 아니다.
+ *    토큰만으로 색인하면 다른 구의 같은 번호 구역이 후보로 딸려 온다.
+ * ⚠️ 이 색인은 동 색인을 «대체하지 않는다». 둘을 합집합으로 쓴다 —
+ *    동이 있는 현장은 지금까지처럼, 없는 현장은 이 축으로 후보에 오른다.
+ */
+export function indexByZoneToken(rows: SiteRow[]): Map<string, SiteFact[]> {
+  const idx = new Map<string, SiteFact[]>();
+  for (const r of rows) {
+    const sigungu = (r.sigungu ?? '').trim();
+    if (!sigungu) continue;              // 지역 근거가 없으면 토큰도 쓰지 않는다
+    const f = toSiteFact(r);
+    const tokens = new Set<string>();
+    for (const n of f.names) for (const t of extractZoneTokens(n)) tokens.add(t);
+    for (const t of tokens) {
+      const key = `${sigungu}|${t}`;
+      const arr = idx.get(key) ?? [];
+      arr.push(f);
+      idx.set(key, arr);
+    }
+  }
+  return idx;
+}
+
+/** 두 축의 후보를 합친다. 같은 현장이 양쪽에 있으면 한 번만 센다. */
+export function mergeCandidates(a: SiteFact[], b: SiteFact[]): SiteFact[] {
+  const seen = new Set<string>();
+  const out: SiteFact[] = [];
+  for (const f of [...a, ...b]) {
+    if (seen.has(f.id)) continue;
+    seen.add(f.id);
+    out.push(f);
+  }
+  return out;
 }
