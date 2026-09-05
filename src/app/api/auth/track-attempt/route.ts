@@ -11,6 +11,19 @@ const ATTEMPT_COOKIE = 'kd_att';
 const ATTEMPT_COOKIE_MAX_AGE = 900;
 
 /**
+ * insert 를 기다리는 «상한».
+ *
+ * ⚠️ 2026-09-05 배포 직후 실측: 새 함수의 첫 인보케이션들이 Supabase 연결을 세우느라
+ *    10초(maxDuration)를 넘겨 504 를 다섯 번 냈다. 그다음부터는 0.2초다.
+ *    await 로 바꾸면서 «원래 있던 느림» 이 처음으로 표면에 나온 것이다 —
+ *    fire-and-forget 이던 시절엔 같은 지연이 조용히 시작 행을 잃고 있었다(고아 콜백).
+ * 그래서 서버도 무한정 기다리지 않는다. 상한을 넘기면 id 없이 200 을 돌려주고
+ * (쿠키 없음 → 콜백의 폴백 매처가 받는다) insert 는 남은 시간 동안 계속 달린다.
+ * ⛔ 504 를 내지 않는다. 계측이 로그인 경로에 에러를 만들면 안 된다.
+ */
+const INSERT_BUDGET_MS = 4_000;
+
+/**
  * POST /api/auth/track-attempt — signup_attempts 시작 행 기록
  *
  * SU A-2 (2026-09-05): fire-and-forget 을 걷는다.
@@ -33,7 +46,7 @@ export async function POST(req: NextRequest) {
     let attemptId: number | null = null;
     try {
       const sb = getSupabaseAdmin();
-      const { data, error } = await (sb as any)
+      const insert = (sb as any)
         .from('signup_attempts')
         .insert({
           provider: provider || 'unknown',
@@ -50,7 +63,13 @@ export async function POST(req: NextRequest) {
         })
         .select('id')
         .single();
-      if (!error && data?.id) attemptId = data.id as number;
+      // ⚠️ 타이머를 «끈다». 안 끄면 insert 가 0.2초에 끝나도 이벤트 루프가
+      //    상한까지 살아 있어 함수 실행시간이 그만큼 길어진다.
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const timeout = new Promise<null>((r) => { timer = setTimeout(() => r(null), INSERT_BUDGET_MS); });
+      const settled = await Promise.race([insert, timeout]).finally(() => { if (timer) clearTimeout(timer); });
+      const row = settled as { data?: { id?: number }; error?: unknown } | null;
+      if (row && !row.error && row.data?.id) attemptId = row.data.id as number;
     } catch {
       // insert 실패해도 응답은 성공
     }
