@@ -85,10 +85,6 @@
       "schedule": "0 3 * * *"
     },
     {
-      "path": "/api/cron/crawl-nationwide-redev",
-      "schedule": "0 7 * * 1"
-    },
-    {
       "path": "/api/cron/apt-ai-summary",
       "schedule": "0 5 * * *"
     },

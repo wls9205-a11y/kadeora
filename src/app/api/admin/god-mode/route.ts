@@ -29,7 +29,6 @@ const CRON_GROUPS = {
     '/api/cron/crawl-seoul-redev',
     '/api/cron/crawl-busan-redev',
     '/api/cron/crawl-gyeonggi-redev',
-    '/api/cron/crawl-nationwide-redev',
     '/api/cron/stock-crawl',
     '/api/cron/stock-discover',
     '/api/cron/stock-price',

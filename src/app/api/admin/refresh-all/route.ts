@@ -12,7 +12,6 @@ const CRON_SEQUENCE = [
   { name: 'crawl-unsold-molit', path: '/api/cron/crawl-unsold-molit' },
   { name: 'crawl-seoul-redev', path: '/api/cron/crawl-seoul-redev' },
   { name: 'crawl-busan-redev', path: '/api/cron/crawl-busan-redev' },
-  { name: 'crawl-nationwide-redev', path: '/api/cron/crawl-nationwide-redev' },
   { name: 'crawl-apt-subscription', path: '/api/cron/crawl-apt-subscription' },
   { name: 'crawl-competition-rate', path: '/api/cron/crawl-competition-rate' },
   // ⛔ A1(2026-08-27) — seed-posts · seed-comments · seed-chat 호출을 제거했다.

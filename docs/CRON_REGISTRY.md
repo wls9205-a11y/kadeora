@@ -100,3 +100,24 @@ ORDER BY fails DESC;
 - 특정 잡 반복 실패: `cron.unschedule('<jobname>')` 로 일시 중단
 - 스케줄 변경: `cron.alter_job(<id>, schedule => '...')` 또는 unschedule 후 schedule 재등록
 - 실행 로그: `cron_logs` 테이블 (애플리케이션 레벨) + `cron.job_run_details` (DB 레벨)
+
+---
+
+## 퇴역 (retired)
+
+| 잡 | 퇴역일 | 사유 | 대체 |
+|---|---|---|---|
+| `crawl-nationwide-redev` | 2026-09-05 | **엔드포인트 부재.** `apis.data.go.kr/1613000/MntncBizInfoSvc` 가 `400 NO_OPENAPI_SERVICE_ERROR`(returnReasonCode 12 · 「해당 오픈API 서비스가 없거나 폐기됨」). 태어나서 수신 0건(cron_logs 4회 · created 0) | A-2 공개 문서 소스 — 울산 `data.go.kr` 파일데이터 15055591 · 경남은 창원시 정비사업 통합누리집 |
+
+**퇴역의 방식** — 파일을 지우지 않는다. 지우면 다음 사람이 「전국 정비사업 크롤러가
+없네」 하고 **같은 엔드포인트로 다시 만든다**. 라우트는 자리에 남아 진입 즉시
+`cron_logs` 에 `status='skipped'` 와 사유 한 줄을 남기고 돌아온다. 그 파일의 머리말이
+판정 근거(보정 실험 포함)를 들고 있다.
+
+**같이 끊은 것** — `vercel.json` 스케줄 엔트리 · `admin/refresh-all` · `admin/god-mode`
+팬아웃 목록. ⚠️ 퇴역은 스케줄만 끊으면 끝나지 않는다. 「전체 실행」 버튼이 남아 있으면
+사람이 손으로 다시 부른다.
+
+> ⚠️ 판정 전 3중 확인: ① cron_logs 4회·created 0 ② pg_cron 등록 없음 ③ 저장소 내 호출자.
+> ③ 이 «비어 있지 않았다» — admin 팬아웃 둘이 부르고 있었다. 그래서 그 둘도 같이 끊었다.
+> gap-watch 지표 참조는 0건(확인함).
