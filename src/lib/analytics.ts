@@ -2,7 +2,7 @@
  * 통합 행동 분석 유틸
  * 
  * 모든 유저 행동을 user_events 테이블에 기록
- * - 비로그인: visitor_id (localStorage UUID)
+ * - 비로그인: visitor_id (kd_vid 쿠키 · lib/visitor-id.ts 정본)
  * - 로그인: visitor_id + user_id
  * - 세션: 30분 무활동 시 새 세션
  * 
@@ -22,15 +22,10 @@
 
 // ═══ 식별자 관리 ═══
 
-function getVisitorId(): string {
-  if (typeof window === 'undefined') return '';
-  let id = localStorage.getItem('kd_visitor_id');
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem('kd_visitor_id', id);
-  }
-  return id;
-}
+// SU B-1: 식별자 저장이 두 벌이었다(localStorage kd_visitor_id / cookie kd_vid).
+// 정본은 쿠키 kd_vid 이고 발급·승격은 lib/visitor-id.ts 한 곳에서만 한다.
+// ⛔ 여기서 다시 생성하지 않는다 — 그것이 「같은 사람, 표마다 다른 id」의 원인이었다.
+import { getVisitorId } from './visitor-id';
 
 function getSessionId(): string {
   if (typeof window === 'undefined') return '';

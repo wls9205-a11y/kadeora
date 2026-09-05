@@ -1,7 +1,11 @@
 /**
  * 전환 이벤트 추적 유틸 — fire-and-forget
  * Supabase(conversion_events) + GA4(gtag) 동시 발송
+ *
+ * SU B-1: visitor_id 는 lib/visitor-id.ts(쿠키 kd_vid) 가 정본. 여기서 localStorage
+ * 를 직접 읽던 것이 세 번째 갈래였다 — 쿠키가 없는 사용자에게 null 을 보냈다.
  */
+import { getVisitorId } from './visitor-id';
 export function trackConversion(
   eventType: 'cta_view' | 'cta_click' | 'cta_step2' | 'cta_complete',
   ctaName: string,
@@ -34,7 +38,7 @@ export function trackConversion(
     cta_name: ctaName,
     category: extra?.category,
     page_path: extra?.pagePath || window.location.pathname,
-    visitor_id: localStorage.getItem('kd_visitor_id'),
+    visitor_id: getVisitorId(),
   });
 
   if (navigator.sendBeacon) {

@@ -8,6 +8,10 @@
  * sendBeacon 지원 시 beacon, 아니면 keepalive fetch. 실패는 silent.
  */
 
+// SU B-1: 쿠키 읽기/발급 로직을 여기서 걷고 정본 헬퍼로 넘겼다.
+// 이 파일이 쿠키를, analytics.ts 가 localStorage 를 따로 발급하던 것이 이원화의 실체다.
+import { getVisitorId } from './visitor-id';
+
 export interface CtaPayload {
   cta_name: string;
   category?: string;
@@ -15,17 +19,6 @@ export interface CtaPayload {
   gate_position?: number;
 }
 
-function visitorId(): string {
-  if (typeof document === 'undefined') return '';
-  const KEY = 'kd_vid';
-  try {
-    const match = document.cookie.split('; ').find((c) => c.startsWith(KEY + '='));
-    if (match) return decodeURIComponent(match.split('=')[1] || '');
-    const v = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-    document.cookie = `${KEY}=${encodeURIComponent(v)}; Max-Age=${60 * 60 * 24 * 365}; Path=/; SameSite=Lax`;
-    return v;
-  } catch { return ''; }
-}
 
 function deviceType(): string {
   if (typeof navigator === 'undefined') return 'unknown';
@@ -60,7 +53,7 @@ function send(event_type: 'cta_view' | 'cta_click' | 'cta_complete', p: CtaPaylo
     category: p.category,
     page_path: p.page_path ?? window.location.pathname,
     gate_position: p.gate_position,
-    visitor_id: visitorId(),
+    visitor_id: getVisitorId(),
     device_type: deviceType(),
     referrer_source: referrerSource(),
   });

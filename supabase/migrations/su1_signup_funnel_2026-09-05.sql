@@ -35,12 +35,15 @@ create index if not exists idx_signup_attempts_match
 -- ═══════════════════════════════════════════════════════════════════════════
 --
 -- ① cta_complete visitor_id 오염 재발 0 (A-5)
---    기대: 0. 1 이상이면 user.id 를 쓰는 경로가 아직 남아 있다.
--- select count(*) as polluted
---   from conversion_events
+--    기대: 둘 다 0. 1 이상이면 user.id 를 쓰는 경로가 아직 남아 있다.
+--    ⚠️ 「UUID 모양」은 «지표» 이지 증거가 아니다 — 정본 방문자 id 는 base36-rand 로
+--       발급되므로(SU B-1) 지금은 모양만으로도 갈리지만, 확증은 auth.users 대조다.
+-- select
+--   count(*) filter (where visitor_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-')            as uuid_shaped,
+--   count(*) filter (where exists (select 1 from auth.users u where u.id::text = ce.visitor_id)) as is_user_id
+--   from conversion_events ce
 --  where event_type = 'cta_complete'
---    and created_at > timestamptz '2026-09-05 00:00+09'   -- ← 배포시각
---    and visitor_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-';
+--    and created_at > timestamptz '2026-09-05 00:00+09';   -- ← 배포시각
 --
 -- ② 고아 콜백 0 (A-2)
 --    기대: 0. 콜백은 도달했는데 시작 행이 없다 = 매칭이 또 빗나갔다는 뜻.

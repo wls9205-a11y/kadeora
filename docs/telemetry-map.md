@@ -99,7 +99,60 @@ order by s.views desc;
 
 ---
 
-## 4. 이 지도를 고칠 때
+## 4. 방문자 식별자 정본 — `kd_vid` 쿠키 (SU B-1 · 2026-09-05)
+
+**정본은 1st-party 쿠키 `kd_vid`(SameSite=Lax · Max-Age 1년 · Path=/)이고,
+발급·승격은 `src/lib/visitor-id.ts` 한 곳에서만 한다.**
+
+### 왜 이 조항이 생겼나
+
+식별자 저장이 **두 벌**이었다.
+
+| 갈래 | 저장 | 형식 | 적재 표 |
+|---|---|---|---|
+| `lib/analytics.ts` | localStorage `kd_visitor_id` | `crypto.randomUUID()` | `user_events` |
+| `lib/cta-track.ts` | cookie `kd_vid` | `base36-rand` | `conversion_events` |
+| `lib/track-conversion.ts` | localStorage `kd_visitor_id` 직접 읽기 | — | `conversion_events` |
+
+같은 사람이 표마다 다른 id 를 가졌고, 무엇보다 **서버가 둘 다 읽을 수 없었다**.
+그 막다른 골목에서 `auth/callback` 은 손에 있던 유일한 식별자 — `user.id` — 를
+`conversion_events.visitor_id` 자리에 넣었다. 최근 14일 `cta_complete` **11/11 건이
+UUID**. 방문자 기준으로 낸 가입 전환은 전부 오보였다.
+
+> 이원화는 「지저분함」이 아니라 **오염의 구조적 원인**이었다. 서버가 읽을 수 있는
+> 자리에 식별자가 없으면, 서버는 반드시 다른 것을 그 자리에 넣는다.
+
+### 규칙
+
+1. **읽기는 `getVisitorId()` 로만.** `document.cookie` · `localStorage` 를 직접 뒤지지 않는다.
+2. **승격 순서** — 기존 값 보존이 목적이다:
+   쿠키 → localStorage `kd_vid` → localStorage `kd_visitor_id` → (최후) 새로 발급.
+3. **localStorage 두 키에 계속 미러링**한다. 구버전 탭이 아직 그 키를 읽는다.
+4. ⛔ **새 id 를 UUID 로 만들지 않는다.** `user.id` 도 UUID 라서, 오염 재발을 «형태로»
+   가려낼 수 있는 성질을 잃는다. `base36-rand` 는 그 자체가 판별자다.
+5. ⛔ **서버가 `visitor_id` 자리를 `user.id` 로 메우지 않는다.** 쿠키가 없으면 `null`.
+   **결측이 오염보다 낫다** — 결측은 세지 않으면 그만이고, 오염은 틀린 답을 낸다.
+
+### 서버측 소비처
+
+| 위치 | 읽는 쿠키 | 쓰는 곳 |
+|---|---|---|
+| `app/auth/callback/route.ts` | `kd_vid` | `conversion_events.visitor_id`(cta_complete) · `signup_attempts.visitor_id` |
+| `app/api/auth/track-attempt/route.ts` | — | `kd_att` 쿠키 **발급**(상관관계 id · 900초, SU A-2) |
+
+⚠️ `kd_att` 는 방문자 식별자가 **아니다**. OAuth 왕복 1회짜리 상관관계 키이고
+콜백이 사용 즉시 소멸시킨다. 두 쿠키의 역할을 섞지 않는다.
+
+### 한 번 일어나는 불연속 (기록)
+
+승격에서 **쿠키가 이긴다**. 쿠키(`kd_vid`)와 localStorage(`kd_visitor_id`)를 둘 다
+갖고 있던 기존 방문자는 9/5 이후 `user_events.visitor_id` 가 쿠키 값으로 바뀐다.
+⛔ 9/5 를 걸치는 방문자 수 비교는 하지 않는다. 소급 수정도 하지 않는다.
+
+---
+
+## 5. 이 지도를 고칠 때
 
 새 계측을 붙이거나 슬롯을 더하면 **§2 표를 같은 커밋에서** 고친다.
+새 식별자·쿠키를 더하면 **§4 표**도 같은 커밋에서 고친다.
 지도와 코드가 갈라지면 이 문서는 다음 사람을 P0-C 와 같은 자리로 다시 보낸다.

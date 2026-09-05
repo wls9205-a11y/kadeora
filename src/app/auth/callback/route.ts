@@ -33,6 +33,8 @@ export async function GET(request: NextRequest) {
   // 응답에서 반드시 지운다(다음 로그인이 남의 행을 갱신하지 않게).
   const attemptCookieRaw = request.cookies.get('kd_att')?.value ?? '';
   const attemptIdFromCookie = /^\d+$/.test(attemptCookieRaw) ? Number(attemptCookieRaw) : null;
+  // SU B-1: 방문자 id 정본. 서버가 읽을 수 있는 유일한 통로다(lib/visitor-id.ts).
+  const visitorId = request.cookies.get('kd_vid')?.value?.slice(0, 80) || null;
   console.log(`[auth/callback] entry mobile=${isMobile} source="${source}" hasCode=${!!code} redirect="${redirect}" ua="${ua.slice(0, 80)}"`);
 
   // Open redirect 방어
@@ -74,6 +76,7 @@ export async function GET(request: NextRequest) {
         success: false,
         dropped_step: 'callback_error',
         error_message: `${prefix}:${detail}`.slice(0, 250),
+        visitor_id: visitorId,
       };
       if (attemptIdFromCookie != null) {
         const { data: hit } = await (admin as any)
@@ -181,13 +184,16 @@ export async function GET(request: NextRequest) {
     const admin = getSupabaseAdmin();
     const nowIso = new Date().toISOString();
 
-    // cta_complete 기록 (fire-and-forget)
+    // SU A-5: 여기가 cta_complete 오염의 발원지였다 — visitor_id 자리에 user.id.
+    // 최근 14일 11/11 건이 UUID 였고, 그 열로 낸 방문자 기준 전환은 전부 오보다.
+    // 이제 서버가 «클라의 방문자 id» 를 읽을 수 있다(kd_vid 1st-party 쿠키 · B-1).
+    // ⛔ 쿠키가 없으면 null 을 넣는다. user.id 로 메우지 않는다 — 결측이 오염보다 낫다.
     (admin as any).from('conversion_events').insert({
       event_type: 'cta_complete',
       cta_name: source,
       category: 'signup',
       page_path: safeRedirect,
-      visitor_id: user.id,
+      visitor_id: visitorId,
     }).then(() => {}).catch(() => {});
     const ua = request.headers.get('user-agent') || '';
     // s260 P0: track-attempt 와 동일한 sha256/16 hex 알고리즘으로 통일.
@@ -232,6 +238,7 @@ export async function GET(request: NextRequest) {
         redirect_path: safeRedirect,
         error_message: rpcOk ? null : 'frictionless_rpc_failed',
         is_new_user: isNewUser,
+        visitor_id: visitorId,
         // SU A-4: track-attempt 가 심은 'oauth_start' 는 «시작에 머묾» 이라는 뜻이다.
         // 콜백이 도달한 순간 더는 참이 아닌데 아무도 지우지 않아 성공 행에도 남았다.
         // 그 컬럼으로 낸 이탈 집계는 전부 오보였다.
@@ -247,6 +254,7 @@ export async function GET(request: NextRequest) {
         onboarding_skipped: true,
         error_message: rpcOk ? null : 'frictionless_rpc_failed',
         is_new_user: isNewUser,
+        visitor_id: visitorId,
         dropped_step: null,
       });
     }
