@@ -3,11 +3,13 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { fetchAll } from '@/lib/db/fetchBatched';
-import { extractDong } from '@/lib/permits/match';
+import { extractDong, extractZoneTokens as zoneTokens } from '@/lib/permits/match';
+// ⚠️ 이름 판정은 lib 에 있다. 라우트 안에 두었더니 이름 결함을 «배포해야만» 볼 수 있었고
+//    세 번 연속으로 냈다. 지금은 permits-promote-name.test.ts 가 로컬에서 잡는다.
+import { cleanProjectName, projectKey, usableAsProject } from '@/lib/permits/promote-name';
 import {
   adBlockedFor, isProvisional, judgeSupplyType, normName, provisionalSlug, stripProvisional,
 } from '@/lib/presale/candidate';
-import { extractZoneTokens as zoneTokens } from '@/lib/permits/match';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -34,57 +36,6 @@ export const maxDuration = 300;
  *   ?limit=N   생성 상한(기본 60) — 한 번에 쏟지 않는다
  */
 const REGIONS = ['부산', '울산', '경남'];
-
-/**
- * 인허가 원문에서 «사업명» 만 남긴다.
- *
- * ⚠️ 첫 예행이 이걸 안 하고 돌았더니 현장 이름이 이렇게 나왔다:
- *      「부산광역시 부산진구 범천동 858-6번지 일원 희망더함아파트」
- *      「울산 광역시 남구 신정동 563-1 일원 주상복합 신축공사」
- *    이름이자 곧 URL 이다. 행정 접두와 지번을 달고 페이지를 만들면 되돌리기 어렵다.
- * ⛔ 그렇다고 «지어내지» 않는다 — 원문에서 «빼기만» 한다(D2).
- */
-function cleanProjectName(raw: string): string {
-  let t = String(raw ?? '').replace(/\s+/g, ' ').trim();
-  // ⛔ 행정 접두는 «머리에서만» 뗀다. 문자열 아무 데서나 「…구」를 털면 사업명을 물어 뜯는다 —
-  //    2차 예행에서 실제로 그랬다: 「창원 풍호장천지구 1BL」 → 「창원 풍 1BL」,
-  //    「판문도시개발사업지구 2BL」 → 「판문도시개 2BL」. `지구` 의 '구' 를 시군구로 읽은 것이다.
-  //    (기존 `extractZoneCodes` 주석의 「무동지구의 '구' 까지 물어 뜯는다」와 같은 함정.)
-  for (let i = 0; i < 4; i++) {
-    const before = t;
-    t = t.replace(/^(?:부산|울산)\s*광역시\s*/, '')
-      .replace(/^(?:경상남도|창원특례시)\s*/, '')
-      .replace(/^[가-힣]{2,4}(?:시|군|구)\s+/, '');
-    if (t === before) break;
-  }
-  // ⚠️ 동+지번은 «남긴다». 그것이 이 사업을 가리키는 유일한 식별자인 원문이 많다
-  //    (「다대동 370-11번지 일원 공동주택」 3,002세대). 떼면 이름이 「공동주택」만 남는다.
-  return t.replace(/\s*신축공사\s*$/, '').replace(/\s+/g, ' ').trim();
-}
-
-/**
- * 사업명으로 쓸 수 있는가.
- * ⛔ 브랜드 «단독» 은 거부한다 — 「힐스테이트」·「호반 써밋」이 실제로 원문에 그렇게 온다.
- *    그 이름으로 만든 페이지는 어느 현장도 가리키지 못한다(PL-A 판정 ① 과 같은 종).
- * 통과 조건: 구역·지구·블록 식별자가 있거나, 법정동 이름이 남아 있을 것.
- */
-function usableAsProject(cleaned: string): boolean {
-  if (cleaned.length < 5) return false;
-  if (/^(아파트|공동주택)( 및|$)/.test(cleaned)) return false;
-  const hasZone = zoneTokens(cleaned).length > 0 || /(구역|지구|BL|블록|블럭)/i.test(cleaned);
-  const hasDong = Boolean(extractDong(cleaned));
-  return hasZone || hasDong;
-}
-
-/** 같은 사업의 분할 인허가를 한 덩어리로 — 단지·블록 꼬리를 턴 이름이 키다. */
-function projectKey(name: string | null | undefined): string {
-  return cleanProjectName(String(name ?? ''))
-    .replace(/[()（）\[\]]/g, ' ')
-    .replace(/\s+/g, '')
-    .replace(/(\d+단지|\d+BL|\d+블록|\d+블럭|[A-Z]-?\d+블록?|[A-Z]-\d+)/g, '')
-    .replace(/(공동주택|주상복합|주거복합|신축공사|아파트)$/g, '')
-    .trim();
-}
 
 /**
  * 시공사 추출. ⛔ 「선정·수주·계약」 문맥이 있을 때만 쓴다.
@@ -122,7 +73,7 @@ async function handler(req: NextRequest) {
   // 같은 사업의 분할 인허가는 «최대 세대수 1행» 이 대표. 나머지는 source_ids 로 흡수한다.
   const groups = new Map<string, Array<Record<string, any>>>();
   for (const p of permits) {
-    const k = `${p.sigungu ?? ''}|${projectKey(p.project_name)}`;
+    const k = `${p.sigungu ?? ''}|${projectKey(p.project_name, p.sigungu)}`;
     groups.set(k, [...(groups.get(k) ?? []), p]);
   }
 
