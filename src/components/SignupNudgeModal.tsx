@@ -25,6 +25,7 @@ import { useAuth } from '@/components/AuthProvider';
 import { isAptSiteDetailPath } from '@/lib/apt/is-site-detail';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { errMsg } from '@/lib/error-utils';
+import { useInAppBrowser } from '@/hooks/useInAppBrowser';
 
 interface ValueProp {
   icon: string;
@@ -62,6 +63,9 @@ export default function SignupNudgeModal() {
   const [props, setProps] = useState<SignupValueProps | null>(null);
   const [loginLoading, setLoginLoading] = useState<'kakao' | 'google' | null>(null);
   const [loginError, setLoginError] = useState('');
+  // SU A-1: 게이트가 «없던» 진입점. /login 과 같은 훅에서 정책이 나오게 한다 —
+  // 정책 상수를 컴포넌트마다 따로 두면 두 진입점이 곧 갈라진다.
+  const inApp = useInAppBrowser();
 
   // 트리거 체크: 페이지 진입 시 pv_count++ 후 임계값 도달 검사
   useEffect(() => {
@@ -160,6 +164,10 @@ export default function SignupNudgeModal() {
   }, [show, handleClose]);
 
   if (!show || userId) return null;
+  // OAuth 가 «둘 다» 막히는 인앱(다음·당근·페북/인스타/라인·일반 webview)에서는
+  // 눌러도 실패로 끝난다. 전환되지 않는 모달을 띄우지 않는다.
+  if (inApp.resolved && inApp.isInApp && !inApp.canDoOAuth) return null;
+  const googleAllowed = inApp.canDoOAuthBy.google;
 
   const valueProps = props?.value_props && props.value_props.length > 0 ? props.value_props.slice(0, 4) : DEFAULT_PROPS;
   const activeUsers = props?.real_active_users ?? 110;
@@ -240,27 +248,33 @@ export default function SignupNudgeModal() {
           {loginLoading === 'kakao' ? '로그인 중...' : '카카오로 로그인'}
         </button>
 
-        {/* Google 보조 옵션 */}
-        <button
-          onClick={() => handleLogin('google')}
-          disabled={loginLoading !== null}
-          style={{
-            width: '100%', padding: '12px 20px', marginBottom: 16,
-            borderRadius: 12, border: '1px solid var(--border)',
-            cursor: loginLoading ? 'not-allowed' : 'pointer',
-            background: 'var(--bg-hover)', color: 'var(--text-primary)',
-            fontWeight: 600, fontSize: 'var(--fs-sm, 13px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            opacity: loginLoading === 'kakao' ? 0.5 : 1,
-          }}
-        >
-          {loginLoading === 'google' ? (
-            <span style={{ width: 16, height: 16, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'kdNudgeSpin 0.8s linear infinite' }} />
-          ) : (
-            <span>G</span>
-          )}
-          {loginLoading === 'google' ? '로그인 중...' : 'Google 계정으로 가입'}
-        </button>
+        {/* Google 보조 옵션 — 인앱 웹뷰에서는 구글이 OAuth 를 거부한다(A-1) */}
+        {googleAllowed ? (
+          <button
+            onClick={() => handleLogin('google')}
+            disabled={loginLoading !== null}
+            style={{
+              width: '100%', padding: '12px 20px', marginBottom: 16,
+              borderRadius: 12, border: '1px solid var(--border)',
+              cursor: loginLoading ? 'not-allowed' : 'pointer',
+              background: 'var(--bg-hover)', color: 'var(--text-primary)',
+              fontWeight: 600, fontSize: 'var(--fs-sm, 13px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              opacity: loginLoading === 'kakao' ? 0.5 : 1,
+            }}
+          >
+            {loginLoading === 'google' ? (
+              <span style={{ width: 16, height: 16, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'kdNudgeSpin 0.8s linear infinite' }} />
+            ) : (
+              <span>G</span>
+            )}
+            {loginLoading === 'google' ? '로그인 중...' : 'Google 계정으로 가입'}
+          </button>
+        ) : (
+          <p style={{ margin: '0 0 16px', padding: '10px 12px', borderRadius: 12, border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-xs, 12px)', lineHeight: 1.6, textAlign: 'center' }}>
+            Google 로그인은 기본 브라우저에서 가능해요 — 카카오로 계속하거나, 우측 상단 메뉴에서 &lsquo;다른 브라우저로 열기&rsquo;를 눌러주세요
+          </p>
+        )}
 
         {loginError && (
           <p style={{ margin: '0 0 12px', padding: '8px 12px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--accent-red)', borderRadius: 8, fontSize: 'var(--fs-xs, 12px)', textAlign: 'center' }}>
