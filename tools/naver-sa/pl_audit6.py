@@ -115,7 +115,15 @@ def collect():
             """ + BASE + """
                 and (k.keyword ~ '(주식회사|건설|이앤씨|산업개발|종합건설|토건|주택공사|도시공사)'
                      or k.keyword ~ '[가-힣]-[가-힣]'
-                     or k.keyword ~ '^[가-힣][ ]')
+                     or k.keyword ~ '^[가-힣][ ]'
+                     -- 지역 접두 중복 후보: 공백을 지웠을 때 «대표명으로 끝나면서 더 긴» 키워드.
+                     -- ⚠️ 후보일 뿐이다. 접두가 정말 중복인지는 keyword_flags 가 판정한다.
+                     or (s.name is not null
+                         and length(regexp_replace(k.keyword,'\s+','','g'))
+                             > length(regexp_replace(s.name,'\s+','','g'))
+                         and right(regexp_replace(k.keyword,'\s+','','g'),
+                                   length(regexp_replace(s.name,'\s+','','g')))
+                             = regexp_replace(s.name,'\s+','','g')))
               order by k.keyword""", arg)
             flagged = []
             for r in cand:

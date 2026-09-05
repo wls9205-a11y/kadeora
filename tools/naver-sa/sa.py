@@ -349,9 +349,49 @@ def alias_is_corp(raw, cleaned, main, builders=()):
         return True
     bare = (cleaned or "").replace(" ", "")
     for b in builders:
+        # ⚠️ 리스트가 섞여 들어온 이력이 있다(builder_normalized 가 text[]). 여기서도 한 번 막는다.
+        if not isinstance(b, str):
+            continue
         b = re.sub(r"\(주\)|㈜|주식회사|\s", "", b or "")
         if len(b) >= 3 and b in bare and b not in bare_main:
             return True
+    return False
+
+
+def alias_is_dup_prefix(alias, main=None):
+    """대표명이 «이미 달고 있는» 지역을 한 번 더 붙인 별칭이면 True (SUPL 후속 · 2026-09-05).
+
+    「김해 외동 재건축사업」에서 나온 세 형태가 실제로 저장돼 있었다:
+        「김해김해외동재건축사업」 · 「김해 김해 외동 재건축사업」 · 「김해시 김해 외동 재건축사업」
+
+    ── 이 문이 «생성단» 이 아니라 여기 있는 이유 ─────────────────────────────
+    생산자(generate_apt_name_variants_jsonb)는 2026-09-02 CV-B ① 에서 이미 막혔다 —
+    `position(v_short IN p_name) = 0` 가드가 있고, 지금 함수로 다시 만들면 이 형태가
+    «0건» 나온다(9/5 전수 재생성으로 확인). 남아 있는 것은 그 이전에 앉은 «데이터» 다.
+    ⛔ 그러니 생산자를 또 고치지 않는다. 이미 있는 가드를 두 벌로 만들 뿐이다.
+    ⚠️ 그렇다고 데이터가 지워질 때까지 기다릴 수도 없다 — 9/5 실측 활성 1,955별칭·653현장.
+       그래서 «내보내는 층» 에 문을 단다. 이 문은 데이터가 정리돼도 해로울 게 없다.
+
+    판정은 «모양» 으로만 한다 — 시군구 목록을 여기 다시 적지 않는다(그 표는 DB 함수의 것이고,
+    두 곳에 두면 갈린다). 조건: 공백을 지웠을 때 별칭이 «접두 + 대표명» 이고, 그 접두가
+    대표명이 이미 시작하는 말일 것.
+      · 「김해」 + 「김해외동재건축사업」 → 대표명이 「김해」로 시작 → 중복
+      · 「김해시」 + 「김해외동재건축사업」 → 시/군/구 한 글자를 떼면 「김해」 → 중복
+    ⚠️ 접두 길이 상한(5)을 둔다. 상한이 없으면 「A B」와 「B」가 둘 다 있는 정상 쌍에서
+       긴 쪽을 중복으로 오판할 여지가 생긴다.
+    """
+    a = re.sub(r"\s+", "", alias or "")
+    m = re.sub(r"\s+", "", main or "")
+    if not a or not m or len(a) <= len(m) or not a.endswith(m):
+        return False
+    prefix = a[: len(a) - len(m)]
+    if not (2 <= len(prefix) <= 5):
+        return False
+    if m.startswith(prefix):
+        return True
+    # 「김해시」처럼 행정 꼬리가 붙은 형태. 꼬리를 떼면 대표명의 머리와 같다.
+    if len(prefix) >= 3 and prefix[-1] in "시군구" and m.startswith(prefix[:-1]):
+        return True
     return False
 
 
@@ -427,7 +467,18 @@ def name_pool(site, max_alias=4):
     #    그 이름으로 만든 키워드는 14~22개 현장에 걸쳐 어느 곳도 가리키지 못한다.
     out = [main] if len(main) >= 4 and not alias_is_fragment(main) else []
     seen = {main.replace(" ", "")}
-    builders = [b for b in (site.get("builder"), site.get("builder_normalized")) if b]
+    # ⚠️ builder 는 text 인데 builder_normalized 는 «text[]» 다(DB 실측). 그대로 담으면
+    #    리스트가 alias_is_corp 로 들어가 re.sub 에서 TypeError 로 죽는다 —
+    #    2026-09-05 실측: 부울경 적격 1,182현장 중 470현장에서 name_pool 이 크래시했다.
+    #    cmd_build 는 전 현장을 훑으므로 첫 크래시에서 회전이 통째로 멈춘다.
+    builders = []
+    for _b in (site.get("builder"), site.get("builder_normalized")):
+        if not _b:
+            continue
+        if isinstance(_b, (list, tuple, set)):
+            builders.extend([x for x in _b if x])
+        else:
+            builders.append(_b)
     cands = []
     for v in (site.get("variants") or []):
         n = kw_name(v)
@@ -437,6 +488,8 @@ def name_pool(site, max_alias=4):
         if alias_is_fragment(n, main):      # PL-A 판정 ① — 접미어 단독 금지
             continue
         if alias_is_corp(v, n, main, builders):   # CV-B ①-2 — 시공사 법인명 금지
+            continue
+        if alias_is_dup_prefix(n, main):         # SUPL 후속 — 지역 접두 중복 금지
             continue
         seen.add(k); cands.append(n)
     cands.sort(key=lambda x: (len(x), x))
@@ -928,6 +981,9 @@ def keyword_flags(kw, main=None):
             " " not in (kw or "") and CORP_GLUED.search(kw or "")
             and not CORP_GLUED.search((main or "").replace(" ", ""))):
         why.append("법인명")
+    # 지역을 두 번 단 키워드. 만드는 층은 막혔지만 이미 나간 것은 스스로 사라지지 않는다.
+    if main and alias_is_dup_prefix(kw, main):
+        why.append("지역중복")
     return why
 
 

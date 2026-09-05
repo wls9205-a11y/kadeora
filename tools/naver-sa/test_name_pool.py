@@ -140,9 +140,45 @@ for kw, main, want in [
     ('동래-반도-유보라', '반도유보라',        ['slug형']),
     ('서면 롯데캐슬',   '양정3 재개발',       []),
     ('가평 센트럴파크 더 스카이', '가평센트럴파크더스카이', []),  # 이름에 있는 한 글자
+    ('김해김해외동재건축사업', '김해 외동 재건축사업', ['지역중복']),   # 이미 나간 층
 ]:
     got = sa.keyword_flags(kw, main)
     check(got == want, '%-22s → %s (기대 %s)' % (kw, got or '깨끗', want or '깨끗'))
+
+print()
+print('■ ⑧ 단위 — alias_is_dup_prefix (지역 접두 중복 · 2026-09-05)')
+# ⚠️ 생산자(generate_apt_name_variants_jsonb)는 2026-09-02 에 이미 막혔다. 9/5 재생성
+#    실측으로 «지금 함수는 0건» 을 확인했다. 그런데도 이 문이 필요한 이유는 그 «이전에»
+#    앉은 데이터가 활성 1,955별칭·653현장 남아 있기 때문이다. 소비단의 두 번째 문이다.
+for alias, main, want in [
+    ('김해김해외동재건축사업',      '김해 외동 재건축사업', True),
+    ('김해 김해 외동 재건축사업',   '김해 외동 재건축사업', True),
+    ('김해시 김해 외동 재건축사업', '김해 외동 재건축사업', True),   # 행정 꼬리형
+    ('창원 창원자이 더 스카이',     '창원자이 더 스카이',   True),
+    # 살아야 하는 것들 — 접두가 «덧붙은» 것이 아니면 건드리지 않는다
+    ('김해 외동 데시앙',           '김해 외동 재건축사업', False),
+    ('외동 데시앙',                '김해 외동 재건축사업', False),
+    ('김해 데시앙',                '김해 외동 재건축사업', False),
+    ('서면 롯데캐슬',              '양정3 재개발',        False),
+    ('창원자이 더 스카이',         '창원자이 더 스카이',   False),
+    ('부산 감만1 재개발',          '감만1 재개발',        False),   # 접두가 이름에 없다 = 정상 결합
+]:
+    got = sa.alias_is_dup_prefix(alias, main)
+    check(got == want, '%-24s / %-20s → %s (기대 %s)' % (alias[:22], main[:18], got, want))
+
+print()
+# ⚠️ 영구 등재 — 2026-09-05 실제 사고. builder 는 text 인데 builder_normalized 는 «text[]» 다.
+#    그대로 alias_is_corp 로 넘어가 re.sub 에서 TypeError. 부울경 적격 1,182현장 중
+#    470현장에서 name_pool 이 죽었고, cmd_build 는 전 현장을 훑으므로 첫 크래시에서
+#    회전이 통째로 멈춘다. ⛔ 이 블록을 지우지 말 것.
+print('■ ⑨ 회귀 — builder_normalized 가 배열이어도 name_pool 이 죽지 않는다')
+try:
+    pool = sa.name_pool({'name': '센트레빌 아스테리움 거제', 'sigungu': '거제시',
+                         'builder': '동부건설', 'builder_normalized': ['동부건설'],
+                         'variants': ['거제 센트레빌', '거제 아스테리움']}, max_alias=4)
+    check(True, '배열 builder_normalized → %s' % pool)
+except Exception as e:
+    check(False, '배열 builder_normalized 에서 예외: %r' % (e,))
 
 if os.environ.get('SUPABASE_DB_URL'):
     print('\n■ ③ 전수 — 전 현장 name_pool 스윕')

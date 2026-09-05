@@ -68,10 +68,13 @@ create index if not exists idx_signup_attempts_match
 --  group by 1 order by 2 desc;
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- 배포 후 검증에서 «내가 만든» 행 (2026-09-05 03:33~03:37 UTC · SUPL §E)
+-- 배포 후 검증에서 «내가 만든» 행 (2026-09-05 03:33~03:42 UTC · SUPL §E)
 --   ⛔ 실사용 기록이 아니다. 9/5 기준선을 셀 때 제외한다.
---     · id 341~348 — source 가 'supl_verify%' 인 시작 행(track-attempt 왕복 확인)
+--     · id 341~348 · 350~352 — source 가 'supl_verify%' 인 시작 행
+--       (350~352 는 4초 상한 수리 후 재확인분. 세션 A 교차 판정에서 잡아 줬다)
 --     · id 340, 349 — /auth/callback?error=server_error 수동 진입(A-3 확인).
 --       error_message 가 'provider_error:server_error:supl_verify_test' 다.
+--   ⚠️ 즉 9/5 signup_attempts 행은 «전부» 검증 트래픽이다. 실트래픽 0.
+--      그래서 이 깔때기의 D0 는 9/5 가 아니라 **9/6** 이다.
 --   제외 조건: (source like 'supl_verify%' or error_message like '%supl_verify_test%')
 -- ═══════════════════════════════════════════════════════════════════════════
