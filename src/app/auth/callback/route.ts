@@ -47,9 +47,70 @@ export async function GET(request: NextRequest) {
   // (startsWith('/') 참, '//' · '/\\' · '/<공백>' 아님).
   const safeRedirect = isSafeInternalPath(redirect) ? redirect : '/';
 
+  /**
+   * SU A-3 (2026-09-05): 실패를 «표면화» 한다.
+   *
+   * 9/4 07:21 카카오 드롭의 실체는 동의화면 이탈이 아니었다. 사용자는 동의를 마치고
+   * 돌아왔고, Supabase 의 /callback 이 `Post "https://kauth.kakao.com/oauth/token":
+   * context deadline exceeded` → 504 → `Error loading flow state` 로 죽었다.
+   * 서버측 토큰 교환 타임아웃이다. 그런데 그 실패는 Supabase 도메인에서 나므로
+   * 우리 signup_attempts 에는 «콜백 미도달» 로 위장돼 들어온다.
+   *
+   * Supabase 는 실패 시 ?error=&error_description= 을 달아 돌려보내는데, 기존
+   * !code 분기는 그 파라미터를 «버리고» /login?error=auth_failed 로만 보냈다.
+   * 그래서 원인이 로그에도 화면에도 남지 않았다. 여기서 둘 다 남긴다.
+   *
+   * ⛔ 자동 재-authorize 금지. 수동 재시도만 안내한다(s267_b 무한 루프 이력).
+   */
+  const recordCallbackError = async (prefix: 'provider_error' | 'exchange_failed', detail: string) => {
+    try {
+      const { getSupabaseAdmin } = await import('@/lib/supabase-admin');
+      const admin = getSupabaseAdmin();
+      const nowIso = new Date().toISOString();
+      const ipRaw = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? '';
+      const ipHash = ipRaw ? createHash('sha256').update(ipRaw).digest('hex').slice(0, 16) : null;
+      const row = {
+        oauth_callback_at: nowIso, // 도달은 «했다». 미도달로 위장되던 자리를 이 값이 연다.
+        success: false,
+        dropped_step: 'callback_error',
+        error_message: `${prefix}:${detail}`.slice(0, 250),
+      };
+      if (attemptIdFromCookie != null) {
+        const { data: hit } = await (admin as any)
+          .from('signup_attempts').select('id').eq('id', attemptIdFromCookie).maybeSingle();
+        if (hit?.id) {
+          await (admin as any).from('signup_attempts').update(row).eq('id', hit.id);
+          return;
+        }
+      }
+      await (admin as any).from('signup_attempts').insert({
+        provider: 'unknown',
+        source,
+        redirect_path: safeRedirect,
+        ip_hash: ipHash,
+        user_agent: ua.slice(0, 300),
+        ...row,
+      });
+    } catch { /* 계측 실패가 리디렉트를 막지 않는다 */ }
+  };
+
+  const failResponse = (errorCode: string) => {
+    const res = NextResponse.redirect(`${origin}/login?error=${errorCode}&retry=1`);
+    res.cookies.set('kd_att', '', { path: '/', maxAge: 0 });
+    return res;
+  };
+
   if (!code) {
+    const providerError = searchParams.get('error') ?? '';
+    const providerErrorDesc = searchParams.get('error_description') ?? '';
+    if (providerError || providerErrorDesc) {
+      console.warn(`[auth/callback] provider_error mobile=${isMobile} source="${source}" error="${providerError}" desc="${providerErrorDesc.slice(0, 120)}"`);
+      await recordCallbackError('provider_error', `${providerError}:${providerErrorDesc}`);
+      return failResponse('provider_error');
+    }
     console.warn(`[auth/callback] missing_code mobile=${isMobile} source="${source}" — redirect to /login?error=auth_failed`);
-    return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+    await recordCallbackError('provider_error', 'missing_code');
+    return failResponse('auth_failed');
   }
 
   // s267_b: response 를 미리 생성하고 cookies adapter 가 직접 response.cookies 에 set.
@@ -76,7 +137,8 @@ export async function GET(request: NextRequest) {
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
   if (error || !data?.user) {
     console.warn(`[auth/callback] exchange_failed mobile=${isMobile} source="${source}" err=${error?.message ?? 'no_user'}`);
-    return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+    await recordCallbackError('exchange_failed', error?.message ?? 'no_user');
+    return failResponse('provider_error');
   }
 
   const user = data.user;
@@ -170,6 +232,10 @@ export async function GET(request: NextRequest) {
         redirect_path: safeRedirect,
         error_message: rpcOk ? null : 'frictionless_rpc_failed',
         is_new_user: isNewUser,
+        // SU A-4: track-attempt 가 심은 'oauth_start' 는 «시작에 머묾» 이라는 뜻이다.
+        // 콜백이 도달한 순간 더는 참이 아닌데 아무도 지우지 않아 성공 행에도 남았다.
+        // 그 컬럼으로 낸 이탈 집계는 전부 오보였다.
+        dropped_step: null,
       }).eq('id', attemptId);
     } else {
       await (admin as any).from('signup_attempts').insert({
@@ -181,6 +247,7 @@ export async function GET(request: NextRequest) {
         onboarding_skipped: true,
         error_message: rpcOk ? null : 'frictionless_rpc_failed',
         is_new_user: isNewUser,
+        dropped_step: null,
       });
     }
   } catch { /* 로깅 실패는 무시 */ }

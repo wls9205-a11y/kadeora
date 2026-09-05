@@ -20,6 +20,13 @@ function LoginForm({ redirect }: LoginFormProps) {
     const params = new URLSearchParams(window.location.search);
     const invite = params.get('invite');
     if (invite) localStorage.setItem('kd_invite_code', invite);
+    // SU A-3: 콜백이 실패를 ?error= 로 돌려보내는데 이 화면은 그걸 «읽지도 않았다».
+    // 9/4 kauth 504(서버측 토큰 교환 타임아웃)가 사용자에겐 무설명 낙하로 보인 이유다.
+    // ⛔ 자동 재-authorize 금지 — 수동 재시도만 안내한다(s267_b 무한 루프 이력).
+    const err = params.get('error');
+    if (err === 'provider_error' || err === 'auth_failed') {
+      setError('로그인 처리 중 일시적인 오류가 있었어요. 한 번 더 눌러주시면 대부분 해결돼요.');
+    }
   }, []);
 
   const login = async (provider: 'kakao' | 'google') => {
