@@ -64,13 +64,23 @@ async function handler(req: NextRequest) {
 
   // ⚠️ 아직 «본 적 없는» 것부터 본다(pending). review·unmatched 는 재판정 대상이 아니다 —
   //    같은 입력에 같은 답이 나오고, 사람이 큐에서 내린 판단을 덮어쓸 위험만 있다.
-  let q = admin.from('apt_permits')
-    .select('id, bjd_cd, address, project_name, total_units, permit_date, match_status, sigungu, sido');
-  q = rematch
-    ? q.in('match_status', ['pending', 'no_target', 'review'])
-    : q.eq('match_status', 'pending');
-  if (sido) q = q.in('sido', sido.split(','));
-  const { data: permits } = await q.order('id').limit(limit);
+  // ⚠️ PostgREST 는 db-max-rows=1000 으로 «조용히» 자른다. limit(2000) 을 적어도 1,000행만
+  //    온다 — 2026-08-29 에 같은 캡이 현장 연결 4,273건을 조용히 증발시킨 적이 있다.
+  //    재판정은 «전량» 을 돌아야 의미가 있으므로 range 로 페이지를 돈다.
+  const PAGE = 1000;
+  const permits: Array<Record<string, any>> = [];
+  for (let from = 0; from < limit; from += PAGE) {
+    let q = admin.from('apt_permits')
+      .select('id, bjd_cd, address, project_name, total_units, permit_date, match_status, sigungu, sido');
+    q = rematch
+      ? q.in('match_status', ['pending', 'no_target', 'review'])
+      : q.eq('match_status', 'pending');
+    if (sido) q = q.in('sido', sido.split(','));
+    const { data: page } = await q.order('id').range(from, Math.min(from + PAGE, limit) - 1);
+    const rows = (page ?? []) as Array<Record<string, any>>;
+    permits.push(...rows);
+    if (rows.length < PAGE) break;
+  }
 
   const tally: Record<string, number> = {};
   const byMethod: Record<string, number> = {};
@@ -79,7 +89,7 @@ async function handler(req: NextRequest) {
   let writeFails = 0;
   let firstWriteError: string | null = null;
 
-  for (const p of (permits ?? []) as Array<Record<string, any>>) {
+  for (const p of permits) {
     if (Date.now() - started > TIME_BUDGET_MS) { stoppedBy = 'time_budget'; break; }
 
     const fact: PermitFact = {
@@ -136,7 +146,7 @@ async function handler(req: NextRequest) {
   return {
     processed,
     metadata: {
-      dry, rematch, sido: sido ?? null,
+      dry, rematch, sido: sido ?? null, fetched: permits.length,
       stopped_by: stoppedBy, sites_indexed: siteRows.length,
       dongs: idx.size, zone_keys: zoneIdx.size, by_status: tally, by_method: byMethod,
       // ⚠️ 0 이 아니면 그 실행은 «판정만» 하고 아무것도 못 바꾼 것이다.
