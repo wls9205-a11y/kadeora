@@ -9,8 +9,14 @@ import { fetchAll } from '@/lib/db/fetchBatched';
 //    이미 있는 「광안동 373블럭 가로주택정비」를 못 보고 새로 만들 뻔했다(5차 예행).
 import { extractDong, extractZoneCodes, extractZoneTokens } from '@/lib/permits/match';
 
+/**
+ * ⚠️ extractZoneCodes 의 「BL<번호>」는 «약한» 식별자다. 「1BL」·「2BL」은 어느 지구에나 있고
+ *    같은 시군구 안에서 서로 다른 사업이 같은 키가 된다 — 6차 예행에서 「창원 풍호장천지구
+ *    1BL」이 무관한 현장과 중복 판정됐다. 지번형(373BL)이나 영문+번호(A5·B14)만 남긴다.
+ */
+const STRONG = (t: string): boolean => !/^BL\d{1,2}$/.test(t);
 const zoneTokens = (s: string | null | undefined): string[] =>
-  [...new Set([...extractZoneTokens(s), ...extractZoneCodes(s)])];
+  [...new Set([...extractZoneTokens(s), ...extractZoneCodes(s).filter(STRONG)])];
 // ⚠️ 이름 판정은 lib 에 있다. 라우트 안에 두었더니 이름 결함을 «배포해야만» 볼 수 있었고
 //    세 번 연속으로 냈다. 지금은 permits-promote-name.test.ts 가 로컬에서 잡는다.
 import { cleanProjectName, projectKey, usableAsProject } from '@/lib/permits/promote-name';
