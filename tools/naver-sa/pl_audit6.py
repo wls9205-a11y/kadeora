@@ -143,12 +143,14 @@ def collect():
             for r in q(cur, "select distinct k.site_slug" + BASE + " and k.site_slug is not null", arg):
                 if r['site_slug']:
                     have.add(r['site_slug'])
-            ax['6_부울경미등록'] = [
-                {'slug': e['slug'], 'name': e['name'], 'cat': e['cat'],
-                 'region': e['region'], 'sigungu': e['sigungu'],
-                 'total_units': e['total_units'], 'content_score': e['content_score']}
-                for e in eligible if e['region'] in ZONES and e['slug'] not in have
-            ]
+            # ⚠️ sa.SQL 의 ORDER BY 는 동점이 많아 실행마다 순서가 흔들린다. 그대로 CSV 로
+            #    쓰면 «내용이 같은데» 매번 통째로 diff 가 난다. 여기서 확정 정렬한다.
+            ax['6_부울경미등록'] = sorted(
+                ({'slug': e['slug'], 'name': e['name'], 'cat': e['cat'],
+                  'region': e['region'], 'sigungu': e['sigungu'],
+                  'total_units': e['total_units'], 'content_score': e['content_score']}
+                 for e in eligible if e['region'] in ZONES and e['slug'] not in have),
+                key=lambda r: (r['cat'], r['region'], r['slug']))
 
             # ⑦ (보강) 외부 착지 · PC↔모바일 불일치 — 9/5 에 0 이었다.
             ax['7_외부·불일치'] = q(cur, """
