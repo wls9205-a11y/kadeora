@@ -81,7 +81,7 @@ async function handler(req: NextRequest) {
   //    이미 있는 「광안동 373블럭 가로주택정비」와 «다른 slug» 라 새로 만들어질 뻔했다.
   //    그래서 ① 이름 정규화 키 ② 같은 시군구의 구역 토큰 — 세 축으로 본다.
   const siteRows = (await fetchAll(admin, 'apt_sites',
-    'slug, name, display_name, name_variants, sigungu',
+    'id, slug, name, display_name, name_variants, sigungu, dong, lifecycle_stage, total_units, complex_units, is_active',
     (q: any) => q.in('region', REGIONS))) as Array<Record<string, any>>;
   const existingSlugs = new Set<string>(siteRows.map((r) => r.slug));
   const existingNameKeys = new Set<string>();
@@ -96,7 +96,58 @@ async function handler(req: NextRequest) {
     }
   }
 
-  const stat = { groups: groups.size, permits: permits.length, created: 0, skipped_slug: 0, skipped_name: 0, skipped_dup: 0, absorbed: 0 };
+  /**
+   * PV2-C 보강 — 「세대수 NULL 유령」 검사 (세션 A 실측, 2026-09-05).
+   *
+   * ── 왜 ────────────────────────────────────────────────────────────────
+   * 1차 승인 직전 교차 검증에서 19건 중 3건이 «이미 있는 현장» 이었다:
+   *   범천동 858-6(614) ↔ `부산-범천동-주상복합`   (pre_announcement · 세대수 NULL · 주소 공백)
+   *   중동 주상복합(516) ↔ `해운대-중동-동원로얄듀크`(pre_announcement · 세대수 NULL)
+   *   명륜동(747)        ↔ `명륜2-재건축`          (mgmt_approved · 504 — 33% 차)
+   * 셋 다 이름·slug·구역 토큰이 겹치지 않아 앞의 세 축이 전부 통과시켰다.
+   *
+   * ⛔ 공통 원인이 구조적이다 — `seed:web` 레코드는 **세대수 NULL·주소 공백**이라
+   *    매처의 «세대수 축과 지번 축을 둘 다» 못 쓴다. 이름도 「범천동 주상복합」처럼
+   *    일반명사라 이름 축도 못 쓴다. 그래서 매처가 못 이었고, 여기가 「없다」고 읽었다.
+   * ⚠️ 「매처가 못 이은 것」과 「실제로 없는 것」은 다르다. 그 둘을 가르지 못하면
+   *    승격이 유령의 쌍둥이를 만든다 — 그리고 그것은 되돌리기 어렵다.
+   *
+   * 판정: 같은 법정동(동이 없으면 같은 시군구)에 «공고 전» 활성 현장이 있고
+   *   ⓐ 세대수를 모르거나            → 겹칠 수 있다
+   *   ⓑ 세대수가 ±40% 안이거나       → 같은 사업일 수 있다(명륜동 504/747 = 33%)
+   * 이면 **만들지 않고 review 로 보낸다.** ⛔ 억지로 matched 로 잇지도 않는다 —
+   *    범천동처럼 «확정으로 올릴» 판단은 사람이 하고, 여기는 후보만 적어 큐에 남긴다.
+   */
+  const PRE_STAGES = new Set([
+    'pre_announcement', 'union_established', 'site_planning', 'plan_approved',
+    'mgmt_approved', 'constructor_selected',
+  ]);
+  const preSites = siteRows.filter(
+    (r) => r.is_active !== false && PRE_STAGES.has(String(r.lifecycle_stage ?? '')),
+  );
+  const preByDong = new Map<string, Array<Record<string, any>>>();
+  const preBySigunguNoDong = new Map<string, Array<Record<string, any>>>();
+  for (const r of preSites) {
+    if (r.dong) preByDong.set(r.dong, [...(preByDong.get(r.dong) ?? []), r]);
+    else if (r.sigungu) preBySigunguNoDong.set(r.sigungu, [...(preBySigunguNoDong.get(r.sigungu) ?? []), r]);
+  }
+  const UNITS_NEAR = 0.4;
+  const collides = (p: Record<string, any>): Array<Record<string, any>> => {
+    const dong = extractDong(p.address);
+    const pool = [
+      ...(dong ? (preByDong.get(dong) ?? []) : []),
+      ...(p.sigungu ? (preBySigunguNoDong.get(p.sigungu) ?? []) : []),
+    ];
+    const units = Number(p.total_units ?? 0);
+    return pool.filter((r) => {
+      const u = r.complex_units ?? r.total_units;
+      if (u == null) return true;                       // ⓐ 모른다 = 겹칠 수 있다
+      if (!units) return true;
+      return Math.abs(units - u) / Math.max(units, u) <= UNITS_NEAR;   // ⓑ 가깝다
+    });
+  };
+
+  const stat = { groups: groups.size, permits: permits.length, created: 0, skipped_slug: 0, skipped_name: 0, skipped_dup: 0, held_ghost: 0, absorbed: 0 };
   const created: Array<Record<string, unknown>> = [];
   const skipped: Array<Record<string, unknown>> = [];
   let writeFails = 0;
@@ -118,6 +169,25 @@ async function handler(req: NextRequest) {
     if (dupByName || dupByZone) {
       stat.skipped_dup++;
       skipped.push({ key, name: rawName, why: dupByName ? '이름 키 중복 — 기존 현장 있음(검수)' : '구역 토큰 중복 — 기존 현장 있음(검수)' });
+      continue;
+    }
+    // ⛔ 유령 검사 — 매처가 못 이었을 뿐 «있는» 현장일 수 있다. 만들지 않고 큐로 보낸다.
+    const ghosts = collides(rep);
+    if (ghosts.length) {
+      stat.held_ghost++;
+      const note = `PV2-C 보류 — 같은 동/구의 공고 전 현장과 겹칠 수 있다: ${ghosts.map((g) => `${g.slug}(${g.complex_units ?? g.total_units ?? '세대수 미상'})`).join(', ')}`;
+      skipped.push({ key, name: rawName, units: rep.total_units, why: note.slice(0, 200) });
+      if (!dry) {
+        for (const r of rows) {
+          // review 로 옮겨 다음 회전이 같은 사업을 다시 만들지 않게 한다.
+          // ⚠️ matched_site_id 는 «비워 둔다» — 확정이 아니다(라우트의 불변식).
+          const { error: e3 } = await admin.from('apt_permits').update({
+            match_status: 'review', match_method: 'ghost_hold',
+            match_note: note.slice(0, 300), matched_at: new Date().toISOString(),
+          }).eq('id', r.id);
+          if (e3) { writeFails++; if (firstWriteError == null) firstWriteError = String(e3.message).slice(0, 200); }
+        }
+      }
       continue;
     }
     const slug = provisionalSlug(rawName);
