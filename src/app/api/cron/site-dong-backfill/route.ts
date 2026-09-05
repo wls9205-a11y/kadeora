@@ -63,13 +63,17 @@ async function handler(req: NextRequest) {
   const started = Date.now();
 
   // ── 법정동 사전: (시군구 → 동 집합). 매칭 상대인 apt_permits 의 어휘를 그대로 쓴다.
-  const permitRows = (await fetchAll(admin, 'apt_permits', 'sigungu, dong',
-    (q: any) => q.in('sido', regions))) as Array<{ sigungu: string | null; dong: string | null }>;
+  // ⚠️ `apt_permits.dong` 컬럼은 «전량 NULL» 이다(2026-09-05 실측: 부울경 1,184행 중 0).
+  //    동은 `address` 안에만 있다. 그래서 사전도 매칭기와 «같은 함수» 로 뽑는다 —
+  //    여기서 따로 파싱하면 사전의 어휘와 매칭의 어휘가 갈린다.
+  const permitRows = (await fetchAll(admin, 'apt_permits', 'sigungu, address',
+    (q: any) => q.in('sido', regions))) as Array<{ sigungu: string | null; address: string | null }>;
   const dongsBy = new Map<string, Set<string>>();
   for (const r of permitRows) {
-    if (!r.sigungu || !r.dong) continue;
+    const d = extractDong(r.address);
+    if (!r.sigungu || !d) continue;
     const set = dongsBy.get(r.sigungu) ?? new Set<string>();
-    set.add(r.dong);
+    set.add(d);
     dongsBy.set(r.sigungu, set);
   }
 
