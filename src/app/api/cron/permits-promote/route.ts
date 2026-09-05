@@ -77,11 +77,27 @@ async function handler(req: NextRequest) {
   const started = Date.now();
 
   // ── ⓐ 대상 인허가: 재판정 후에도 no_target 인 것 ──────────────────────────
+  /**
+   * ?rehold=1 — «이 라우트가 스스로 보류한» 행만 다시 본다.
+   *
+   * ⚠️ 판정 규칙이 바뀌면 같은 입력이 아니다. 공공↔민간 분기를 넣은 뒤
+   *    「범천동 858-6 희망더함아파트」는 만들어야 하는데, 이미 review 로 옮겨 놔서
+   *    no_target 만 보는 기본 모드로는 «영영 안 보인다».
+   * ⛔ 사람이 큐에서 내린 review 는 건드리지 않는다 — match_method 가
+   *    ghost_hold·dup_hold 인 것, 즉 내가 적어 둔 것만 되돌려 본다.
+   */
+  const rehold = sp.get('rehold') === '1';
   const permits = (await fetchAll(admin, 'apt_permits',
     'id, sido, sigungu, address, project_name, builder, developer, total_units, construct_start_expected, permit_date, raw',
-    (q: any) => q.in('sido', REGIONS).eq('match_status', 'no_target')
-      .gte('construct_start_expected', '2026-01-01').lt('construct_start_expected', '2029-01-01')
-      .gte('total_units', 300))) as Array<Record<string, any>>;
+    (q: any) => {
+      let x = q.in('sido', REGIONS)
+        .gte('construct_start_expected', '2026-01-01').lt('construct_start_expected', '2029-01-01')
+        .gte('total_units', 300);
+      x = rehold
+        ? x.or('match_status.eq.no_target,and(match_status.eq.review,match_method.in.(ghost_hold,dup_hold))')
+        : x.eq('match_status', 'no_target');
+      return x;
+    })) as Array<Record<string, any>>;
 
   // 같은 사업의 분할 인허가는 «최대 세대수 1행» 이 대표. 나머지는 source_ids 로 흡수한다.
   const groups = new Map<string, Array<Record<string, any>>>();
@@ -319,7 +335,7 @@ async function handler(req: NextRequest) {
     processed: stat.created,
     created: stat.created,
     metadata: {
-      dry, limit, ...stat,
+      dry, limit, rehold, ...stat,
       write_fails: writeFails, first_write_error: firstWriteError,
       created_samples: created.slice(0, 30),
       skipped_samples: skipped.slice(0, 20),
