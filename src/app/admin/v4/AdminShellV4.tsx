@@ -133,6 +133,31 @@ export default function AdminShellV4() {
             border: '1px solid var(--border)', textDecoration: 'none',
           }}>{m.label}</a>
         ))}
+        {/* ⛔ AD-6(2026-09-07) — 「도구」. 여기 7면은 src 전체에서 «어디서도 링크되지
+            않던» 페이지들이다(참조 grep 0 실측). 만들어 놓고 주소를 아는 사람만
+            들어갈 수 있었다 — 광고 단위경제 199줄, DS 프리뷰, 제로결과 키워드 발굴,
+            봇 크롤·Web Vitals 대시보드가 그 상태였다.
+            apt-stage·redev-review 는 /admin 루트 페이지에서만 닿아서 V4 셸에서는
+            보이지 않았다 — 같이 올린다.
+            ⚠️ users·alerts 는 각각 UsersCommunitySection·AlertsHeaderLink 로 이미
+               진입점이 살아 있어 «중복 등재하지 않는다».
+            ⚠️ 이모지 라벨은 RULES#144 예외(어드민은 내부 도구) — 셸 기존 스타일을 따른다. */}
+        {[
+          { href: '/admin/ads',              label: '📢 광고 단위경제' },
+          { href: '/admin/search-analytics', label: '🔎 검색 분석' },
+          { href: '/admin/seo/crawl',        label: '🤖 봇 크롤' },
+          { href: '/admin/seo/vitals',       label: '📉 Web Vitals' },
+          { href: '/admin/apt-stage',        label: '🏗️ 단계 입력' },
+          { href: '/admin/redev-review',     label: '🧾 재개발 검수' },
+          { href: '/admin/design',           label: '🎨 디자인 프리뷰' },
+        ].map(m => (
+          <a key={m.href} href={m.href} style={{
+            fontSize: 11, fontWeight: 500,
+            padding: '6px 12px', borderRadius: 6,
+            background: 'transparent', color: 'var(--text-secondary)',
+            border: '1px solid var(--border)', textDecoration: 'none',
+          }}>{m.label}</a>
+        ))}
         <button onClick={fetchData} style={{
           fontSize: 11, fontWeight: 500,
           padding: '6px 12px', borderRadius: 6, cursor: 'pointer',
