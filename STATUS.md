@@ -1,3 +1,26 @@
+## 2026-09-07 — external-cron 퇴역 · RULES#145(4면 검증) · pg_cron 업타임 동봉
+
+`external-cron.yml` 삭제. 세 잡 중 둘(`pr-monitor`·`alert-time-based`)은 **라우트가 이미 없어진 뒤에도**
+6시간마다·매일 호출되고 있었다 — 프로덕션 **404**(GET·POST), 폴더 부재, `src` 참조 0(실측).
+최근 스케줄 런 **11건 중 9건 failure**, 성공 2건 = 유일한 생존자 `builder-watch` 이틀치로 산술 정합.
+⛔ 빨강이 상시화되면 그 빨강은 신호가 아니다 — 퇴역을 안 한 대가는 «관측이 죽는 것» 이었다.
+⚠️ 404/401 을 가른 것이 열쇠였다(`builder-watch` 401 = 인증벽·생존). 「200 이 아니다」로 뭉치면 산 것과 죽은 것이 섞인다.
+
+삭제 전 대체 확인 — `cron.job` 실조회로 `builder-watch-hanwoong`(jobid 174 · `0 21 * * *` · active ·
+`_call_vercel_cron` 경유) 존재를 «먼저» 확인했다. 유일한 생존 잡을 조용히 죽이지 않기 위해서다.
+
+**RULES#145** — 크론 퇴역 검증을 RULES#19 의 3면(cron_logs·pg_cron·src)에서 **4면**으로 확장,
+`.github/workflows/` 추가. 곁가지로 「런 하나를 보고 워크플로 전체를 판정하지 않는다」도 등재했다 —
+AD-0 이 「external-cron 정상(#792)」이라 적었는데 하필 그게 2건뿐인 success 중 하나였다(CC 자기정정).
+
+마이그레이션 사후 동봉 `supabase/migrations/20260907_pgcron_uptime_builderwatch.sql`
+(세션 A 집행분: `site_uptime_log`+RLS · `site_uptime_probe()` · cron.schedule 2건). ⛔ DB 재실행 없음.
+⚠️ 본문은 «DB 에서 다시 읽어» 옮겼다(`pg_get_functiondef`·`information_schema`·`cron.job`) — 대화 인용이 아니다.
+수확 실측 07:15Z: 2행 중 1행 회수 `status_code=200`. 마지막 행이 NULL 인 것은 비동기 수확 설계다.
+
+⚠️ `uptime.yml` 은 **무접촉·보류**. GitHub 스케줄이 이 리포에서 1~4시간 밀려(external-cron 실측)
+「15분 내 조기경보」 목적을 못 이룬다. 기록층은 pg_cron 5분 프로브가 맡고, **경보층은 Node 판정 대기**.
+
 ## 2026-09-07 — 구표면 폐쇄 · /premium 내림 · 외부 눈(uptime.yml) (Node 판정 집행)
 
 라우트 폴더 4개 삭제(`hot`·`shop`+megaphone·`grades`·`premium`) + `next.config` 영구 리다이렉트 5경로.
