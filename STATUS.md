@@ -1,3 +1,72 @@
+## 2026-09-07 — AD 트랙 (전수조사 정비) · 커밋 11건 · 단일 배포
+
+지시서 `docs/최종지시서_AD_20260907.md`. 롤백 태그 `pre-ad-20260907`.
+
+| # | 커밋 | 내용 |
+|---|------|------|
+| C0 | `19d75fb4` | 지시서 수신·적재 |
+| AD-0 | `d691b601` | CI 5잡 실가동 복원 |
+| AD-1 | `e8a2e059` | 공개 리포 위생 17건 + STATUS 꼬리 무효 선언 |
+| AD-2 | `c34642b7` | npm audit fix — high 11 → 3 |
+| AD-3 | `d7cf6bf6` | ld+json → JsonLd 단일 경로 (72파일·171태그) |
+| AD-4 | `b794ea28` | 구표면 4면 noindex + 진입 링크 회수 |
+| AD-5 | `55dcd4b7` | 어드민 일괄 + RULES#144 |
+| AD-6 | `e1d1be79` | V4 셸 「도구」 7면 등재 |
+| AD-7 | `f05f435e` | DS_RULES#5-7 |
+| AD-8 | `c26c374b` | trend-aggregator 퇴역 선언 |
+| AD-9 | `16ba6929` | e2e 회귀 4종 |
+
+### 지시서보다 나빴던 것 — CI 는 «한 번도 초록인 적이 없었다»
+
+지시서는 「최근 2런 연속 failure」로 적었지만 GitHub API 실측은 **run #1(2026-03-14)부터
+3,238 런 success 0건**이었다. quality 잡이 언제나 먼저 죽어서 `test`·`e2e`·`build`
+3잡은 **실행된 적조차 없다**. 배포가 Vercel 직결이라 이 빨강이 6개월간 아무 것도 막지
+않았고, 그래서 그 3잡 «안에» 있던 결함들도 드러난 적이 없었다:
+
+- `npm run dev` 가 홈에서 **500** — `globals.css` 의 `@import` 가 빈 `@layer` 블록 뒤에
+  있어 CSS 규칙 위반. `next build`(lightningcss)는 넘어가고 turbopack dev 만 멈춰서,
+  **빌드가 초록인 동안 아무도 못 봤다.**
+- `build` 잡이 `SUPABASE_SERVICE_ROLE_KEY` 를 안 넘긴다 — secrets 를 전부 등록했더라도
+  `/apt/stage/[stage]/[region]` 수집에서 죽었을 구성.
+- `e2e` 잡이 chromium 만 설치하는데 playwright 의 mobile 프로젝트는 iPhone(=**webkit**).
+- e2e 스펙이 **2026-03 커뮤니티 시절 제품**을 검증하고 있었다(로그인 문구·약관 조 번호·
+  `/feed`·CSP·X-Frame-Options 전부 현행과 불일치). 제품을 테스트에 맞추지 않고
+  테스트를 실물에 맞췄다 — 바뀐 기대값은 `e2e/core.spec.ts` 머리주석에 전부 남겼다.
+
+**「게이트는 초록으로 태어난다」** — Supabase 3종 키는 존재 여부만 검증되므로 secrets
+없이도 플레이스홀더로 `build`·`e2e` 가 **진짜로** 돈다(건너뛰지 않고 실제로 컴파일하고
+브라우저를 띄운다). 유일한 명시적 skip 은 `type-diff`(PR 전용, 원격 스키마 비교라
+대체 불가)이고 사유를 `::warning::` 으로 남겼다.
+
+### 판정·확인이 남은 것
+
+- **CSP 에 nonce 가 없다.** 기존 e2e 는 「nonce 존재 + unsafe-eval 부재」를 주장했는데
+  실물엔 nonce 가 아예 없고 `script-src` 에 `unsafe-inline`·`unsafe-eval` 이
+  **프로덕션에서도 무조건** 들어간다(`middleware.ts:14`). CSP 를 조이는 건 광고·카카오·
+  토스 로딩과 얽혀 AD 범위 밖이라 테스트를 실물에 맞추되 부채로 남겼다.
+- **잔존 audit high 3** — postcss(next 번들 사본, 수정이 next@16 요구) · sharp(0.35.4 가
+  semver-major) · xlsx(**fixAvailable: false** — SheetJS 가 npm 배포를 접어 고친 버전이
+  레지스트리에 없다). xlsx 는 시간이 지나도 저절로 사라지지 않는다 — 교체 설계가 별건.
+- **유령 토큰 4종** — `--text-muted`(7곳)·`--border-subtle`·`--warn-bg`·`--warn-border` 는
+  정의가 0이라 폴백 hex 가 실제로 화면을 칠하고 있다. 폴백 제거는 색 삭제라 보존했다.
+- **trend-aggregator 는 「배포 안 됨」이 아니다.** `DEPLOY_GUIDE.md` 가 pg_cron 매 1분
+  호출을 안내해 왔다. 원격 실등록 확인과 undeploy 는 DB 접근이 있는 쪽 몫.
+  코드 측 근거는 「호출자 0」보다 강하다 — `trending_keywords` 에는 살아 있는 생산자
+  `/api/cron/refresh-trending`(vercel 크론 `0 */6 * * *`)가 있어서, 되살리면
+  **이중 생산자**가 된다(CV-B①).
+- **곁가지** — `/apt` 목록이 `/apt/ranking` 으로 링크하는데 로컬 404(라우트 파일은 존재,
+  데이터 의존으로 보임). AD 범위 밖이라 손대지 않았다.
+
+### 트랙 교차
+
+- 파일 교차는 **`STATUS.md` 하나뿐**(PL-B′ `e6643194` · TRIVN `1e8305b2` 가 같은 브랜치에
+  끼어들었다 — 각자 세션 항목을 덧붙이는 자리라 충돌 아님).
+  ⚠️ 작업 중 `tools/naver-sa/*` 가 `git add -A` 에 딸려 들어가 AD-5 를 한 번 되감아
+  분리했다. 이후 커밋은 전부 **명시 스테이징**으로 바꿨다.
+- `/stock` 계열 **19파일 접촉** — 전부 AD-3 의 JSON-LD 래퍼 교체(16파일)와 AD-0 의
+  `let`→`const`(크론 3파일)뿐이다. 텍스트·수치·정렬·로직 변경 0(diff 전수 확인).
+- FN 커밋은 main 에 없다(착수 시 grep 0). 교차 없음.
+
 ## 2026-09-07 — PL-B′ 판독 종결 · 록아웃 해제 · TRIVN 재개
 
 - **PL-B′ 종결 → 록아웃 해제.** 세션 A 판독 회신을 `docs/pl/PLB_PRIME_회신_20260907.md` 로 적재(원문 그대로) — 노출0 90.8%→88.9%·활성 키워드 486→586(총노출 보존)로 PL-B 품질 조치는 실효, 절대 ~89% 불변이라 **⑧ 전국 확대는 보류 유지**. `sa.py LOCKOUTS` 엔트리는 **삭제하지 않고**(이력 보존) 해제 주석 1줄만 동봉 — 이 커밋 자체가 지시서_TRIVN_20260907 **걸쇠 ② 충족 증거**다. 부수 2건(E_대표 300원 미반영·기존 「카더라」 그룹 PAUSED)은 Node `!` 안건으로만 등재, 이 커밋에서 집행 없음.
