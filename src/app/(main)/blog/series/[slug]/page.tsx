@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import ShareButtons from '@/components/ShareButtons';
 import { notFound } from 'next/navigation';
+import JsonLd from '@/components/seo/JsonLd';
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -74,13 +75,13 @@ export default async function SeriesDetailPage({ params }: Props) {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '블로그', item: SITE_URL + '/blog' }, { '@type': 'ListItem', position: 3, name: '시리즈', item: SITE_URL + '/blog/series' }, { '@type': 'ListItem', position: 4, name: series.title }] }) }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '블로그', item: SITE_URL + '/blog' }, { '@type': 'ListItem', position: 3, name: '시리즈', item: SITE_URL + '/blog/series' }, { '@type': 'ListItem', position: 4, name: series.title }] }} />
       {/* Speakable — 음성검색/AI 답변 */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: `${series.title} 시리즈`, url: `${SITE_URL}/blog/series/${slug}`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.series-description'] }, thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent(series.title)}&category=blog` }) }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'WebPage', name: `${series.title} 시리즈`, url: `${SITE_URL}/blog/series/${slug}`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.series-description'] }, thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent(series.title)}&category=blog` }} />
       {/* FAQPage — SERP 면적 확장 */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [{ '@type': 'Question', name: `${series.title} 시리즈는 몇 편인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${series.title} 시리즈는 총 ${posts?.length || 0}편으로 구성되어 있습니다. 카더라 블로그에서 주제별 심층 분석을 순서대로 읽을 수 있습니다.` } }, { '@type': 'Question', name: `${series.title} 시리즈는 어떤 내용인가요?`, acceptedAnswer: { '@type': 'Answer', text: series.description || `${series.title}에 대한 심층 분석 시리즈입니다. 투자 인사이트와 데이터 기반 분석을 제공합니다.` } }] }) }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [{ '@type': 'Question', name: `${series.title} 시리즈는 몇 편인가요?`, acceptedAnswer: { '@type': 'Answer', text: `${series.title} 시리즈는 총 ${posts?.length || 0}편으로 구성되어 있습니다. 카더라 블로그에서 주제별 심층 분석을 순서대로 읽을 수 있습니다.` } }, { '@type': 'Question', name: `${series.title} 시리즈는 어떤 내용인가요?`, acceptedAnswer: { '@type': 'Answer', text: series.description || `${series.title}에 대한 심층 분석 시리즈입니다. 투자 인사이트와 데이터 기반 분석을 제공합니다.` } }] }} />
       {/* 세션 148 F: CollectionPage — 시리즈 내 포스트 배열 */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org',
         '@type': 'CollectionPage',
         name: `${series.title} 시리즈`,
@@ -98,7 +99,7 @@ export default async function SeriesDetailPage({ params }: Props) {
           })),
         },
         isPartOf: { '@type': 'WebSite', url: SITE_URL, name: '카더라' },
-      }) }} />
+      }} />
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
         <Link href="/blog/series" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 시리즈 목록</Link>
         <h1 style={{ margin: '8px 0 0', fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)' }}>📚 {series.title}</h1>
@@ -168,7 +169,7 @@ export default async function SeriesDetailPage({ params }: Props) {
       </div>
 
       {/* 시리즈 JSON-LD */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org',
         '@type': 'ItemList',
         name: series.title,
@@ -180,7 +181,7 @@ export default async function SeriesDetailPage({ params }: Props) {
           url: `${SITE_URL}/blog/${p.slug}`,
           name: p.title,
         })),
-      })}} />
+      }} />
     </div>
   );
 }

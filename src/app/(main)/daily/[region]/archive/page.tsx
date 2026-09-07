@@ -5,6 +5,7 @@ import { REPORT_REGIONS, type ReportRegion } from '@/lib/daily-report-data';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import Link from 'next/link';
 import ShareButtons from '@/components/ShareButtons';
+import JsonLd from '@/components/seo/JsonLd';
 
 interface Props { params: Promise<{ region: string }> }
 
@@ -63,7 +64,7 @@ export default async function ArchivePage({ params }: Props) {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px 40px' }}>
       {/* JSON-LD */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org',
         '@type': 'BreadcrumbList',
         itemListElement: [
@@ -71,8 +72,8 @@ export default async function ArchivePage({ params }: Props) {
           { '@type': 'ListItem', position: 2, name: '데일리', item: `${SITE_URL}/daily/${encodeURIComponent(region)}` },
           { '@type': 'ListItem', position: 3, name: '아카이브' },
         ],
-      }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: `${region} 데일리 아카이브`, url: `${SITE_URL}/daily/${encodeURIComponent(region)}/archive`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1'] } }) }} />
+      }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'WebPage', name: `${region} 데일리 아카이브`, url: `${SITE_URL}/daily/${encodeURIComponent(region)}/archive`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1'] } }} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
         <div>

@@ -36,6 +36,7 @@ export const maxDuration = 60;
 export const revalidate = 600; // s239 W5: 10분 ISR (cold start ↓ + 봇 캐시 hit ↑)
 
 import { SITE_URL as SITE } from '@/lib/constants';
+import JsonLd from '@/components/seo/JsonLd';
 
 const CAT_META: Record<string, { title: string; desc: string }> = {
   all: { title: '블로그 — 주식·청약·부동산 정보', desc: '코스피 코스닥 시세, 아파트 청약 일정, 미분양 현황, 재테크 정보를 매일 업데이트합니다.' },
@@ -561,19 +562,19 @@ export default async function BlogPage({ searchParams }: Props) {
   return (
     <div className="kd-list" style={{ padding: '0 var(--sp-lg) 28px' }}>
       <div className="kd-list-main">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      {itemListLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />}
+      <JsonLd data={breadcrumbLd} />
+      {itemListLd && <JsonLd data={itemListLd} />}
       {/* JSON-LD: FAQPage */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: [
           { '@type': 'Question', name: '카더라 블로그란?', acceptedAnswer: { '@type': 'Answer', text: '카더라 블로그는 주식 시황, 아파트 청약, 미분양, 재테크 등 금융·부동산 정보를 매일 업데이트하는 데이터 기반 블로그입니다.' } },
           { '@type': 'Question', name: '카더라 블로그는 무료인가요?', acceptedAnswer: { '@type': 'Answer', text: '네, 카더라 블로그의 모든 분석 글은 무료로 읽을 수 있습니다. 카카오 로그인 시 댓글, 도움돼요, 관심글 저장 기능도 이용 가능합니다.' } },
           { '@type': 'Question', name: '카더라 블로그 글은 얼마나 자주 올라오나요?', acceptedAnswer: { '@type': 'Answer', text: '주식 시황과 청약 분석은 매일, 미분양 현황은 월간, 재테크 정보는 주 1~2회 업데이트됩니다. RSS 구독으로 새 글 알림을 받을 수 있습니다.' } },
         ],
-      })}} />
+      }} />
       {/* speakable — 네이버 음성검색 */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: '카더라 블로그', speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.blog-summary'] } }) }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'WebPage', name: '카더라 블로그', speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.blog-summary'] } }} />
       {/* s205-W2: HeroCard "오늘의 블로그" 제거. */}
       {/* V4-3 — 서브마스트. 단색 --brand-navy + 하단 골드 2px.
           ⚠️ h1 을 «지우지 않고» sr-only 로 내렸다. 문자열은 「블로그」 그대로다 —

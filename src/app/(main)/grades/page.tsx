@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { SITE_URL, GRADE_COLORS } from '@/lib/constants';
 import { createSupabaseServer as createClient } from '@/lib/supabase-server';
 import ShareButtons from '@/components/ShareButtons';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 3600; // 1시간 캐시 — 등급 정보는 자주 안 바뀜
 
@@ -44,9 +45,9 @@ export default async function GradesPage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '등급 안내' }] }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: '회원 등급 안내 — 카더라', url: `${SITE_URL}/grades`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.grade-description'] } }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '등급 안내' }] }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'WebPage', name: '회원 등급 안내 — 카더라', url: `${SITE_URL}/grades`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.grade-description'] } }} />
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: [
           { '@type': 'Question', name: '카더라 등급은 어떻게 결정되나요?', acceptedAnswer: { '@type': 'Answer', text: '활동 포인트(글 작성 +10P, 댓글 +5P, 출석 +10P 등)를 기준으로 자동 등급이 부여됩니다. 매일 새벽 자동 갱신됩니다.' } },
@@ -54,7 +55,7 @@ export default async function GradesPage() {
           { '@type': 'Question', name: '등급별 혜택이 있나요?', acceptedAnswer: { '@type': 'Answer', text: '높은 등급일수록 프로필 뱃지, 커뮤니티 신뢰도 표시, 향후 프리미엄 기능 우선 접근 등의 혜택이 제공됩니다.' } },
           { '@type': 'Question', name: '포인트는 어떻게 획득하나요?', acceptedAnswer: { '@type': 'Answer', text: '글 작성(+10P), 댓글(+5P), 출석체크(+10P), 공유(+5P), 관심단지 등록(+50P) 등 다양한 활동으로 포인트를 적립할 수 있습니다.' } },
         ],
-      }) }} />
+      }} />
       {/* 헤더 */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>

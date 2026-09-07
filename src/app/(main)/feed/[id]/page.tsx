@@ -21,6 +21,7 @@ import ReadingProgress from '@/components/ReadingProgress';
 import PollWidget from '@/components/PollWidget';
 import RelatedContentCard from '@/components/RelatedContentCard';
 import { renderContent, type EntityMap } from '@/lib/content-renderer';
+import JsonLd from '@/components/seo/JsonLd';
 
 
 function parsePostId(param: string): { numId: number; isSlug: boolean } {
@@ -369,26 +370,23 @@ export default async function FeedDetailPage({ params }: Props) {
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <ReadingProgress />
       {/* JSON-LD SEO */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={jsonLd} />
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
           { '@type': 'ListItem', position: 2, name: '피드', item: `${SITE_URL}/feed` },
           { '@type': 'ListItem', position: 3, name: post.title },
         ],
-      }) }} />
+      }} />
       {/* FAQ JSON-LD */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: [
           { '@type': 'Question', name: `이 글은 어떤 내용인가요?`, acceptedAnswer: { '@type': 'Answer', text: post.content?.slice(0, 150) || post.title } },
           { '@type': 'Question', name: `카더라 커뮤니티는 어떤 곳인가요?`, acceptedAnswer: { '@type': 'Answer', text: `카더라는 주식, 부동산, 재테크 정보를 공유하는 투자 커뮤니티입니다. 누구나 무료로 글을 작성하고 토론에 참여할 수 있습니다.` } },
         ],
-      }) }} />
+      }} />
 
       {/* Back link */}
       <div style={{ marginBottom: 8 }}>

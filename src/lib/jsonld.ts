@@ -1,6 +1,9 @@
 /**
  * JSON-LD 안전 직렬화
  *
+ * ⛔ AD-3(2026-09-07) — 정본은 components/seo/JsonLd 다. 이 파일은 그 컴포넌트가
+ *    쓰는 «이스케이프 원시함수» 로만 남는다. 페이지에서 직접 부르지 말 것.
+ *
  * 문제: <script type="application/ld+json"> 안에 JSON.stringify() 결과를 그대로 넣으면
  *      만약 어떤 값이 "</script>" 문자열 포함하면 script 태그가 닫히고 XSS 가능
  *

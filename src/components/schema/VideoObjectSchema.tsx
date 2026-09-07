@@ -1,4 +1,5 @@
 import React from 'react';
+import JsonLd from '@/components/seo/JsonLd';
 
 /**
  * VideoObjectSchema — 본문에 포함된 YouTube 영상의 VideoObject JSON-LD.
@@ -38,10 +39,7 @@ export default function VideoObjectSchema({ videos }: Props) {
       : { '@context': 'https://schema.org', '@graph': list };
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(payload) }}
-    />
+    <JsonLd data={payload} />
   );
 }
 

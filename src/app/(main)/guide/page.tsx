@@ -3,6 +3,7 @@ import { SITE_URL , CONTACT_EMAIL} from '@/lib/constants';
 import GuideInstallButton from '@/components/GuideInstallButton';
 import Link from 'next/link';
 import ShareButtons from '@/components/ShareButtons';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 3600;
 
@@ -60,8 +61,8 @@ const FEATURES = [
 export default function GuidePage() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":SITE_URL},{"@type":"ListItem","position":2,"name":"가이드","item":SITE_URL + "/guide"}]}) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":SITE_URL},{"@type":"ListItem","position":2,"name":"가이드","item":SITE_URL + "/guide"}]}} />
+      <JsonLd data={{
         "@context": "https://schema.org", "@type": "FAQPage",
         mainEntity: [
           { "@type": "Question", name: "카더라는 무료인가요?", acceptedAnswer: { "@type": "Answer", text: "네, 카더라의 모든 기본 기능은 완전 무료입니다. 주식 시세 조회, 아파트 청약 일정, 블로그, 커뮤니티 글 작성 등 핵심 기능을 무료로 이용할 수 있습니다." } },
@@ -70,7 +71,7 @@ export default function GuidePage() {
           { "@type": "Question", name: "카더라 앱은 어디서 설치하나요?", acceptedAnswer: { "@type": "Answer", text: "카더라는 PWA(프로그레시브 웹앱)로, 앱스토어 다운로드 없이 모바일 브라우저에서 홈 화면에 추가하면 앱처럼 사용할 수 있습니다." } },
           { "@type": "Question", name: "회원 등급은 어떻게 올라가나요?", acceptedAnswer: { "@type": "Answer", text: "활동 포인트(글 작성, 댓글, 출석 등)로 자동 등급업됩니다. 새싹부터 카더라신까지 10단계 등급이 있으며 매일 자동 갱신됩니다." } },
         ],
-      }) }} />
+      }} />
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
         <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)' }}>📖 카더라 가이드</h1>
         <p style={{ margin: '6px 0 0', fontSize: 'var(--fs-base)', color: 'var(--text-secondary)' }}>카더라를 100% 활용하는 방법</p>

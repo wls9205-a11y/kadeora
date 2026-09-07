@@ -6,6 +6,7 @@ import { fetchBatched } from '@/lib/db/fetchBatched';
 import Link from 'next/link';
 import MapWrapper from './MapWrapper';
 import ShareButtons from '@/components/ShareButtons';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = {
   title: '부동산 지도',
@@ -117,8 +118,8 @@ export default async function AptMapPage() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: [{ "@type": "Question", name: "지도에서 청약 현장을 볼 수 있나요?", acceptedAnswer: { "@type": "Answer", text: "카더라 부동산 지도에서 전국 청약·분양·미분양 현장을 확인할 수 있습니다. 재개발·재건축은 지역별 건수로 보고, 구역별 진행 단계는 재개발 허브에서 확인합니다." } }] }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: SITE_URL + '/apt' }, { '@type': 'ListItem', position: 3, name: '지도' }] }) }} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: [{ "@type": "Question", name: "지도에서 청약 현장을 볼 수 있나요?", acceptedAnswer: { "@type": "Answer", text: "카더라 부동산 지도에서 전국 청약·분양·미분양 현장을 확인할 수 있습니다. 재개발·재건축은 지역별 건수로 보고, 구역별 진행 단계는 재개발 허브에서 확인합니다." } }] }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: SITE_URL + '/apt' }, { '@type': 'ListItem', position: 3, name: '지도' }] }} />
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-md)' }}>
           <h1 style={{ position:"absolute", width:1, height:1, overflow:"hidden", clip:"rect(0,0,0,0)" }}>🗺️ 지역별 부동산 현황</h1>

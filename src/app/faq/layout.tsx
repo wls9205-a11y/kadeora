@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = {
   title: '자주 묻는 질문',
@@ -17,7 +18,7 @@ const faqLd = {
 export default function FaqLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <JsonLd data={faqLd} />
       {children}
     </>
   );

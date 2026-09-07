@@ -16,6 +16,7 @@ import Script from 'next/script';
 import KakaoInit from '@/components/KakaoInit';
 import TossModeInit from '@/components/TossModeInit';
 import TossBottomBanner from '@/components/TossBottomBanner';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -131,7 +132,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: `try{var fs=localStorage.getItem('kd_font_size');if(fs&&['small','medium','large'].indexOf(fs)>=0){var cl=document.documentElement.classList;cl.remove('font-small','font-medium','font-large');cl.add('font-'+fs);}}catch(e){}` }} />
         {/* Kakao SDK — KakaoInit 컴포넌트에서 next/script로 로드 (중복 방지) */}
         {/* JSON-LD 구조화 데이터 */}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        <JsonLd data={{
           '@context': 'https://schema.org',
           '@type': 'WebApplication',
           name: '카더라',
@@ -154,9 +155,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             },
             contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', email: 'kadeora.app@gmail.com', availableLanguage: '한국어' },
           },
-        }) }} />
+        }} />
         {/* WebSite schema — Google Sitelinks 검색 박스 */}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        <JsonLd data={{
           '@context': 'https://schema.org',
           '@type': 'WebSite',
           name: '카더라',
@@ -170,9 +171,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             target: { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/search?q={search_term_string}` },
             'query-input': 'required name=search_term_string',
           },
-        }) }} />
+        }} />
         {/* SiteNavigationElement — Google 확장 사이트링크 */}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        <JsonLd data={{
           '@context': 'https://schema.org',
           '@graph': [
             { '@type': 'SiteNavigationElement', name: '주식 시세', url: `${SITE_URL}/stock`, description: '실시간 주식 시세, 섹터 분석, AI 브리핑' },
@@ -183,9 +184,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             { '@type': 'SiteNavigationElement', name: '청약 가점 계산기', url: `${SITE_URL}/apt/diagnose`, description: '무주택·부양가족·통장 가점 자동 계산' },
             { '@type': 'SiteNavigationElement', name: '카더라 소개', url: `${SITE_URL}/about`, description: '카더라 — 부동산·주식 정보 플랫폼 소개' },
           ],
-        }) }} />
+        }} />
         {/* Organization schema — 구글 Knowledge Panel + Entity 인식 */}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        <JsonLd data={{
           '@context': 'https://schema.org',
           '@type': 'Organization',
           '@id': `${SITE_URL}/#organization`,
@@ -206,7 +207,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           slogan: '아파트 청약·재개발, 주식 시세·AI 종목 분석을 한곳에서',
           numberOfEmployees: { '@type': 'QuantitativeValue', value: 1 },
           areaServed: { '@type': 'Country', name: '대한민국' },
-        }) }} />
+        }} />
       </head>
       <body>
         <a href="#main-content" className="skip-to-content" style={{ position: 'absolute', left: '-9999px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden', zIndex: 99999, padding: '12px 24px', background: 'var(--brand)', color: '#fff', borderRadius: '8px', fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}>본문으로 건너뛰기</a>

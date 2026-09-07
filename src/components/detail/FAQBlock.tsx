@@ -7,6 +7,7 @@
 // 있으면 그쪽을 지우거나 emitJsonLd={false} 로 끈다.
 
 import React from 'react';
+import JsonLd from '@/components/seo/JsonLd';
 
 export interface FAQItem {
   q: string;
@@ -72,10 +73,7 @@ export default function FAQBlock({ items, emitJsonLd = true }: FAQBlockProps) {
         ))}
       </dl>
       {emitJsonLd ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        <JsonLd data={jsonLd} />
       ) : null}
     </>
   );

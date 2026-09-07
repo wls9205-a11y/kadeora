@@ -28,6 +28,7 @@ import {
   fetchBlogList,
 } from '@/lib/apt-fetcher';
 import type { AptFilters, AptCategory } from '@/lib/apt-fetcher';
+import JsonLd from '@/components/seo/JsonLd';
 
 // s240 W1: force-dynamic 제거 — getSupabaseAdmin (cookie-free) 사용 중이라 ISR static 가능.
 // cache-control public, s-maxage=600, stale-while-revalidate=86400 회복.
@@ -146,10 +147,7 @@ export default async function AptPage({
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+      <JsonLd data={{
             '@context': 'https://schema.org',
             '@type': 'BreadcrumbList',
             itemListElement: [
@@ -157,22 +155,15 @@ export default async function AptPage({
               { '@type': 'ListItem', position: 2, name: '부동산', item: `${SITE_URL}/apt` },
               { '@type': 'ListItem', position: 3, name: region, item: `${SITE_URL}/apt?region=${encodeURIComponent(region)}` },
             ],
-          }),
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          }} />
+      <JsonLd data={{
             '@context': 'https://schema.org',
             '@type': 'CollectionPage',
             name: `${region} 부동산 — 청약·분양·미분양·재개발`,
             description: `${region}의 청약·분양중·미분양·재개발 단지 ${s.cat.total.toLocaleString()}건`,
             url: `${SITE_URL}/apt?region=${encodeURIComponent(region)}`,
             isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE_URL },
-          }),
-        }}
-      />
+          }} />
 
       <h1 className="sr-only">{region} 부동산 — 청약·분양·미분양·재개발</h1>
       <p className="sr-only region-summary">

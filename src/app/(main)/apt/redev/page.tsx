@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { SITE_URL } from '@/lib/constants';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 3600; // 1시간 캐시
 
@@ -130,9 +131,9 @@ export default async function RedevLandingPage() {
 
   return (
     <div style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '0 16px' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
+      <JsonLd data={jsonLd} />
+      <JsonLd data={faqLd} />
+      <JsonLd data={itemListLd} />
 
       {/* 히어로 */}
       <div style={{ padding: '32px 0 24px', textAlign: 'center' }}>

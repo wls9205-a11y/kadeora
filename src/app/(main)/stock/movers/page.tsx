@@ -6,6 +6,7 @@ import { SITE_URL } from '@/lib/constants';
 import { fmtPrice, fmtCap } from '@/lib/format';
 import ShareButtons from '@/components/ShareButtons';
 import Disclaimer from '@/components/Disclaimer';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 300;
 
@@ -66,18 +67,18 @@ export default async function MoversPage() {
 
   return (
     <article style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` }, { '@type': 'ListItem', position: 3, name: '급등락' }] }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` }, { '@type': 'ListItem', position: 3, name: '급등락' }] }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
         { '@type': 'Question', name: '오늘 주식 상한가 종목은?', acceptedAnswer: { '@type': 'Answer', text: '카더라 급등락 페이지에서 코스피·코스닥 당일 상한가(+30%), 급등 TOP 20 종목을 실시간으로 확인할 수 있습니다.' } },
         { '@type': 'Question', name: '오늘 주식 하한가 종목은?', acceptedAnswer: { '@type': 'Answer', text: '카더라에서 당일 하한가(-30%), 급락 TOP 20 종목과 거래량 폭발 종목을 실시간으로 확인할 수 있습니다.' } },
         { '@type': 'Question', name: '52주 신고가 종목 확인 방법은?', acceptedAnswer: { '@type': 'Answer', text: '카더라 급등락 페이지 하단에서 52주 신고가·신저가 종목 목록을 확인할 수 있습니다. 52주 최고가 갱신 종목은 강세 신호로 해석되기도 합니다.' } },
         { '@type': 'Question', name: '거래량 폭증 종목이란?', acceptedAnswer: { '@type': 'Answer', text: '평균 거래량 대비 당일 거래량이 급증한 종목입니다. 호재 공시, 테마 편입, 외국인·기관 매수 등의 원인이 있을 수 있으며 카더라에서 실시간으로 확인할 수 있습니다.' } },
-      ]}) }} />
+      ]}} />
       <nav style={{ fontSize: 12, color: 'var(--text-tertiary)', display: 'flex', gap: 4, marginBottom: 8 }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>›
         <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>›<span>급등락</span>
       </nav>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: TITLE, url: `${SITE_URL}/stock/movers`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'section'] } }) }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'WebPage', name: TITLE, url: `${SITE_URL}/stock/movers`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'section'] } }} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>🔥 급등락 종목</h1>
         <ShareButtons title={TITLE} contentType="stock-page" contentRef="movers" />

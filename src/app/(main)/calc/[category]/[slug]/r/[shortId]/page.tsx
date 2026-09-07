@@ -6,6 +6,7 @@ import { findCalc, CATEGORIES } from '@/lib/calc/registry';
 import { SITE_URL } from '@/lib/constants';
 import { jsonLdSafe } from '@/lib/jsonld';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 1800;
 
@@ -101,7 +102,7 @@ export default async function CalcResultPage({ params }: PageProps) {
   // ──── 결과 표시 (수치 강조) ────
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '20px var(--sp-lg)' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSafe(jsonLd) }} />
+      <JsonLd data={jsonLd} />
 
       <nav style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12 }}>
         <Link href="/calc">계산기</Link> › <Link href={`/calc/${category}`}>{catMeta?.label}</Link> › <Link href={`/calc/${category}/${slug}`}>{calc.titleShort}</Link>

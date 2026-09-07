@@ -5,6 +5,7 @@ import { REPORT_REGIONS, type ReportRegion } from '@/lib/daily-report-data';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import DailyReportClient from '../DailyReportClient';
 import ShareButtons from '@/components/ShareButtons';
+import JsonLd from '@/components/seo/JsonLd';
 
 interface Props { params: Promise<{ region: string; date: string }> }
 
@@ -108,7 +109,7 @@ export default async function DailyReportDatePage({ params }: Props) {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px 40px' }}>
       {/* JSON-LD */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org',
         '@type': 'NewsArticle',
         headline: `카더라 데일리 리포트 리포트 — ${region} 투자 브리핑 #${issueNo}`,
@@ -116,16 +117,16 @@ export default async function DailyReportDatePage({ params }: Props) {
         author: { '@type': 'Organization', name: '카더라', url: SITE_URL },
         publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL },
         speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.report-summary', '.market-overview'] },
-      }) }} />
+      }} />
 
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
           { '@type': 'Question', name: `${region} ${dateStr} 부동산·주식 시장 동향은?`, acceptedAnswer: { '@type': 'Answer', text: `카더라 데일리 리포트에서 ${region} 지역의 부동산 청약·실거래·미분양과 주식 시황을 매일 분석합니다. 데이터 기반 투자 인사이트를 무료로 확인하세요.` } },
           { '@type': 'Question', name: '카더라 데일리 리포트는 언제 업데이트되나요?', acceptedAnswer: { '@type': 'Answer', text: '카더라 데일리 리포트는 매일 오전 7시(KST)에 전국 17개 광역시도별로 자동 발행됩니다.' } },
         ],
-      }) }} />
+      }} />
 
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org',
         '@type': 'BreadcrumbList',
         itemListElement: [
@@ -133,7 +134,7 @@ export default async function DailyReportDatePage({ params }: Props) {
           { '@type': 'ListItem', position: 2, name: '데일리', item: `${SITE_URL}/daily/${encodeURIComponent(region)}` },
           { '@type': 'ListItem', position: 3, name: `${dateStr}` },
         ],
-      }) }} />
+      }} />
 
       <DailyReportClient
         data={reportData}

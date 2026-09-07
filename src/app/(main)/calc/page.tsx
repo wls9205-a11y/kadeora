@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { CATEGORIES, CALC_REGISTRY } from '@/lib/calc/registry';
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = {
   title: '무료 계산기 모음 — 세금·부동산·주식·대출',
@@ -28,22 +29,22 @@ export const metadata: Metadata = {
 export default function CalcHubPage() {
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
           { '@type': 'ListItem', position: 2, name: '계산기' },
         ],
-      })}} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      }} />
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'WebApplication',
         name: '카더라 무료 계산기', applicationCategory: 'FinanceApplication',
         operatingSystem: 'Web', offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
         description: '세금, 부동산, 주식, 대출, 연금 계산기 무료 제공. 청약 가점, 양도세, 종합소득세, 복리 계산 등.',
         url: `${SITE_URL}/calc`,
         provider: { '@type': 'Organization', name: '카더라', url: SITE_URL },
-      })}} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      }} />
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'ItemList',
         name: '카더라 무료 계산기 모음',
         numberOfItems: CALC_REGISTRY.length,
@@ -53,7 +54,7 @@ export default function CalcHubPage() {
           name: c.title,
           image: `${SITE_URL}/api/og?title=` + encodeURIComponent(c.title) + '&design=2&category=calc',
         })),
-      })}} />
+      }} />
     <div style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, marginBottom: 4, letterSpacing: '-0.5px' }}>무료 계산기 모음</h1>
       <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 24 }}>세금 · 부동산 · 주식 · 대출 · 연금 — {CALC_REGISTRY.length}종 무료 제공</p>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { buildMeta } from '@/lib/seo';
 import { SITE_URL } from '@/lib/constants';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = buildMeta({
   title: '주식 종목 검색 — 국내외 1,800+종목',
@@ -15,7 +16,7 @@ export const metadata: Metadata = buildMeta({
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` }, { '@type': 'ListItem', position: 3, name: '종목 검색' }] }) }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` }, { '@type': 'ListItem', position: 3, name: '종목 검색' }] }} />
       {children}
     </>
   );

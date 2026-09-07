@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { SITE_URL as SITE, CONTACT_EMAIL, BIZ_NAME } from '@/lib/constants';
 import { PRO_PRICING, PRO_FEATURES } from '@/lib/plan-limits';
 import ShareButtons from '@/components/ShareButtons';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = {
   title: '카더라 상점 — 프로 멤버십 · 확성기 · 아이템',
@@ -234,7 +235,7 @@ export default function ShopPage() {
       </div>
 
       {/* JSON-LD */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'Product',
         name: '카더라 프로 멤버십',
         description: '주식+부동산 올인원 프리미엄 — 관심 종목 무제한, AI 분석, 급등락 알림, 단지 비교',
@@ -243,11 +244,11 @@ export default function ShopPage() {
           { '@type': 'Offer', name: '프로 연간', price: '249000', priceCurrency: 'KRW', availability: 'https://schema.org/InStock', url: `${SITE}/shop` },
         ],
         brand: { '@type': 'Organization', name: '카더라' },
-      }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      }} />
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: FAQ.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
-      }) }} />
+      }} />
     </article>
   );
 }

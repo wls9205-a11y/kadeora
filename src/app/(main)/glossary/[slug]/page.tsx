@@ -3,6 +3,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 86400; // 24시간
 
@@ -74,7 +75,7 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '16px' }}>
       {/* JSON-LD DefinedTerm */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org',
         '@type': 'DefinedTerm',
         name: term.term,
@@ -85,10 +86,10 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
           name: '카더라 주식 용어사전',
           url: `${SITE_URL}/glossary`,
         },
-      }) }} />
+      }} />
 
       {/* FAQPage JSON-LD */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
         mainEntity: [{
@@ -99,10 +100,10 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
             text: term.definition_ko + (term.definition_detail ? ' ' + term.definition_detail : ''),
           },
         }],
-      }) }} />
+      }} />
 
       {/* BreadcrumbList */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org',
         '@type': 'BreadcrumbList',
         itemListElement: [
@@ -110,7 +111,7 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
           { '@type': 'ListItem', position: 2, name: '용어사전', item: `${SITE_URL}/glossary` },
           { '@type': 'ListItem', position: 3, name: term.term, item: `${SITE_URL}/glossary/${slug}` },
         ],
-      }) }} />
+      }} />
 
       <nav style={{ fontSize: '13px', color: 'var(--text-tertiary)', marginBottom: '16px' }}>
         <Link href="/glossary" style={{ color: 'var(--brand)', textDecoration: 'none' }}>용어사전</Link>

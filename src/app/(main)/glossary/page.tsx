@@ -2,6 +2,7 @@ import { SITE_URL } from '@/lib/constants';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 3600;
 
@@ -56,7 +57,7 @@ export default async function GlossaryPage() {
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '16px' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org',
         '@type': 'DefinedTermSet',
         name: '카더라 주식 용어사전',
@@ -68,7 +69,7 @@ export default async function GlossaryPage() {
           description: t.definition_ko,
           url: `${SITE_URL}/glossary/${t.slug}`,
         })),
-      }) }} />
+      }} />
 
       <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '8px' }}>
         📖 주식 용어사전

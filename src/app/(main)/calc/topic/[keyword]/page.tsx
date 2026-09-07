@@ -6,6 +6,7 @@ import { SITE_URL } from '@/lib/constants';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { jsonLdSafe } from '@/lib/jsonld';
 import { sanitizeHtml } from '@/lib/sanitize-html';
+import JsonLd from '@/components/seo/JsonLd';
 
 // s175: revalidate + return [] (s168 cold-SSR) 조합으로 DYNAMIC_SERVER_USAGE
 export const dynamic = 'force-dynamic';
@@ -139,7 +140,7 @@ export default async function TopicHubPage({ params }: PageProps) {
 
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: '20px var(--sp-lg)' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSafe(jsonLd) }} />
+      <JsonLd data={jsonLd} />
 
       <nav style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12 }}>
         <Link href="/calc" style={{ color: 'var(--text-tertiary)' }}>계산기</Link>

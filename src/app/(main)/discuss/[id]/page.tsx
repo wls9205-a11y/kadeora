@@ -5,6 +5,7 @@ import { SITE_URL as SITE } from '@/lib/constants';
 import DiscussDetailClient from './DiscussDetailClient';
 import Link from 'next/link';
 import ShareButtons from '@/components/ShareButtons';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 60; // ISR 1분
 
@@ -151,16 +152,16 @@ export default async function DiscussDetailPage({ params }: Props) {
 
   return (
     <article itemScope itemType="https://schema.org/DiscussionForumPosting" style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <JsonLd data={jsonLd} />
+      <JsonLd data={breadcrumbLd} />
       {/* FAQ JSON-LD */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: [
           { '@type': 'Question', name: `${topic.title}에서 어떤 의견이 많나요?`, acceptedAnswer: { '@type': 'Answer', text: `${topic.option_a} ${total > 0 ? Math.round(((topic.vote_a || 0) / total) * 100) : 50}% vs ${topic.option_b} ${total > 0 ? Math.round(((topic.vote_b || 0) / total) * 100) : 50}% (${total}명 참여)` } },
           { '@type': 'Question', name: `카더라 토론방은 어떤 곳인가요?`, acceptedAnswer: { '@type': 'Answer', text: `카더라 토론방은 주식, 부동산, 경제 이슈를 실시간으로 투표하고 토론하는 공간입니다. 누구나 무료로 참여 가능합니다.` } },
         ],
-      }) }} />
+      }} />
 
       {/* Back */}
       <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>

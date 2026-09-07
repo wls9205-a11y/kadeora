@@ -1,4 +1,5 @@
 import React from 'react';
+import JsonLd from '@/components/seo/JsonLd';
 
 /**
  * SpeakableSchema — Google AI Overview / 음성검색 인용 가능성 강화.
@@ -31,9 +32,6 @@ export default function SpeakableSchema({ url, title, selectors }: Props) {
     },
   };
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(payload) }}
-    />
+    <JsonLd data={payload} />
   );
 }

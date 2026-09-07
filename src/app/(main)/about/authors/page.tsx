@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SITE_URL } from '@/lib/constants';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = {
   // s212 P0-B: template 가 '| 카더라' 자동 추가
@@ -81,7 +82,7 @@ export default function AuthorListPage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 16px' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <JsonLd data={jsonLd} />
       <nav aria-label="breadcrumb" style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 16 }}>
         <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>홈</Link>
         <span style={{ margin: '0 6px', opacity: 0.5 }}>/</span>

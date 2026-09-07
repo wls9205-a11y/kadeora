@@ -11,6 +11,7 @@ import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import { buildAlternates } from '@/lib/seo';
 import { notFound } from 'next/navigation';
+import JsonLd from '@/components/seo/JsonLd';
 
 export async function generateStaticParams() {
   return CALC_REGISTRY.map(c => ({ category: c.category, slug: c.slug }));
@@ -74,23 +75,23 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       {/* JSON-LD: WebApplication */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'WebApplication',
         name: `카더라 ${calc.titleShort}`, url: `${SITE_URL}/calc/${category}/${slug}`,
         applicationCategory: 'FinanceApplication', operatingSystem: 'Web',
         description: calc.description, datePublished: '2026-01-15', dateModified: calc.lastUpdated,
         provider: { '@type': 'Organization', name: '카더라', url: SITE_URL },
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
-      })}} />
+      }} />
       {/* JSON-LD: FAQPage */}
       {calc.faqs.length > 0 && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        <JsonLd data={{
           '@context': 'https://schema.org', '@type': 'FAQPage',
           mainEntity: calc.faqs.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
-        })}} />
+        }} />
       )}
       {/* JSON-LD: HowTo */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'HowTo',
         name: `${calc.title} 사용법`,
         description: calc.description,
@@ -101,9 +102,9 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
         ],
         totalTime: 'PT1M',
         tool: { '@type': 'HowToTool', name: '카더라 계산기 (웹 브라우저)' },
-      })}} />
+      }} />
       {/* JSON-LD: BreadcrumbList */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
@@ -111,7 +112,7 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
           { '@type': 'ListItem', position: 3, name: catMeta?.label || category, item: `${SITE_URL}/calc/${category}` },
           { '@type': 'ListItem', position: 4, name: calc.titleShort },
         ],
-      })}} />
+      }} />
 
       {/* 헤더 */}
       <div style={{ marginBottom: 16 }}>

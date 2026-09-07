@@ -24,6 +24,7 @@ import {
   resolveParams, marketValues, sortLabel, marketLabel,
   type StockParams,
 } from '@/lib/stock/filters';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 60;
 export const maxDuration = 10;
@@ -355,7 +356,7 @@ export default async function StockPage({
     return (
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '8px 6px 24px' }}>
         <h1 className="sr-only">주식 시세 — 이슈 캐러셀</h1>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+        <JsonLd data={itemListJsonLd} />
         {/* ⚠️ 이 분기가 «프로덕션에서 실제로 도는» 경로다(NEXT_PUBLIC_CAROUSEL_ENABLED
             는 Vercel 환경변수에만 있고 로컬 .env 에는 없다 — 실측 2026-08-30).
             V4-2 첫판이 서브마스트를 아래 기본 분기에만 붙여 «live 화면에는 안 나왔다».

@@ -2,6 +2,7 @@ import { SITE_URL } from '@/lib/constants';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import type { Metadata } from 'next';
 import Disclaimer from '@/components/Disclaimer';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 300;
 
@@ -145,7 +146,7 @@ export default async function ShortSellingPage() {
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '16px' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <JsonLd data={faqLd} />
 
       <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '8px' }}>
         📉 공매도·대차잔고 대시보드

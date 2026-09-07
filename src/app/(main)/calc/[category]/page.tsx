@@ -3,6 +3,7 @@ import { CATEGORIES, CALC_REGISTRY, getCategoryLabel } from '@/lib/calc/registry
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import { notFound } from 'next/navigation';
+import JsonLd from '@/components/seo/JsonLd';
 
 export async function generateStaticParams() {
   return CATEGORIES.map(c => ({ category: c.id }));
@@ -45,14 +46,14 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
           { '@type': 'ListItem', position: 2, name: '계산기', item: `${SITE_URL}/calc` },
           { '@type': 'ListItem', position: 3, name: cat.label },
         ],
-      })}} />
+      }} />
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <Link href="/calc" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 계산기 전체</Link>
       <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, margin: '8px 0 4px' }}>{cat.icon} {cat.label} 계산기</h1>

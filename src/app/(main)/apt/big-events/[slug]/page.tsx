@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 900;
 
@@ -129,7 +130,7 @@ export default async function BigEventDetailPage({ params }: Props) {
 
   return (
     <div style={{ maxWidth: 840, margin: '0 auto', padding: '24px 16px' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventLd) }} />
+      <JsonLd data={eventLd} />
 
       <nav aria-label="breadcrumb" style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12 }}>
         <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>홈</Link>

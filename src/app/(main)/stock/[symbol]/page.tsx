@@ -23,6 +23,7 @@ import RelatedStocks from '@/components/stock/RelatedStocks';
 import RelatedBlogBelt from '@/components/stock/RelatedBlogBelt';
 import { ImageLightbox } from '@/components/ui/ImageLightbox';
 import { safeImg } from '@/lib/image-sanitize';
+import JsonLd from '@/components/seo/JsonLd';
 
 interface Props { params: Promise<{ symbol: string }> }
 
@@ -184,7 +185,7 @@ export default async function StockDetailPage({ params }: Props) {
   return (
     <article style={{ maxWidth: 'var(--container-read)', margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       {/* JSON-LD 1: FinancialProduct + ExchangeRateSpecification */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org',
         '@type': 'WebPage',
         name: `${s.name} (${symbol}) 주가 정보`,
@@ -200,18 +201,18 @@ export default async function StockDetailPage({ params }: Props) {
           ...(s.price ? { offers: { '@type': 'Offer', price: Number(s.price), priceCurrency: s.currency || 'KRW', availability: 'https://schema.org/InStock' } } : {}),
         },
         isPartOf: { '@type': 'WebSite', name: '카더라', url: SITE_URL },
-      })}} />
+      }} />
       {/* JSON-LD 2: BreadcrumbList */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
           { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` },
           { '@type': 'ListItem', position: 3, name: s.name },
         ],
-      })}} />
+      }} />
       {/* JSON-LD 3: Article + Speakable (Google Discover + 음성 검색) */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'Article',
         headline: `${s.name}(${symbol}) 주가·배당금·PER·실적 분석`,
         description: s.description || `${s.name} ${s.market} 상장 종목 실시간 시세·재무제표·AI 분석`,
@@ -227,9 +228,9 @@ export default async function StockDetailPage({ params }: Props) {
         thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent(`${s.name}`)}&category=stock`,
         mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/stock/${symbol}` },
         speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.stock-price-header'] },
-      })}} />
+      }} />
       {/* JSON-LD 4: FAQ (검색결과 아코디언 — 8항목, SERP 면적 최대화) */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: [
           { '@type': 'Question', name: `${s.name} 현재 주가는?`, acceptedAnswer: { '@type': 'Answer', text: `${s.name}(${symbol})의 현재가는 ${fmtPrice(Number(s.price), s.currency ?? undefined)}이며, 전일 대비 ${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}% 변동했습니다. ${s.market} 상장 종목입니다.` } },
@@ -241,9 +242,9 @@ export default async function StockDetailPage({ params }: Props) {
           { '@type': 'Question', name: `${s.name} 실시간 차트를 볼 수 있나요?`, acceptedAnswer: { '@type': 'Answer', text: `카더라(kadeora.app)에서 ${s.name}의 실시간 시세, 일봉·주봉 차트, 수급 분석, AI 종목 분석, 관련 뉴스를 무료로 확인할 수 있습니다.` } },
           { '@type': 'Question', name: `${s.name} vs 동종 업종 비교하려면?`, acceptedAnswer: { '@type': 'Answer', text: `카더라의 종목 비교 기능에서 ${s.name}과 동종 업종 종목의 PER, PBR, 배당수익률, 시가총액을 한눈에 비교할 수 있습니다. /stock/compare 페이지를 이용하세요.` } },
         ],
-      })}} />
+      }} />
       {/* JSON-LD 5: 이미지 캐러셀 (Google 이미지 검색 + SERP 이미지 팩) */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'ImageGallery',
         name: `${s.name}(${symbol}) 주가 차트·시세 이미지`,
         description: `${s.name} 실시간 주가 차트, 시세 변동, AI 분석 그래프`,
@@ -253,7 +254,7 @@ export default async function StockDetailPage({ params }: Props) {
           { '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(`${s.name}`)}&category=stock`, width: 630, height: 630, name: `${s.name} 종목 정보`, caption: `${s.name} ${s.market} 상장 종목` },
           { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${s.name} (${symbol}) 주가`)}&design=2&category=stock`, width: 1200, height: 630, name: `${s.name} 주가 시세`, caption: `${s.name}(${symbol}) 현재가 ${fmtPrice(Number(s.price), s.currency ?? undefined)}` },
         ],
-      })}} />
+      }} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
         <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)' }}>

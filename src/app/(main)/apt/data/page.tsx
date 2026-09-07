@@ -2,6 +2,7 @@ import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { SITE_URL as SITE } from '@/lib/constants';
 import type { Metadata } from 'next';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = {
   title: '부동산 통계 자료실 — 시군구별 청약·분양·실거래 데이터',
@@ -77,9 +78,9 @@ export default async function AptDataPage() {
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 16px 80px' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"카더라","item":SITE},{"@type":"ListItem","position":2,"name":"부동산","item":`${SITE}/apt`},{"@type":"ListItem","position":3,"name":"통계 자료실"}]}) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"부동산 통계 자료는 어디서 확인하나요?","acceptedAnswer":{"@type":"Answer","text":"카더라 부동산 통계 자료실에서 전국 시군구별 청약·분양·미분양·실거래 데이터를 무료로 확인할 수 있습니다."}},{"@type":"Question","name":"실거래가 데이터는 얼마나 자주 업데이트되나요?","acceptedAnswer":{"@type":"Answer","text":"카더라의 실거래가 데이터는 국토교통부 실거래가 공개시스템과 연동되어 매일 자동 업데이트됩니다."}}]}) }} />
+      <JsonLd data={jsonLd} />
+      <JsonLd data={{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"카더라","item":SITE},{"@type":"ListItem","position":2,"name":"부동산","item":`${SITE}/apt`},{"@type":"ListItem","position":3,"name":"통계 자료실"}]}} />
+      <JsonLd data={{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"부동산 통계 자료는 어디서 확인하나요?","acceptedAnswer":{"@type":"Answer","text":"카더라 부동산 통계 자료실에서 전국 시군구별 청약·분양·미분양·실거래 데이터를 무료로 확인할 수 있습니다."}},{"@type":"Question","name":"실거래가 데이터는 얼마나 자주 업데이트되나요?","acceptedAnswer":{"@type":"Answer","text":"카더라의 실거래가 데이터는 국토교통부 실거래가 공개시스템과 연동되어 매일 자동 업데이트됩니다."}}]}} />
 
       {/* 헤더 */}
       <div style={{ padding: '24px 0 16px' }}>

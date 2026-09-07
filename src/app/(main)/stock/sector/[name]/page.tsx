@@ -7,6 +7,7 @@ import { SITE_URL } from '@/lib/constants';
 import { fmtCap, fmtPrice } from '@/lib/format';
 import Disclaimer from '@/components/Disclaimer';
 import ShareButtons from '@/components/ShareButtons';
+import JsonLd from '@/components/seo/JsonLd';
 
 // s175: createSupabaseServer (cookies) + revalidate + return [] 조합으로 DYNAMIC_SERVER_USAGE
 export const dynamic = 'force-dynamic';
@@ -81,16 +82,16 @@ export default async function SectorPage({ params }: Props) {
   return (
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       {/* JSON-LD: BreadcrumbList */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
           { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` },
           { '@type': 'ListItem', position: 3, name: `${sector} 섹터` },
         ],
-      })}} />
+      }} />
       {/* JSON-LD: ItemList (상위 10종목) */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'ItemList',
         name: `${sector} 섹터 시총 상위 종목`,
         numberOfItems: top10.length,
@@ -100,24 +101,24 @@ export default async function SectorPage({ params }: Props) {
           image: `${SITE_URL}/api/og?title=${encodeURIComponent(s.name || s.symbol)}&design=2&category=stock`,
           name: `${s.name} (${s.symbol})`,
         })),
-      })}} />
+      }} />
       {/* JSON-LD: FAQPage */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
         { '@type': 'Question', name: `${decodeURIComponent(sector)} 섹터 대표 종목은?`, acceptedAnswer: { '@type': 'Answer', text: `카더라에서 ${decodeURIComponent(sector)} 섹터에 속하는 종목들의 실시간 시세, 등락률, 시가총액을 확인할 수 있습니다.` } },
         { '@type': 'Question', name: `${decodeURIComponent(sector)} 섹터 주가 전망은?`, acceptedAnswer: { '@type': 'Answer', text: `${decodeURIComponent(sector)} 섹터의 최신 동향과 등락률은 카더라 섹터 분석 페이지에서 실시간으로 확인하세요. 섹터별 평균 등락률과 상위 종목을 한눈에 비교할 수 있습니다.` } },
         { '@type': 'Question', name: `${decodeURIComponent(sector)} 관련주 목록은?`, acceptedAnswer: { '@type': 'Answer', text: `카더라에서 ${decodeURIComponent(sector)} 섹터에 속하는 모든 종목의 시가총액, 현재가, 등락률, PER, 배당수익률을 비교할 수 있습니다.` } },
-      ]}) }} />
+      ]}} />
       {/* JSON-LD: speakable */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: `${sector} 섹터 종목`, url: `${SITE_URL}/stock/sector/${encodeURIComponent(sector)}`, mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/stock/sector/${encodeURIComponent(sector)}` }, thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent(sector + ' 섹터')}&category=stock`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.sector-summary'] } }) }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'WebPage', name: `${sector} 섹터 종목`, url: `${SITE_URL}/stock/sector/${encodeURIComponent(sector)}`, mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/stock/sector/${encodeURIComponent(sector)}` }, thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent(sector + ' 섹터')}&category=stock`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.sector-summary'] } }} />
       {/* JSON-LD: FAQPage */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: [
           { '@type': 'Question', name: `${sector} 섹터에는 어떤 종목이 있나요?`, acceptedAnswer: { '@type': 'Answer', text: `${sector} 섹터에는 ${stocks.length}개 종목이 있으며, 시총 상위 종목으로 ${top10.slice(0, 3).map(s => s.name).join(', ')} 등이 있습니다.` } },
           { '@type': 'Question', name: `${sector} 섹터 전체 시가총액은?`, acceptedAnswer: { '@type': 'Answer', text: `${sector} 섹터 전체 합산 시가총액은 ${fmtCap(totalCap, stocks[0]?.currency ?? undefined)}이며, ${stocks.length}개 종목 중 ${upCount}개 상승, ${downCount}개 하락입니다.` } },
           { '@type': 'Question', name: `${sector} 섹터 시세를 어디서 확인하나요?`, acceptedAnswer: { '@type': 'Answer', text: `카더라(kadeora.app)에서 ${sector} 섹터 전체 종목의 실시간 시세, 시총 순위, 등락률을 무료로 비교할 수 있습니다.` } },
         ],
-      })}} />
+      }} />
       {/* 가시적 브레드크럼 */}
       <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>

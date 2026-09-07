@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import HotClient from './HotClient';
 import SectionShareButton from '@/components/SectionShareButton';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = {
   title: '오늘의 HOT',
@@ -94,8 +95,8 @@ export default async function HotPage() {
 
   return (
     <HotClient>
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":SITE_URL},{"@type":"ListItem","position":2,"name":"HOT 게시글","item":SITE_URL + "/hot"}]}) }} />
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"HOT 게시글은 어떤 기준으로 선정되나요?","acceptedAnswer":{"@type":"Answer","text":"카더라 HOT 게시글은 최근 7일간 좋아요, 댓글, 조회수를 종합하여 가장 인기 있는 글을 자동으로 선정합니다."}},{"@type":"Question","name":"카더라 커뮤니티에서 어떤 글을 쓸 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"주식 종목 분석, 부동산 청약 후기, 재테크 정보, 자유 토론 등 투자와 관련된 다양한 주제의 글을 자유롭게 작성할 수 있습니다."}}]}) }} />
+    <JsonLd data={{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":SITE_URL},{"@type":"ListItem","position":2,"name":"HOT 게시글","item":SITE_URL + "/hot"}]}} />
+    <JsonLd data={{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"HOT 게시글은 어떤 기준으로 선정되나요?","acceptedAnswer":{"@type":"Answer","text":"카더라 HOT 게시글은 최근 7일간 좋아요, 댓글, 조회수를 종합하여 가장 인기 있는 글을 자동으로 선정합니다."}},{"@type":"Question","name":"카더라 커뮤니티에서 어떤 글을 쓸 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"주식 종목 분석, 부동산 청약 후기, 재테크 정보, 자유 토론 등 투자와 관련된 다양한 주제의 글을 자유롭게 작성할 수 있습니다."}}]}} />
     {/* SEO 전용 히어로 이미지 — 시각적으로 숨김, 크롤러 인식용 */}
     {/* eslint-disable-next-line @next/next/no-img-element */}
     

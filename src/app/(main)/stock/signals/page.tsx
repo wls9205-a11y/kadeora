@@ -3,6 +3,7 @@ import { SITE_URL } from '@/lib/constants';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import type { Metadata } from 'next';
 import Disclaimer from '@/components/Disclaimer';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 300;
 
@@ -111,10 +112,7 @@ export default async function SignalsPage() {
       </p>
 
       {/* JSON-LD FAQPage */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+      <JsonLd data={{
             '@context': 'https://schema.org',
             '@type': 'FAQPage',
             mainEntity: [
@@ -135,9 +133,7 @@ export default async function SignalsPage() {
                 },
               },
             ],
-          }),
-        }}
-      />
+          }} />
 
       {signals.length === 0 ? (
         <div style={{

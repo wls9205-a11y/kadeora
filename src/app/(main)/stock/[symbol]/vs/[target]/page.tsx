@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 import { SITE_URL } from '@/lib/constants';
 import Disclaimer from '@/components/Disclaimer';
+import JsonLd from '@/components/seo/JsonLd';
 
 type Props = { params: Promise<{ symbol: string; target: string }> };
 
@@ -53,7 +54,7 @@ export default async function StockComparePage({ params }: Props) {
 
   return (
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '16px var(--sp-lg)' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` }, { '@type': 'ListItem', position: 3, name: `${a.name} vs ${b.name}` }] }) }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` }, { '@type': 'ListItem', position: 3, name: `${a.name} vs ${b.name}` }] }} />
       <h1 style={{ fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>{a.name} vs {b.name}</h1>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 16 }}>두 종목의 핵심 투자 지표를 한눈에 비교합니다.</p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>

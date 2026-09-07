@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { SITE_URL, CONTACT_EMAIL, BIZ_NAME } from '@/lib/constants';
 import { fetchSocialProof, fmtSocial } from '@/lib/social-proof';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = {
   title: '카더라 소개 — 부동산·주식 정보 플랫폼',
@@ -37,7 +38,7 @@ export default async function AboutPage() {
   return (
     <>
       {/* JSON-LD: AboutPage */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org',
         '@type': 'AboutPage',
         name: '카더라 소개',
@@ -56,7 +57,7 @@ export default async function AboutPage() {
           sameAs: [],
           knowsAbout: ['부동산 투자', '주식 투자', '아파트 청약', '재개발', 'AI 주식 분석'],
         },
-      }) }} />
+      }} />
 
       <div id="main-content" style={{ maxWidth: 800, margin: '0 auto', padding: '40px 20px 80px' }}>
         {/* Hero */}

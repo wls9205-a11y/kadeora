@@ -15,6 +15,7 @@ import { isIndexable, INDEX_MIN } from '@/lib/apt/indexable';
 import { MONTH_RE, VIEW_P90, VIEW_P75, fetchMonth, listArchiveMonths } from '@/lib/blog/archive';
 import HubHero from '@/components/detail/HubHero';
 import PostCard from '@/components/cards/v3/PostCard';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -90,7 +91,7 @@ export default async function BlogArchiveMonth({ params }: Props) {
 
   return (
     <main style={{ maxWidth: 'var(--container-read)', margin: '0 auto', padding: 'var(--sp-md)' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
+      <JsonLd data={itemListLd} />
 
       <nav
         aria-label="breadcrumb"

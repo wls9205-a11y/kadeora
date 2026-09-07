@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation';
 import { fmtAmount } from '@/lib/format';
 import ShareButtons from '@/components/ShareButtons';
 import { cache } from 'react';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 3600;
 export const maxDuration = 30;
@@ -139,10 +140,10 @@ export default async function SigunguHubPage({ params }: Props) {
 
   return (
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: `${SITE_URL}/apt` }, { '@type': 'ListItem', position: 3, name: region, item: `${SITE_URL}/apt/region/${encodeURIComponent(region)}` }, { '@type': 'ListItem', position: 4, name: sigungu }] }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Dataset', name: `${sigungu} 아파트 실거래가 데이터`, description: `${region} ${sigungu} ${profiles.length}개 단지 실거래 데이터`, url: canon, keywords: [sigungu, region, '실거래가', '아파트 시세'], creator: { '@type': 'Organization', name: '카더라', url: SITE_URL }, dateModified: new Date().toISOString(), spatialCoverage: { '@type': 'Place', name: `${region} ${sigungu}` } }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Article', headline: `${sigungu} 아파트 실거래가·시세 종합 분석`, url: canon, dateModified: new Date().toISOString(), author: { '@type': 'Organization', name: '카더라', url: SITE_URL }, publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png` } }, image: `${SITE_URL}/api/og?title=${encodeURIComponent(sigungu)}&design=2&category=apt`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.area-summary'] } }) }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: `${SITE_URL}/apt` }, { '@type': 'ListItem', position: 3, name: region, item: `${SITE_URL}/apt/region/${encodeURIComponent(region)}` }, { '@type': 'ListItem', position: 4, name: sigungu }] }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'Dataset', name: `${sigungu} 아파트 실거래가 데이터`, description: `${region} ${sigungu} ${profiles.length}개 단지 실거래 데이터`, url: canon, keywords: [sigungu, region, '실거래가', '아파트 시세'], creator: { '@type': 'Organization', name: '카더라', url: SITE_URL }, dateModified: new Date().toISOString(), spatialCoverage: { '@type': 'Place', name: `${region} ${sigungu}` } }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'Article', headline: `${sigungu} 아파트 실거래가·시세 종합 분석`, url: canon, dateModified: new Date().toISOString(), author: { '@type': 'Organization', name: '카더라', url: SITE_URL }, publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png` } }, image: `${SITE_URL}/api/og?title=${encodeURIComponent(sigungu)}&design=2&category=apt`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.area-summary'] } }} />
 
       <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)', flexWrap: 'wrap' }}>
         <Link href="/apt" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>부동산</Link><span>›</span>

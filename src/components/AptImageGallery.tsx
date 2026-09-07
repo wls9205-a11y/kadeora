@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import ImageLightbox from '@/components/ImageLightbox';
+import JsonLd from '@/components/seo/JsonLd';
 
 interface AptImage {
   url: string;
@@ -316,10 +317,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
       )}
 
       {/* JSON-LD: ImageGallery + ImageObject — SEO 풍부한 결과 노출 */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+      <JsonLd data={{
             '@context': 'https://schema.org',
             '@type': 'ImageGallery',
             name: '단지 사진',
@@ -329,9 +327,7 @@ export default function AptImageGallery({ images, name, region, badges }: {
               thumbnailUrl: img.thumbnail || img.thumb || img.url,
               caption: img.caption || `이미지 ${i + 1}`,
             })),
-          }),
-        }}
-      />
+          }} />
     </>
   );
 }

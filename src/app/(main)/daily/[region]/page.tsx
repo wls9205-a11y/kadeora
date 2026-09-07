@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { fetchDailyReportData, REPORT_REGIONS, type ReportRegion } from '@/lib/daily-report-data';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import DailyReportClient from './DailyReportClient';
+import JsonLd from '@/components/seo/JsonLd';
 
 interface Props { params: Promise<{ region: string }> }
 
@@ -114,7 +115,7 @@ export default async function DailyReportPage({ params }: Props) {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px 40px' }}>
       {/* JSON-LD: NewsArticle */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org',
         '@type': 'NewsArticle',
         headline: `카더라 데일리 리포트 — ${region} 투자 브리핑 #${data.issueNo}`,
@@ -135,10 +136,10 @@ export default async function DailyReportPage({ params }: Props) {
           { '@type': 'Thing', name: `${region} 부동산` },
           { '@type': 'Thing', name: '주식 시장' },
         ],
-      }) }} />
+      }} />
 
       {/* JSON-LD: BreadcrumbList */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org',
         '@type': 'BreadcrumbList',
         itemListElement: [
@@ -146,10 +147,10 @@ export default async function DailyReportPage({ params }: Props) {
           { '@type': 'ListItem', position: 2, name: '데일리', item: `${SITE_URL}/daily/${encodeURIComponent('서울')}` },
           { '@type': 'ListItem', position: 3, name: `${region} 브리핑` },
         ],
-      }) }} />
+      }} />
 
       {/* JSON-LD: FAQPage */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
         mainEntity: [
@@ -164,7 +165,7 @@ export default async function DailyReportPage({ params }: Props) {
             acceptedAnswer: { '@type': 'Answer', text: `${region} 미분양은 ${data.unsoldLocal.reduce((s, r) => s + r.units, 0).toLocaleString()}세대이며, 전국 ${data.unsoldUnits.toLocaleString()}세대 중 ${data.unsoldUnits > 0 ? Math.round(data.unsoldLocal.reduce((s, r) => s + r.units, 0) / data.unsoldUnits * 100) : 0}%입니다.` },
           },
         ],
-      }) }} />
+      }} />
 
       <DailyReportClient data={data} regions={[...REPORT_REGIONS]} prevDate={prevDate} />
       {/* 관련 서비스 (내부 링크 — SEO 교차 참조) */}

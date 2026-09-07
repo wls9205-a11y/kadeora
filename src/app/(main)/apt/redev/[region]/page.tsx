@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { SITE_URL } from '@/lib/constants';
 import { notFound } from 'next/navigation';
 import { generateAptSlug } from '@/lib/apt-slug';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 3600;
 
@@ -161,9 +162,9 @@ export default async function RegionRedevPage({ params }: Props) {
 
   return (
     <div style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '0 16px' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <JsonLd data={jsonLd} />
+      <JsonLd data={itemListLd} />
+      <JsonLd data={faqLd} />
 
       {/* 히어로 */}
       <div style={{ padding: '32px 0 16px', textAlign: 'center' }}>

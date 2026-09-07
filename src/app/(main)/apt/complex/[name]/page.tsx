@@ -20,6 +20,7 @@ import AptKpiGrid from '@/components/apt/detail/AptKpiGrid';
 import AptScheduleTimeline from '@/components/apt/detail/AptScheduleTimeline';
 import AptLocationMini from '@/components/apt/detail/AptLocationMini';
 import InlineTalkBanner from '@/components/banner/InlineTalkBanner';
+import JsonLd from '@/components/seo/JsonLd';
 
 const AptPriceTrendChart = nextDynamic(() => import('@/components/charts/AptPriceTrendChart'));
 const AptReviewSection = nextDynamic(() => import('@/components/AptReviewSection'));
@@ -276,7 +277,7 @@ export default async function ComplexDetailPage({ params }: Props) {
   return (
     <article style={{ margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       {/* JSON-LD: Place + GeoCoordinates */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'Place', 'speakable': { '@type': 'SpeakableSpecification', 'cssSelector': ['h1', '.complex-summary'] },
         name: `${decoded} 아파트`,
         description: `${region} ${sigungu} ${dong} 소재 아파트${builtYear ? ` (${builtYear}년 준공)` : ''}`,
@@ -292,10 +293,10 @@ export default async function ComplexDetailPage({ params }: Props) {
           { '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded)}&category=apt`, width: 630, height: 630 },
         ],
         thumbnailUrl: `${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded)}&category=apt`,
-      })}} />
+      }} />
 
       {/* JSON-LD: Product + AggregateOffer (SERP 가격 칩) + 조건부 AggregateRating */}
-      {latestPrice > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      {latestPrice > 0 && <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'Product',
         name: `${decoded} 아파트`,
         description: `${region} ${sigungu} ${dong} ${decoded} 아파트 매매·전세 시세 정보`,
@@ -317,10 +318,10 @@ export default async function ComplexDetailPage({ params }: Props) {
           },
         } : {}),
         ...(areaStats.length > 0 ? { additionalProperty: areaStats.slice(0,3).map(a => ({ '@type': 'PropertyValue', name: `${a.area} 평균 매매가`, value: fmtAmount(a.avg) })) } : {}),
-      }) }} />}
+      }} />}
 
       {/* JSON-LD: Dataset (실거래 데이터셋) */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'Dataset',
         name: `${decoded} 아파트 실거래가 데이터`,
         description: `${decoded} 아파트의 매매·전세·월세 실거래 데이터 ${tradeList.length + rentTrades.length}건`,
@@ -331,10 +332,10 @@ export default async function ComplexDetailPage({ params }: Props) {
         spatialCoverage: { '@type': 'Place', name: `${region} ${sigungu}` },
         temporalCoverage: tradeList.length > 0 ? `${tradeList[tradeList.length-1]?.deal_date || ''}/${tradeList[0]?.deal_date || ''}` : '',
         distribution: { '@type': 'DataDownload', contentUrl: `${SITE_URL}/apt/complex/${encodeURIComponent(decoded)}`, encodingFormat: 'text/html' },
-      })}} />
+      }} />
 
       {/* JSON-LD: BreadcrumbList */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
@@ -343,10 +344,10 @@ export default async function ComplexDetailPage({ params }: Props) {
           { '@type': 'ListItem', position: 4, name: `${region} ${sigungu}`, item: `${SITE_URL}/apt/complex?region=${encodeURIComponent(region)}` },
           { '@type': 'ListItem', position: 5, name: decoded },
         ],
-      })}} />
+      }} />
 
       {/* JSON-LD: FAQPage (SERP 아코디언) */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: [
           { '@type': 'Question', name: `${decoded} 최근 실거래가는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}의 최근 매매가는 ${latestPrice > 0 ? fmtAmount(latestPrice) : '정보 없음'}이며, 평균 ${fmtAmount(avgPrice)}입니다. ${region} ${sigungu} ${dong} 소재${builtYear ? `, ${builtYear}년 준공` : ''}입니다.` } },
@@ -360,10 +361,10 @@ export default async function ComplexDetailPage({ params }: Props) {
           { '@type': 'Question', name: `${decoded} 면적별 평당가는?`, acceptedAnswer: { '@type': 'Answer', text: `${decoded}에는 ${areaStats.length}개 면적 타입이 있으며, 면적별 평당가와 거래 이력을 카더라에서 비교 분석할 수 있습니다.` } },
           { '@type': 'Question', name: `${decoded} 입주 연차는?`, acceptedAnswer: { '@type': 'Answer', text: builtYear ? `${decoded}은 ${builtYear}년 준공으로 현재 ${2026 - builtYear}년차(${profile?.age_group || ''})입니다.` : `${decoded}의 준공 연도 정보는 확인되지 않았습니다.` } },
         ],
-      })}} />
+      }} />
 
       {/* JSON-LD: ImageGallery (이미지 캐러셀 — 항상 노출) */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'ImageGallery',
         name: `${decoded} 아파트 이미지·차트`,
         description: `${decoded} 아파트 실거래가 차트, 조감도, 평면도 등`,
@@ -378,7 +379,7 @@ export default async function ComplexDetailPage({ params }: Props) {
           { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(latestPrice > 0 ? `매매 ${fmtAmount(latestPrice)}` : '실거래가 분석')}`, width: 1200, height: 630, name: `${decoded} 실거래가`, caption: `${decoded} 매매·전세 시세` },
           { '@type': 'ImageObject', url: `${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded)}&category=apt`, width: 630, height: 630, name: `${decoded} 아파트 정보` },
         ],
-      })}} />
+      }} />
 
       <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)', flexWrap: 'wrap' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>

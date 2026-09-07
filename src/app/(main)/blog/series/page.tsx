@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { BookOpen } from 'lucide-react';
 import ShareButtons from '@/components/ShareButtons';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = {
   title: '블로그 시리즈',
@@ -40,9 +41,9 @@ export default async function BlogSeriesPage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '블로그', item: SITE_URL + '/blog' }, { '@type': 'ListItem', position: 3, name: '시리즈' }] }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: '블로그 시리즈 — 카더라', url: `${SITE_URL}/blog/series`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1'] } }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [{ '@type': 'Question', name: '카더라 블로그 시리즈란?', acceptedAnswer: { '@type': 'Answer', text: '카더라 블로그 시리즈는 주식, 부동산, 재테크 등 특정 주제를 여러 편에 걸쳐 심층 분석하는 연재 콘텐츠입니다. 순서대로 읽으면 해당 분야를 체계적으로 이해할 수 있습니다.' } }] }) }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '블로그', item: SITE_URL + '/blog' }, { '@type': 'ListItem', position: 3, name: '시리즈' }] }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'WebPage', name: '블로그 시리즈 — 카더라', url: `${SITE_URL}/blog/series`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1'] } }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [{ '@type': 'Question', name: '카더라 블로그 시리즈란?', acceptedAnswer: { '@type': 'Answer', text: '카더라 블로그 시리즈는 주식, 부동산, 재테크 등 특정 주제를 여러 편에 걸쳐 심층 분석하는 연재 콘텐츠입니다. 순서대로 읽으면 해당 분야를 체계적으로 이해할 수 있습니다.' } }] }} />
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
         <Link href="/blog" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 블로그</Link>
         <h1 style={{ margin: '8px 0 0', fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)' }}>📚 시리즈</h1>

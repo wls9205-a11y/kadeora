@@ -8,6 +8,7 @@ import SiteThumb from '@/components/apt/SiteThumb';
 import { REGIONS } from '@/lib/regions';
 import { siteEntity } from '@/lib/seo/entity';
 import RecentObservations from '@/components/apt/RecentObservations';
+import JsonLd from '@/components/seo/JsonLd';
 
 async function SigunguLinks({ region }: { region: string }) {
   const sb = getSupabaseAdmin();
@@ -266,14 +267,14 @@ export default async function RegionLandingPage({ params }: Props) {
   return (
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       {/* JSON-LD: BreadcrumbList */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"카더라","item":SITE_URL},{"@type":"ListItem","position":2,"name":"부동산","item":SITE_URL+"/apt"},{"@type":"ListItem","position":3,"name":decoded}]}) }} />
+      <JsonLd data={{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"카더라","item":SITE_URL},{"@type":"ListItem","position":2,"name":"부동산","item":SITE_URL+"/apt"},{"@type":"ListItem","position":3,"name":decoded}]}} />
       {/* A6 — 이 지역 관측. 사실 한 줄씩, 0건이면 미렌더. */}
       <RecentObservations items={data.observations} />
 
       {/* JSON-LD: CollectionPage */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"CollectionPage","name":`${decoded} 부동산 종합 정보`,"description":`${decoded} 지역 청약 ${data.subscriptions.length}건, 실거래 ${data.transactions.length}건, 재개발 ${data.redevelopments.length}건, 미분양 ${data.unsolds.length}건`,"url":`${SITE_URL}/apt/region/${encodeURIComponent(decoded)}`,"isPartOf":{"@type":"WebSite","name":"카더라","url":SITE_URL},"speakable":{"@type":"SpeakableSpecification","cssSelector":["h1",".region-summary"]},"mainEntityOfPage":{"@type":"WebPage","@id":`${SITE_URL}/apt/region/${encodeURIComponent(decoded)}`},"thumbnailUrl":`${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded + ' 부동산')}&category=apt`}) }} />
+      <JsonLd data={{"@context":"https://schema.org","@type":"CollectionPage","name":`${decoded} 부동산 종합 정보`,"description":`${decoded} 지역 청약 ${data.subscriptions.length}건, 실거래 ${data.transactions.length}건, 재개발 ${data.redevelopments.length}건, 미분양 ${data.unsolds.length}건`,"url":`${SITE_URL}/apt/region/${encodeURIComponent(decoded)}`,"isPartOf":{"@type":"WebSite","name":"카더라","url":SITE_URL},"speakable":{"@type":"SpeakableSpecification","cssSelector":["h1",".region-summary"]},"mainEntityOfPage":{"@type":"WebPage","@id":`${SITE_URL}/apt/region/${encodeURIComponent(decoded)}`},"thumbnailUrl":`${SITE_URL}/api/og-square?title=${encodeURIComponent(decoded + ' 부동산')}&category=apt`}} />
       {/* JSON-LD: ItemList (주요 단지) */}
-      {data.subscriptions.length > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      {data.subscriptions.length > 0 && <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'ItemList',
         name: `${decoded} 주요 분양 단지`,
         numberOfItems: Math.min(data.subscriptions.length, 10),
@@ -292,18 +293,18 @@ export default async function RegionLandingPage({ params }: Props) {
             ...(ent ? { item: ent } : {}),
           };
         }),
-      })}} />}
+      }} />}
       {/* NV-1 — FAQPage 는 «한 페이지에 하나» 다.
           이 파일엔 FAQPage JSON-LD 가 «두 블록» 있었다(여기 8문답 + 하단 3~4문답). 같은 페이지가
           두 FAQ 를 말하면 수집기가 어느 쪽을 쓰는지 우리가 모른다 — 하나로 합치고 하단 블록은 지웠다.
           ⛔ 문장에 숫자를 «쓰지» 않는다. 전부 조회 결과 변수다(하드코딩 금지). */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+      <JsonLd data={{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
         {"@type":"Question","name":`${decoded} 아파트 분양 일정은 어디서 확인하나요?`,"acceptedAnswer":{"@type":"Answer","text":`이 페이지에서 ${decoded} 아파트 분양·청약 일정을 매일 갱신합니다. 지금은 청약 ${data.subscriptions.length}건을 접수 일정·분양가와 함께 보고 있습니다.`}},
         {"@type":"Question","name":`${decoded} 미분양·줍줍(무순위)은 어디서 보나요?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 미분양·선착순 현장 ${data.unsolds.length}건을 카더라 미분양 페이지(${SITE_URL}/apt/unsold/${encodeURIComponent(decoded)})에서 잔여세대와 함께 확인할 수 있습니다.`}},
         {"@type":"Question","name":`${decoded} 재개발 진행 단계는 어떻게 보나요?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 재개발·재건축 ${data.redevelopments.length}건의 조합설립·사업시행·관리처분 단계를 재개발 현황 페이지(${SITE_URL}/apt/redev)에서 단계별로 볼 수 있습니다.`}},
         {"@type":"Question","name":`${decoded} 실거래가는 어떻게 조회하나요?`,"acceptedAnswer":{"@type":"Answer","text":`카더라에서 ${decoded} 지역 아파트 실거래 ${data.transactions.length}건을 단지별·면적별로 조회할 수 있습니다.`}},
         {"@type":"Question","name":`${decoded} 모집공고는 어디서 확인하나요?`,"acceptedAnswer":{"@type":"Answer","text":`각 현장 상세 페이지에서 ${decoded} 아파트 입주자모집공고 요약과 분양 조건(분양가상한제·전매제한·거주의무), 평형별 공급 정보를 제공합니다.`}},
-      ]}) }} />
+      ]}} />
       {/* 헤더 */}
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
         <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>

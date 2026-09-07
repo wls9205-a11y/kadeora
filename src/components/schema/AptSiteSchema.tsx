@@ -1,4 +1,5 @@
 import React from 'react';
+import JsonLd from '@/components/seo/JsonLd';
 
 interface OgCard {
   idx: number;
@@ -170,9 +171,6 @@ export default function AptSiteSchema({ site, origin }: AptSiteSchemaProps) {
   };
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(payload) }}
-    />
+    <JsonLd data={payload} />
   );
 }

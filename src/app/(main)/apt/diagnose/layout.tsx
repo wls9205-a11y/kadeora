@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import { buildAlternates } from '@/lib/seo';
+import JsonLd from '@/components/seo/JsonLd';
 
 const TITLE = '2026 청약 가점 계산기 — 무주택·부양가족·통장 자동 계산';
 const DESC = '2026년 최신 기준 청약 가점 자동 계산기. 무주택기간·부양가족 수·청약통장 가입기간(배우자 합산 포함)을 입력하면 총점 84점 기준 가점, 지역별 당첨 가능성, 맞춤 전략을 제공합니다. 주택공급규칙 별표1 기준.';
@@ -54,7 +55,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
       {/* WebApplication */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'WebApplication',
         name: '카더라 청약 가점 계산기 2026',
         url: URL,
@@ -66,19 +67,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.diagnose-result', '.blog-content h2'] },
         datePublished: '2026-01-15',
         dateModified: '2026-04-05',
-      })}} />
+      }} />
 
       {/* FAQPage (8개 — 리치 스니펫) */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: FAQS.map(f => ({
           '@type': 'Question', name: f.q,
           acceptedAnswer: { '@type': 'Answer', text: f.a },
         })),
-      })}} />
+      }} />
 
       {/* HowTo (단계별 사용법 — 구글 리치 결과) */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'HowTo',
         name: '청약 가점 계산하는 방법',
         description: '주택공급규칙 별표1 기준으로 청약 가점을 4단계로 계산합니다.',
@@ -89,17 +90,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           { '@type': 'HowToStep', position: 3, name: '부양가족 수 입력', text: '배우자, 미혼 자녀, 직계존속(3년 이상 등재), 미혼 형제자매를 각각 입력합니다.' },
           { '@type': 'HowToStep', position: 4, name: '통장 가입기간 입력', text: '본인 및 배우자의 청약통장 가입기간을 입력합니다. 배우자는 50% 인정, 최대 3점 합산.' },
         ],
-      })}} />
+      }} />
 
       {/* BreadcrumbList */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL },
           { '@type': 'ListItem', position: 2, name: '부동산', item: `${SITE_URL}/apt` },
           { '@type': 'ListItem', position: 3, name: '청약 가점 계산기' },
         ],
-      })}} />
+      }} />
       {children}
     </>
   );

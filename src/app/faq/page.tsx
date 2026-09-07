@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import FaqClient from './FaqClient';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = {
   title: '자주 묻는 질문 (FAQ)',
@@ -31,13 +32,13 @@ export const metadata: Metadata = {
 // FAQ JSON-LD is in faq/layout.tsx
 export default function FAQPage() {
   return <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         '@context': 'https://schema.org', '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: '카더라', item: '' },
           { '@type': 'ListItem', position: 2, name: '자주 묻는 질문' },
         ],
-      })}} />
+      }} />
       <h1 style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)" }}>카더라 자주 묻는 질문</h1>
       <FaqClient />
     </>;

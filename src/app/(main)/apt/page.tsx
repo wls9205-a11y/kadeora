@@ -68,6 +68,7 @@ import RegionSelectPanel from '@/components/region/RegionSelectPanel';
 import SiteRow from '@/components/apt/SiteRow';
 import { parseRegionSelection } from '@/lib/region/select-tree';
 import { getRegionCounts, getSitesForSelection, selectionToPairs } from '@/lib/region/select-server';
+import JsonLd from '@/components/seo/JsonLd';
 
 // Next 는 segment config 를 정적 분석하므로 리터럴이어야 한다 (import 식별자 불가).
 // lib/apt/hub.ts 의 APT_HUB_REVALIDATE_SECONDS 와 같은 값으로 유지할 것.
@@ -654,17 +655,10 @@ export default async function AptPage({
 
       {/* SEO: 접수중/예정 단지 Event + ItemList */}
       {events.map((ev, i) => (
-        <script
-          key={`apt-event-${i}`}
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(ev) }}
-        />
+        <JsonLd key={`apt-event-${i}`} data={ev} />
       ))}
       {itemList ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }}
-        />
+        <JsonLd data={itemList} />
       ) : null}
       </div>
 

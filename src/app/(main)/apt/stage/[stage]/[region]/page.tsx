@@ -23,6 +23,7 @@ import {
 } from '@/lib/apt/stage';
 import HubHero from '@/components/detail/HubHero';
 import SiteCard from '@/components/cards/v3/SiteCard';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -134,8 +135,8 @@ export default async function AptStageRegionHub({ params }: Props) {
 
   return (
     <main style={{ maxWidth: 'var(--container-grid)', margin: '0 auto', padding: 'var(--sp-md)' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <JsonLd data={itemListLd} />
+      <JsonLd data={breadcrumbLd} />
 
       <nav
         aria-label="breadcrumb"

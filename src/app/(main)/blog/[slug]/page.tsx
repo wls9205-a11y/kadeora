@@ -59,6 +59,7 @@ import BigEventCharts from '@/components/blog/BigEventCharts';
 import InlineTalkBanner from '@/components/banner/InlineTalkBanner';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { siteEntity, siteEntities } from '@/lib/seo/entity';
+import JsonLd from '@/components/seo/JsonLd';
 // NewsletterSubscribe 삭제 — 카카오 CTA로 통합
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
@@ -910,15 +911,15 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* A5 — about/mentions 는 «여기서» 합친다. jsonLd 리터럴은 현장 조회보다
           위에서 만들어지므로 그 안에 넣으면 항상 null 이 박힌다.
           현장 노드의 @id 는 /apt/[id] 가 쓰는 것과 같아야 두 페이지가 묶인다. */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <JsonLd data={{
         ...jsonLd,
         ...(aboutEntity ? { about: aboutEntity } : {}),
         ...(mentionEntities.length > 0 ? { mentions: mentionEntities } : {}),
-      }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      {howtoSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howtoSchema) }} />}
-      {datasetSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }} />}
-      {eventSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }} />}
+      }} />
+      <JsonLd data={breadcrumbLd} />
+      {howtoSchema && <JsonLd data={howtoSchema} />}
+      {datasetSchema && <JsonLd data={datasetSchema} />}
+      {eventSchema && <JsonLd data={eventSchema} />}
 
       <CardCarousel
         slug={post.slug}
@@ -980,10 +981,10 @@ export default async function BlogDetailPage({ params }: Props) {
           ];
 
           return (
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            <JsonLd data={{
               '@context': 'https://schema.org', '@type': 'ImageGallery', name: `${post.title} 이미지`,
               image: allImages,
-            })}} />
+            }} />
           );
         })()}
 

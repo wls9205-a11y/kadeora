@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { SITE_URL } from '@/lib/constants';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 900;
 
@@ -99,7 +100,7 @@ export default async function BigEventsHubPage({ searchParams }: SearchProps) {
 
   return (
     <div style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '24px 16px' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
+      <JsonLd data={itemListLd} />
 
       <nav aria-label="breadcrumb" style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 10 }}>
         <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>홈</Link>
