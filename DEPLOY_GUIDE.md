@@ -28,7 +28,7 @@
 - ✅ 트렌딩 키워드 TOP 10 위젯 (피드 상단)
 - ✅ `search_logs` / `view_logs` / `share_logs` 테이블 (마이그레이션)
 - ✅ `trending_keywords` / `user_streaks` 테이블
-- ✅ `supabase/functions/trend-aggregator/` — 열기 지수 Edge Function
+- ⛔ `supabase/functions/trend-aggregator/` — **퇴역**(AD-8 · 2026-09-07). 배포하지 않는다. 아래 §Edge Function 항목 참조.
 - ✅ `src/app/api/trend/route.ts` — 트렌드 API
 - ✅ `src/app/api/search/route.ts` — 검색어 로깅
 
@@ -110,8 +110,15 @@ npx supabase db push
 
 ### STEP 3: Edge Function 배포
 
+> ⛔ **퇴역 (AD-8 · 2026-09-07)** — 아래 절차는 «실행하지 않는다».
+> `trending_keywords` 의 생산자는 `/api/cron/refresh-trending`(vercel.json 크론 `0 */6 * * *`)
+> 하나다. 이 Edge Function 을 되살려 pg_cron 으로 매 1분 돌리면 같은 테이블에 생산자가
+> 둘이 되어 서로의 행을 덮어쓴다 — CV-B① 「이중 생산자 금지」.
+> 원격에 실제로 배포·스케줄돼 있는지 확인과 undeploy 는 DB 접근 권한이 있는 쪽 몫이다.
+> 기록 보존을 위해 절차 원문은 남겨 둔다.
+
 ```bash
-# trend-aggregator 배포
+# trend-aggregator 배포  ⛔ 퇴역 — 실행 금지
 npx supabase functions deploy trend-aggregator \
   --project-ref tezftxakuwhsclarprlz
 

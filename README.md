@@ -39,7 +39,10 @@ Supabase 대시보드 → SQL Editor에서 순서대로 실행:
 ### Step 3: Edge Function 배포
 
 ```bash
-npx supabase functions deploy trend-aggregator --project-ref tezftxakuwhsclarprlz
+# ⛔ 퇴역 (AD-8 · 2026-09-07) — trend-aggregator 는 배포하지 않는다.
+#    trending_keywords 의 생산자는 /api/cron/refresh-trending 하나다.
+#    자세한 근거는 supabase/functions/trend-aggregator/index.ts 머리 주석.
+# npx supabase functions deploy trend-aggregator --project-ref tezftxakuwhsclarprlz
 ```
 
 ### Step 4: Vercel 환경변수

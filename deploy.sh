@@ -100,8 +100,10 @@ echo "       supabase/migrations/20260315_v2_1_team_feedback.sql"
 echo "       supabase/migrations/20260315_v3_expert_feedback.sql"
 echo ""
 echo -e "  ${YELLOW}2. Edge Function 배포${NC}"
-echo "     npx supabase functions deploy trend-aggregator \\"
-echo "       --project-ref tezftxakuwhsclarprlz"
+# ⛔ AD-8(2026-09-07) — trend-aggregator 는 퇴역했다. 안내에서 뺀다.
+#    trending_keywords 생산자는 /api/cron/refresh-trending 하나이며,
+#    이 함수를 되살리면 이중 생산자가 된다(CV-B①).
+echo "     (없음 — trend-aggregator 는 퇴역. AD-8 · 2026-09-07)"
 echo ""
 echo -e "  ${YELLOW}3. Vercel 환경변수 설정${NC}"
 echo "     → https://vercel.com/wls9205-5665s-projects/kadeora/settings/environment-variables"
