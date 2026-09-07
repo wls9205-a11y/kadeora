@@ -79,7 +79,7 @@ export default async function AptSearchPage({ searchParams }: Props) {
     <div className="mx-auto max-w-3xl p-4 sm:p-6">
       <header className="mb-4">
         <h1 className="text-xl font-bold">
-          "<span className="text-blue-600">{q}</span>" 부동산 검색
+          &quot;<span className="text-blue-600">{q}</span>&quot; 부동산 검색
           <span className="ml-2 text-sm font-normal text-gray-500">
             {total > 0 ? `${total}건` : "결과 없음"}
           </span>

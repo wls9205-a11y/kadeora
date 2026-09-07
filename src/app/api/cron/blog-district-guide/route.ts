@@ -414,7 +414,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
       }));
 
       // --- Build content ---
-      let content = buildContent(region, sigungu, cnt, top10, recentTx);
+      const content = buildContent(region, sigungu, cnt, top10, recentTx);
       // quality gate: skip if content too short
 
       const tags = [region, sigungu, '아파트', '시세', '학군', '교통', '추천', '2026'];

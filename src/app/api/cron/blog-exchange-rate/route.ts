@@ -206,7 +206,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
       const slug = `exchange-rate-outlook-2026-${monthInfo.month}`;
       const title = `원달러 환율 전망 2026년 ${monthInfo.label} — 미국 금리와 원화 흐름 분석`;
 
-      let content = buildContent(monthInfo, exchangeRates, rateHistory);
+      const content = buildContent(monthInfo, exchangeRates, rateHistory);
       // quality gate: skip if content too short
 
       const tags = ['환율', '원달러', 'USD', '금리', 'FOMC', '2026', monthInfo.label];

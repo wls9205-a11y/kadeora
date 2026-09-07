@@ -55,6 +55,28 @@ const eslintConfig = [
     files: H5_NEW_FILES,
     rules: { "no-restricted-syntax": NO_PX },
   },
+
+  /* ⛔ AD-0(2026-09-07) — CI 초록 복원.
+   *
+   * ci.yml 의 quality 잡이 400 런 넘게 연속 실패해 있었고(test·e2e·build 는 그 뒤로
+   * needs 에 걸려 통째로 skip), 원인은 전부 npm run lint 의 error 였다. 아래 둘은
+   * 「코드를 고쳐서」가 아니라 「규칙이 이 리포에 안 맞아서」 남은 잔여분이다.
+   *
+   * ① src/_legacy/** — 롤백 참조용 스냅샷 보관소(임포트 0 실측). 첫 줄 @ts-nocheck 가
+   *    바로 그 의도다. 보관물에 lint 를 강제하는 건 목적과 모순이라 대상에서 뺀다.
+   *
+   * ② @next/next/no-html-link-for-pages — Pages Router 전용 규칙인데 이 리포엔 pages/
+   *    가 없다(App Router 전용, 실측). 걸린 27곳은 전부 «의도된» <a> 다:
+   *      · error.tsx 2곳 — 깨진 React 트리를 버리려면 하드 내비게이션이어야 한다.
+   *      · ClientShell 푸터 9곳 — A4·H6-5 주석대로 크롤 예산을 손으로 관리하는 링크.
+   *        <Link> 로 바꾸면 전 페이지에 프리페치가 붙는다.
+   *    즉 규칙을 만족시키는 유일한 길이 «동작 변경» 이라 규칙을 내린다.
+   *    off 가 아니라 warn 이다 — 새로 생기는 <a> 는 로그에 계속 남아야 한다.
+   */
+  { ignores: ["src/_legacy/**"] },
+  {
+    rules: { "@next/next/no-html-link-for-pages": "warn" },
+  },
 ];
 
 export default eslintConfig;

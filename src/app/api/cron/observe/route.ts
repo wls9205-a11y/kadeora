@@ -119,7 +119,7 @@ export async function GET(req: NextRequest) {
       .from('apt_observations')
       .select('id', { count: 'exact', head: true })
       .gte('created_at', `${today}T00:00:00Z`);
-    let budget = DAILY_CAP - (todayCount ?? 0);
+    const budget = DAILY_CAP - (todayCount ?? 0);
     if (budget <= 0) {
       return { processed: 0, created: 0, failed: 0, metadata: { reason: 'daily_cap', today_count: todayCount } };
     }

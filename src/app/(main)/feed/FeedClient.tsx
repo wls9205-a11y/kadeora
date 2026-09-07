@@ -253,7 +253,7 @@ export default function FeedClient({
   };
 
   const visiblePosts = useMemo(() => {
-    let filtered = activeTag
+    const filtered = activeTag
       ? posts.filter((p: PostWithProfile) => {
           const tags = p.tags;
           return tags?.includes(activeTag);

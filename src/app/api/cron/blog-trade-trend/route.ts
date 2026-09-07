@@ -313,7 +313,7 @@ async function processRegions(
 
       // 3. Build the blog content
       const title = `${region} 아파트 실거래가 동향 ${titleMonth} — 평당가 추이와 거래량 분석`;
-      let content = buildContent(region, aggregatedStat, subRegionStats, top5, titleMonth);
+      const content = buildContent(region, aggregatedStat, subRegionStats, top5, titleMonth);
       // quality gate: skip if content too short
 
       const tags = [region, '아파트', '실거래가', '부동산', statMonth, '평당가', '거래량'];

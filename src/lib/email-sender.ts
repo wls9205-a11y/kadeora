@@ -14,6 +14,11 @@ function getResend(): any | null {
   if (!key) return null;
   if (!resendInstance) {
     try {
+      // ⛔ AD-0 — 정적 import 로 바꾸지 않는다. resend 는 RESEND_API_KEY 가 있을 때만
+      //    필요한데, 상단 import 로 올리면 email-sender 를 스치는 모든 라우트가
+      //    콜드스타트마다 이 모듈을 싣는다. await import() 는 getResend 를 async 로
+      //    바꿔 호출부 전체를 건드리게 된다 — 둘 다 동작 변경이라 지연 require 를 유지한다.
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { Resend } = require('resend');
       resendInstance = new Resend(key);
     } catch {

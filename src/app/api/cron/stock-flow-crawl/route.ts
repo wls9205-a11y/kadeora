@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
     };
 
     let flows: any[] = [];
-    let mode = 'data';
+    const mode = 'data';
 
     // 데이터 기반 추정 (AI 제거 — 비용 절감)
     flows = targets.map((s: any) => ({ symbol: s.symbol, ...estimateFlow(s) }));

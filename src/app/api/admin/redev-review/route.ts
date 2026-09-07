@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
   // 구역명 후보 → 실존 현장. pending 만 붙인다(처리분은 이미 resolved_site_id 가 있다).
   const items = [] as any[];
   for (const r of rows ?? []) {
-    let siteOptions: any[] = [];
+    const siteOptions: any[] = [];
     if (status === 'pending') {
       const zones: string[] = Array.isArray(r.zone_candidates) ? r.zone_candidates.filter((z: any) => typeof z === 'string') : [];
       const seen = new Set<string>();

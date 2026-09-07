@@ -141,7 +141,7 @@ export default function RegionSettingsPage() {
       </button>
 
       <div style={{ marginTop: 20, padding: '12px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
-        💡 우리동네 기능은 피드에서 "우리동네" 탭을 통해 같은 지역 이웃들의 글만 모아볼 수 있어요. 지역 정보는 언제든 변경할 수 있습니다.
+        💡 우리동네 기능은 피드에서 &quot;우리동네&quot; 탭을 통해 같은 지역 이웃들의 글만 모아볼 수 있어요. 지역 정보는 언제든 변경할 수 있습니다.
       </div>
     </div>
   );

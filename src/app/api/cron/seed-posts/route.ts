@@ -572,7 +572,7 @@ export async function GET(req: NextRequest) {
     const selectedUsers = pickN(availableUsers, postCount);
 
     // ═══ 동적 데이터 기반 추가 템플릿 (v3: 9개 소스, 매일 새 콘텐츠) ═══
-    let dynamicTemplates: Template[] = [];
+    const dynamicTemplates: Template[] = [];
     try {
       const [
         { data: stocks },

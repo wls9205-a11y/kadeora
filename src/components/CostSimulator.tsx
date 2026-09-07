@@ -26,14 +26,16 @@ export default function CostSimulator({ types, options = [], siteName, priceSour
   const [includeBalcony, setIncludeBalcony] = useState(true);
   const [selectedOptions, setSelectedOptions] = useState<Set<number>>(new Set());
 
-  if (validTypes.length === 0) return null;
-
   const t = validTypes[selectedType] || validTypes[0];
-  const typeLabel = t.type || '기본';
-  const exclusiveArea = parseFloat((t.type || '0').replace(/[A-Za-z]/g, ''));
 
   // 분양가 결정 (층 선택 기반)
+  // ⛔ AD-0 — useMemo 는 «조건부 return 위» 에 있어야 한다(react-hooks/rules-of-hooks).
+  //    types 가 비었다가 채워지는 순간(부모 재조회) 훅 개수가 4→5 로 바뀌어
+  //    React 가 훅 순서를 잃는다. 조기 return 은 훅을 다 부른 뒤로 내렸다.
+  //    validTypes 가 비면 t 가 undefined 이므로 콜백 첫 줄에서 0 을 돌려준다 —
+  //    그 렌더는 어차피 아래에서 null 을 반환하므로 화면 결과는 이전과 동일하다.
   const basePrice = useMemo(() => {
+    if (!t) return 0;
     if (selectedFloor === 'min' && t.lttot_min_amount) return t.lttot_min_amount;
     if (selectedFloor === 'max') return t.lttot_top_amount;
     if (selectedFloor === 'avg' && t.lttot_avg_amount) return t.lttot_avg_amount;
@@ -44,6 +46,11 @@ export default function CostSimulator({ types, options = [], siteName, priceSour
     }
     return t.lttot_avg_amount || t.lttot_top_amount;
   }, [selectedFloor, t]);
+
+  if (validTypes.length === 0) return null;
+
+  const typeLabel = t.type || '기본';
+  const exclusiveArea = parseFloat((t.type || '0').replace(/[A-Za-z]/g, ''));
 
   const balconyPrice = includeBalcony && t.balcony_price ? t.balcony_price : 0;
   const optionsTotal = Array.from(selectedOptions).reduce((s, i) => s + (options[i]?.price || 0), 0);

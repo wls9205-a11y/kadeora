@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
     };
 
     let notes: any[] = [];
-    let mode = 'data';
+    const mode = 'data';
 
     // 데이터 기반 자동 생성 (AI 제거 — 비용 절감)
     notes = targetStocks.map(generateDataNote);

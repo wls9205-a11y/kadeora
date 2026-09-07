@@ -674,7 +674,7 @@ export default function UniversalSearchBar({
               {/* 결과 없음 */}
               {q && resp && resp.total === 0 && !loading && (
                 <div className="py-12 text-center">
-                  <p className="text-sm text-gray-500">"{q}" 검색 결과가 없습니다.</p>
+                  <p className="text-sm text-gray-500">&quot;{q}&quot; 검색 결과가 없습니다.</p>
                   <p className="mt-2 text-xs text-gray-400">단지명·지역·종목명·키워드로 다시 시도해보세요.</p>
                 </div>
               )}
@@ -793,7 +793,7 @@ function ResultsPanel({
           onClick={onSeeAll}
           className="touch-target mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-center text-xs text-gray-700 hover:bg-gray-50"
         >
-          "{resp.query}" 전체 결과 ({resp.total}+) 보기 →
+          &quot;{resp.query}&quot; 전체 결과 ({resp.total}+) 보기 →
         </button>
       )}
     </div>

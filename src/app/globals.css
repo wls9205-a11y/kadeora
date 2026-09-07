@@ -24,10 +24,18 @@
    @layer screens 를 선언하므로 «import 위치는 우선순위에 영향을 주지 않는다». */
 @import "./styles/screens.css";
 
+/* ⛔ AD-0(2026-09-07) — 이 @import 는 «빈 @layer elements 블록 뒤» 에 있었다.
+   CSS 는 @import 가 @charset·@layer 선언문을 뺀 모든 규칙보다 앞서야 한다고 정한다.
+   next build(lightningcss)는 넘어갔지만 turbopack dev 는 거기서 파싱을 멈춰
+   «npm run dev 가 홈에서 500» 이었다(2026-09-07 실측). 빌드가 통과하니 아무도 몰랐다.
+   ⚠️ 옮겼어도 캐스케이드는 그대로다: 원래 위치와 이 위치 사이에 선언이 0개였고,
+      apt-tabs.css 는 전량 @layer reset 안에 있으며 레이어 순서를 스스로 선언한다.
+      즉 이 파일의 「맨 처음 import 라 가장 약하다」는 자기 주석도 유지된다. */
+@import "../styles/apt-tabs.css";
+
 @layer elements {
   /* s208 apt-tabs: 스코프된 토큰/유틸리티 (--aptr-*) — 기존 카더라 토큰과 충돌 X. s273-cc: tailwind config darkMode cache bust. */
 }
-@import "../styles/apt-tabs.css";
 @layer elements {
 
   /* Pretendard 는 layout.tsx 의 CDN <link> 한 곳에서만 로드한다 (Rule #80).

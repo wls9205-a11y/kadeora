@@ -172,7 +172,7 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
         <div style={{ marginTop: 14, padding: '10px 12px', borderRadius: 8, background: 'var(--bg-base)', border: '1px solid var(--border)' }}>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4, fontWeight: 600 }}>대안</div>
           <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            우상단 "…" 메뉴 → "외부 브라우저로 열기" 또는 "Chrome/Safari 에서 열기" 선택
+            우상단 &quot;…&quot; 메뉴 → &quot;외부 브라우저로 열기&quot; 또는 &quot;Chrome/Safari 에서 열기&quot; 선택
           </div>
         </div>
 

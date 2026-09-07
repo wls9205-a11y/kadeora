@@ -550,7 +550,8 @@ export function electricityBill(v: V): CalcResult {
   const tiers = [
     { max: 200, rate: 120.0 }, { max: 400, rate: 214.6 }, { max: Infinity, rate: 307.3 },
   ];
-  let charge = 0, base = 910; // 기본요금
+  let charge = 0;
+  const base = 910; // 기본요금
   let remaining = usage;
   let prev = 0;
   for (const t of tiers) {

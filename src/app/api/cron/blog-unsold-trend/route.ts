@@ -182,7 +182,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
 
       const title = `전국 미분양 아파트 추이 ${displayLabel} — 지역별 증감과 할인 분양 기회`;
 
-      let content = buildContent(statMonth, unsoldStats);
+      const content = buildContent(statMonth, unsoldStats);
       // quality gate: skip if content too short
 
       const totalUnsold = unsoldStats.reduce((sum, s) => sum + (s.total_unsold || 0), 0);

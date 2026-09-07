@@ -86,7 +86,7 @@ async function handler(_req: NextRequest) {
       } catch {}
 
       // 프로그래매틱 SEO 페이지 — 시군구/동 허브, 테마, 건설사
-      let seoUrls: string[] = [];
+      const seoUrls: string[] = [];
       try {
         // 시군구 허브 (최근 거래 활발한 시군구 50개)
         const { data: sgData } = await (sb as any).from('apt_complex_profiles')
@@ -120,7 +120,7 @@ async function handler(_req: NextRequest) {
 
       // ━━━ 신규 SEO 페이지 (세션 114 확장) ━━━
       // 용어사전 / 주식 차트·재무 / 데일리 리포트 히스토리
-      let newSeoUrls: string[] = [];
+      const newSeoUrls: string[] = [];
       try {
         // 용어사전 (41개)
         const { data: glossary } = await (sb as any).from('stock_glossary')
@@ -155,7 +155,7 @@ async function handler(_req: NextRequest) {
       } catch {}
 
       // ━━━ 계산기 SEO (세션 132 추가) — 토픽 클러스터 + 인기 결과 ━━━
-      let calcUrls: string[] = [];
+      const calcUrls: string[] = [];
       try {
         // 1) 토픽 클러스터 허브 (검색량 높은 순)
         const { data: topics } = await (sb as any).from('calc_topic_clusters')

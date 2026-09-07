@@ -23,7 +23,8 @@ export async function GET(req: NextRequest) {
   const result = await withCronLogging('churn-prevention', async () => {
     const sb = getSupabaseAdmin();
     const now = Date.now();
-    let d3Sent = 0, d7Sent = 0, d14Sent = 0;
+    let d3Sent = 0, d14Sent = 0;
+    const d7Sent = 0;
 
     // 실유저 (시드/고스트/삭제 제외)
     const { data: users } = await sb.from('profiles')

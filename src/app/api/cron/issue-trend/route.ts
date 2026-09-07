@@ -110,7 +110,7 @@ async function handler(_req: NextRequest) {
 
 
   // v2: Google Trends RSS 교차 검증
-  let googleTrendingKeywords: string[] = [];
+  const googleTrendingKeywords: string[] = [];
   try {
     const gRes = await fetch('https://trends.google.co.kr/trending/rss?geo=KR', { signal: AbortSignal.timeout(8000) });
     if (gRes.ok) {
@@ -139,7 +139,7 @@ async function handler(_req: NextRequest) {
 
   // v2: 다음/카카오 뉴스 검색 교차 검증
   const KAKAO_KEY = process.env.KAKAO_REST_API_KEY || '';
-  let daumTrendingKeywords: string[] = [];
+  const daumTrendingKeywords: string[] = [];
   if (KAKAO_KEY) {
     try {
       // 스파이크 키워드로 다음 웹 검색 → 최근 1시간 내 결과 있으면 트렌딩

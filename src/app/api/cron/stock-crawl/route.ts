@@ -37,7 +37,7 @@ async function fetchKRXStocks(apiKey: string): Promise<{ stocks: any[]; debug: s
   
   // mrktCls 없이 전체 조회 (KOSPI+KOSDAQ 한번에), 실패하면 시장별 개별 조회
   for (const marketCode of ['KOSPI', 'KOSDAQ']) {
-    let pageNo = 1;
+    const pageNo = 1;
     const numOfRows = 100;
     
     try {

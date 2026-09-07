@@ -98,7 +98,7 @@ export default async function SearchPage({ searchParams }: Props) {
     <div className="mx-auto max-w-3xl p-4 sm:p-6">
       <header className="mb-4">
         <h1 className="text-xl font-bold">
-          "<span className="text-blue-600">{q}</span>" 검색 결과
+          &quot;<span className="text-blue-600">{q}</span>&quot; 검색 결과
           <span className="ml-2 text-sm font-normal text-gray-500">
             {total > 0 ? `${total}건` : "결과 없음"}
           </span>

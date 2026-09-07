@@ -308,7 +308,7 @@ export const GET = withCronAuth(async (req: NextRequest) => {
       const subscriptions = projects as Subscription[];
       const title = `${brand} 분양 일정 2026 총정리 — ${constructorNm} 신규 단지 분양가와 입지 비교`;
 
-      let content = buildContent(constructorNm, brand, subscriptions);
+      const content = buildContent(constructorNm, brand, subscriptions);
       // quality gate: skip if content too short
 
       const tags = [brand, constructorNm, '분양', '청약', '아파트', '2026', '분양일정'];

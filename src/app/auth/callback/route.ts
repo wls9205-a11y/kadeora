@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
   // s267_b: response 를 미리 생성하고 cookies adapter 가 직접 response.cookies 에 set.
   // 결과적으로 exchangeCodeForSession 이후 session cookie 가 redirect 응답에 명시 attach.
   // Placeholder response — 실제 redirect 는 함수 끝에서 destination 으로 cookies 복사.
-  let pendingResponse = NextResponse.next();
+  const pendingResponse = NextResponse.next();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

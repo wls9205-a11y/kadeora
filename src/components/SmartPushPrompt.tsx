@@ -151,8 +151,8 @@ export default function SmartPushPrompt() {
             }}>
               <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>설치 방법 (10초)</div>
               <div>1️⃣ 하단 <strong style={{ color: 'var(--brand)' }}>공유 버튼</strong> (⬆️) 탭</div>
-              <div>2️⃣ <strong style={{ color: 'var(--brand)' }}>"홈 화면에 추가"</strong> 탭</div>
-              <div>3️⃣ 우측 상단 <strong style={{ color: 'var(--brand)' }}>"추가"</strong> 탭</div>
+              <div>2️⃣ <strong style={{ color: 'var(--brand)' }}>&quot;홈 화면에 추가&quot;</strong> 탭</div>
+              <div>3️⃣ 우측 상단 <strong style={{ color: 'var(--brand)' }}>&quot;추가&quot;</strong> 탭</div>
               <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-tertiary)' }}>
                 추가 후 홈 화면에서 카더라 앱을 열면 알림 설정이 가능해요
               </div>

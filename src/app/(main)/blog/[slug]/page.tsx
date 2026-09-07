@@ -526,8 +526,8 @@ export default async function BlogDetailPage({ params }: Props) {
   const readingTimeMin = Math.max(1, Math.ceil(wordCount / 200));
 
   // 사이드바용 데이터: 단지 프로필 메트릭 (apt 카테고리)
-  let sidebarMetrics: { label: string; value: string }[] = [];
-  let sidebarRelatedLinks: { title: string; href: string }[] = [];
+  const sidebarMetrics: { label: string; value: string }[] = [];
+  const sidebarRelatedLinks: { title: string; href: string }[] = [];
   try {
     if ((post.category === 'apt' || post.category === 'unsold') && post.tags?.length) {
       const aptName = post.tags[0];
