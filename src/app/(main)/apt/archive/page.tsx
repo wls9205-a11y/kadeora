@@ -235,7 +235,12 @@ export default async function AptArchivePage({ searchParams }: { searchParams?: 
         <div className="kd-rail-panel">
           <h2>바로가기</h2>
           <Link href="/apt">진행중 청약</Link>
-          <Link href="/apt/ranking">청약 경쟁률 랭킹</Link>
+          {/* ⛔ 2026-09-07 — 위 레일과 같은 수리. `/apt/ranking` 맨 경로는 404 다.
+              여기 region 은 기본값이 「전국」인데 전국 랭킹 허브는 없으므로,
+              지역이 골라진 화면에서만 이 입구가 선다. */}
+          {(KR_REGIONS_17 as readonly string[]).includes(region) && (
+            <Link href={`/apt/ranking/${encodeURIComponent(region)}/subscription`}>청약 경쟁률 랭킹</Link>
+          )}
           <Link href="/apt/unsold">미분양 현황</Link>
           <Link href="/apt/complex">단지 백과</Link>
         </div>

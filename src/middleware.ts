@@ -9,7 +9,8 @@ const PUBLIC_PATHS = ['/login', '/auth', '/onboarding', '/terms', '/privacy', '/
 const BOT_PATHS = ['/wp-admin', '/wp-login.php', '/.env', '/.git', '/phpmyadmin'];
 
 // CSP 정책 (단일 정의 — 중복 방지)
-const CSP_DIRECTIVES = [
+// ⚠️ 배열로 둔다. 아래 Report-Only 초안이 «이 배열에서 파생» 되어야 두 정책이 갈라지지 않는다.
+const CSP_PARTS = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://va.vercel-scripts.com https://*.tosspayments.com https://*.kakaocdn.net https://*.kakao.com https://dapi.kakao.com https://www.googletagmanager.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://fundingchoicesmessages.google.com",
   "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
@@ -25,13 +26,42 @@ const CSP_DIRECTIVES = [
   "frame-ancestors 'self' https://*.tossmini.com",
   "base-uri 'self'",
   "form-action 'self' https://kauth.kakao.com https://sharer.kakao.com https://accounts.google.com https://www.googletagmanager.com",
-].join('; ');
+];
+const CSP_DIRECTIVES = CSP_PARTS.join('; ');
+
+/* ── CSP Report-Only 초안 (2026-09-07) ──────────────────────────────────────
+ * ⛔ 차단하지 않는다. 보고만 받는다. 집행 정책(Content-Security-Policy)은 위 그대로다.
+ *
+ * 무엇을 재는가 — «unsafe-inline·unsafe-eval 을 빼고 nonce 로 가면 무엇이 깨지는가».
+ * 호스트 허용목록은 «그대로 둔다». 한 번에 두 축을 조이면 보고서를 읽어도 원인을 못 가린다.
+ *
+ * ⚠️ 지금까지 nonce 는 «만들어 놓고 아무도 안 읽는» 값이었다 — applySecurityHeaders 가
+ *    매 요청 생성해 x-nonce 헤더로 내보냈지만 소비처가 src 전체에서 0건이었고(실측),
+ *    집행 CSP 에도 실리지 않았다. 그 nonce 를 여기서 «처음으로» 실제로 쓴다.
+ * ⚠️ Next 가 Report-Only 헤더의 nonce 를 자기 스크립트에 붙여 주는지는 확정하지 않았다.
+ *    안 붙이면 프레임워크 스크립트까지 보고서에 뜬다 — 그 «잡음의 양» 자체가 1주 수집의
+ *    판독거리다. 지금 추측으로 정책을 좁히지 않는다.
+ * ⛔ report-uri 는 폐기 예정 규격이지만 아직 가장 널리 먹는다. report-to 와 «둘 다» 낸다.
+ */
+function cspReportOnly(nonce: string): string {
+  const parts = CSP_PARTS.map((d) =>
+    d.startsWith('script-src ')
+      ? d.replace(" 'unsafe-inline'", '').replace(" 'unsafe-eval'", '')
+           .replace("script-src 'self'", `script-src 'self' 'nonce-${nonce}'`)
+      : d,
+  );
+  parts.push('report-uri /api/csp-report', 'report-to csp-endpoint');
+  return parts.join('; ');
+}
 
 /** 보안 헤더 일괄 적용 */
 function applySecurityHeaders(response: NextResponse) {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   response.headers.set('Content-Security-Policy', CSP_DIRECTIVES);
   response.headers.set('x-nonce', nonce);
+  // 차단 0 — 수집만. 1주 뒤 판독하고 그때 집행 정책을 옮길지 정한다.
+  response.headers.set('Content-Security-Policy-Report-Only', cspReportOnly(nonce));
+  response.headers.set('Reporting-Endpoints', 'csp-endpoint="/api/csp-report"');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');

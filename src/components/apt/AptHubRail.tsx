@@ -10,6 +10,7 @@
 // /apt/[id] 의 SiteDetailRail 과 같은 패턴이다. 레일은 페이지가 소유한다.
 
 import Link from 'next/link';
+import { KR_REGIONS_17 } from '@/lib/region-storage';
 import { aptHref, type AptHubItem } from '@/lib/apt/hub';
 import { formatComplexName } from '@/lib/apt/subscription-status';
 import { rowStatusChip } from '@/lib/apt/subscription-badge';
@@ -90,7 +91,16 @@ export default function AptHubRail({
       <div className="kd-rail-panel">
         <h2>바로가기</h2>
         <Link href="/apt/diagnose">청약 가점 계산기</Link>
-        <Link href="/apt/ranking">청약 경쟁률 랭킹</Link>
+        {/* ⛔ 2026-09-07 — `/apt/ranking` «맨 경로» 는 페이지가 없다. 라우트는
+            `/apt/ranking/[region]/[category]` 뿐이라 이 링크는 프로덕션에서도 404 였다
+            (사이트맵은 그 하위 76조합을 정상으로 내보내고 있었으므로 기능은 살아 있다 —
+            깨진 건 이 «입구» 하나다).
+            그래서 실재하는 경로로 깊게 건다. ⚠️ 「전국」에는 랭킹 허브가 없다(404 실측) —
+            17 시도일 때만 그린다(DS_RULES#5-4 · 조건부는 조건부).
+            ⛔ 맨 경로에 허브 페이지를 새로 만드는 것은 별건이다 — 새 색인 표면이 생긴다. */}
+        {(KR_REGIONS_17 as readonly string[]).includes(region) && (
+          <Link href={`/apt/ranking/${encodeURIComponent(region)}/subscription`}>청약 경쟁률 랭킹</Link>
+        )}
         <Link href="/apt/unsold">미분양 현황</Link>
         {/* ⛔ H6-2 — 「분양 지도」 바로가기 제거. H5-2 에서 [목록|지도] 토글을 내렸는데
             레일 링크가 남아 「지도가 이 사이트의 기능」이라고 계속 말하고 있었다.
