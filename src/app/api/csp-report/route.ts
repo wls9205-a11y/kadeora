@@ -30,6 +30,9 @@ export const dynamic = 'force-dynamic';
 const MAX_LOGGED = 200;
 let logged = 0;
 let dropped = 0;
+/** 아는 형태가 아닌 본문을 원문으로 남기는 상한 — 진단용이라 훨씬 낮게 잡는다. */
+const MAX_UNPARSED = 20;
+let unparsed = 0;
 
 type Violation = {
   directive?: string;
@@ -84,6 +87,21 @@ export async function POST(req: NextRequest) {
     }
 
     const items = parsed ? normalize(parsed) : [];
+
+    // ⚠️ 자가진단 — 본문은 왔는데 «아는 형태가 아니면» 원문을 잘라서 한 번 남긴다.
+    //    2026-09-07 실측: 실제 브라우저가 보낸 POST 가 204 를 받고도 보고 줄을 남기지
+    //    않았다(위 두 분기에 안 걸렸다). 이게 없으면 1주 수집이 «빈손인데 왜 빈손인지
+    //    모르는» 상태로 끝난다. 상한을 따로 두어 잡음이 로그를 먹지 않게 한다.
+    if (items.length === 0 && body.trim().length > 0 && unparsed < MAX_UNPARSED) {
+      unparsed++;
+      console.warn('[CSP_REPORT_UNPARSED]', JSON.stringify({
+        ct: req.headers.get('content-type')?.slice(0, 60),
+        len: raw.length,
+        head: body.slice(0, 400),
+        n: unparsed,
+      }));
+    }
+
     for (const v of items) {
       if (logged >= MAX_LOGGED) {
         dropped++;
@@ -110,7 +128,7 @@ export async function POST(req: NextRequest) {
 /** GET 은 수집 대상이 아니다. 존재만 알리고 끝낸다(디버깅용). */
 export async function GET() {
   return NextResponse.json(
-    { ok: true, mode: 'report-only', logged, dropped, max: MAX_LOGGED },
+    { ok: true, mode: 'report-only', logged, dropped, unparsed, max: MAX_LOGGED },
     { headers: { 'Cache-Control': 'no-store' } },
   );
 }
