@@ -69,12 +69,16 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
     const staticPaths = [
       // ⛔ A4 — '/feed'(→/apt 302) 와 '/discuss'(noindex) 를 정적 항목에서 뺐다.
       //    302·noindex 를 사이트맵에 제출하면 「차단된 URL 제출」 경고가 뜬다.
-      '', '/hot', '/stock', '/apt', '/blog', '/about',
-      '/guide', '/search', '/faq', '/terms', '/privacy', '/refund', '/shop',
+      // ⛔ AD-4(2026-09-07) — '/hot' · '/shop' · '/grades' 를 뺐다. 그 셋은 noindex 다.
+      //    사이트맵은 「이걸 색인해 달라」는 요청이라, noindex 를 걸어 놓고 여기 남기면
+      //    크롤러에게 앞뒤가 다른 말을 하는 셈이고 크롤 예산만 샌다.
+      //    ⚠️ 라우트는 살아 있다. 직접 주소로는 그대로 들어간다.
+      '', '/stock', '/apt', '/blog', '/about',
+      '/guide', '/search', '/faq', '/terms', '/privacy', '/refund',
       // s274: '/apt/map' 과 '/apt/data' 는 robots.txt 에서 Disallow (s235 dead route) 인데
       // 사이트맵에는 남아 있어 "차단된 URL 을 제출" 경고가 뜬다. 사이트맵에서 제외.
       // (사용자용 링크는 유지 — Disallow 는 크롤러에만 적용된다.)
-      '/grades', '/apt/diagnose', '/apt/complex', '/apt/redev', '/stock/compare', '/blog/series',
+      '/apt/diagnose', '/apt/complex', '/apt/redev', '/stock/compare', '/blog/series',
       '/stock/data', '/stock/search', '/stock/dividend', '/stock/movers', '/stock/themes',
       '/stock/market/kospi', '/stock/market/kosdaq', '/stock/market/nyse', '/stock/market/nasdaq',
       '/stock/short-selling', '/stock/signals',

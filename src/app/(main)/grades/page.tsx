@@ -10,6 +10,12 @@ export const metadata: Metadata = {
   title: '회원 등급 안내',
   description: '카더라 회원 등급 시스템 — 새싹부터 카더라신까지 10단계. 활동 포인트, 등급별 혜택, 등업 조건을 확인하세요.',
   alternates: { canonical: SITE_URL + '/grades' },
+  // ⛔ AD-4(2026-09-07) — 색인에서 내린다. 라우트·화면·상품 로직은 그대로 두는
+  //    «가역» 조치다(존폐 2단은 Node 판정). follow: true 인 것이 핵심 —
+  //    robots.txt 로 크롤을 막으면 크롤러가 이 noindex 를 «읽지도 못한다»(S8 교훈).
+  //    사유: 커뮤니티 시대의 게이미피케이션(10단계 등급)이다. 지금 제품이
+  //    검색으로 데려오고 싶은 화면이 아니다.
+  robots: { index: false, follow: true },
   openGraph: {
     title: '카더라 회원 등급 시스템',
     description: '새싹부터 카더라신까지 10단계 등급 안내',

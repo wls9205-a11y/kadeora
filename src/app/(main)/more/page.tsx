@@ -25,9 +25,10 @@ const GROUPS: Group[] = [
     eyebrow: 'COMMUNITY — 사람들이 쓰는 글',
     items: [
       /* ⛔ '/feed' 항목 제거 — 잡담 피드 영구 폐쇄(Node 판정 2026-08-31).
-         ⚠️ '/hot'·'/discuss' 는 «남긴다» — 폐쇄 대상은 잡담 목록이고 그 둘은 별 판정이다.
-            같이 지우면 「접두가 닮았다」로 산 것을 죽이는 삭제 함정 ①이다. */
-      { href: '/hot', label: '이번주 HOT', sub: '많이 읽힌 글 모아보기' },
+         위에 있던 「'/hot' 은 남긴다 — 그 둘은 별 판정이다」라는 유보를 AD-4 가 «푼다».
+         AD-4(2026-09-07)가 바로 그 별 판정이었고, /hot 은 noindex + 진입 링크 회수로
+         갔다(라우트는 존치). '/discuss' 는 여전히 별건이라 그대로 남긴다 —
+         「접두가 닮았다」로 산 것을 죽이지 않는다는 원칙은 유효하다. */
       { href: '/discuss', label: '라운지 토론', sub: 'A vs B 투표·토론' },
       { href: '/search', label: '통합 검색', sub: '글·종목·단지 한번에' },
     ],
@@ -79,7 +80,9 @@ const GROUPS: Group[] = [
       { href: '/settings/interests', label: '관심사 설정', sub: '맞춤 피드 설정' },
       { href: '/attendance', label: '출석 체크', sub: '매일 포인트 적립' },
       { href: '/premium', label: '프리미엄', sub: '유료 기능 안내' },
-      { href: '/shop', label: '상점', sub: '포인트 사용처' },
+      // ⛔ AD-4(2026-09-07) — '/shop' 항목을 뺐다(noindex 전환). 라우트는 살아 있다.
+      //    ⚠️ '/premium' 은 남긴다 — 그 라우트는 redirect('/shop') 이라 링크를 지우면
+      //       사용자가 유료 안내로 갈 길이 사라진다. 존폐는 Node 판정 몫이다.
     ],
   },
   {
@@ -88,7 +91,7 @@ const GROUPS: Group[] = [
     items: [
       { href: '/guide', label: '가이드북', sub: '이용 방법 안내' },
       { href: '/guide#install', label: '앱 설치 가이드', sub: '홈화면에 추가하기' },
-      { href: '/grades', label: '등급 안내', sub: '등급별 혜택' },
+      // ⛔ AD-4(2026-09-07) — '/grades' 항목을 뺐다(noindex 전환). 라우트는 살아 있다.
       { href: '/about', label: '서비스 소개', sub: '카더라 소개' },
       { href: '/faq', label: 'FAQ', sub: '자주 묻는 질문' },
       { href: '/consultant', label: '전문가 상담', sub: '상담 신청 안내' },

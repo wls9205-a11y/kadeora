@@ -11,7 +11,13 @@ export const metadata: Metadata = {
   title: '오늘의 HOT',
   description: '오늘 가장 인기있는 카더라 게시글. 실시간 추천수 기반 인기 글을 확인하세요.',
   alternates: { canonical: SITE_URL + '/hot' },
-  robots: { index: true, follow: true, 'max-image-preview': 'large' as const, 'max-snippet': -1 as const },
+  // ⛔ AD-4(2026-09-07) — 색인에서 내린다. 라우트·화면·상품 로직은 그대로 두는
+  //    «가역» 조치다(존폐 2단은 Node 판정). follow: true 인 것이 핵심 —
+  //    robots.txt 로 크롤을 막으면 크롤러가 이 noindex 를 «읽지도 못한다»(S8 교훈).
+  //    사유: 합성 view_count·likes 로 정렬한 「실시간 인기 게시글」을 색인시키고
+  //    있었다 — view_count 사용자 노출 금지(증분6)와 「인기」 라벨 금지(8/26)를
+  //    동시에 어긴다. 게다가 영구 폐쇄된 피드(posts)의 부속 표면이다.
+  robots: { index: false, follow: true },
   openGraph: {
     title: '오늘의 HOT',
     description: '실시간 인기 게시글 TOP',

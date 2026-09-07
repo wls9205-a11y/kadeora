@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Home, TrendingUp, Building2, Bell, PenSquare, LogOut, FileText, MoreHorizontal, Settings,
-  BarChart3, Flame, Library, Calculator, BellRing, LayoutGrid, MapPin, Lightbulb, CalendarCheck } from 'lucide-react';
+  BarChart3, Library, Calculator, BellRing, LayoutGrid, MapPin, Lightbulb, CalendarCheck } from 'lucide-react';
 import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
 import { haptic } from '@/lib/haptic';
@@ -33,8 +33,9 @@ type MoreItem = { href: string; Icon: React.ComponentType<{ size?: number; style
 const MORE_ITEMS: MoreItem[] = [
   // ⛔ A4 — '/feed'(→/apt 302)·'/discuss'(접음) 항목을 뺐다. 라우트는 살아 있다.
   { href: '/daily',                  Icon: BarChart3,      label: '데일리 리포트', sub: '매일 시장 요약' },
-  // ⛔ H6-5 — 「인기」는 순위를 주장하는 라벨이다. 그 순위를 만들 신호가 없다.
-  { href: '/hot',                    Icon: Flame,          label: '많이 본',       sub: '조회 많은 글' },
+  // ⛔ AD-4(2026-09-07) — '/hot' 항목을 뺐다(noindex 전환). 라우트는 살아 있다.
+  //    H6-5 가 「인기」→「많이 본」으로 라벨을 고쳤던 그 항목이다 — 라벨을 고쳐도
+  //    순위를 만들 신호가 없다는 문제는 그대로였다.
   { href: '/blog/series',            Icon: Library,        label: '시리즈',        sub: '주제별 연재' },
   { href: '/calc',                   Icon: Calculator,     label: '계산기',        sub: '부동산·세금' },
   { href: '/notifications/settings', Icon: BellRing,       label: '알림 설정',     sub: '푸시·이메일' },

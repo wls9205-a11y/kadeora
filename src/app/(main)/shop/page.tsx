@@ -9,7 +9,13 @@ export const metadata: Metadata = {
   title: '카더라 상점 — 프로 멤버십 · 확성기 · 아이템',
   description: `카더라 프로 멤버십 월 ${PRO_PRICING.monthly.label} — 관심 종목 무제한, AI 분석 주 5건, 급등락 알림, 청약 D-7 알림, 단지 비교, CSV 다운로드. 확성기로 내 글을 전체 유저에게 노출.`,
   alternates: { canonical: `${SITE}/shop` },
-  robots: { index: true, follow: true },
+  // ⛔ AD-4(2026-09-07) — 색인에서 내린다. 라우트·화면·상품 로직은 그대로 두는
+  //    «가역» 조치다(존폐 2단은 Node 판정). follow: true 인 것이 핵심 —
+  //    robots.txt 로 크롤을 막으면 크롤러가 이 noindex 를 «읽지도 못한다»(S8 교훈).
+  //    사유: 사망한 피드에 글을 띄우는 확성기를 팔고 있고(구매가 성립하면 사고),
+  //    멤버십은 토스가 미가동이다. 파는 물건이 동작하지 않는 페이지를 색인시키지
+  //    않는다. ⚠️ 상품·가격·문구는 한 글자도 건드리지 않았다.
+  robots: { index: false, follow: true },
   openGraph: {
     title: '카더라 상점 | 프로 멤버십 · 확성기',
     description: '주식+부동산 올인원 프리미엄. 관심 종목 무제한 · AI 분석 · 급등락 알림.',
