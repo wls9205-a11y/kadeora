@@ -1,3 +1,15 @@
+## 2026-09-07 — RLS 9표 마이그레이션 사후 동봉 (세션 A 직접 집행분)
+
+세션 A 가 프로덕션 DB 에 직접 건 `ENABLE ROW LEVEL SECURITY` 9건을
+`supabase/migrations/20260907_rls_backup_tables.sql` 로 동봉했다. ⛔ DB 재실행 없음 — 이미 적용됐다.
+DB 에만 있고 마이그레이션에 없는 변경은 다음 사람이 스키마를 재구성할 때 조용히 사라진다.
+
+동봉 전 두 방향으로 확인했다 — ① `list_tables` 실물에서 9표 전부 `rls_enabled=true`
+(`leads`·`profiles` 도 true, 세션 A 의 「무결」과 정합) ② src 참조는 `ad_adgroups` 하나뿐이고
+그 한 곳이 `getSupabaseAdmin`(service_role, RLS 우회)이라 정책 없이 켜도 앱 경로가 안 깨진다.
+⛔ 나중에 「0행이 나온다」고 허용 정책을 붙이지 말 것 — 필요한 건 정책이 아니라 그 경로가
+service_role 인지 확인이다. 파일 머리주석에 같은 경고를 박았다.
+
 ## 2026-09-07 — 연장집행 Q2: ⓑ 잔여 30행 OFF (기승인분) · 오늘 누적 OFF 110
 
 갈림 ⓑ(9/6 「승인분」 32행 중 30행 미집행) 종결. 세션 A 판정대로 «새 `!` 이 아니라 기승인 잔여 집행».
