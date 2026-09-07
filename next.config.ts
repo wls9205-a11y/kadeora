@@ -193,6 +193,29 @@ const nextConfig: NextConfig = {
        * ⚠️ /feed.xml 은 다른 것이다 — source 를 정확히 "/feed" 로 한정한다. */
       { source: "/feed", destination: "/apt", permanent: true },
 
+      /* ⛔ 구표면 «영구» 폐쇄 (Node 판정 2026-09-07 — 「폐쇄」·「내림」)
+       *
+       * AD-4(9/7 오전)가 noindex + 진입 링크 회수까지 «가역» 으로 해 뒀고, 이제 라우트를 접는다.
+       * 폐쇄 사유는 각 표면마다 다르다:
+       *   /hot            — 합성 view_count·likes 정렬의 「인기 게시글」. 영구 폐쇄된 피드의 부속.
+       *   /shop·megaphone — 사망한 피드에 글을 띄우는 확성기를 팔고 있었다(구매 성립 시 사고).
+       *   /grades         — 커뮤니티 시대 게이미피케이션.
+       *   /premium        — 「내림」. 유지하려면 전자상거래 표기(상호·사업자번호·통신판매업신고)가
+       *                     선행 의무인데 현재 0건이다. 판매 표면을 접는 쪽을 골랐다.
+       *
+       * ⚠️ /hot 만 /apt 로 보낸다 — 그 표면의 독자는 「단지 소식을 보러 온 사람」에 가깝다.
+       *    나머지는 대체할 화면이 없어서 홈으로 보낸다. 없는 곳으로 보내느니 홈이 정직하다.
+       * ⚠️ permanent: true «의도된 301» 이다. 되살릴 계획이 없으므로 검색엔진이 통합하는 것이
+       *    원하는 결과다. 되살리기로 하면 이 항목을 지우고 라우트를 복원하면 된다(git revert).
+       * ⛔ 하위 경로는 열지 않는다 — source 를 정확한 경로로 «한정» 한다.
+       *    /shop/megaphone 을 따로 적은 것이 그 이유다(:path* 를 쓰지 않는다).
+       * ⛔ feed·discuss·points·등급 «데이터» 는 무접촉이다. 접은 것은 화면뿐이다. */
+      { source: "/hot", destination: "/apt", permanent: true },
+      { source: "/shop/megaphone", destination: "/", permanent: true },
+      { source: "/shop", destination: "/", permanent: true },
+      { source: "/grades", destination: "/", permanent: true },
+      { source: "/premium", destination: "/", permanent: true },
+
       { source: "/api/stock-debug", destination: "/", permanent: true },
       { source: "/api/stock-debug/:path*", destination: "/", permanent: true },
       { source: "/rss", destination: "/feed.xml", permanent: true },

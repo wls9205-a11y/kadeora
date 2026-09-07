@@ -4,7 +4,35 @@ import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 const TOSS_SECRET_KEY = process.env.TOSS_SECRET_KEY || '';
 
-export async function POST(request: NextRequest) {
+/* ⛔ 봉인 (2026-09-07 · 지시서_CLOSE_20260907 CL-1③)
+ *
+ * 이 POST 는 계정의 «유일한 구매 성립 지점» 이다 — 토스 결제를 confirm 하고
+ * 프리미엄 30일 활성화·닉네임 변경권 지급까지 여기서 한다.
+ * 그 구매를 시작하던 표면(/shop · /shop/megaphone · /premium)이 오늘 301 로 접혔다.
+ * 표면이 없어졌는데 성립 지점이 열려 있으면, 남은 주소를 직접 두드리는 요청 하나로
+ * «되돌리기 어려운» 결제가 성립한다. 그래서 문을 닫는다.
+ *
+ * ⛔ 삭제하지 않는다. 410 으로 «없어졌음» 을 명시적으로 말한다 —
+ *    404 는 「원래 없었다」고, 500 은 「고장났다」고 말한다. 둘 다 사실이 아니다.
+ * ⚠️ GET(아래)은 그대로 둔다. 조회성이고, 지난 결제 내역을 못 보게 만들 이유가 없다.
+ * ⚠️ 이 문은 productId 를 가리지 않는다 — premium_badge·premium_monthly 뿐 아니라
+ *    nickname_change 도 같이 막힌다. 그 상품을 파는 화면도 /shop 이었으므로 정합한다.
+ * ⚠️ 되살리려면: 이 블록을 지우기 «전에» 전자상거래 표기(상호·사업자번호·통신판매업신고)를
+ *    먼저 세운다. /premium 을 내린 이유가 그 표기 부재였다.
+ */
+export async function POST(_request: NextRequest) {
+  return NextResponse.json(
+    {
+      success: false,
+      error: '판매가 종료된 상품입니다.',
+      code: 'SALES_CLOSED',
+    },
+    { status: 410, headers: { 'Cache-Control': 'no-store' } },
+  );
+}
+
+/* eslint-disable-next-line no-unused-vars -- 봉인 뒤의 원본. 되살릴 때 이 함수가 근거다. */
+async function _sealed_POST(request: NextRequest) {
   const rl = await rateLimit(request); if (!rl) return rateLimitResponse();
   try {
     const body = await request.json();

@@ -150,7 +150,10 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
                   ⚠️ 푸터는 «전 페이지에» 실리는 내부 링크다. 여기 남겨 두면 noindex 를
                      걸어 놓고도 크롤러를 계속 그리로 보내게 된다 — 크롤 예산이 샌다.
                   라우트는 살아 있다. 직접 주소로는 들어갈 수 있다. */}
-              <a href="/premium" style={{color:'var(--text-secondary)',textDecoration:'none'}}>프리미엄</a>
+              {/* ⛔ 2026-09-07 — '/premium' 링크를 뺐다. 그 라우트는 오늘 접혀 «홈으로 301» 된다.
+                  「프리미엄」이라 적고 홈으로 보내면 카피가 동작을 속인다(DS_RULES#5-3).
+                  AD-4 때는 «/premium → /shop 리다이렉트» 가 살아 있어서 이 링크를 남겼는데,
+                  그 근거가 오늘 사라졌다 — 남긴 이유가 없어지면 링크도 같이 회수한다. */}
               <a href="/press" style={{color:'var(--text-secondary)',textDecoration:'none'}}>보도자료</a>
               <a href="/about" style={{color:'var(--text-secondary)',textDecoration:'none'}}>소개</a>
             </nav>

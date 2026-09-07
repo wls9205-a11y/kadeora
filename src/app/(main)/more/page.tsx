@@ -79,10 +79,10 @@ const GROUPS: Group[] = [
       { href: '/settings/region', label: '우리동네 설정', sub: '지역 설정·변경' },
       { href: '/settings/interests', label: '관심사 설정', sub: '맞춤 피드 설정' },
       { href: '/attendance', label: '출석 체크', sub: '매일 포인트 적립' },
-      { href: '/premium', label: '프리미엄', sub: '유료 기능 안내' },
-      // ⛔ AD-4(2026-09-07) — '/shop' 항목을 뺐다(noindex 전환). 라우트는 살아 있다.
-      //    ⚠️ '/premium' 은 남긴다 — 그 라우트는 redirect('/shop') 이라 링크를 지우면
-      //       사용자가 유료 안내로 갈 길이 사라진다. 존폐는 Node 판정 몫이다.
+      // ⛔ 2026-09-07 — '/shop'(AD-4 · noindex) 에 이어 '/premium' 항목도 뺐다.
+      //    AD-4 는 「/premium → /shop 리다이렉트가 살아 있으니 유료 안내로 갈 길을
+      //    남긴다」고 적었는데, Node 판정(「내림」)으로 오늘 둘 다 접혔다. 갈 길 자체가
+      //    없어졌으므로 링크도 회수한다 — 없는 곳을 가리키는 메뉴를 남기지 않는다.
     ],
   },
   {

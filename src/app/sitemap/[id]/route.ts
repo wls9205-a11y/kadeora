@@ -82,7 +82,10 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       '/stock/data', '/stock/search', '/stock/dividend', '/stock/movers', '/stock/themes',
       '/stock/market/kospi', '/stock/market/kosdaq', '/stock/market/nyse', '/stock/market/nasdaq',
       '/stock/short-selling', '/stock/signals',
-      '/calc', '/press', '/glossary', '/premium', '/more',
+      // ⛔ 2026-09-07 — '/premium' 을 뺐다. 오늘 접혀 홈으로 301 된다.
+      //    301 되는 주소를 사이트맵에 남기면 크롤러에게 앞뒤가 다른 말을 하는 것이다
+      //    (AD-4 가 /hot·/shop·/grades 를 뺀 것과 같은 이유).
+      '/calc', '/press', '/glossary', '/more',
       // r4-P5-3: 주식 국내/해외 2분할
       '/stock/domestic', '/stock/overseas',
       // 지역별 재개발 SEO 페이지
