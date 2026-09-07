@@ -265,7 +265,7 @@ export default function SendModal({
               borderRadius: 6,
               cursor: busy ? 'wait' : 'pointer',
               background: 'var(--brand)',
-              color: '#fff',
+              color: 'var(--text-inverse)',
               border: '1px solid var(--brand)',
               opacity: busy ? 0.6 : 1,
             }}

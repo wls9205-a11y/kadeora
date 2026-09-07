@@ -290,7 +290,7 @@ function ChipGroup({
               borderRadius: 999,
               cursor: 'pointer',
               background: on ? 'var(--brand)' : 'transparent',
-              color: on ? '#fff' : 'var(--text-secondary)',
+              color: on ? 'var(--text-inverse)' : 'var(--text-secondary)',
               border: `1px solid ${on ? 'var(--brand)' : 'var(--border)'}`,
             }}
           >
@@ -325,7 +325,7 @@ function Toggle({
           borderRadius: 999,
           cursor: 'pointer',
           background: value ? 'var(--brand)' : 'transparent',
-          color: value ? '#fff' : 'var(--text-secondary)',
+          color: value ? 'var(--text-inverse)' : 'var(--text-secondary)',
           border: `1px solid ${value ? 'var(--brand)' : 'var(--border)'}`,
         }}
       >
@@ -340,7 +340,7 @@ function Toggle({
           borderRadius: 999,
           cursor: 'pointer',
           background: !value ? 'var(--brand)' : 'transparent',
-          color: !value ? '#fff' : 'var(--text-secondary)',
+          color: !value ? 'var(--text-inverse)' : 'var(--text-secondary)',
           border: `1px solid ${!value ? 'var(--brand)' : 'var(--border)'}`,
         }}
       >
@@ -358,7 +358,7 @@ function btnStyle(variant: 'primary' | 'default'): React.CSSProperties {
     borderRadius: 6,
     cursor: 'pointer',
     background: variant === 'primary' ? 'var(--brand)' : 'transparent',
-    color: variant === 'primary' ? '#fff' : 'var(--text-secondary)',
+    color: variant === 'primary' ? 'var(--text-inverse)' : 'var(--text-secondary)',
     border: `1px solid ${variant === 'primary' ? 'var(--brand)' : 'var(--border)'}`,
   };
 }

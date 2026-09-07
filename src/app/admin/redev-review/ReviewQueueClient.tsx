@@ -129,7 +129,7 @@ export default function ReviewQueueClient() {
               padding: '7px 14px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
               border: tab === t.key ? '1px solid var(--brand)' : '1px solid var(--border)',
               background: tab === t.key ? 'var(--brand)' : 'transparent',
-              color: tab === t.key ? '#fff' : 'var(--text-primary)',
+              color: tab === t.key ? 'var(--text-inverse)' : 'var(--text-primary)',
               fontSize: 'var(--fs-sm)', fontWeight: 600,
             }}
           >
@@ -221,7 +221,7 @@ export default function ReviewQueueClient() {
                       <button
                         disabled={busyId === item.id || item.site_options.length === 0}
                         onClick={() => act(item, 'approve')}
-                        style={{ flex: 1, minHeight: 44, borderRadius: 'var(--radius-sm)', border: 'none', background: item.site_options.length === 0 ? 'var(--bg-elevated)' : 'var(--brand)', color: item.site_options.length === 0 ? 'var(--text-tertiary)' : '#fff', fontWeight: 500, fontSize: 'var(--fs-sm)', cursor: item.site_options.length === 0 ? 'not-allowed' : 'pointer' }}
+                        style={{ flex: 1, minHeight: 44, borderRadius: 'var(--radius-sm)', border: 'none', background: item.site_options.length === 0 ? 'var(--bg-elevated)' : 'var(--brand)', color: item.site_options.length === 0 ? 'var(--text-tertiary)' : 'var(--text-inverse)', fontWeight: 500, fontSize: 'var(--fs-sm)', cursor: item.site_options.length === 0 ? 'not-allowed' : 'pointer' }}
                       >
                         맞음 — 시공사 선정 반영
                       </button>

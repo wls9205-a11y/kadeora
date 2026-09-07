@@ -139,7 +139,7 @@ export default function AlertsClient() {
             style={{
               ...btn,
               background: tab === t.key ? 'var(--brand)' : 'var(--bg-surface)',
-              color: tab === t.key ? '#fff' : 'var(--text-secondary)',
+              color: tab === t.key ? 'var(--text-inverse)' : 'var(--text-secondary)',
               border: `1px solid ${tab === t.key ? 'var(--brand)' : 'var(--border)'}`,
             }}
           >{t.label}</button>
@@ -239,7 +239,7 @@ export default function AlertsClient() {
               <button onClick={() => setConfirmAll(false)} style={btn}>취소</button>
               <button
                 onClick={archiveAll}
-                style={{ ...btn, background: 'var(--accent-red)', color: '#fff', border: '1px solid var(--accent-red)' }}
+                style={{ ...btn, background: 'var(--accent-red)', color: 'var(--text-inverse)', border: '1px solid var(--accent-red)' }}
               >모두 아카이브</button>
             </div>
           </div>

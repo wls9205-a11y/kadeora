@@ -121,7 +121,7 @@ export default function NotificationBell() {
               // ⚠️ #EF4444 위 흰 글씨는 3.76 으로 하한 미달이었다(9px 배지라 4.5 기준).
         //    기존 토큰 --accent-red(#991B1B)로 8.31. 새 토큰은 만들지 않았다.
         background: 'var(--accent-red)',
-              color: '#fff',
+              color: 'var(--text-inverse)',
               fontSize: 9,
               fontWeight: 500,
               display: 'flex',

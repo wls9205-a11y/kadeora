@@ -63,7 +63,7 @@ export default function KakaoMarketingClient() {
             borderRadius: 6,
             cursor: 'pointer',
             background: 'var(--brand)',
-            color: '#fff',
+            color: 'var(--text-inverse)',
             border: '1px solid var(--brand)',
           }}
         >

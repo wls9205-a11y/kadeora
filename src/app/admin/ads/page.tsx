@@ -94,10 +94,10 @@ export default async function AdminAds() {
               <div
                 key={label}
                 style={{
-                  border: '1px solid var(--border, #e5e7eb)',
+                  border: '1px solid var(--border)',
                   borderRadius: 'var(--radius-md, 12px)',
                   padding: 'var(--sp-3, 12px)',
-                  background: 'var(--bg-surface, #fff)',
+                  background: 'var(--bg-surface)',
                 }}
               >
                 <div style={{ fontSize: 'var(--fs-xs, 12px)', color: 'var(--text-muted, #6b7280)' }}>{label}</div>
@@ -126,7 +126,7 @@ export default async function AdminAds() {
             <div
               role="note"
               style={{
-                border: '1px solid var(--border, #e5e7eb)',
+                border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-md, 12px)',
                 padding: 'var(--sp-3, 12px)',
                 fontSize: 'var(--fs-sm, 13px)',
@@ -141,7 +141,7 @@ export default async function AdminAds() {
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm, 13px)' }}>
               <thead>
-                <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border, #e5e7eb)' }}>
+                <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border)' }}>
                   {['키워드', '현장', '노출', '클릭', '지출', '리드', '리드단가', '실 CPC'].map((h, i) => (
                     <th key={h} style={{ padding: '8px 6px', whiteSpace: 'nowrap', textAlign: i >= 2 ? 'right' : 'left' }}>
                       {h}

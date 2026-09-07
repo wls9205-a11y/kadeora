@@ -329,7 +329,7 @@ export default function AptCoverUploader() {
               marginTop: 12, minHeight: 44, padding: '0 18px',
               borderRadius: 'var(--radius-sm)', border: 'none',
               background: busy || !credit.trim() || !file ? 'var(--bg-sunken)' : 'var(--brand)',
-              color: busy || !credit.trim() || !file ? 'var(--text-tertiary)' : '#FFFFFF',
+              color: busy || !credit.trim() || !file ? 'var(--text-tertiary)' : 'var(--text-inverse)',
               fontSize: 13.5, fontWeight: 600,
               cursor: busy || !credit.trim() || !file ? 'not-allowed' : 'pointer',
             }}

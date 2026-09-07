@@ -60,7 +60,7 @@ export default function IssuePipelineSection({ data }: Props) {
           style={{
             marginLeft: 'auto', fontSize: 11, fontWeight: 500,
             padding: '6px 12px', borderRadius: 6, cursor: running ? 'wait' : 'pointer',
-            background: 'var(--brand)', color: '#fff', border: 'none',
+            background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none',
             opacity: running ? 0.6 : 1,
           }}
         >
