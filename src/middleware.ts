@@ -270,7 +270,13 @@ export async function middleware(request: NextRequest) {
       // 크론/웹훅은 제외 (Authorization 헤더로 인증)
       const isCron = pathname.startsWith('/api/cron/');
       const hasBearer = request.headers.get('authorization')?.startsWith('Bearer ');
-      if (!isCron && !hasBearer) {
+      // ⛔ CSP 보고는 «브라우저의 리포팅 계층» 이 보낸다 — Origin 이 null 로 오는 경로가
+      //    있어 이 검사에 걸린다(2026-09-07 실측: POST /api/csp-report 403 1건).
+      //    CSRF 는 「남의 세션으로 상태를 바꾸게 만드는 것」을 막는 방어인데 이 라우트는
+      //    바꿀 상태가 없다 — 로그만 남기고 204 로 닫으며, 들어온 내용은 이미 신뢰하지
+      //    않는 것으로 다룬다. 여기서 403 을 내면 «수집이 조용히 새는» 쪽 손해만 남는다.
+      const isCspReport = pathname === '/api/csp-report';
+      if (!isCron && !hasBearer && !isCspReport) {
         const origin = request.headers.get('origin');
         const host = request.headers.get('host');
         if (origin && host && !origin.includes(host) && !origin.includes('kadeora.app') && !origin.includes('localhost') && !origin.includes('tossmini.com')) {
