@@ -929,7 +929,7 @@ def cmd_relink(args):
                 if pc == old_url or mo == old_url:
                     hits.append({"group": name, "gid": gidv, "kid": k.get("nccKeywordId"),
                                  "keyword": k.get("keyword"), "old": pc or mo,
-                                 "new": want[old]})
+                                 "new": want[old], "_obj": k})
                     break
         time.sleep(0.15)
 
@@ -949,19 +949,32 @@ def cmd_relink(args):
     with open(bak, "w", newline="", encoding="utf-8-sig") as f:
         w = csv.DictWriter(f, fieldnames=["group", "gid", "kid", "keyword", "old", "new"])
         w.writeheader()
-        for h in hits: w.writerow(h)
+        for h in hits:
+            w.writerow({k: v for k, v in h.items() if not k.startswith("_")})
     print("되돌림용 백업 저장: %s" % bak)
 
     if not args.live:
         print("\n[예행] 아무것도 바꾸지 않았습니다. 실제로 바꾸려면 --live 를 붙이세요.")
         return
 
+    # ⚠️ 이 API 는 «부분 body» 를 받지 않는다. 2026-09-08 실측:
+    #      [{nccKeywordId, links}]            → 500 code 1005
+    #      GET 으로 받은 «전체 객체» + links   → 200 이고 실제로 바뀐다
+    #    읽기 전용 필드(품질지수·심사상태·시각)는 빼야 한다.
+    # ⚠️ 그리고 이 API 는 «모르는 fields 값을 줘도 200» 이다 — fields=zzz 로 확인했다.
+    #    그래서 200 을 성공으로 읽지 않는다. 아래에서 재조회로 «실제로 바뀌었나» 를 본다
+    #    (cmd_off 가 세운 규율 그대로다).
+    READONLY = ("adRelevanceScore", "expectedClickScore", "nccQi", "editTm", "regTm",
+                "status", "statusReason", "inspectStatus", "delFlag")
     ok = fail = 0
-    for i in range(0, len(hits), 50):
-        chunk = hits[i:i + 50]
-        body = [{"nccKeywordId": h["kid"],
-                 "links": {"pc": {"final": h["new"]}, "mobile": {"final": h["new"]}}}
-                for h in chunk]
+    for i in range(0, len(hits), 20):
+        chunk = hits[i:i + 20]
+        body = []
+        for h in chunk:
+            obj = {k: v for k, v in (h.get("_obj") or {}).items() if k not in READONLY}
+            obj["nccKeywordId"] = h["kid"]
+            obj["links"] = {"pc": {"final": h["new"]}, "mobile": {"final": h["new"]}}
+            body.append(obj)
         try:
             call("PUT", "/ncc/keywords", params={"fields": "links"}, body=body)
             ok += len(chunk)
@@ -969,7 +982,27 @@ def cmd_relink(args):
             fail += len(chunk)
             print("  실패 %d건 %s" % (len(chunk), str(e)[:200]))
         time.sleep(0.3)
-    print("\n[실제] 교체 성공 %d / 실패 %d" % (ok, fail))
+    print("\n[실제] 요청 성공 %d / 실패 %d" % (ok, fail))
+
+    # ── 실행 후 재조회. 「요청이 200 이었다」가 아니라 「실제로 바뀌었나」를 본다 ──
+    landed = miss = 0
+    for i in range(0, len(hits), 50):
+        ids = [h["kid"] for h in hits[i:i + 50]]
+        try:
+            got = call("GET", "/ncc/keywords", params={"ids": ",".join(ids)}) or []
+        except Exception as e:
+            print("  재조회 실패 %s" % str(e)[:120]); continue
+        byid = {g.get("nccKeywordId"): g for g in got}
+        for h in hits[i:i + 50]:
+            u = ((byid.get(h["kid"], {}).get("links") or {}).get("pc") or {}).get("final") or ""
+            if u == h["new"]:
+                landed += 1
+            else:
+                miss += 1
+                print("    미반영 %-24s → %s" % (h["keyword"][:24],
+                      unquote(u.split("/apt/")[-1]) if u else "(빈값)"))
+        time.sleep(0.2)
+    print("실제 반영 %d / 미반영 %d" % (landed, miss))
     print("다음: sa.py verify 로 전수 대조")
 
 

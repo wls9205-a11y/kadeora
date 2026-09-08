@@ -226,6 +226,19 @@ const nextConfig: NextConfig = {
       { source: "/blog/samik-beach-real-transaction-price-analysis-2023-2025", destination: "/blog/samik-beach-redev-complete-guide-2026", permanent: true },
       { source: "/blog/samik-beach-reconstruction-2026-stage3-progress", destination: "/blog/samik-beach-redev-complete-guide-2026", permanent: true },
       { source: "/blog/samik-beach-contribution-simulation-spoke-c1", destination: "/blog/samik-beach-redev-complete-guide-2026", permanent: true },
+
+      /**
+       * [CV-N N-0] 이중 레코드 통합 (2026-09-08).
+       *
+       * 「아크로 라로체」는 «이름이 촉진3, 별칭이 촉진1» 인 오표기 레코드였고(dong 도 촉진1의 부암동),
+       * 「부산 우동1 재건축」은 「우동1 재건축」의 이중이었다(별칭이 ["부산","재건축"] 조각).
+       *
+       * ⚠️ 광고 착지 17건을 «먼저» 정본으로 옮긴 뒤에 이 리다이렉트를 켠다. 순서를 뒤집으면
+       *    그동안 광고 트래픽이 리다이렉트를 한 번 경유한다.
+       * ⚠️ permanent: true 는 Next 에서 308 이다. 검색엔진이 정본으로 통합하는 것이 의도다.
+       */
+      { source: "/apt/아크로-라로체", destination: "/apt/시민공원주변재정비촉진3구역-재개발", permanent: true },
+      { source: "/apt/부산-우동1-재건축", destination: "/apt/우동1-재건축", permanent: true },
     ];
   },
 };
