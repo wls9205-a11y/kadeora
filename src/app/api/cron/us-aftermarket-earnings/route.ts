@@ -5,6 +5,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { AI_MODEL_SONNET, ANTHROPIC_VERSION } from '@/lib/constants';
 import { sanitizeAiContent, ensureDisclaimer } from '@/lib/ai/sanitize-investment-content';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -46,7 +47,7 @@ EPS 컨센서스: ${event.eps_consensus ?? '정보 없음'}
 
 투자 권유 없이 팩트 기반으로 800자 내외 작성. h2 소제목 3개.`;
 
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -58,7 +59,7 @@ EPS 컨센서스: ${event.eps_consensus ?? '정보 없음'}
             max_tokens: 1500,
             messages: [{ role: 'user', content: prompt }],
           }),
-        });
+        }, { caller: 'us-aftermarket-earnings', category: 'stock' });
 
         apiCalls++;
         const data = await res.json();

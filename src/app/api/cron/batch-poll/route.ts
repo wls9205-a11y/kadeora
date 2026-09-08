@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { anthropicPollFetch } from '@/lib/llm/gateway';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -17,7 +18,7 @@ export const maxDuration = 300;
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
 
 async function fetchBatchStatus(batchId: string) {
-  const res = await fetch(`https://api.anthropic.com/v1/messages/batches/${batchId}`, {
+  const res = await anthropicPollFetch(`https://api.anthropic.com/v1/messages/batches/${batchId}`, {
     headers: { 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
   });
   if (!res.ok) return null;

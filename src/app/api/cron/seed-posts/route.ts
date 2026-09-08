@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getFreshnessContext } from '@/lib/blog/freshness-context';
 import { BUULGYEONG_REGIONS, isBuulgyeongRegion } from '@/lib/region/buulgyeong';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 /**
  * seed-posts 크론 v4 — 다양하고 자연스러운 피드 게시글
@@ -493,7 +494,7 @@ async function generateWithAI(prompt: string, tone: string): Promise<{ title: st
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return null;
   try {
-    const res = await fetch(ANTHROPIC_API, {
+    const res = await anthropicFetch(ANTHROPIC_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
@@ -516,7 +517,7 @@ async function generateWithAI(prompt: string, tone: string): Promise<{ title: st
 ${getFreshnessContext()}`,
         messages: [{ role: 'user', content: prompt }],
       }),
-    });
+    }, { caller: 'seed-posts', category: 'infra' });
     if (!res.ok) return null;
     const data = await res.json();
     const text = data.content?.[0]?.text?.trim();

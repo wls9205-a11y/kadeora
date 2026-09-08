@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import * as cheerio from 'cheerio';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -83,7 +84,7 @@ JSON으로만 응답:
 {"name":"단지명 또는 null","region":"시도 (서울/부산/...)","sigungu":"시군구","dong":"동","total_units":세대수 또는 null,"lifecycle_hint":"pre_announcement"}`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -96,7 +97,7 @@ JSON으로만 응답:
         messages: [{ role: 'user', content: prompt }],
       }),
       signal: AbortSignal.timeout(15000),
-    });
+    }, { caller: 'builder-watch', category: 'realestate' });
     if (!res.ok) return null;
     const data = await res.json();
     const responseText = data?.content?.[0]?.text || '';

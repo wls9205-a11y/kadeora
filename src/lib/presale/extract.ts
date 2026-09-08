@@ -17,8 +17,9 @@
  * ⚠️ 어떤 입력에도 «던지지 않는다». 소스 하나의 실패가 크론 전체를 죽이면
  *    그날 다른 19개 소스의 신규 현장이 통째로 사라진다.
  */
-import { badJson, callFailed, fetchJson, noResult, ok, type Outcome } from '@/lib/net/outcome';
-import { logAnthropicUsage } from '@/lib/llm/usage-tracker';
+import { badJson, callFailed, noResult, ok, type Outcome } from '@/lib/net/outcome';
+// ⚠️ 관문 경유 — 원장·쿼터가 한 곳에 모인다(LB-1).
+import { anthropicJson } from '@/lib/llm/gateway';
 import { canonicalBuilder, parseUnits } from '@/lib/verify/builders';
 import { parseAddress } from '@/lib/builder-sites/parse';
 import type { PresaleSource } from '@/lib/builder-sites/presale-registry';
@@ -208,10 +209,9 @@ export async function extractCards(
 페이지 본문:
 ${body}`;
 
-  const started = Date.now();
   // ⚠️ 응답 «전체» 를 받는다. text 만 뽑으면 usage 가 같이 버려지고,
   //    그러면 첫 주 비용을 «추정» 으로만 말하게 된다(Node 판정 ②).
-  const call = await fetchJson<any>(
+  const call = await anthropicJson<any>(
     'https://api.anthropic.com/v1/messages',
     {
       method: 'POST',
@@ -223,18 +223,14 @@ ${body}`;
         messages: [{ role: 'user', content: user }],
       }),
     },
+    {
+      caller: 'builder-presale-crawl',
+      category: 'realestate',
+      metadata: { source_key: src.key, kind: src.kind, input_chars: body.length, truncated: text.length > MAX_INPUT_CHARS },
+    },
     { timeoutMs: 90_000, retries: 1 },
   );
 
-  logAnthropicUsage({
-    cron_name: 'builder-presale-crawl',
-    model,
-    usage: call.kind === 'ok' ? call.value?.usage : null,
-    duration_ms: Date.now() - started,
-    status: call.kind === 'ok' ? 'success' : 'error',
-    error_code: call.kind === 'ok' ? null : `${call.kind}:${call.status}`,
-    metadata: { source_key: src.key, kind: src.kind, input_chars: body.length, truncated: text.length > MAX_INPUT_CHARS },
-  });
 
   if (call.kind !== 'ok' || !call.value) return { ...call, value: null } as Outcome<ExtractedCard[]>;
 

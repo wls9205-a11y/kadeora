@@ -12,8 +12,10 @@
  *    나머지 브랜드의 신규 예정명이 통째로 사라진다.
  */
 
-import { badJson, fetchJson, noResult, ok, type Outcome } from '@/lib/net/outcome';
-import { logAnthropicUsage } from '@/lib/llm/usage-tracker';
+import { badJson, noResult, ok, type Outcome } from '@/lib/net/outcome';
+// ⚠️ 관문을 거친다 — 원장 기록·쿼터가 여기 한 곳에 있다. 직접 fetchJson 을 부르면
+//    이 호출은 다시 «관측 밖» 이 된다(2026-09-08 실측: 55곳 중 51곳이 그랬다).
+import { anthropicJson } from '@/lib/llm/gateway';
 import { htmlToText } from '@/lib/presale/extract';
 import type { EventType } from './decide';
 
@@ -95,8 +97,7 @@ export async function extractRegistryCards(
   if (text.length < 100) return noResult<RegistryCard[]>(200, `본문 텍스트 ${text.length}자`);
   const body = text.slice(0, MAX_INPUT_CHARS);
 
-  const started = Date.now();
-  const call = await fetchJson<any>(
+  const call = await anthropicJson<any>(
     'https://api.anthropic.com/v1/messages',
     {
       method: 'POST',
@@ -108,18 +109,14 @@ export async function extractRegistryCards(
         messages: [{ role: 'user', content: `브랜드: ${brand}\n브랜드관 URL: ${registryUrl}\n\n페이지 본문:\n${body}` }],
       }),
     },
+    {
+      caller: 'cvn-brand-registry',
+      category: 'realestate',
+      metadata: { brand, input_chars: body.length, truncated: text.length > MAX_INPUT_CHARS },
+    },
     { timeoutMs: 90_000, retries: 1 },
   );
 
-  logAnthropicUsage({
-    cron_name: 'cvn-brand-registry',
-    model: MODEL,
-    usage: call.kind === 'ok' ? call.value?.usage : null,
-    duration_ms: Date.now() - started,
-    status: call.kind === 'ok' ? 'success' : 'error',
-    error_code: call.kind === 'ok' ? null : `${call.kind}:${call.status}`,
-    metadata: { brand, input_chars: body.length, truncated: text.length > MAX_INPUT_CHARS },
-  });
 
   if (call.kind !== 'ok' || !call.value) return { ...call, value: null } as Outcome<RegistryCard[]>;
   const raw = call.value?.content?.find((b: any) => b?.type === 'text')?.text;
@@ -218,8 +215,7 @@ export async function classifyNewsBatch(items: NewsInput[]): Promise<Outcome<New
     if (body.length + line.length <= MAX_NEWS_CHARS) body += line;
   });
 
-  const started = Date.now();
-  const call = await fetchJson<any>(
+  const call = await anthropicJson<any>(
     'https://api.anthropic.com/v1/messages',
     {
       method: 'POST',
@@ -231,18 +227,14 @@ export async function classifyNewsBatch(items: NewsInput[]): Promise<Outcome<New
         messages: [{ role: 'user', content: body }],
       }),
     },
+    {
+      caller: 'cvn-name-watch',
+      category: 'realestate',
+      metadata: { items: items.length, input_chars: body.length, truncated: body.length >= MAX_NEWS_CHARS },
+    },
     { timeoutMs: 90_000, retries: 1 },
   );
 
-  logAnthropicUsage({
-    cron_name: 'cvn-name-watch',
-    model: MODEL,
-    usage: call.kind === 'ok' ? call.value?.usage : null,
-    duration_ms: Date.now() - started,
-    status: call.kind === 'ok' ? 'success' : 'error',
-    error_code: call.kind === 'ok' ? null : `${call.kind}:${call.status}`,
-    metadata: { items: items.length, input_chars: body.length, truncated: body.length >= MAX_NEWS_CHARS },
-  });
 
   if (call.kind !== 'ok' || !call.value) return { ...call, value: null } as Outcome<NewsCard[]>;
   const raw = call.value?.content?.find((b: any) => b?.type === 'text')?.text;

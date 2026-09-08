@@ -4,6 +4,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { diversifyPrompt, getRandomStructure, getRandomStyle } from '@/lib/blog-prompt-diversity';
 import { getFreshnessContext } from '@/lib/blog/freshness-context';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -101,7 +102,7 @@ ${post.content}`);
     });
 
     // Submit to Anthropic Batch API
-    const batchRes = await fetch('https://api.anthropic.com/v1/messages/batches', {
+    const batchRes = await anthropicFetch('https://api.anthropic.com/v1/messages/batches', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -109,7 +110,7 @@ ${post.content}`);
         'anthropic-version': ANTHROPIC_VERSION,
       },
       body: JSON.stringify({ requests }),
-    });
+    }, { caller: 'batch-rewrite-submit', category: 'infra', apiKind: 'batch_submit' });
 
     if (!batchRes.ok) {
       const err = await batchRes.text();

@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getFreshnessContext, deriveFreshnessFields } from '@/lib/blog/freshness-context';
 import { NextRequest, NextResponse } from 'next/server';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const maxDuration = 300;
 
@@ -102,12 +103,12 @@ export async function GET(req: NextRequest) {
 
 ${getFreshnessContext()}`;
 
-            const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+            const aiRes = await anthropicFetch('https://api.anthropic.com/v1/messages', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY!, 'anthropic-version': ANTHROPIC_VERSION },
               body: JSON.stringify({ model: AI_MODEL_HAIKU, max_tokens: 600, messages: [{ role: 'user', content: prompt }] }),
               signal: AbortSignal.timeout(15000),
-            });
+            }, { caller: 'blog-apt-v2', category: 'realestate' });
             if (aiRes.ok) {
               const d = await aiRes.json();
               aiText = d.content?.[0]?.text || '';

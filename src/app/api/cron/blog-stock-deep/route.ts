@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
 import { NextRequest, NextResponse } from 'next/server';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const maxDuration = 300;
 
@@ -102,12 +103,12 @@ JSON만 응답:
 {"title":"제목(50자이내,연도포함)","content":"마크다운본문(2500자+)","excerpt":"요약(120자이내)","tags":["태그1","태그2","태그3","태그4"]}`)
 
       try {
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': ANTHROPIC_VERSION },
           body: JSON.stringify({ model: AI_MODEL_HAIKU, max_tokens: 3000, messages: [{ role: 'user', content: prompt }] }),
           signal: AbortSignal.timeout(45000),
-        });
+        }, { caller: 'blog-stock-deep', category: 'stock' });
         if (!res.ok) {
           // 529 크레딧 부족 → 나머지 반복 낭비 없이 즉시 종료
           if (res.status === 529 || res.status === 402) break;

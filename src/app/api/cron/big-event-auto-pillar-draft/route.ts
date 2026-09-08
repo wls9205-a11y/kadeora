@@ -23,6 +23,7 @@ import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { sendKakaoAlimtalk } from '@/lib/kakao-alimtalk';
 import { NotificationBellService } from '@/lib/notification-bell';
 import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -92,12 +93,12 @@ async function generatePillar(ev: any): Promise<{ title: string; content: string
 }`;
 
   try {
-    const res = await fetch(ANTHROPIC_API, {
+    const res = await anthropicFetch(ANTHROPIC_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': ANTHROPIC_VERSION },
       body: JSON.stringify({ model: AI_MODEL_HAIKU, max_tokens: 12000, system: systemPrompt, messages: [{ role: 'user', content: userPrompt }] }),
       signal: AbortSignal.timeout(120_000),
-    });
+    }, { caller: 'big-event-auto-pillar-draft', category: 'realestate' });
     if (!res.ok) {
       console.error(`[auto-pillar-draft] AI API ${res.status}`);
       return null;

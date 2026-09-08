@@ -219,6 +219,11 @@ async function handler(req: NextRequest) {
           detected_keywords: [card.proposedName, input.projectName ?? ''].filter(Boolean),
           apt_site_id: out.siteId,
           region_sigungu: card.region,
+          // ⚠️ 점수를 «준다». 기본값 0 이면 issue-draft 의 문턱(≥25)에 걸려 P1 글감이
+          //    한 건도 안 뽑힌다. 45 는 문턱(25)과 발행 임계(35) 위이면서, 사람이 만든
+          //    고득점 이슈를 밀어낼 만큼 높지는 않은 자리다.
+          base_score: 45,
+          final_score: 45,
           raw_data: { tier: out.tier, resolution: out.resolution, builder: card.builder, units: card.units },
         });
       }

@@ -3,6 +3,7 @@ import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -38,12 +39,12 @@ JSON 배열만 응답. 각 항목: {"title":"이벤트명","description":"설명
 
 최소 15개, 최대 25개. JSON 배열만 출력.`;
 
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': ANTHROPIC_VERSION },
           body: JSON.stringify({ model: AI_MODEL_HAIKU, max_tokens: 2000, messages: [{ role: 'user', content: prompt }] }),
           signal: AbortSignal.timeout(30000),
-        });
+        }, { caller: 'invest-calendar-refresh', category: 'stock' });
 
         if (!res.ok) {
           if (res.status === 529 || res.status === 402) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'anthropic_credit_exhausted' } };

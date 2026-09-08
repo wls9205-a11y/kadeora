@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const maxDuration = 120;
 
@@ -65,12 +66,12 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
           `${i + 1}. ${s.symbol} | ${s.name} | ${s.market} | ${s.sector || '미분류'} | 시총 ${s.market_cap ? Math.round(s.market_cap / 100000000) + '억' : '미정'}`
         ).join('\n');
         const prompt = `다음 주식 종목들의 한국어 설명을 각각 2~3문장으로. 핵심 사업 위주. JSON만: [{"n":1,"desc":"..."}]\n${stockList}`;
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY(), 'anthropic-version': ANTHROPIC_VERSION },
           body: JSON.stringify({ model: AI_MODEL_HAIKU, max_tokens: 3000, messages: [{ role: 'user', content: prompt }] }),
           signal: AbortSignal.timeout(30000),
-        });
+        }, { caller: 'stock-desc-gen', category: 'stock' });
         if (res.ok) {
           const text = ((await res.json())?.content?.[0]?.text || '').replace(/```json\s*|```/g, '').trim();
           const match = text.match(/\[[\s\S]*\]/);

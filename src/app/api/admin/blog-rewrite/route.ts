@@ -2,6 +2,7 @@ import { AI_MODEL_HAIKU } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { requireAdmin } from '@/lib/admin-auth';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
         // 랜덤 스타일 선택
         const style = REWRITE_STYLES[Math.floor(Math.random() * REWRITE_STYLES.length)];
 
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
+        const response = await anthropicFetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -98,7 +99,7 @@ export async function POST(req: NextRequest) {
 ${post.content}`
             }],
           }),
-        });
+        }, { caller: 'blog-rewrite', category: 'infra' });
 
         if (!response.ok) {
           results.push({ slug: post.slug, status: `api_error_${response.status}` });

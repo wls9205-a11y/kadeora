@@ -1,3 +1,4 @@
+import { anthropicFetch } from '@/lib/llm/gateway';
 /**
  * 블로그 프롬프트 템플릿 라이브러리
  * 모든 blog-* 크론이 이 템플릿을 사용하여 완성형 콘텐츠 생성
@@ -106,7 +107,7 @@ export async function generateWithAI(
   const { diversifyPrompt } = await import('@/lib/blog-prompt-diversity');
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -118,7 +119,7 @@ export async function generateWithAI(
         max_tokens: opts.maxTokens || 6000,
         messages: [{ role: 'user', content: diversifyPrompt(systemPrompt) }],
       }),
-    });
+    }, { caller: 'blog-prompt-templates', category: 'infra' });
 
     if (!res.ok) return null;
     const data = await res.json();

@@ -15,6 +15,7 @@ import {
   type RawClaim,
 } from '@/lib/verify/facts';
 import { fetchJson, tally, type Outcome } from '@/lib/net/outcome';
+import { anthropicJson } from '@/lib/llm/gateway';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -134,19 +135,22 @@ JSON 배열만 반환:
 검색 결과:
 ${snippets.slice(0, 12).map((s, i) => `[${i + 1}] ${s}`).join('\n')}`;
 
-  const call = await fetchJson<string>(
+  const call = await anthropicJson<any>(
     'https://api.anthropic.com/v1/messages',
     {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({ model: MODEL, max_tokens: 1500, system, messages: [{ role: 'user', content: user }] }),
     },
-    { timeoutMs: 45_000, retries: 1, pick: (j: any) => j?.content?.[0]?.text ?? null },
+    { caller: 'verify-facts', category: 'realestate' },
+    // ⚠️ pick 을 쓰지 않는다 — 본문만 뽑아 오면 관문이 usage 를 못 봐서 토큰이 0으로 남는다.
+    //    LB-1 은 «호출 수» 만이 아니라 «토큰» 축도 재는 것이 목적이다.
+    { timeoutMs: 45_000, retries: 1 },
   );
   if (call.kind !== 'ok' || !call.value) return { ...call, value: null } as Outcome<ExtractedClaim[]>;
 
   try {
-    const text = call.value;
+    const text: string = call.value?.content?.[0]?.text ?? '';
     const m = text.match(/\[[\s\S]*\]/);
     // ⚠️ 「JSON 배열이 없다」는 호출 실패가 아니라 «읽을 수 없는 응답» 이다.
     if (!m) return { kind: 'bad_json', value: null, status: call.status, detail: `배열 없음: ${text.slice(0, 80)}` };

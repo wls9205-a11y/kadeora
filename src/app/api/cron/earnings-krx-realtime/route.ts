@@ -5,6 +5,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { AI_MODEL_SONNET, ANTHROPIC_VERSION } from '@/lib/constants';
 import { sanitizeAiContent, ensureDisclaimer } from '@/lib/ai/sanitize-investment-content';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 /**
  * 국내 실적 공시 실시간 감지 크론
@@ -74,7 +75,7 @@ ${stockInfo}
 6. 1000~1500자
 7. 마지막에 "출처: DART 전자공시시스템" 명시`;
 
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -86,7 +87,7 @@ ${stockInfo}
             max_tokens: 2000,
             messages: [{ role: 'user', content: prompt }],
           }),
-        });
+        }, { caller: 'earnings-krx-realtime', category: 'stock' });
 
         apiCalls++;
         const data = await res.json();

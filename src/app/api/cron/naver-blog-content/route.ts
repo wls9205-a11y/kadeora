@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL, AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { extractAptSiteSlugs } from '@/lib/blog-safe-insert';
 import { dbw } from '@/lib/cron-db-log';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -242,7 +243,7 @@ ${plainContent}
 JSON만 출력하세요. 다른 텍스트 없이.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -254,7 +255,7 @@ JSON만 출력하세요. 다른 텍스트 없이.`;
         max_tokens: 2000,
         messages: [{ role: 'user', content: prompt }],
       }),
-    });
+    }, { caller: 'naver-blog-content', category: 'realestate' });
 
     const data = await res.json();
     const text = data?.content?.[0]?.text || '';

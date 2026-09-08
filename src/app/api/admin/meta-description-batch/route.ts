@@ -17,6 +17,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const maxDuration = 60;
 
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest) {
     },
   }));
 
-  const res = await fetch(ANTHROPIC_BATCH_URL, {
+  const res = await anthropicFetch(ANTHROPIC_BATCH_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -86,7 +87,7 @@ export async function POST(req: NextRequest) {
       'anthropic-version': ANTHROPIC_VERSION,
     },
     body: JSON.stringify({ requests }),
-  });
+  }, { caller: 'meta-description-batch', category: 'infra', apiKind: 'batch_submit' });
 
   if (!res.ok) {
     const errText = await res.text().catch(() => '');

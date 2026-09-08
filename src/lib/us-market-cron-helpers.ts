@@ -8,6 +8,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { AI_MODEL_HAIKU, AI_MODEL_SONNET, ANTHROPIC_VERSION } from '@/lib/constants';
 import { sanitizeAiContent, ensureDisclaimer } from '@/lib/ai/sanitize-investment-content';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 /** 미국 주식 시세 조회 (등락률 상위/하위) */
 export async function getUSMarketSnapshot() {
@@ -94,7 +95,7 @@ export async function generateUSBriefing(opts: {
 6. 마지막 소제목: "내일(오늘) 관전 포인트"`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -106,7 +107,7 @@ export async function generateUSBriefing(opts: {
         max_tokens: 2000,
         messages: [{ role: 'user', content: prompt }],
       }),
-    });
+    }, { caller: 'us-market-cron-helpers', category: 'stock' });
 
     const data = await res.json();
     const raw = data.content?.[0]?.text?.trim() || '';

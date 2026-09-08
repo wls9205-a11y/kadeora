@@ -16,6 +16,7 @@ export const maxDuration = 300;
  */
 
 import { diversifyPrompt } from '@/lib/blog-prompt-diversity';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 // [L0-5] 본문 내 공공기관/감독기관 언급 감지 → source_ref 자동 주입 맵
 // rel=noopener nofollow는 렌더러에서 자동 부여됨.
@@ -80,7 +81,7 @@ export async function GET(req: NextRequest) {
     for (const post of posts) {
       try {
         const style = STYLES[Math.floor(Math.random() * STYLES.length)];
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -123,7 +124,7 @@ SEO·내부링크 규칙 (매우 중요):
 ${post.content}`)
             }],
           }),
-        });
+        }, { caller: 'blog-rewrite', category: 'infra' });
 
         if (!res.ok) {
           if (res.status === 529 || res.status === 402) break;

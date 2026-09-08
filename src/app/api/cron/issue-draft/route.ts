@@ -12,9 +12,10 @@ import { isBlockedImageUrl } from '@/lib/image-pipeline';
 import { runBlogSeoMaster } from '@/lib/blog-seo-master';
 import { appendRelatedHubFooter } from '@/lib/internal-link-injector';
 // s239 Phase 0: LLM 사용량 추적 (fire-and-forget, main flow 영향 0)
-import { logAnthropicUsage } from '@/lib/llm/usage-tracker';
 import { getFreshnessContext, deriveFreshnessFields } from '@/lib/blog/freshness-context';
 import { dbw } from '@/lib/cron-db-log';
+import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
+import { sortForGeneration } from '@/lib/content/realestate-priority';
 
 /**
  * issue-draft v2 — AI 기사 생성 + 자동 발행 + 이미지 + 피드 포스트
@@ -141,7 +142,36 @@ export type DraftFailReason =
   | 'parse' | 'token_limit' | 'duplicate' | 'no_match';
 type GenResult = { title: string; content: string; slug: string; keywords: string[]; meta_description: string; infographic_data: Record<string, any> };
 
-async function generateArticle(issue: any, bigEventContext = ''): Promise<{ article: GenResult | null; failReason: DraftFailReason | null }> {
+/**
+ * LB-5 — 현장 컨텍스트. 글이 «어느 현장의 것인지» 를 프롬프트가 알아야
+ * 예정명으로 제목을 세우고 현장 상세로 내부링크를 걸 수 있다.
+ * ⚠️ 없으면 빈 문자열이다 — 주인 없는 글도 계속 만들어진다(기존 동작 불변).
+ */
+async function buildSiteContext(sb: any, siteId: string | null | undefined): Promise<string> {
+  if (!siteId) return '';
+  try {
+    const { data } = await sb.from('apt_sites')
+      .select('slug, name, display_name, sigungu, region, builder, total_units, expected_sale_period')
+      .eq('id', siteId).maybeSingle();
+    if (!data) return '';
+    const disp = (data.display_name || '').trim();
+    // display 규격이 「{예정명} — {구역명}」이라 제목에는 앞쪽(예정명)만 쓴다.
+    const preferred = (disp.split(' — ')[0] || disp || data.name || '').trim();
+    const lines = [
+      `- 현장 상세 링크(반드시 1회 이상 사용): [${preferred}](/apt/${data.slug})`,
+      `- 표기할 이름: 「${preferred}」 ${preferred !== data.name ? `(구역명: ${data.name})` : ''}`,
+      data.sigungu ? `- 지역: ${[data.region, data.sigungu].filter(Boolean).join(' ')}` : '',
+      data.builder ? `- 시공사: ${data.builder}` : '- 시공사: 미정(단정하지 말 것)',
+      data.total_units ? `- 세대수: ${data.total_units}세대` : '- 세대수: 미정(단정하지 말 것)',
+      data.expected_sale_period ? `- 예상 분양 시기: ${data.expected_sale_period}` : '',
+    ].filter(Boolean);
+    return lines.join('\n');
+  } catch {
+    return '';
+  }
+}
+
+async function generateArticle(issue: any, bigEventContext = '', siteContext = ''): Promise<{ article: GenResult | null; failReason: DraftFailReason | null }> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) { console.error('[issue-draft] ANTHROPIC_API_KEY missing'); return { article: null, failReason: 'no_key' }; }
 
@@ -170,6 +200,19 @@ ${isPreempt ? `
 - 주변 시세 비교 테이블 필수 (반경 1km 내 단지)
 - 청약 전략 가이드 섹션 포함 (가점/추첨, 자금계획)
 - "이 정보는 공식 발표 전 수집된 것으로 변동될 수 있습니다" 면책 포함
+` : ''}
+${issue.category === 'apt' ? `
+## 부동산 규격 (LB-5 · 네이버 검색 최적화)
+- 제목은 «사람이 실제로 검색하는 말» 로 25~30자: 「{지역 지명} {현장명} {분양일정|분양가|조합원분양|시공사|입주예정}」
+  ⛔ 「부울경」 같은 내부 용어를 제목·본문에 쓰지 않는다. 부산·해운대구처럼 «구체 지명» 만 쓴다.
+  ⛔ 이름을 하이픈에서 자르지 않는다 — 「범천1-1구역」을 「범천1」로 쓰면 다른 현장이 된다.
+- 본문 첫머리에 «3줄 요약» 을 둔다(검색 스니펫용, 각 줄 한 문장).
+- 「공급 정보」 표를 하나 둔다: 세대수 · 시공사 · 예상 일정 · 위치. 모르는 값은 「미정」이라고 쓴다.
+⛔ 사실 규율 — 예정명은 «확정 발표된 것» 만 단정한다. 시공사 선정 «전» 의 이름이면
+   반드시 「제안 단지명」이라고 밝힌다. 확정과 제안을 섞으면 그 현장을 영영 잘못 부르게 된다.
+${siteContext ? `
+## 이 글의 현장
+${siteContext}` : ''}
 ` : ''}
 ## 구조 가이드:
 - 도입부: 핵심 팩트 1~2줄 → 배경 설명
@@ -229,7 +272,9 @@ ${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑,
 
 응답 형식 (JSON만, 다른 텍스트 없이):
 {
-  "title": "SEO 최적화 제목 (40~60자, | 구분자, ${titleHint ? `반드시 [${titleHint}] 중 2개 이상 포함` : '단지명+분석 패턴 회피'})",
+  "title": "${issue.category === 'apt'
+    ? `검색어형 제목 25~30자 — 「{지역 지명} {현장명} {분양일정|분양가|조합원분양|시공사|입주예정}」. 하이픈 절단 금지`
+    : 'SEO 최적화 제목 (40~60자, | 구분자)'}${titleHint ? `, 반드시 [${titleHint}] 중 2개 이상 포함` : ''}",
   "slug": "url-safe-slug-한글가능",
   "keywords": ["키워드1", "키워드2", ...최소 5개],
   "meta_description": "검색 결과에 노출될 설명 (120~160자)",
@@ -239,11 +284,11 @@ ${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑,
   // s239 Phase 0: LLM 사용량 추적 — duration + usage 로깅 (fire-and-forget)
   const llmStart = Date.now();
   try {
-    const res = await fetch(ANTHROPIC_API, {
+    const res = await anthropicFetch(ANTHROPIC_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({ model: MODEL, max_tokens: 12000, system: systemPrompt, messages: [{ role: 'user', content: userPrompt }] }),
-    });
+    }, { caller: 'issue-draft', category: llmCategoryOfContent(issue?.category), postId: null, metadata: { issue_id: issue?.id ?? null } });
 
     if (!res.ok) {
       const errBody = await res.text().catch(() => '');
@@ -254,27 +299,9 @@ ${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑,
          「3일 전 그 장애가 무엇이었나」에 답하지 못한다. 판정에 쓸 사실은 DB 에 둔다.
          ⚠️ 400 의 본문에는 사유가 «문장으로» 들어 있다(잘못된 파라미터인지, 한도인지).
             그 문장이 곧 수리 대상을 정한다 — 없으면 추측만 남는다. */
-      logAnthropicUsage({
-        cron_name: 'issue-draft', model: MODEL,
-        duration_ms: Date.now() - llmStart,
-        status: 'error', error_code: String(res.status),
-        metadata: {
-          max_tokens: 12000,
-          issue_id: issue?.id ?? null,
-          http_status: res.status,
-          error_body: errBody.slice(0, 500),
-        },
-      });
       return { article: null, failReason: res.status >= 500 ? 'api_5xx' : 'api_4xx' };
     }
     const data = await res.json();
-    logAnthropicUsage({
-      cron_name: 'issue-draft', model: MODEL,
-      usage: data?.usage,
-      duration_ms: Date.now() - llmStart,
-      status: 'success',
-      metadata: { max_tokens: 12000, issue_id: issue?.id ?? null, category: issue?.category ?? null },
-    });
     const text = data.content?.[0]?.text || '';
     if (!text) { console.error('[issue-draft] AI returned empty text'); return { article: null, failReason: 'empty_text' }; }
 
@@ -306,12 +333,6 @@ ${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑,
     } };
   } catch (e) {
     console.error('[issue-draft] AI generation exception:', (e as Error).message);
-    logAnthropicUsage({
-      cron_name: 'issue-draft', model: MODEL,
-      duration_ms: Date.now() - llmStart,
-      status: 'error', error_code: 'exception',
-      metadata: { max_tokens: 12000, issue_id: issue?.id ?? null, error: (e as Error).message?.slice(0, 200) },
-    });
     return { article: null, failReason: 'exception' };
   }
 }
@@ -598,7 +619,8 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   const bigEventContext = await fetchBigEventContext(sb, issue);
 
   // AI 기사 생성
-  const { article, failReason } = await generateArticle(issue, bigEventContext);
+  const siteContext = await buildSiteContext(sb, issue.apt_site_id);
+  const { article, failReason } = await generateArticle(issue, bigEventContext, siteContext);
   if (!article) {
     // A3: 재시도 로직 — retry_count < 3이면 is_processed=false로 리셋
     const newRetry = retryCount + 1;
@@ -864,13 +886,20 @@ async function handler(_req: NextRequest) {
     dbw('issue-draft', 'issue_alerts.update@780', belowThreshold);
     const belowThresholdN = belowThreshold?.data?.length ?? 0;
 
-    // 미처리 이슈 조회 (최고 점수 우선 + ai_failed 재시도 포함)
-    const { data: issues } = await (sb as any).from('issue_alerts')
+    // 미처리 이슈 조회 — LB-4 우선순위로 «앱에서» 정렬한다.
+    // ⚠️ DB order 하나로는 P순위(미래지향 축)를 표현할 수 없어 후보를 넉넉히 받아 정렬한다.
+    // ⛔ 문턱(final_score ≥ 25)에 CV-N 이벤트를 «예외» 로 둔다. 그 행은 감지 직후라
+    //    점수가 아직 붙지 않았는데, P1(이름이 태어나는 순간)이 문턱에서 잘리면
+    //    이 트랙 전체가 무의미해진다 — 실제로 잘리고 있었다(2026-09-08 실측).
+    const { data: pool } = await (sb as any).from('issue_alerts')
       .select('*')
       .eq('is_processed', false)
-      .gte('final_score', 25)
+      .or('final_score.gte.25,source_type.eq.cvn_name_event')
       .order('final_score', { ascending: false })
-      .limit(MAX_PER_RUN);
+      .limit(MAX_PER_RUN * 4);
+    const issues = sortForGeneration<any>((pool ?? []) as any[])
+      .slice(0, MAX_PER_RUN)
+      .map((x) => x.row);
 
     if (!issues || issues.length === 0) {
       return {

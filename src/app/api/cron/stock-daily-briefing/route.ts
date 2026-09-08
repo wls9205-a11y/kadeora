@@ -3,6 +3,7 @@ import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -81,12 +82,12 @@ ${themeHistory?.length ? `테마: ${themeHistory.map((t: any) => `${t.theme_name
 
 200자 이내로 시황을 요약하세요. JSON만 응답: {"title":"제목(20자이내)","summary":"요약","sentiment":"bullish|neutral|bearish"}`;
 
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': ANTHROPIC_VERSION },
           body: JSON.stringify({ model: AI_MODEL_HAIKU, max_tokens: 300, messages: [{ role: 'user', content: prompt }] }),
           signal: AbortSignal.timeout(15000),
-        });
+        }, { caller: 'stock-daily-briefing', category: 'stock' });
         apiCalls = 1;
         if (res.ok) {
           const data = await res.json();
@@ -145,12 +146,12 @@ Top losers: ${usLosers.map(s => `${s.name}(${Number(s.change_pct??0).toFixed(1)}
 Sectors: ${usSectorPerf.slice(0,5).map(s=>`${s.name}(${s.avg_pct>0?'+':''}${s.avg_pct}%)`).join(', ')}
 
 한국어로 200자 이내 미국 증시 요약. JSON만: {"title":"제목(20자이내)","summary":"요약","sentiment":"bullish|neutral|bearish"}`;
-          const usRes = await fetch('https://api.anthropic.com/v1/messages', {
+          const usRes = await anthropicFetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY!, 'anthropic-version': ANTHROPIC_VERSION },
             body: JSON.stringify({ model: AI_MODEL_HAIKU, max_tokens: 300, messages: [{ role: 'user', content: usPrompt }] }),
             signal: AbortSignal.timeout(15000),
-          });
+          }, { caller: 'stock-daily-briefing', category: 'stock' });
           if (usRes.ok) {
             const d = await usRes.json();
             const m = (d.content?.[0]?.text || '').match(/\{[\s\S]*\}/);

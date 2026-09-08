@@ -7,6 +7,7 @@ import { checkBlogQuality, stripInlineHtml } from '@/lib/blog-quality-gate';
 import { diversifyPrompt } from '@/lib/blog-prompt-diversity';
 import { getFreshnessContext, deriveFreshnessFields } from '@/lib/blog/freshness-context';
 import { dbw } from '@/lib/cron-db-log';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -103,7 +104,7 @@ ${dataPrompt}
 
 ${getFreshnessContext()}`;
 
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -115,7 +116,7 @@ ${getFreshnessContext()}`;
             max_tokens: 6000,
             messages: [{ role: 'user', content: diversifyPrompt(systemPrompt) }],
           }),
-        });
+        }, { caller: 'blog-enrich-rewrite', category: 'infra' });
 
         if (!res.ok) {
           if (res.status === 529 || res.status === 402) break;

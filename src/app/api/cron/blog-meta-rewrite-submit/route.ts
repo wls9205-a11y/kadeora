@@ -11,6 +11,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { getFreshnessContext } from '@/lib/blog/freshness-context';
 import { jsonSafeSlice, findLoneSurrogateItems, LONE_SURROGATE_RE } from '@/lib/text-safe';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const runtime = 'nodejs';
 export const maxDuration = 120;
@@ -105,12 +106,12 @@ async function handler(req: NextRequest) {
       throw new Error(`전 건이 서로게이트 깨짐으로 제외됨 — ${broken.slice(0, 10).join(', ')}`);
     }
 
-    const batchRes = await fetch('https://api.anthropic.com/v1/messages/batches', {
+    const batchRes = await anthropicFetch('https://api.anthropic.com/v1/messages/batches', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': ANTHROPIC_VERSION },
       body: JSON.stringify({ requests: clean }),
       signal: AbortSignal.timeout(60_000),
-    });
+    }, { caller: 'blog-meta-rewrite-submit', category: 'infra', apiKind: 'batch_submit' });
     if (!batchRes.ok) {
       const errBody = await batchRes.text().catch(() => '');
 

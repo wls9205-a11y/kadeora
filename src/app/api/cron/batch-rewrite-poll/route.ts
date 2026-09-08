@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { anthropicPollFetch } from '@/lib/llm/gateway';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest) {
 
     for (const batch of batches) {
       // Check batch status
-      const statusRes = await fetch(`https://api.anthropic.com/v1/messages/batches/${batch.batch_id}`, {
+      const statusRes = await anthropicPollFetch(`https://api.anthropic.com/v1/messages/batches/${batch.batch_id}`, {
         headers: {
           'x-api-key': process.env.ANTHROPIC_API_KEY!,
           'anthropic-version': '2023-06-01',

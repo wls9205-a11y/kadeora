@@ -19,6 +19,7 @@ import { withCronAuthFlex } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { dbw } from '@/lib/cron-db-log';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -83,7 +84,7 @@ async function factCheckViaClaude(issue: any): Promise<FactCheckOutcome | null> 
 ${draftPreview}`;
 
   try {
-    const res = await fetch(ANTHROPIC_API, {
+    const res = await anthropicFetch(ANTHROPIC_API, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -97,7 +98,7 @@ ${draftPreview}`;
         messages: [{ role: 'user', content: user }],
       }),
       signal: AbortSignal.timeout(30_000),
-    });
+    }, { caller: 'issue-fact-check', category: 'infra' });
     if (!res.ok) return null;
     const data = await res.json();
     const text: string = data?.content?.[0]?.text || '';

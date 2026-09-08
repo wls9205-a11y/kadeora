@@ -39,6 +39,9 @@ jobs:
       - run: npm ci
       - run: npm run type-check
       - run: npm run lint
+      # LB-1 — Anthropic 호출은 관문 하나로만 나간다. 사람의 규율이 아니라 CI 가 지킨다.
+      # ⛔ 이 게이트가 없던 시절 55곳 중 51곳이 원장 밖이었고, 크레딧이 마른 48시간이 조용했다.
+      - run: bash scripts/llm-gateway-gate.sh
 
   test:
     name: Unit & integration tests

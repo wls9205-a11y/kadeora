@@ -10,6 +10,7 @@ import { verifyCronAuth } from '@/lib/cron-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { jsonSafeSlice, findLoneSurrogateItems, LONE_SURROGATE_RE } from '@/lib/text-safe';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const runtime = 'nodejs';
 export const maxDuration = 120;
@@ -113,7 +114,7 @@ async function handler(req: NextRequest) {
     }
 
     // Anthropic Batch API
-    const batchRes = await fetch('https://api.anthropic.com/v1/messages/batches', {
+    const batchRes = await anthropicFetch('https://api.anthropic.com/v1/messages/batches', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -122,7 +123,7 @@ async function handler(req: NextRequest) {
       },
       body: JSON.stringify({ requests: clean }),
       signal: AbortSignal.timeout(60_000),
-    });
+    }, { caller: 'blog-backfill-submit', category: 'infra', apiKind: 'batch_submit' });
 
     if (!batchRes.ok) {
       const errBody = await batchRes.text().catch(() => '');

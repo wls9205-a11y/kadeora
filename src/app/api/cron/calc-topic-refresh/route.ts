@@ -13,6 +13,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { getConfig, getAIModel, shouldUsePromptCache } from '@/lib/app-config';
 import { ANTHROPIC_VERSION } from '@/lib/constants';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -145,7 +146,7 @@ async function callAI(topic: Topic, model: string, useCache: boolean): Promise<{
       }]
     : [{ role: 'user', content: promptText }];
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'x-api-key': process.env.ANTHROPIC_API_KEY!,
@@ -157,7 +158,7 @@ async function callAI(topic: Topic, model: string, useCache: boolean): Promise<{
       max_tokens: 2500,
       messages,
     }),
-  });
+  }, { caller: 'calc-topic-refresh', category: 'finance' });
   if (!res.ok) {
     const errText = await res.text();
     throw new Error(`anthropic_${res.status}: ${errText.slice(0, 200)}`);

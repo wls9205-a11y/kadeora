@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
+import { anthropicPollFetch } from '@/lib/llm/gateway';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -19,7 +20,7 @@ export async function GET(_req: NextRequest) {
 
     let totalSaved = 0;
     for (const batch of batches) {
-      const sr = await fetch(`https://api.anthropic.com/v1/messages/batches/${batch.batch_id}`, {
+      const sr = await anthropicPollFetch(`https://api.anthropic.com/v1/messages/batches/${batch.batch_id}`, {
         headers: { 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01' },
       });
       const sd = await sr.json();

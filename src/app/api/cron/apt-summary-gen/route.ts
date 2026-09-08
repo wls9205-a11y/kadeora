@@ -6,6 +6,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import Anthropic from "@anthropic-ai/sdk";
+import { anthropicCreate } from "@/lib/llm/gateway";
 import { logCronStart, logCronEnd } from "@/lib/cron-log";
 import { extractPriceHeuristic } from "@/lib/pdf/parser";
 
@@ -19,7 +20,9 @@ const MIN_RAW_LEN = 500;  // 너무 짧은 raw_text는 처리 보류
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
 async function summarizeWithLlm(rawText: string, aptName: string) {
-  const msg = await anthropic.messages.create({
+  const msg = await anthropicCreate(
+    (p) => anthropic.messages.create(p),
+    {
     model: "claude-haiku-4-5-20251001",
     max_tokens: 600,
     system:
@@ -38,7 +41,12 @@ async function summarizeWithLlm(rawText: string, aptName: string) {
           `}\n\n--- 본문 ---\n${rawText.slice(0, 12000)}`,
       },
     ],
-  });
+  },
+    { caller: 'apt-summary-gen', category: 'realestate' },
+  );
+  // ⛔ 쿼터로 막히면 관문이 null 을 준다(던지지 않는다). 빈 요약을 «성공» 으로 적으면
+  //    그 현장은 영영 다시 처리되지 않는다 — 조용한 유실이다.
+  if (!msg) throw new Error('llm_quota_blocked');
   const text =
     msg.content
       .filter((b) => b.type === "text")

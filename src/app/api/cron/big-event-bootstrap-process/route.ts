@@ -22,6 +22,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { AI_MODEL_HAIKU, AI_MODEL_OPUS, ANTHROPIC_VERSION } from '@/lib/constants';
 import { dbw } from '@/lib/cron-db-log';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -87,7 +88,7 @@ async function callClaude(model: string, system: string, user: string, maxTokens
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return null;
   try {
-    const res = await fetch(ANTHROPIC_API, {
+    const res = await anthropicFetch(ANTHROPIC_API, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -101,7 +102,7 @@ async function callClaude(model: string, system: string, user: string, maxTokens
         messages: [{ role: 'user', content: user }],
       }),
       signal: AbortSignal.timeout(150_000),
-    });
+    }, { caller: 'big-event-bootstrap-process', category: 'realestate' });
     if (!res.ok) {
       console.error(`[bootstrap-process] Claude ${model} ${res.status}`);
       return null;

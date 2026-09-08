@@ -13,6 +13,7 @@ import { verifyCronAuth } from '@/lib/cron-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { ANTHROPIC_VERSION } from '@/lib/constants';
 import { runImagePipeline, type PostContext } from '@/lib/image-pipeline';
+import { anthropicPollFetch } from '@/lib/llm/gateway';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -77,7 +78,7 @@ async function handler(req: NextRequest) {
       if (Date.now() - start > PREEMPT_MS) break;
       stats.polled++;
 
-      const statusRes = await fetch(`https://api.anthropic.com/v1/messages/batches/${b.anthropic_batch_id}`, {
+      const statusRes = await anthropicPollFetch(`https://api.anthropic.com/v1/messages/batches/${b.anthropic_batch_id}`, {
         headers: {
           'x-api-key': apiKey,
           'anthropic-version': ANTHROPIC_VERSION,

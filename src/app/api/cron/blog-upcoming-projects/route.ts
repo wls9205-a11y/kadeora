@@ -4,6 +4,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { checkBlogQuality } from '@/lib/blog-quality-gate';
 import { diversifyPrompt } from '@/lib/blog-prompt-diversity';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -122,7 +123,7 @@ ${nearbyData}
 - ## 제목에 **볼드** 금지
 - 글 끝에 면책: "> ⚠️ 이 정보는 공식 발표 전 수집된 것으로 변동될 수 있습니다. 투자 결정은 공식 자료를 직접 확인 후 본인의 판단 하에 이루어져야 합니다."`;
 
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -134,7 +135,7 @@ ${nearbyData}
             max_tokens: 6000,
             messages: [{ role: 'user', content: diversifyPrompt(systemPrompt) }],
           }),
-        });
+        }, { caller: 'blog-upcoming-projects', category: 'realestate' });
 
         if (!res.ok) {
           if (res.status === 529 || res.status === 402) break;

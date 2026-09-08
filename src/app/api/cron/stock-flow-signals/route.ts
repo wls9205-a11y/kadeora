@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { sanitizeAiContent } from '@/lib/ai/sanitize-investment-content';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 /**
  * 수급 시그널 탐지 크론
@@ -162,7 +163,7 @@ async function generateInterpretation(signal: SignalResult): Promise<string> {
 해석만 출력하세요.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -174,7 +175,7 @@ async function generateInterpretation(signal: SignalResult): Promise<string> {
         max_tokens: 300,
         messages: [{ role: 'user', content: prompt }],
       }),
-    });
+    }, { caller: 'stock-flow-signals', category: 'stock' });
     const data = await res.json();
     const raw = data.content?.[0]?.text?.trim() || '';
     return sanitizeAiContent(raw).text;

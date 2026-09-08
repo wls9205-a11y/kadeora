@@ -5,6 +5,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { sanitizeAiContent, ensureDisclaimer } from '@/lib/ai/sanitize-investment-content';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 /**
  * IPO/공모주 일일 업데이트 크론
@@ -82,7 +83,7 @@ export async function GET(req: NextRequest) {
 3. 청약 방법, 일정, 유의사항 포함
 4. 의무보유확약 정보 있으면 포함`;
 
-          const res = await fetch('https://api.anthropic.com/v1/messages', {
+          const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -94,7 +95,7 @@ export async function GET(req: NextRequest) {
               max_tokens: 1500,
               messages: [{ role: 'user', content: prompt }],
             }),
-          });
+          }, { caller: 'ipo-daily-update', category: 'stock' });
 
           apiCalls++;
           const data = await res.json();

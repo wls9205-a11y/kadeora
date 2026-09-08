@@ -2,6 +2,7 @@ import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -44,11 +45,11 @@ export async function GET(_req: NextRequest) {
       }
     });
 
-    const batchRes = await fetch('https://api.anthropic.com/v1/messages/batches', {
+    const batchRes = await anthropicFetch('https://api.anthropic.com/v1/messages/batches', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY!, 'anthropic-version': ANTHROPIC_VERSION },
       body: JSON.stringify({ requests }),
-    });
+    }, { caller: 'batch-analysis-submit', category: category === 'apt-analysis' ? 'realestate' : 'stock', apiKind: 'batch_submit' });
     if (!batchRes.ok) { const e = await batchRes.text(); return { processed: 0, metadata: { error: `API ${batchRes.status}`, detail: e.slice(0,200) } }; }
 
     const bd = await batchRes.json();

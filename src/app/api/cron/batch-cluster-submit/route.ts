@@ -2,6 +2,7 @@ import { AI_MODEL_SONNET, ANTHROPIC_VERSION } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -105,10 +106,10 @@ export async function GET(_req: NextRequest) {
 
     // Batch API 제출
     const jsonl = requests.map(r => JSON.stringify(r)).join('\n');
-    const batchRes = await fetch('https://api.anthropic.com/v1/messages/batches', {
+    const batchRes = await anthropicFetch('https://api.anthropic.com/v1/messages/batches', {
       method: 'POST', headers: { 'x-api-key': API_KEY, 'anthropic-version': ANTHROPIC_VERSION, 'content-type': 'application/json' },
       body: JSON.stringify({ requests: requests.map(r => ({ custom_id: r.custom_id, params: r.params })) }),
-    });
+    }, { caller: 'batch-cluster-submit', category: 'infra', apiKind: 'batch_submit' });
     const batchData = await batchRes.json();
 
     if (batchData.id) {

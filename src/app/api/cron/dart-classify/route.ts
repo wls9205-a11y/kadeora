@@ -3,6 +3,7 @@ import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 /**
  * DART 미분류 공시를 Haiku로 카테고리 분류 + 요약
@@ -49,7 +50,7 @@ export async function GET(req: NextRequest) {
 
 요약만 출력하세요. 다른 텍스트 없이.`;
 
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -61,7 +62,7 @@ export async function GET(req: NextRequest) {
             max_tokens: 500,
             messages: [{ role: 'user', content: prompt }],
           }),
-        });
+        }, { caller: 'dart-classify', category: 'stock' });
 
         apiCalls++;
         const data = await res.json();

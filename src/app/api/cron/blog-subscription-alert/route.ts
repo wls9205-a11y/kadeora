@@ -3,6 +3,7 @@ import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 const API_KEY = () => process.env.ANTHROPIC_API_KEY || '';
 export const maxDuration = 120;
@@ -26,14 +27,14 @@ export const GET = withCronAuth(async (_req: NextRequest) => {
       if (existing) continue;
 
       try {
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY(), 'anthropic-version': ANTHROPIC_VERSION },
           body: JSON.stringify({
             model: AI_MODEL_HAIKU, max_tokens: 4000,
             messages: [{ role: 'user', content: `한국 아파트 청약 분석글. 단지: ${sub.name}, 지역: ${sub.region}, 세대수: ${sub.supply_count}, 접수: ${sub.rcept_bgnde}~${sub.rcept_endde}. 2500자+ 마크다운, 입지분석/분양가/가점예측/전략/FAQ5개 포함.` }],
           }),
-        });
+        }, { caller: 'blog-subscription-alert', category: 'realestate' });
         if (!res.ok) { failed++; continue; }
         const data = await res.json();
         const content = data.content?.[0]?.text || '';

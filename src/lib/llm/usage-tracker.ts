@@ -97,18 +97,13 @@ export async function trackedAnthropicCreate(
 }
 
 /**
- * fetch 기반 caller 용 — 기존 fetch 호출 후 응답에서 usage 만 뽑아 로깅.
- * 호출 예 (issue-draft 등):
- *   const start = Date.now();
- *   const res = await fetch(ANTHROPIC_API, {...});
- *   const data = await res.json();
- *   logAnthropicUsage({
- *     cron_name: 'issue-draft', model: MODEL,
- *     usage: data?.usage,
- *     duration_ms: Date.now() - start,
- *     status: res.ok ? 'success' : 'error',
- *     error_code: res.ok ? null : String(res.status),
- *   });
+ * fetch 기반 caller 용 저수준 로거.
+ *
+ * ⛔ 새 호출부에서 이것을 «직접» 쓰지 않는다 (LB-1 · 2026-09-08). 정본은 관문
+ *    `@/lib/llm/gateway` 의 anthropicFetch / anthropicJson / anthropicCreate 이고,
+ *    거기서 원장 기록과 1:9 쿼터가 «같이» 일어난다.
+ *    여기만 부르면 기록은 남지만 쿼터를 지나지 않아 배분이 조용히 무너진다.
+ * ⚠️ 이 함수는 관문의 내부 사정과 과거 데이터를 위해 남겨 둔다 — 지우면 이력이 끊긴다.
  */
 export function logAnthropicUsage(args: {
   cron_name: string;

@@ -2,6 +2,7 @@ import { errMsg } from '@/lib/error-utils';
 export const maxDuration = 15;
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 const SERVICES = [
   { name: 'supabase', getUrl: () => process.env.NEXT_PUBLIC_SUPABASE_URL! + '/rest/v1/', getHeaders: () => ({ apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! }) },
@@ -74,12 +75,12 @@ export async function GET(request: Request) {
   // Anthropic API 크레딧 체크 (POST 필요)
   try {
     const aStart = Date.now();
-    const aRes = await fetch('https://api.anthropic.com/v1/messages', {
+    const aRes = await anthropicFetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'x-api-key': process.env.ANTHROPIC_API_KEY || '', 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 10, messages: [{ role: 'user', content: 'ping' }] }),
       signal: AbortSignal.timeout(8000),
-    });
+    }, { caller: 'health-check', category: 'infra' });
     await supabase.from('health_checks').upsert({
       service_name: 'anthropic_api', status: aRes.ok ? 'ok' : 'error',
       response_time_ms: Date.now() - aStart, last_checked_at: new Date().toISOString(),

@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { withCronAuth } from '@/lib/cron-auth';
 import { dbw } from '@/lib/cron-db-log';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -41,12 +42,12 @@ async function handler(_req: NextRequest) {
           .limit(15);
 
         const prompt = buildPrompt(site, sub, trades || []);
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY!, 'anthropic-version': ANTHROPIC_VERSION },
           body: JSON.stringify({ model: AI_MODEL_HAIKU, max_tokens: 4000, messages: [{ role: 'user', content: prompt }] }),
           signal: AbortSignal.timeout(25000),
-        });
+        }, { caller: 'apt-analysis-gen', category: 'realestate' });
 
         if (!res.ok) continue;
         const data = await res.json();

@@ -3,6 +3,7 @@ import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 /**
  * 인기 게시글 AI 댓글 요약 크론
@@ -60,7 +61,7 @@ ${commentsText}
 
 JSON만: {"summary":"3줄 요약 (줄바꿈 \\n으로 구분)","consensus":"agree|disagree|mixed","hot_topic":"가장 많이 논의된 주제 1개"}`;
 
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -73,7 +74,7 @@ JSON만: {"summary":"3줄 요약 (줄바꿈 \\n으로 구분)","consensus":"agre
             messages: [{ role: 'user', content: prompt }],
           }),
           signal: AbortSignal.timeout(15000),
-        });
+        }, { caller: 'post-ai-summary', category: 'infra' });
 
         if (!res.ok) {
           if (res.status === 402 || res.status === 529) {

@@ -5,6 +5,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { sanitizeAiContent, ensureDisclaimer } from '@/lib/ai/sanitize-investment-content';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 /**
  * 매크로 경제지표 발표 감지 + 섹터/종목 영향 매핑
@@ -127,7 +128,7 @@ ${eventsText}
 4. 800~1200자, h2 소제목 3~5개`;
 
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -139,7 +140,7 @@ ${eventsText}
           max_tokens: 1500,
           messages: [{ role: 'user', content: prompt }],
         }),
-      });
+      }, { caller: 'macro-event-detect', category: 'stock' });
 
       const data = await res.json();
       const raw = data.content?.[0]?.text?.trim() || '';

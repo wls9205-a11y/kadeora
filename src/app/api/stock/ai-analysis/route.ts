@@ -3,6 +3,7 @@ import { AI_MODEL_HAIKU, ANTHROPIC_VERSION } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { rateLimit, rateLimitResponse } from '@/lib/rate-limit';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 /**
  * 프로 회원 전용 AI 종목 분석
@@ -141,7 +142,7 @@ ${newsData}
 JSON만 응답: {"overview":"...","technical":"...","fundamental":"...","opinion":"...","score":7,"risk":"medium"}
 score: 1~10 투자매력도, risk: low/medium/high`;
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -154,7 +155,7 @@ score: 1~10 투자매력도, risk: low/medium/high`;
         messages: [{ role: 'user', content: prompt }],
       }),
       signal: AbortSignal.timeout(20000),
-    });
+    }, { caller: 'ai-analysis', category: 'stock' });
 
     if (!res.ok) {
       if (res.status === 402 || res.status === 529) {

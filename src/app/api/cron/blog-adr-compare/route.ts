@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { generateMetaDesc, generateMetaKeywords } from '@/lib/blog-seo-utils';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const maxDuration = 300;
 
@@ -52,12 +53,12 @@ JSON만: {"title":"${target.title}","content":"마크다운본문","excerpt":"�
 
     let created = 0;
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY!, 'anthropic-version': ANTHROPIC_VERSION },
         body: JSON.stringify({ model: AI_MODEL_HAIKU, max_tokens: 3000, messages: [{ role: 'user', content: prompt }] }),
         signal: AbortSignal.timeout(45000),
-      });
+      }, { caller: 'blog-adr-compare', category: 'stock' });
       if (!res.ok) { if (res.status === 529 || res.status === 402) return { processed: 0, created: 0, failed: 0, metadata: { reason: 'anthropic_credit_exhausted' } }; return { processed: 0, created: 0, failed: 1, metadata: { reason: 'anthropic_error', status: res.status } }; }
       if (res.ok) {
         const data = await res.json();

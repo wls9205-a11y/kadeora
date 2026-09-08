@@ -2,6 +2,7 @@ export const maxDuration = 30;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
+import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
 
 /**
  * feed-buzz-publish 크론 — 예약된 뻘글 발행
@@ -46,7 +47,7 @@ async function generateBuzzContent(issue: any, personaType: string): Promise<str
   const persona = PERSONA_PROFILES[personaType] || PERSONA_PROFILES.curious;
 
   try {
-    const res = await fetch(ANTHROPIC_API, {
+    const res = await anthropicFetch(ANTHROPIC_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
@@ -75,7 +76,7 @@ async function generateBuzzContent(issue: any, personaType: string): Promise<str
 글만 작성하세요. 다른 설명 없이.`,
         }],
       }),
-    });
+    }, { caller: 'feed-buzz-publish', category: llmCategoryOfContent(issue?.category) });
 
     if (!res.ok) return null;
     const data = await res.json();

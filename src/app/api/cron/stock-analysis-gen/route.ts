@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 import { dbw } from '@/lib/cron-db-log';
+import { anthropicFetch } from '@/lib/llm/gateway';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -45,12 +46,12 @@ export async function GET(_req: NextRequest) {
 필수 4섹션(## 소제목): 기업개요, 투자포인트([시세보기→](/stock) [비교→](/stock/compare) 링크), 밸류에이션, FAQ(### Q. 5개).
 규칙: 마크다운, 목차금지, ##안에 볼드금지, 면책문구 마지막.`;
 
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await anthropicFetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY!, 'anthropic-version': ANTHROPIC_VERSION },
           body: JSON.stringify({ model: AI_MODEL_HAIKU, max_tokens: 3000, messages: [{ role: 'user', content: prompt }] }),
           signal: AbortSignal.timeout(25000),
-        });
+        }, { caller: 'stock-analysis-gen', category: 'stock' });
 
         if (!res.ok) continue;
         const data = await res.json();
