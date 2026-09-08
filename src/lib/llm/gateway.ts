@@ -94,16 +94,33 @@ async function loadConfig(): Promise<QuotaConfig> {
   }
 }
 
-/** 오늘(KST 기준 24시간 창) 실제로 크레딧을 태운 호출 수. skipped 는 시도가 아니다. */
+/** KST 자정 이후 시작. ⚠️ 롤링 24h 가 아니다 — 아래 주석이 그 이유를 든다. */
+function kstDayStartIso(): string {
+  const k = new Date(Date.now() + 9 * 3600_000);
+  const midnightUtcMs = Date.UTC(k.getUTCFullYear(), k.getUTCMonth(), k.getUTCDate()) - 9 * 3600_000;
+  return new Date(midnightUtcMs).toISOString();
+}
+
+/**
+ * 오늘 «실제로 크레딧을 태운» 호출 수.
+ *
+ * ⛔ 실패(error)를 세지 않는다. 4xx/5xx 는 과금되지 않는데, 세면 «장애가 예산을 잠근다».
+ *    2026-09-08 실측이 정확히 그랬다 — 크레딧 사망기의 실패 204건이 롤링 24h 창에 남아
+ *    예산 200 을 통째로 먹었고, 회복된 뒤에도 새 호출이 전부 막혔다.
+ *    폭주하는 실패는 예산이 아니라 파수꾼(fn_llm_silence_watch)이 잡는 몫이다.
+ * ⛔ 창을 롤링 24h 가 아니라 «KST 달력일» 로 둔다. 롤링이면 어제의 사고가 오늘을 계속
+ *    잠그고, 「일 예산」이라는 말과도 어긋난다.
+ * ⚠️ skipped 는 애초에 쏘지 않은 것이라 당연히 세지 않는다.
+ */
 async function spentToday(category?: 'stock_side' | 'all'): Promise<number> {
   try {
     const sb = getSupabaseAdmin() as any;
-    const since = new Date(Date.now() - 24 * 3600_000).toISOString();
+    const since = kstDayStartIso();
     let q = sb
       .from('llm_usage_logs')
       .select('id', { count: 'exact', head: true })
       .gte('created_at', since)
-      .neq('status', 'skipped');
+      .eq('status', 'success');
     if (category === 'stock_side') q = q.in('category', ['stock', 'finance']);
     const { count } = await q;
     return count ?? 0;

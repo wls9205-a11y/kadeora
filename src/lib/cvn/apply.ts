@@ -140,7 +140,7 @@ export async function applyCandidate(
     reason = `${reason} (섀도 — autoapply OFF)`;
   }
 
-  const { data: cand } = await deps.admin
+  const { data: cand, error: candErr } = await deps.admin
     .from('site_name_candidates')
     .upsert(
       {
@@ -172,6 +172,18 @@ export async function applyCandidate(
     wrote: false,
     reason,
   };
+
+  // ⛔ 큐 등재 실패를 «조용히» 넘기지 않는다.
+  //    2026-09-08 첫 회전 실측: upsert 가 42P10 으로 떨어졌는데 error 를 읽지 않아
+  //    「분류 1건 · 큐 0행」이 됐다 — 분류까지 마친 사냥감이 영속화 직전에 증발했다.
+  //    「미매칭을 폐기하지 않는다」는 원칙이 코드가 아니라 «침묵» 때문에 깨진 자리다.
+  // ⚠️ 그렇다고 던지지도 않는다. 한 건의 실패가 그날 회전 전체를 죽이면 더 나쁘다 —
+  //    실패를 «들고» 돌아가서 크론이 metadata 로 보고하게 한다.
+  if (candErr) {
+    out.resolution = 'pending';
+    out.reason = `큐 등재 실패(적용 보류): ${(candErr as any)?.message ?? String(candErr)}`.slice(0, 300);
+    return out;
+  }
   if (!willWrite || !site) return out;
 
   // ── T-역: 해지·개명. 삭제가 아니라 «강등» 이다. ──────────────────────────

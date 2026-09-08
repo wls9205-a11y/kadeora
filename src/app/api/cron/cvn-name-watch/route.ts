@@ -187,8 +187,16 @@ async function handler(req: NextRequest) {
           eventType: card.eventType,
           source: 'news:naver',
           sourceUrl: card.url,
-          projectName: card.projectName ?? seed?.site.name ?? null,
-          sigungu: card.region ?? seed?.site.sigungu ?? null,
+          // ⛔ 씨앗 현장 이름으로 «대체하지 않는다». 2026-09-08 첫 회전 실측:
+          //    「우동2 시공사 선정」으로 검색해 나온 기사에서 AI 가 「아크로 광안」을 뽑았는데,
+          //    사업명을 못 준 탓에 씨앗(우동2재개발·남구)이 대신 들어가 그 현장에 붙었다.
+          //    광안은 수영구다 — 아무 관계 없는 현장에 이름이 앉을 뻔했고,
+          //    글감(issue_alerts)까지 「우동2재개발 — 아크로 광안」으로 나갔다.
+          //    검색 씨앗은 «어디를 찾아봤는가» 일 뿐 «기사가 무엇을 말하는가» 가 아니다.
+          // ⚠️ 그래서 사업명이 없으면 미매칭으로 둔다. 미매칭은 폐기가 아니라 큐에 남는 것이고
+          //    (resolution='pending'), 오귀속보다 언제나 낫다 — DART 매칭 규칙과 같은 축이다.
+          projectName: card.projectName ?? null,
+          sigungu: card.region ?? null,
           region: card.region,
           builderRaw: card.builder,
           totalUnits: card.units,
@@ -209,8 +217,12 @@ async function handler(req: NextRequest) {
         outcomes.push({ name: card.proposedName, event: card.eventType, tier: out.tier, res: out.resolution });
 
         // C 트랙 — 글감. ⛔ 초안은 여기서 쓰지 않는다. 기존 issue-draft 가 그 몫이다.
+        // ⚠️ 제목에 «확정되지 않은» 현장명을 넣지 않는다. 매칭이 안 됐으면 예정명만 쓴다 —
+        //    틀린 현장명이 붙은 글감은 LB-4 가 P1 으로 최우선 생성해서 그대로 기사가 된다.
         await admin.from('issue_alerts').insert({
-          title: `${input.projectName ?? card.proposedName} — ${card.proposedName}`.slice(0, 200),
+          title: (out.siteId && input.projectName
+            ? `${input.projectName} — ${card.proposedName}`
+            : card.proposedName).slice(0, 200),
           summary: seed?.description ?? null,
           category: 'apt',
           source_type: 'cvn_name_event',
