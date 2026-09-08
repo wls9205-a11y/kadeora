@@ -173,7 +173,14 @@ async function handler(req: NextRequest) {
     for (const r of (ranked ?? []) as Array<{ date: string; matched_url: string }>) {
       const m = r.matched_url.match(/\/blog\/([^/?#]+)/);
       if (!m) continue;
-      if (!firstByUrl.has(m[1])) firstByUrl.set(m[1], r.date);
+      // ⛔ 퍼센트 인코딩을 «반드시» 푼다. blog_posts.slug 에는 한글이 그대로 들어 있는데
+      //    matched_url 은 인코딩된 채라(%EB%8D%94…) 디코드 없이는 조인이 안 된다.
+      //    실측 2026-09-08: 디코드 전 표본이 «1건» 뿐이었다 — 영문 slug 하나만 붙었고
+      //    한글 slug 글은 전부 놓쳐서 리드타임이 그 한 건의 값이 되고 있었다.
+      //    (오늘 세 번째 인코딩 사고다. Next redirects 도 같은 이유로 308 이 안 걸렸다.)
+      let slug = m[1];
+      try { slug = decodeURIComponent(slug); } catch { /* 잘못된 인코딩은 원문으로 둔다 */ }
+      if (!firstByUrl.has(slug)) firstByUrl.set(slug, r.date);
     }
     if (firstByUrl.size) {
       const slugs = Array.from(firstByUrl.keys()).slice(0, 500);
