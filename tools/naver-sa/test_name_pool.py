@@ -190,9 +190,38 @@ try:
 except Exception as e:
     check(False, '배열 builder_normalized 에서 예외: %r' % (e,))
 
+print('\n■ ⑩ CV-N — 브랜드 별칭이 «짧은 것 우선» 보다 앞선다 (2026-09-08)')
+# 사람은 「촉진3구역」이 아니라 「아크로 라로체」를 검색한다. max_alias 4 에서 이 한 칸이
+# 곧 유입이다 — 9/3 실측 정비사업군 클릭당 리드 13.3%.
+# ⚠️ 이 검사는 DB 없이 돈다. BRANDS 가 폴백 13개인 상태에서도 「아크로」는 그 안에 있다.
+check(sa.alias_is_brand('아크로 라로체'), 'alias_is_brand(「아크로 라로체」) → True')
+check(sa.alias_is_brand('서면 롯데캐슬'), 'alias_is_brand(「서면 롯데캐슬」) → True')
+check(not sa.alias_is_brand('촉진3구역'), 'alias_is_brand(「촉진3구역」) → False')
+check(not sa.alias_is_brand('우동1 재건축'), 'alias_is_brand(「우동1 재건축」) → False')
+
+_laroche = {'name': '시민공원주변재정비촉진3구역 재개발', 'sigungu': '부산진구',
+            'builder': '디엘이앤씨',
+            'variants': ['촉진3구역', '아크로 라로체', '시민공원 촉진3구역',
+                         '서면 시민공원주변재정비촉진3구역 재개발']}
+_pool = sa.name_pool(_laroche, max_alias=4)
+_cands = _pool[1:]           # [0] 은 대표명이다
+check(_cands and _cands[0] == '아크로 라로체',
+      '촉진3 별칭 1순위 = %r (기대 「아크로 라로체」)' % (_cands[0] if _cands else None))
+check(len(_pool) <= 5, 'max_alias 4 불변 — 대표명 포함 %d개' % len(_pool))
+
+# ⚠️ 브랜드 «단독» 은 여기까지 오면 안 된다. 앞선 fragment 가드가 이미 막는다 —
+#    alias_is_brand 는 «순서» 만 정할 뿐 문이 아니라는 것의 확인이다.
+_solo = sa.name_pool({'name': '해운대 어떤현장', 'sigungu': '해운대구',
+                      'variants': ['아크로', '힐스테이트', '해운대 아크로시티']}, max_alias=4)
+check('아크로' not in _solo and '힐스테이트' not in _solo,
+      '브랜드 단독은 정렬 이전에 차단된다 → %s' % _solo[1:])
+
 if os.environ.get('SUPABASE_DB_URL'):
     print('\n■ ③ 전수 — 전 현장 name_pool 스윕')
     sites = sa.fetch_sites()
+    # fetch_sites() 가 brand_tokens 정본을 읽어 BRANDS 를 갈아끼웠어야 한다 (CV-N ①).
+    check(len(sa.BRANDS) >= len(sa.BRANDS_FALLBACK),
+          'brand_tokens 정본 %d개 로드 (폴백 %d개 이상)' % (len(sa.BRANDS), len(sa.BRANDS_FALLBACK)))
     hit = {}
     total = 0
     for s in sites:

@@ -19,6 +19,7 @@ import {
 } from '@/lib/gap/metrics';
 // ⚠️ 라우트 모듈은 헬퍼를 export 하지 못한다(생성 타입이 거부). 판정 본문은 lib 에 산다.
 import { countSimilarPairs } from '@/lib/gap/similar-pairs';
+import { healAppliedAliases } from '@/lib/cvn/apply';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -101,6 +102,60 @@ async function handler(req: NextRequest) {
       prev: prev.get('source_zero_streak') ?? null, detail: { sources: healthRows ?? [] },
     },
   ];
+
+  // ── CV-N 2지표 + 야간 대사 (2026-09-08) ─────────────────────────────────
+  // ⚠️ 대사가 «먼저» 다. 자가치유가 되살린 뒤의 상태를 재야 지표가 오늘의 진실이 된다.
+  //    원장은 applied 인데 별칭이 없는 행을 되살린다 — 어떤 미래의 쓰기가 지워도
+  //    다음 밤 원장이 되살린다는 것이 v1.2-B 의 약속이다.
+  const heal = dry
+    ? { checked: 0, missing: 0, rehealed: 0, samples: [] as Array<{ siteId: string; alias: string }> }
+    : await healAppliedAliases(admin, `gap-watch-${new Date().toISOString().slice(0, 10)}`);
+
+  // 선점률 — 「첫 보도 시점에 이미 그 이름을 갖고 있었는가」의 대리 지표다.
+  // 적용기가 별칭을 «새로 넣지 않았다» = 이미 갖고 있었다는 뜻이므로, 최근 후보 20건 중
+  // alias_add 기록이 없는 비율을 센다.
+  const { data: recentCand } = await admin
+    .from('site_name_candidates')
+    .select('id, site_id')
+    .not('site_id', 'is', null)
+    .order('first_seen_at', { ascending: false })
+    .limit(20);
+  const candRows = (recentCand ?? []) as Array<{ id: number; site_id: string }>;
+  let preempt = 0;
+  if (candRows.length) {
+    const { data: addRows } = await admin
+      .from('site_name_applies')
+      .select('candidate_id')
+      .eq('op', 'alias_add')
+      .in('candidate_id', candRows.map((c) => c.id));
+    const added = new Set(((addRows ?? []) as Array<{ candidate_id: number }>).map((r) => r.candidate_id));
+    preempt = Math.round((candRows.filter((c) => !added.has(c.id)).length / candRows.length) * 100);
+  }
+
+  // 브랜드 별칭 커버리지 — 시공사가 있는 정비 현장 중 브랜드 이름을 가진 비율.
+  const { data: brandRows } = await admin.from('brand_tokens').select('brand').eq('is_active', true);
+  const brandList = ((brandRows ?? []) as Array<{ brand: string }>).map((b) => b.brand.replace(/\s/g, ''));
+  const redevRows = await fetchAll(admin, 'apt_sites', 'id, name, display_name, builder, name_variants',
+    (q: any) => q.eq('is_active', true));
+  const redev = (redevRows as any[]).filter(
+    (r) => /(재개발|재건축|촉진|정비사업|지구단위)/.test(r.name ?? '')
+      && r.builder && String(r.builder).trim(),
+  );
+  const withBrand = redev.filter((r) => {
+    const hay = [r.display_name ?? '', r.name ?? '', ...(Array.isArray(r.name_variants) ? r.name_variants : [])]
+      .join(' ').replace(/\s/g, '');
+    return brandList.some((b) => hay.includes(b));
+  });
+  const coverage = redev.length ? Math.round((withBrand.length / redev.length) * 100) : 0;
+
+  readings.push(
+    { def: def('cvn_name_preempt'), value: preempt, prev: prev.get('cvn_name_preempt') ?? null,
+      detail: { sampled: candRows.length } },
+    { def: def('cvn_brand_alias_coverage'), value: coverage, prev: prev.get('cvn_brand_alias_coverage') ?? null,
+      detail: { denom: redev.length, with_brand: withBrand.length } },
+    { def: def('cvn_alias_heal'), value: heal.rehealed, prev: prev.get('cvn_alias_heal') ?? null,
+      detail: { checked: heal.checked, missing: heal.missing, samples: heal.samples } },
+  );
 
   const body = formatDigest(readings, prevAt);
   const sev = digestSeverity(readings);

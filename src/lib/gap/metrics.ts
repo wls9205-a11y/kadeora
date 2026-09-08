@@ -72,6 +72,27 @@ export const GAP_METRICS: GapMetricDef[] = [
     action: '보류·병합 후보가 쌓인 것 — 주 1회 큐를 비운다',
   },
   {
+    key: 'cvn_name_preempt',
+    label: '예정명 선점률(최근 20건 %)',
+    direction: 'higher_is_better',
+    warnAt: 40, critAt: 15,
+    action: '첫 보도 때 이미 그 이름을 갖고 있던 비율이다. 낮으면 워처가 늦은 것 — cvn-name-watch 의 targets·budget 을 본다',
+  },
+  {
+    key: 'cvn_brand_alias_coverage',
+    label: '브랜드 별칭 커버리지(시공사有 정비 %)',
+    direction: 'higher_is_better',
+    warnAt: 25, critAt: 10,
+    action: '시공사가 정해졌는데 브랜드 이름이 없는 현장의 뒷면이다. 오르지 않으면 N-1 브랜드관 목록(brand_tokens.registry_url)이 마른 것이다',
+  },
+  {
+    key: 'cvn_alias_heal',
+    label: '별칭 자가치유 재주입',
+    direction: 'lower_is_better',
+    warnAt: 1, critAt: 20,
+    action: '원장은 applied 인데 별칭이 사라져 되살린 건수다. 0 이 정상 — 1 이상이면 어떤 쓰기가 name_variants 를 덮고 있다(트리거 통째 교체 의심)',
+  },
+  {
     key: 'source_zero_streak',
     label: '연속 0카드 소스',
     direction: 'lower_is_better',

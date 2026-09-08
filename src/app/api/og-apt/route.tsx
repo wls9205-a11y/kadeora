@@ -74,6 +74,7 @@ const SITE_TYPE_LABEL: Record<string, string> = {
 
 // V13 A-2: 단계 라벨 단일 원본 (lib/apt/lifecycle-label.ts).
 import { LIFECYCLE_LABEL } from '@/lib/apt/lifecycle-label';
+import { displayNameOf } from '@/lib/apt/seo-name';
 
 function fmtAmount(n: number | null | undefined): string {
   if (n == null || n === 0) return '—';
@@ -217,8 +218,15 @@ function renderCover(site: AptRow): React.ReactElement {
   );
 }
 
-/** 표시 이름 — display_name 우선, 없으면 name. §A-3 */
-const displayNameOf = (site: AptRow): string => (site.display_name || site.name || '').trim();
+/**
+ * 표시 이름 — display_name 우선, 없으면 name. §A-3
+ *
+ * ⚠️ 여기 두 벌째 구현을 두지 않는다 (CV-N N-4-2 · 2026-09-08). 정본은 seo-name.ts 이고
+ *    apt/[id] 도 그것을 쓴다. 두 벌이던 시절 실제로 «값이 갈렸다»: 로컬본은
+ *    `(display_name || name).trim()` 이라 display_name 이 공백뿐이면 빈 이름을 냈고,
+ *    정본은 trim 을 «먼저» 해서 name 으로 떨어진다. OG 카드만 이름이 사라지는 형태였다.
+ *    display 규격이 「{예정명} — {구역명}」으로 움직여도 이제 고칠 자리는 한 곳이다.
+ */
 
 /**
  * §A-2 히어로 레이아웃 (4:3 · 21:9).
@@ -232,7 +240,7 @@ const displayNameOf = (site: AptRow): string => (site.display_name || site.name 
  */
 function renderHero(site: AptRow, ratio: RatioKey): React.ReactElement {
   const wide = ratio === '21x9';
-  const name = displayNameOf(site);
+  const name = displayNameOf(site.display_name, site.name);
   const lcLabel = site.lifecycle_stage ? LIFECYCLE_LABEL[site.lifecycle_stage] : null;
   const heroTag = tagFor(site);
 

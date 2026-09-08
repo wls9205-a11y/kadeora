@@ -106,11 +106,22 @@ ALIAS = {
  "에코델타시티 금강펜테리움 6BL": "에코델타시티 금강펜테리움",
 }
 
-# 생성기(generate_apt_name_variants_jsonb)와 «같은» 브랜드 목록. 「<한 글자> + 브랜드」가
-# CV-B ① 에서 지운 ⓑ형이다 — 「외 데시앙」·「남 포레나」·「중 더샵」.
-BRANDS = frozenset("""
+# 브랜드 토큰의 «정본» 은 DB 의 brand_tokens 다 (CV-N ① · 2026-09-08). 시군구 표를 DB 함수
+# 한 곳에만 둔 것과 같은 원칙이다 — 목록이 두 벌이면 반드시 갈라진다.
+#
+# ⚠️ 아래 13개는 «정본의 사본» 이 아니라 «DB 를 못 읽었을 때의 폴백» 이다. 생성기
+#    generate_apt_name_variants_jsonb 의 CASE 13행과 같은 값이라, 폴백으로 돌아도 종전과
+#    똑같이 움직인다.
+# ⛔ 여기에 새 브랜드를 «추가하지 않는다». 추가는 brand_tokens 에 한다 — 여기 적으면
+#    그 순간 목록이 두 벌이 되고, 이 주석이 막으려는 바로 그 일이 벌어진다.
+#
+# 「<한 글자> + 브랜드」가 CV-B ① 에서 지운 ⓑ형이다 — 「외 데시앙」·「남 포레나」·「중 더샵」.
+BRANDS_FALLBACK = frozenset("""
 래미안 자이 힐스테이트 푸르지오 아크로 더샵 롯데캐슬 포레나 호반써밋 아이파크 두산위브 데시앙 비스타
 """.split())
+
+# fetch_sites() 가 DB 정본을 읽어 갈아끼운다. 그때까지는 폴백이 곧 목록이다.
+BRANDS = BRANDS_FALLBACK
 
 # 길이 필터 A안(§ SQL)과 「<한 글자>+브랜드」 판정이 «같은 목록» 을 쓴다.
 SA_BRAND_RE = "|".join(sorted(BRANDS, key=len, reverse=True))
@@ -153,7 +164,11 @@ WHERE is_active
   AND region IS NOT NULL
 ORDER BY region, cat, content_score DESC, coalesce(total_units,0) DESC
 """
-SQL = SQL.replace("__BRAND_RE__", SA_BRAND_RE)
+# ⚠️ 치환을 «여기서 끝내지» 않는다. 브랜드 정본이 DB 에 있으므로 fetch_sites() 가
+#    실제 목록을 읽은 «뒤» 다시 만들어야 길이필터 A 가 정본을 반영한다.
+#    아래 한 줄은 DB 를 못 읽었을 때 그대로 쓰이는 폴백 초기값이다.
+SQL_TEMPLATE = SQL
+SQL = SQL_TEMPLATE.replace("__BRAND_RE__", SA_BRAND_RE)
 
 
 # ─────────────────────────────────────────────── 소재 문구
@@ -265,6 +280,40 @@ def rsa_ads(zone, cat):
 
 # ─────────────────────────────────────────────── DB
 
+# 브랜드 토큰은 정규식과 SQL 문자열 «둘 다» 로 들어간다. 그래서 모양을 좁게 강제한다 —
+# 한글·영숫자만 통과시키면 따옴표도 정규식 메타문자도 원리적으로 들어올 수 없다.
+BRAND_TOKEN_OK = re.compile(r"^[0-9A-Za-z가-힣]{2,20}$")
+
+
+def load_brand_tokens(conn):
+    """브랜드 토큰 정본(brand_tokens)을 읽어 전역을 갈아끼운다 (CV-N ①).
+
+    이 한 번으로 «두 곳» 이 동시에 정본을 따른다:
+      ① 길이필터 A — 짧아도 브랜드가 든 이름은 살린다(`name ~ __BRAND_RE__`)
+      ② alias_is_brand() — 별칭 정렬에서 브랜드를 앞세운다
+
+    ⚠️ 실패해도 «죽지 않는다». 표가 아직 없거나 권한이 없으면 폴백 13개로 종전대로 돈다.
+       광고 회전이 표 하나 때문에 멈추면 그날 전 지역이 통째로 사라진다 —
+       name_pool 크래시가 470현장을 삼켰던 것과 같은 급의 사고다.
+    """
+    global BRANDS, SA_BRAND_RE, SQL
+    got = set()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT brand FROM brand_tokens WHERE is_active")
+            for r in cur.fetchall():
+                b = (r[0] or "").strip()
+                if BRAND_TOKEN_OK.match(b):
+                    got.add(b)
+    except Exception as e:
+        print("  ⚠️ brand_tokens 를 못 읽었습니다 — 폴백 %d개로 돕니다 (%s)"
+              % (len(BRANDS_FALLBACK), e))
+    BRANDS = frozenset(got) if got else BRANDS_FALLBACK
+    SA_BRAND_RE = "|".join(sorted(BRANDS, key=len, reverse=True))
+    SQL = SQL_TEMPLATE.replace("__BRAND_RE__", SA_BRAND_RE)
+    return len(BRANDS)
+
+
 def fetch_sites():
     if not DB_URL:
         sys.exit("SUPABASE_DB_URL 이 없습니다. Supabase > Settings > Database > Connection string")
@@ -273,6 +322,8 @@ def fetch_sites():
     except ImportError:
         sys.exit("pip install psycopg2-binary")
     with psycopg2.connect(DB_URL) as conn:
+        # ⚠️ SQL 을 «만들기 전» 에 부른다. 길이필터 A 가 이 목록으로 짜인다.
+        load_brand_tokens(conn)
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute(SQL)
             rows = [dict(r) for r in cur.fetchall()]
@@ -356,6 +407,25 @@ def alias_is_corp(raw, cleaned, main, builders=()):
         if len(b) >= 3 and b in bare and b not in bare_main:
             return True
     return False
+
+
+def alias_is_brand(alias):
+    """별칭이 «브랜드 토큰» 을 품고 있는가 (CV-N N-4-1 · 2026-09-08).
+
+    ⛔ 채택/차단의 문이 «아니다». 가드 3종(fragment·corp·dup_prefix)이 먼저 다 돌고,
+       살아남은 것들 사이의 «순서» 만 이 술어가 정한다.
+
+    왜 순서를 바꾸는가 — 사람은 「시민공원주변재정비촉진3구역 재개발」을 검색하지 않는다.
+    「아크로 라로체」를 검색한다. 예정명이 그 현장 검색 수요의 실체다.
+    그런데 name_pool 의 기존 정렬은 «짧은 것 우선» 이라 「촉진3구역」(5자)이
+    「아크로 라로체」(7자)를 밀어낸다 — max_alias 4 에서 이 한 칸이 곧 유입이다.
+
+    ⚠️ 브랜드 «단독» 은 여기까지 오지 않는다. alias_is_fragment 가 이미 막았다
+       (SUFFIX_ALONE). 그래서 이 술어가 앞세우는 것은 언제나 결합형이다.
+    ⚠️ 목록은 brand_tokens 정본이다. 여기에 브랜드를 적지 않는다.
+    """
+    a = (alias or "").replace(" ", "")
+    return any(b.replace(" ", "") in a for b in BRANDS)
 
 
 def alias_is_dup_prefix(alias, main=None):
@@ -498,7 +568,10 @@ def name_pool(site, max_alias=4):
         if alias_is_dup_prefix(n, main):         # SUPL 후속 — 지역 접두 중복 금지
             continue
         seen.add(k); cands.append(n)
-    cands.sort(key=lambda x: (len(x), x))
+    # ⚠️ 브랜드 별칭이 «짧은 것 우선» 보다 앞선다 (CV-N N-4-1). 정렬 키 한 줄이
+    #    「아크로 라로체」를 「촉진3구역」 앞으로 보낸다. 9/3 실측 정비사업군
+    #    클릭당 리드 13.3% 는 구역명이 아니라 브랜드 검색이 만든 숫자다.
+    cands.sort(key=lambda x: (not alias_is_brand(x), len(x), x))
     return out + cands[:max_alias]
 
 
@@ -808,6 +881,96 @@ def cmd_apply(args):
             fail += 1; print("실패     %-30s %s" % (g["name"], str(e)[:160]))
     print("\n%s 성공 %d / 실패 %d" % (tag, ok, fail))
     if live: print("전 그룹 OFF 상태입니다. 검수 통과 후 켜세요. 다음: sa.py verify")
+
+
+def cmd_relink(args):
+    """착지 URL 교체 — 키워드는 그대로 두고 «어디로 보내는가» 만 바꾼다 (CV-N N-0 · 2026-09-08).
+
+    ── 왜 삭제·재생성이 아닌가 ─────────────────────────────────────────────
+    키워드를 지우고 다시 만들면 품질지수가 «처음부터» 다시 쌓인다. 같은 키워드가
+    같은 자리에 있으면서 착지만 옮기면 품질지수는 그대로다. 되돌림도 API 한 번이다.
+
+    ⛔ 이 명령은 «열거된 쌍» 만 만진다. 패턴으로 훑어 바꾸지 않는다 — 광고 계정 쓰기는
+       반드시 열거 승인을 거친다는 규율이 이 트랙의 전제다.
+    ⚠️ 새 슬러그가 DB 에 «실재하는지» 먼저 본다. 없는 슬러그로 옮기면 /apt/search 로 튕기고,
+       그것은 지금 고치려는 결함과 똑같은 형태다.
+    ⚠️ 바꾸기 전 URL 을 CSV 로 남긴다. 되돌림 규약을 승계한다.
+    """
+    if not API_KEY: sys.exit("NAVER_SA_* 환경변수가 필요합니다.")
+    pairs = []
+    for m in (args.map or []):
+        if "=" not in m: sys.exit("--map 은 «구슬러그=새슬러그» 형태입니다: %s" % m)
+        a, b = m.split("=", 1)
+        pairs.append((a.strip(), b.strip()))
+    if not pairs: sys.exit("--map 을 하나 이상 주십시오.")
+
+    valid = {x["slug"] for x in fetch_sites()}
+    for _, new in pairs:
+        if new not in valid:
+            sys.exit("새 슬러그가 DB 에 없습니다(광고 적격 집합 기준): %s" % new)
+
+    want = {old: SITE + quote("/apt/" + new) for old, new in pairs}
+    olds = {old: SITE + quote("/apt/" + old) for old, _ in pairs}
+
+    st = json.load(open(STATE, encoding="utf-8")) if os.path.exists(STATE) else {"adgroups": {}}
+    targets = dict(EXISTING_GROUPS); targets.update(st.get("adgroups", {}))
+
+    hits = []
+    for name, gidv in targets.items():
+        try:
+            kws = call("GET", "/ncc/keywords", params={"nccAdgroupId": gidv}) or []
+        except Exception as e:
+            print("  조회 실패 %-22s %s" % (name, str(e)[:100])); continue
+        for k in kws:
+            links = k.get("links") or {}
+            pc = (links.get("pc") or {}).get("final") or ""
+            mo = (links.get("mobile") or {}).get("final") or ""
+            for old, old_url in olds.items():
+                if pc == old_url or mo == old_url:
+                    hits.append({"group": name, "gid": gidv, "kid": k.get("nccKeywordId"),
+                                 "keyword": k.get("keyword"), "old": pc or mo,
+                                 "new": want[old]})
+                    break
+        time.sleep(0.15)
+
+    if not hits:
+        print("교체 대상 0건. 계정에 그 착지를 쓰는 키워드가 없습니다."); return
+
+    by_group = Counter(h["group"] for h in hits)
+    print("교체 대상 %d건" % len(hits))
+    for g, n in by_group.most_common():
+        print("  %-22s %d건" % (g, n))
+    for h in hits:
+        print("    %-28s %s → %s" % (h["keyword"][:28], h["old"].split("/apt/")[-1],
+                                     h["new"].split("/apt/")[-1]))
+
+    bak = os.path.join(OUT, "relink_backup_%s.csv" % datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))
+    os.makedirs(OUT, exist_ok=True)
+    with open(bak, "w", newline="", encoding="utf-8-sig") as f:
+        w = csv.DictWriter(f, fieldnames=["group", "gid", "kid", "keyword", "old", "new"])
+        w.writeheader()
+        for h in hits: w.writerow(h)
+    print("되돌림용 백업 저장: %s" % bak)
+
+    if not args.live:
+        print("\n[예행] 아무것도 바꾸지 않았습니다. 실제로 바꾸려면 --live 를 붙이세요.")
+        return
+
+    ok = fail = 0
+    for i in range(0, len(hits), 50):
+        chunk = hits[i:i + 50]
+        body = [{"nccKeywordId": h["kid"],
+                 "links": {"pc": {"final": h["new"]}, "mobile": {"final": h["new"]}}}
+                for h in chunk]
+        try:
+            call("PUT", "/ncc/keywords", params={"fields": "links"}, body=body)
+            ok += len(chunk)
+        except Exception as e:
+            fail += len(chunk)
+            print("  실패 %d건 %s" % (len(chunk), str(e)[:200]))
+        time.sleep(0.3)
+    print("\n[실제] 교체 성공 %d / 실패 %d" % (ok, fail))
+    print("다음: sa.py verify 로 전수 대조")
 
 
 def cmd_verify(args):
@@ -1190,6 +1353,10 @@ def main():
     b = common(s.add_parser("build")); b.add_argument("--gid"); b.set_defaults(fn=cmd_build)
     a = common(s.add_parser("apply")); a.add_argument("--live", action="store_true"); a.set_defaults(fn=cmd_apply)
     s.add_parser("verify").set_defaults(fn=cmd_verify)
+    rl = common(s.add_parser("relink", help="착지 URL 교체 — 열거한 «구슬러그=새슬러그» 쌍만 만진다"))
+    rl.add_argument("--map", action="append", help="구슬러그=새슬러그 (여러 번 지정 가능)")
+    rl.add_argument("--live", action="store_true")
+    rl.set_defaults(fn=cmd_relink)
     r = s.add_parser("rollback"); r.add_argument("--live", action="store_true"); r.set_defaults(fn=cmd_rollback)
     o = s.add_parser("off", help="R3-1 중단 대상 CSV 의 키워드를 OFF(userLock) 한다")
     o.add_argument("--live", action="store_true", help="없으면 대상 목록만 출력하고 아무것도 바꾸지 않는다")

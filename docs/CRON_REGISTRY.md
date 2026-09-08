@@ -25,12 +25,35 @@
 
 | 잡 | 스케줄 | 경로 | 비고 |
 |---|---|---|---|
-| `gap_watch_daily` (pg_cron 171) | `40 21 * * *` (06:40 KST) | `/api/cron/gap-watch` | 커버리지 결측 7지표. 월요일 또는 임계 초과 시 `admin_alerts` 로 다이제스트 |
+| `gap_watch_daily` (pg_cron 171) | `40 21 * * *` (06:40 KST) | `/api/cron/gap-watch` | 커버리지 결측 **10지표**(2026-09-08 CV-N 3지표 추가). 월요일 또는 임계 초과 시 `admin_alerts` 로 다이제스트 |
 
 ⛔ **Vercel cron 에 넣지 않았다** — 한도 100 도달분이라 추가하면 배포가 ERROR 로 죽는다.
    이 문서의 규칙(신규는 pg_cron)을 그대로 따랐다.
 ⚠️ 이 크론은 «아무것도 고치지 않는다». 재고, 적고, 사람에게 넘긴다. 자동 수정을 붙이면
    지표가 스스로를 낮추는 길이 생긴다.
+
+## CV-N 예정명 인리치 (2026-09-08 추가)
+
+| 잡 | 스케줄 | 경로 | 비고 |
+|---|---|---|---|
+| `cvn_name_watch` | `10 21 * * *` (06:10 KST) | `/api/cron/cvn-name-watch` | 수주·명명 이벤트 워처 + 백필. 일 AI 상한은 `app_config('cvn','daily_ai_budget')` |
+| `cvn_brand_registry` | `50 20 * * 0` (월 05:50 KST) | `/api/cron/cvn-brand-registry` | 브랜드관 어댑터. 주 1회 |
+| `/api/cron/cvn-selftest` | (스케줄 없음) | `/api/cron/cvn-selftest` | **L2 게이트.** 배포 직후 1회 수동. green 이면 `cvn.autoapply_enabled` 를 켠다 |
+
+⚠️ **`cvn_name_watch` 는 `gap_watch_daily`(06:40) 보다 «먼저» 돈다.** 그날 들어온 예정명이
+   같은 날 갭워치 지표(`cvn_name_preempt`)에 실려야 하고, 갭워치가 야간 대사(별칭 자가치유)를
+   겸하기 때문이다. 순서를 뒤집으면 지표가 하루씩 늦게 보인다.
+
+⛔ **`cvn-selftest` 에 스케줄을 걸지 않는다.** 게이트는 «배포 직후 한 번» 이다. 매일 돌리면
+   AI 호출을 매일 사고, 더 나쁘게는 어느 날의 일시적 실패가 자동 적용을 «꺼» 버린다.
+
+### 킬스위치 (`app_config`, namespace `cvn`)
+
+| 키 | 기본 | 뜻 |
+|---|---|---|
+| `watcher_enabled` | `true` | 끄면 크론 2본이 즉시 반환한다. **사람이 쓰는 유일한 스위치** |
+| `autoapply_enabled` | `false` | `false` = 섀도(원장만 쌓고 적용 0). ⛔ 사람이 켜지 않는다 — L2 가 켠다 |
+| `daily_ai_budget` | `40` | N-2 의 일 AI 콜 상한 |
 
 ## 현황 (2026-04-23)
 - **Vercel Pro 크론 한도**: 100 개
