@@ -75,7 +75,12 @@ export const GAP_METRICS: GapMetricDef[] = [
     key: 'ad_landing_on_inactive',
     label: '비활성 레코드 착지(가동 키워드)',
     direction: 'lower_is_better',
-    warnAt: 1, critAt: 20,
+    // ⚠️ critical 을 두지 않는다. 이 지표는 «어제 스냅샷» 을 읽으므로, 오늘 착지를 옮기고
+    //    레코드를 내린 당일에는 그 수가 통째로 잡힌다 — 실제로는 이미 고쳐진 것이다.
+    //    2026-09-08 실측: 교체·비활성 직후 29 였고 다음 스냅샷이면 0 이다.
+    //    첫날부터 거짓 빨강을 내면 그 순간 「빨강의 상시화」가 시작된다(RULES#145).
+    //    ⛔ 그래서 warning 까지만 낸다. detail.snapshot_date 가 기준일을 들고 있다.
+    warnAt: 1,
     action: '레코드를 내렸는데 광고 착지를 안 옮긴 것이다 — 돈이 죽은 페이지로 흐른다. '
       + 'sa.py relink --map "<구슬러그>=<정본슬러그>" 로 옮기고 308 을 켠다. '
       + '⚠️ 값은 «가동(ELIGIBLE)» 만 센다. detail.paused 는 꺼져 있어 비용이 안 나가는 잔여라 '

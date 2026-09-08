@@ -212,6 +212,7 @@ async function handler(req: NextRequest) {
   //    뭉치면 「돈이 새는 것」과 「조용한 잔여」가 한 숫자가 되어 급한 쪽을 못 본다.
   let adOnInactive = 0;
   let adOnInactivePaused = 0;
+  let adSnapshotDate: string | null = null;
   const adInactiveDetail: Array<{ slug: string; status: string; n: number }> = [];
   try {
     const { data: snap } = await admin
@@ -221,6 +222,7 @@ async function handler(req: NextRequest) {
       .limit(1)
       .maybeSingle();
     const day = snap?.snapshot_date ?? null;
+    adSnapshotDate = day;
     if (day) {
       const rows = await fetchAll(admin, 'ad_keywords', 'site_slug, status',
         (q: any) => q.eq('snapshot_date', day).not('site_slug', 'is', null));
@@ -260,7 +262,9 @@ async function handler(req: NextRequest) {
     { def: def('nv5_lead_time_days'), value: leadMedian, prev: prev.get('nv5_lead_time_days') ?? null,
       detail: { samples: leadSamples, baseline_days: 20, channel: 'webkr' } },
     { def: def('ad_landing_on_inactive'), value: adOnInactive, prev: prev.get('ad_landing_on_inactive') ?? null,
-      detail: { paused: adOnInactivePaused, by_slug: adInactiveDetail } },
+      detail: { paused: adOnInactivePaused, snapshot_date: adSnapshotDate,
+                stale: adSnapshotDate !== new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10),
+                by_slug: adInactiveDetail } },
   );
 
   const body = formatDigest(readings, prevAt);
