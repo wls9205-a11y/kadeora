@@ -239,6 +239,14 @@ const nextConfig: NextConfig = {
        */
       { source: "/apt/아크로-라로체", destination: "/apt/시민공원주변재정비촉진3구역-재개발", permanent: true },
       { source: "/apt/부산-우동1-재건축", destination: "/apt/우동1-재건축", permanent: true },
+      /**
+       * ⚠️ 퍼센트 인코딩 형태도 «따로» 등록한다. 2026-09-08 실측: 한글 source 만 두었더니
+       *    브라우저가 보내는 인코딩된 경로(/apt/%EC%95%84...)와 매칭되지 않아
+       *    308 이 아니라 **200** 이 나왔다. Next 는 source 를 디코딩해 비교하지 않는다.
+       *    ⛔ 「리다이렉트를 넣었다」로 끝내지 않고 실제 응답 코드를 쟀기에 잡혔다.
+       */
+      { source: "/apt/%EC%95%84%ED%81%AC%EB%A1%9C-%EB%9D%BC%EB%A1%9C%EC%B2%B4", destination: "/apt/시민공원주변재정비촉진3구역-재개발", permanent: true },
+      { source: "/apt/%EB%B6%80%EC%82%B0-%EC%9A%B0%EB%8F%991-%EC%9E%AC%EA%B1%B4%EC%B6%95", destination: "/apt/우동1-재건축", permanent: true },
     ];
   },
 };
