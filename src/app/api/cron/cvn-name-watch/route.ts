@@ -21,6 +21,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { classifyNewsBatch, type NewsInput } from '@/lib/cvn/extract';
 import { applyCandidate, loadSites, readSwitch } from '@/lib/cvn/apply';
+import { registerRankTargets } from '@/lib/cvn/rank-targets';
 import type { NameCandidateInput, SiteLite } from '@/lib/cvn/decide';
 
 export const maxDuration = 300;
@@ -214,30 +215,52 @@ async function handler(req: NextRequest) {
         const out = await applyCandidate(input, sites, { admin, runId, autoApply });
         if (out.wrote) applied += 1;
         if (out.resolution === 'held') held += 1;
-        outcomes.push({ name: card.proposedName, event: card.eventType, tier: out.tier, res: out.resolution });
+
+        // NV-5 ④ — 확정된 이름만 순위 표적으로 올린다.
+        // ⛔ pending·merge_queue·held 는 등재하지 않는다. 확정되지 않은 이름을 재기 시작하면
+        //    표적 풀이 «답이 없는 질문» 으로 차고, 일 측정 80 안에서 새 예정명이 밀려난다.
+        let targeted: any = null;
+        if (out.wrote && (out.tier === 'T-A' || out.tier === 'T-B')) {
+          targeted = await registerRankTargets(admin, card.proposedName);
+        }
+        outcomes.push({
+          name: card.proposedName, event: card.eventType, tier: out.tier, res: out.resolution,
+          ...(targeted ? { targets: targeted } : {}),
+        });
 
         // C 트랙 — 글감. ⛔ 초안은 여기서 쓰지 않는다. 기존 issue-draft 가 그 몫이다.
         // ⚠️ 제목에 «확정되지 않은» 현장명을 넣지 않는다. 매칭이 안 됐으면 예정명만 쓴다 —
         //    틀린 현장명이 붙은 글감은 LB-4 가 P1 으로 최우선 생성해서 그대로 기사가 된다.
-        await admin.from('issue_alerts').insert({
-          title: (out.siteId && input.projectName
-            ? `${input.projectName} — ${card.proposedName}`
-            : card.proposedName).slice(0, 200),
-          summary: seed?.description ?? null,
-          category: 'apt',
-          source_type: 'cvn_name_event',
-          sub_category: card.eventType,
-          source_urls: [card.url],
-          detected_keywords: [card.proposedName, input.projectName ?? ''].filter(Boolean),
-          apt_site_id: out.siteId,
-          region_sigungu: card.region,
-          // ⚠️ 점수를 «준다». 기본값 0 이면 issue-draft 의 문턱(≥25)에 걸려 P1 글감이
-          //    한 건도 안 뽑힌다. 45 는 문턱(25)과 발행 임계(35) 위이면서, 사람이 만든
-          //    고득점 이슈를 밀어낼 만큼 높지는 않은 자리다.
-          base_score: 45,
-          final_score: 45,
-          raw_data: { tier: out.tier, resolution: out.resolution, builder: card.builder, units: card.units },
-        });
+        //
+        // NV-5 ② 의도 번들 — 한 현장 = 검색어 군집 = 글 군집.
+        // ⚠️ 기본 OFF 다. issue-draft 에 title_similar(pg_trgm 0.35) 중복 차단이 있어
+        //    「아크로 라로체」와 「아크로 라로체 분양가」가 «서로를 막을» 수 있다.
+        //    방안서가 「미실측 가정」으로 둔 자리가 여기이고, 게이트를 완화하는 대신 스위치를
+        //    두고 3단 퍼널(선정→초안→발행)을 실측한 뒤 켠다 — L2 게이트와 같은 정신이다.
+        const bundleOn = await readSwitch(admin, 'bundle_enabled', false);
+        const intents: Array<string> = bundleOn ? ['', ' 분양가', ' 청약 일정'] : [''];
+
+        for (const intent of intents) {
+          await admin.from('issue_alerts').insert({
+            title: ((out.siteId && input.projectName
+              ? `${input.projectName} — ${card.proposedName}`
+              : card.proposedName) + intent).slice(0, 200),
+            summary: seed?.description ?? null,
+            category: 'apt',
+            source_type: 'cvn_name_event',
+            sub_category: card.eventType,
+            source_urls: [card.url],
+            detected_keywords: [`${card.proposedName}${intent}`, card.proposedName, input.projectName ?? ''].filter(Boolean),
+            apt_site_id: out.siteId,
+            region_sigungu: card.region,
+            // ⚠️ 점수를 «준다». 기본값 0 이면 issue-draft 의 문턱(≥25)에 걸려 P1 글감이
+            //    한 건도 안 뽑힌다. 45 는 문턱(25)과 발행 임계(35) 위이면서, 사람이 만든
+            //    고득점 이슈를 밀어낼 만큼 높지는 않은 자리다.
+            base_score: 45,
+            final_score: 45,
+            raw_data: { tier: out.tier, resolution: out.resolution, builder: card.builder, units: card.units, intent: intent.trim() || 'main' },
+          });
+        }
       }
 
       return {
