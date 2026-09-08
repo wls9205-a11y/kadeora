@@ -70,6 +70,15 @@ CV-N 은 그 위에 얹힌 것이 아니라 그것을 **드러낸** 셈이다.
 308 은 착지 교체 **뒤** 에 켰다(`/apt/아크로-라로체`·`/apt/부산-우동1-재건축`) — 광고 트래픽이
 리다이렉트를 경유하는 창이 0이다.
 
+⛔ **첫 시도는 안 걸렸다.** 응답이 308 이 아니라 **200** 이었다 — Next 의 `redirects.source` 는
+   디코딩해 비교하지 않아서 한글 그대로 적은 source 가 브라우저의 퍼센트 인코딩 경로에
+   매칭되지 않는다. 인코딩 형태를 따로 등록해 해결했다.
+   「리다이렉트를 넣었다」로 끝냈으면 구 URL 두 개가 살아 있는 채로 종결됐을 것이다 —
+   SA API 에서 200 을 성공으로 읽지 않은 것과 **같은 축의 사고**가 하루에 두 번 나왔다.
+
+최종 실측: 구 URL 2건 **308** · 정본 2건 **200** · 구 레코드 2건 `is_active=false`
+(대장에 `merge_deactivate` 기록).
+
 ### 등록·계기판
 
 pg_cron `cvn_name_watch`(jobid 175 · `10 21 * * *`) · `cvn_brand_registry`(176 · `50 20 * * 0`).
@@ -110,8 +119,12 @@ pg_cron `cvn_name_watch`(jobid 175 · `10 21 * * *`) · `cvn_brand_registry`(176
 
 ### 남은 것
 
-1. **Anthropic 크레딧 충전** → `_call_vercel_cron('/api/cron/cvn-selftest')` 재호출 → green 이면 autoapply 자동 ON
-2. **`is_active=false`** — 308 리다이렉트 배포가 끝난 뒤 구 레코드 2건(`아크로-라로체`·`부산-우동1-재건축`)에 건다.
+**사람이 할 일은 하나뿐이다** — **Anthropic 크레딧 충전**. 그 뒤
+`SELECT public._call_vercel_cron('/api/cron/cvn-selftest');` 한 줄이면 L2 가 다시 돌고,
+green 이면 `cvn.autoapply_enabled` 가 **자동으로 켜진다**(사람이 켜는 스위치가 아니다).
+그 전까지 크론 2본은 섀도로 돌며 원장만 쌓는다 — 잘못된 이름이 페이지에 앉을 일은 없다.
+
+⚠️ 크레딧은 CV-N 만의 문제가 아니다. `issue-draft` 327회 전패가 그것을 기다리고 있다.
 
 ---
 
