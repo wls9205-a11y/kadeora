@@ -114,10 +114,15 @@ async function handler(req: NextRequest) {
   // 선점률 — 「첫 보도 시점에 이미 그 이름을 갖고 있었는가」의 대리 지표다.
   // 적용기가 별칭을 «새로 넣지 않았다» = 이미 갖고 있었다는 뜻이므로, 최근 후보 20건 중
   // alias_add 기록이 없는 비율을 센다.
+  // ⚠️ 분모는 «보도로 들어온» 후보뿐이다. 브랜드관(brand_registry:)과 수동 주입(manual:)을
+  //    섞으면 지표가 자기 정의를 벗어난다 — 2026-09-08 실측으로 잡혔다: 채팅 주입 8건을
+  //    원장에 사후 등재하자 선점률이 0% 로 찍혔다. 그 8건은 «보도로 온 것이 아니라»
+  //    이미 갖고 있던 것이어서, 분모에 들어간 것 자체가 틀렸다.
   const { data: recentCand } = await admin
     .from('site_name_candidates')
     .select('id, site_id')
     .not('site_id', 'is', null)
+    .like('source', 'news:%')
     .order('first_seen_at', { ascending: false })
     .limit(20);
   const candRows = (recentCand ?? []) as Array<{ id: number; site_id: string }>;
