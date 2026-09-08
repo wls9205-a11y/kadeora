@@ -72,6 +72,18 @@ export const GAP_METRICS: GapMetricDef[] = [
     action: '보류·병합 후보가 쌓인 것 — 주 1회 큐를 비운다',
   },
   {
+    key: 'nv5_lead_time_days',
+    label: '발행→첫 진입 리드타임(웹앱 중앙값, 일)',
+    direction: 'lower_is_better',
+    warnAt: 30, critAt: 45,
+    blindNote: '표본이 얇다. 2026-09-08 기준 깨끗한 관측은 「동래 자이 더 헤리티지」 하나뿐이고 '
+      + '기준선 20일(발행 8/15 → webkr 9/4)이 그 한 건에서 나왔다. '
+      + '표본이 5건을 넘기 전에는 증감을 신호로 읽지 않는다.',
+    action: '선점의 목줄은 발행 속도가 아니라 색인 속도다. 늘면 서치어드바이저 수집 요청(아침 5분 루틴)이 '
+      + '실제로 나가고 있는지부터 본다. ⚠️ 네이버 블로그 변환본은 «다른 채널» 이라 따로 잰다 — '
+      + '같은 글이 blog 8일 · webkr 20일로 갈렸다.',
+  },
+  {
     key: 'cvn_name_preempt',
     label: '예정명 선점률(최근 20건 %)',
     direction: 'higher_is_better',

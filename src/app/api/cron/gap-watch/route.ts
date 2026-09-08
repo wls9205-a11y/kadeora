@@ -153,6 +153,51 @@ async function handler(req: NextRequest) {
   });
   const coverage = redev.length ? Math.round((withBrand.length / redev.length) * 100) : 0;
 
+  // NV-5 §4 — 발행 → 첫 진입 리드타임. keyword_rank_daily.matched_url 로 글을 되짚는다.
+  // ⚠️ 채널을 «섞지 않는다». 같은 글이 네이버 블로그 착지 8일 · 웹앱 20일로 갈렸다(2026-09-08 실측).
+  //    섞으면 중앙값이 두 분포의 가운데라는, 어느 쪽도 아닌 숫자가 된다. 여기서는 webkr(웹앱)만 잰다.
+
+  let leadMedian = 0;
+  let leadSamples = 0;
+  try {
+    const { data: ranked } = await admin
+      .from('keyword_rank_daily')
+      .select('date, matched_url')
+      .eq('source', 'webkr')
+      .not('rank', 'is', null)
+      .not('matched_url', 'is', null)
+      .order('date', { ascending: true })
+      .limit(4000);
+    // 글(slug)마다 «첫» 진입일만 남긴다.
+    const firstByUrl = new Map<string, string>();
+    for (const r of (ranked ?? []) as Array<{ date: string; matched_url: string }>) {
+      const m = r.matched_url.match(/\/blog\/([^/?#]+)/);
+      if (!m) continue;
+      if (!firstByUrl.has(m[1])) firstByUrl.set(m[1], r.date);
+    }
+    if (firstByUrl.size) {
+      const slugs = Array.from(firstByUrl.keys()).slice(0, 500);
+      const { data: posts } = await admin
+        .from('blog_posts')
+        .select('slug, published_at')
+        .in('slug', slugs)
+        .not('published_at', 'is', null);
+      const days: number[] = [];
+      for (const p of (posts ?? []) as Array<{ slug: string; published_at: string }>) {
+        const first = firstByUrl.get(p.slug);
+        if (!first) continue;
+        const d = Math.round((Date.parse(first) - Date.parse(p.published_at)) / 86400000);
+        // ⛔ 음수는 «발행 전 진입» 이라 있을 수 없다 — 데이터 잡음이므로 버린다.
+        if (Number.isFinite(d) && d >= 0 && d <= 365) days.push(d);
+      }
+      days.sort((a, b) => a - b);
+      leadSamples = days.length;
+      if (days.length) leadMedian = days[Math.floor(days.length / 2)];
+    }
+  } catch {
+    // 못 재면 0 으로 둔다. blindNote 가 「표본이 얇다」를 이미 말하고 있다.
+  }
+
   readings.push(
     { def: def('cvn_name_preempt'), value: preempt, prev: prev.get('cvn_name_preempt') ?? null,
       detail: { sampled: candRows.length } },
@@ -160,6 +205,8 @@ async function handler(req: NextRequest) {
       detail: { denom: redev.length, with_brand: withBrand.length } },
     { def: def('cvn_alias_heal'), value: heal.rehealed, prev: prev.get('cvn_alias_heal') ?? null,
       detail: { checked: heal.checked, missing: heal.missing, samples: heal.samples } },
+    { def: def('nv5_lead_time_days'), value: leadMedian, prev: prev.get('nv5_lead_time_days') ?? null,
+      detail: { samples: leadSamples, baseline_days: 20, channel: 'webkr' } },
   );
 
   const body = formatDigest(readings, prevAt);
