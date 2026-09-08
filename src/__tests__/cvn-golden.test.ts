@@ -19,7 +19,8 @@ import {
   type NameCandidateInput,
   type SiteLite,
 } from '@/lib/cvn/decide';
-import { GOLDEN_CASES, GOLDEN_SITES } from '@/lib/cvn/golden';
+import { applyCandidate } from '@/lib/cvn/apply';
+import { CONFLICT_CASE, CONFLICT_SITES, GOLDEN_CASES, GOLDEN_SITES } from '@/lib/cvn/golden';
 
 const toInput = (c: (typeof GOLDEN_CASES)[number]): NameCandidateInput => ({
   proposedName: c.proposedName,
@@ -164,5 +165,103 @@ describe('CV-N 골든셋 — display 규격', () => {
 
   it('강등은 예정명을 지우지 않는다 — 표시만 구역명으로 돌아간다', () => {
     expect(demoteDisplayName('우동1 재건축')).toBe('우동1 재건축');
+  });
+});
+
+
+/**
+ * 충돌 경로 — 2026-09-08 채록. AI 도 DB 도 없다(가짜 admin 이 호출만 기록한다).
+ *
+ * ⚠️ 이 경로는 그날까지 «실전 검증이 없었다». 워처 첫 회전의 pending 은 충돌이 아니라
+ *    「교차 출처 부족」이었고, 유일성 검사는 apply=false 라 돌지도 않았다.
+ *    그 공백을 실물(광안A ↔ 망미 이중)로 메운다.
+ */
+function fakeAdmin() {
+  const calls: Array<{ table: string; op: string; row: any }> = [];
+  const from = (table: string) => ({
+    upsert: (row: any) => {
+      calls.push({ table, op: 'upsert', row });
+      return { select: () => ({ maybeSingle: async () => ({ data: { id: 1 }, error: null }) }) };
+    },
+    insert: async (row: any) => {
+      calls.push({ table, op: 'insert', row });
+      return { data: null, error: null };
+    },
+    update: (row: any) => {
+      calls.push({ table, op: 'update', row });
+      return { eq: async () => ({ data: null, error: null }) };
+    },
+  });
+  return { admin: { from } as any, calls };
+}
+
+const conflictInput = {
+  proposedName: CONFLICT_CASE.proposedName,
+  eventType: CONFLICT_CASE.eventType,
+  source: CONFLICT_CASE.source,
+  sourceUrl: CONFLICT_CASE.sourceUrl,
+  projectName: CONFLICT_CASE.projectName,
+  sigungu: CONFLICT_CASE.sigungu,
+  builderRaw: CONFLICT_CASE.builderRaw,
+  crossRefs: CONFLICT_CASE.crossRefs,
+};
+
+describe('CV-N 충돌 경로 — 주입이 아니라 병합 큐', () => {
+  it('티어 단계에서는 «적용 가능» 하다 — 막는 것은 유일성이지 티어가 아니다', () => {
+    const m = matchSite(conflictInput, CONFLICT_SITES);
+    expect(m.siteId).toBe(CONFLICT_CASE.expectSiteId);
+    const d = decideTier(conflictInput, m);
+    expect(d.tier).toBe('T-B');
+    expect(d.apply).toBe(true);
+  });
+
+  it('적용기를 거치면 merge_queue 로 떨어지고 «아무것도 쓰지 않는다»', async () => {
+    const { admin, calls } = fakeAdmin();
+    const out = await applyCandidate(conflictInput, CONFLICT_SITES, {
+      admin, runId: 'test-conflict', autoApply: true,
+    });
+    expect(out.resolution).toBe('merge_queue');
+    expect(out.wrote).toBe(false);
+    expect(out.aliasAdded).toBeUndefined();
+
+    // ⛔ apt_sites 를 한 번도 건드리지 않아야 한다 — 충돌 상태에서 별칭을 주입하면
+    //    그것이 곧 라로체 3각의 출생이다.
+    expect(calls.filter((c) => c.table === 'apt_sites')).toHaveLength(0);
+
+    // 큐에는 «남는다». 폐기가 아니다.
+    const queued = calls.find((c) => c.table === 'site_name_candidates');
+    expect(queued?.row?.resolution).toBe('merge_queue');
+  });
+
+  it('autoApply 가 꺼져 있어도 충돌 판정이 섀도에 가려지지 않는다', async () => {
+    const { admin } = fakeAdmin();
+    const out = await applyCandidate(conflictInput, CONFLICT_SITES, {
+      admin, runId: 'test-conflict-shadow', autoApply: false,
+    });
+    // 충돌은 섀도보다 «먼저» 판정된다 — 원장에 이유가 정확히 남아야 한다.
+    expect(out.resolution).toBe('merge_queue');
+    expect(out.wrote).toBe(false);
+  });
+
+  it('⚠️ builder 표기 차이(대림산업 ↔ DL이앤씨)로 충돌 판정이 갈리지 않는다', () => {
+    // 같은 회사의 옛 이름이다. 충돌은 «별칭» 으로만 판정한다.
+    const r = checkAliasUniqueness('아크로 광안', '5435f730-83c4-44c7-b4ea-c6d780fedf0b', CONFLICT_SITES);
+    expect(r.ok).toBe(false);
+    expect(r.conflicts).toContain('62a9f1cd-86db-4ec0-b420-f1190a72cb23');
+  });
+
+  it('충돌이 해소된 뒤에는 같은 후보가 정상 적용된다 — 큐가 영구 정체되지 않는다', async () => {
+    const merged = CONFLICT_SITES.map((s) =>
+      s.id === '62a9f1cd-86db-4ec0-b420-f1190a72cb23'
+        ? { ...s, name_variants: (s.name_variants ?? []).filter((v) => v !== '아크로 광안') }
+        : s,
+    );
+    const { admin } = fakeAdmin();
+    const out = await applyCandidate(conflictInput, merged, {
+      admin, runId: 'test-conflict-resolved', autoApply: true,
+    });
+    expect(out.resolution).toBe('applied');
+    expect(out.wrote).toBe(true);
+    expect(out.aliasAdded).toBe('아크로 광안');
   });
 });

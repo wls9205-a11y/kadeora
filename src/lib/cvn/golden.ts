@@ -359,3 +359,59 @@ export const GOLDEN_SNIPPETS: GoldenSnippet[] = [
     expectProjectContains: '가야4',
   },
 ];
+
+/* ─────────────────────────────────── 충돌 경로 픽스처 (2026-09-08 채록) */
+
+/**
+ * 별칭 충돌 → 병합 큐. **실물에서 떠낸 것**이다.
+ *
+ * 워처 첫 회전이 「아크로 광안」을 물어왔을 때 드러난 6번째 이중 레코드다.
+ * ⚠️ 채록 시점이 중요하다 — 이 두 레코드를 «병합하면 재료가 사라진다». 그래서 병합보다
+ *    픽스처가 먼저다. 충돌 경로는 그날까지 실전 검증이 없었고(첫 회전의 pending 은
+ *    충돌이 아니라 「교차 출처 부족」이었다), 이 픽스처가 그 공백을 메운다.
+ *
+ * ⚠️ 「대림산업」과 「DL이앤씨」는 같은 회사다(2021년 사명 변경). builder 표기 차이는
+ *    불일치가 아니라 정규화 잔재이므로, 충돌 판정이 그걸 근거로 갈리면 안 된다.
+ * ⛔ 어느 쪽이 정본인지는 이 파일이 정하지 않는다. 픽스처가 잠그는 것은 하나다 —
+ *    「충돌하면 주입이 아니라 병합 큐로 간다」.
+ */
+export const CONFLICT_SITES: SiteLite[] = [
+  {
+    id: '5435f730-83c4-44c7-b4ea-c6d780fedf0b',
+    name: '광안A 재개발',
+    display_name: '부산 수영구 광안A 재개발',
+    sigungu: '수영구',
+    builder: '대림산업',
+    total_units: 2780,
+    name_variants: ['광안A 재개발', '광안A구역', '광안A재개발', '수영 광안A 재개발'],
+    is_active: true,
+  },
+  {
+    id: '62a9f1cd-86db-4ec0-b420-f1190a72cb23',
+    name: '부산 망미 재건축',
+    display_name: '부산 망미 재건축',
+    sigungu: '수영구',
+    builder: 'DL이앤씨',
+    total_units: 2600,
+    // ⚠️ 「광안A구역」과 「아크로 광안」을 «둘 다» 들고 있다 — 충돌의 실체다.
+    name_variants: ['광안A구역', '광안A구역 재개발', '망미2구역', '부산 망미 재건축', '아크로 광안'],
+    is_active: true,
+  },
+];
+
+/** 충돌을 일으키는 후보. 티어는 T-B 로 «적용 가능» 하게 나오지만 유일성이 막아야 한다. */
+export const CONFLICT_CASE: GoldenCase = {
+  key: 'acro-gwangan-conflict',
+  proposedName: '아크로 광안',
+  projectName: '광안A 재개발',
+  sigungu: '수영구',
+  eventType: 'win',
+  source: 'news:naver',
+  sourceUrl: 'https://example.invalid/news/gwangan-a-win',
+  builderRaw: 'DL이앤씨',
+  crossRefs: 1,
+  expectSiteId: '5435f730-83c4-44c7-b4ea-c6d780fedf0b',
+  expectTier: 'T-B',
+  expectApply: true,   // ⚠️ decideTier 단계에서는 «적용 가능» 이다 — 막는 것은 유일성이다
+  note: '광안A ↔ 망미 이중. 「아크로 광안」이 망미 쪽에 이미 있어 주입이 아니라 병합 큐로 가야 한다.',
+};
