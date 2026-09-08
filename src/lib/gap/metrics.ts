@@ -72,6 +72,16 @@ export const GAP_METRICS: GapMetricDef[] = [
     action: '보류·병합 후보가 쌓인 것 — 주 1회 큐를 비운다',
   },
   {
+    key: 'ad_landing_on_inactive',
+    label: '비활성 레코드 착지(가동 키워드)',
+    direction: 'lower_is_better',
+    warnAt: 1, critAt: 20,
+    action: '레코드를 내렸는데 광고 착지를 안 옮긴 것이다 — 돈이 죽은 페이지로 흐른다. '
+      + 'sa.py relink --map "<구슬러그>=<정본슬러그>" 로 옮기고 308 을 켠다. '
+      + '⚠️ 값은 «가동(ELIGIBLE)» 만 센다. detail.paused 는 꺼져 있어 비용이 안 나가는 잔여라 '
+      + '급하지 않다 — 둘을 한 숫자로 뭉치면 「돈이 새는 17건」과 「조용한 25건」이 구분되지 않는다.',
+  },
+  {
     key: 'nv5_lead_time_days',
     label: '발행→첫 진입 리드타임(웹앱 중앙값, 일)',
     direction: 'lower_is_better',

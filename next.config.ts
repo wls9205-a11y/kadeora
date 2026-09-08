@@ -247,6 +247,17 @@ const nextConfig: NextConfig = {
        */
       { source: "/apt/%EC%95%84%ED%81%AC%EB%A1%9C-%EB%9D%BC%EB%A1%9C%EC%B2%B4", destination: "/apt/시민공원주변재정비촉진3구역-재개발", permanent: true },
       { source: "/apt/%EB%B6%80%EC%82%B0-%EC%9A%B0%EB%8F%991-%EC%9E%AC%EA%B1%B4%EC%B6%95", destination: "/apt/우동1-재건축", permanent: true },
+
+      /**
+       * [CV-N N-0 후속] 광안A 이중 통합 (2026-09-08).
+       *
+       * 「부산 망미 재건축」은 「광안A 재개발」의 이중이었다 — 별칭에 「광안A구역」·「망미2구역」을
+       * 함께 들고 있었고, 정본은 부산시 오픈데이터에 있는 광안A 쪽이다.
+       * ⚠️ 착지 12건을 «먼저» 정본으로 옮긴 뒤 이 리다이렉트를 켠다(순서 고정).
+       * ⚠️ 한글·인코딩 «양쪽» 을 등록한다 — 한글만 두면 308 이 안 걸린다(RULES#147).
+       */
+      { source: "/apt/부산-망미-재건축", destination: "/apt/광안a-재개발", permanent: true },
+      { source: "/apt/%EB%B6%80%EC%82%B0-%EB%A7%9D%EB%AF%B8-%EC%9E%AC%EA%B1%B4%EC%B6%95", destination: "/apt/광안a-재개발", permanent: true },
     ];
   },
 };

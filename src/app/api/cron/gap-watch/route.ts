@@ -205,6 +205,51 @@ async function handler(req: NextRequest) {
     // 못 재면 0 으로 둔다. blindNote 가 「표본이 얇다」를 이미 말하고 있다.
   }
 
+  // PLN-D — 비활성 레코드에 착지 중인 광고 키워드.
+  // ⚠️ 레코드 비활성과 광고 착지 정리가 «따로 놀면» 돈이 죽은 페이지로 흐른다.
+  //    2026-09-08 실측이 그 표본이다: 라로체 10 · 우동1 7 이 ELIGIBLE 로 살아 있었다.
+  // ⚠️ 값은 가동(ELIGIBLE)만 센다. PAUSED 는 꺼져 있어 비용이 안 나가므로 detail 로 뺀다 —
+  //    뭉치면 「돈이 새는 것」과 「조용한 잔여」가 한 숫자가 되어 급한 쪽을 못 본다.
+  let adOnInactive = 0;
+  let adOnInactivePaused = 0;
+  const adInactiveDetail: Array<{ slug: string; status: string; n: number }> = [];
+  try {
+    const { data: snap } = await admin
+      .from('ad_keywords')
+      .select('snapshot_date')
+      .order('snapshot_date', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const day = snap?.snapshot_date ?? null;
+    if (day) {
+      const rows = await fetchAll(admin, 'ad_keywords', 'site_slug, status',
+        (q: any) => q.eq('snapshot_date', day).not('site_slug', 'is', null));
+      const bySlug = new Map<string, { eligible: number; paused: number }>();
+      for (const r of (rows as any[])) {
+        const cur = bySlug.get(r.site_slug) ?? { eligible: 0, paused: 0 };
+        if (r.status === 'ELIGIBLE') cur.eligible += 1; else cur.paused += 1;
+        bySlug.set(r.site_slug, cur);
+      }
+      const slugs = Array.from(bySlug.keys());
+      for (let i = 0; i < slugs.length; i += 300) {
+        const { data: sites } = await admin
+          .from('apt_sites').select('slug, is_active').in('slug', slugs.slice(i, i + 300));
+        for (const s2 of ((sites ?? []) as Array<{ slug: string; is_active: boolean | null }>) ) {
+          if (s2.is_active !== false) continue;
+          const c = bySlug.get(s2.slug);
+          if (!c) continue;
+          adOnInactive += c.eligible;
+          adOnInactivePaused += c.paused;
+          if (adInactiveDetail.length < 20 && (c.eligible || c.paused)) {
+            adInactiveDetail.push({ slug: s2.slug, status: c.eligible ? 'ELIGIBLE' : 'PAUSED', n: c.eligible || c.paused });
+          }
+        }
+      }
+    }
+  } catch {
+    // 스냅샷이 없으면 0 이다. 광고 계정을 직접 치지 않는다 — 이 지표는 «적재된 것» 만 읽는다.
+  }
+
   readings.push(
     { def: def('cvn_name_preempt'), value: preempt, prev: prev.get('cvn_name_preempt') ?? null,
       detail: { sampled: candRows.length } },
@@ -214,6 +259,8 @@ async function handler(req: NextRequest) {
       detail: { checked: heal.checked, missing: heal.missing, samples: heal.samples } },
     { def: def('nv5_lead_time_days'), value: leadMedian, prev: prev.get('nv5_lead_time_days') ?? null,
       detail: { samples: leadSamples, baseline_days: 20, channel: 'webkr' } },
+    { def: def('ad_landing_on_inactive'), value: adOnInactive, prev: prev.get('ad_landing_on_inactive') ?? null,
+      detail: { paused: adOnInactivePaused, by_slug: adInactiveDetail } },
   );
 
   const body = formatDigest(readings, prevAt);
