@@ -25,7 +25,11 @@ function toneStyle(tone: Tone): CSSProperties {
   return {
     color: `var(${t.fg})`,
     background: `var(${t.bg})`,
-    border: t.border ? `1px solid var(${t.border})` : '1px solid transparent',
+    // ⚠️ 테두리를 «항상» 1px 로 둔다(없으면 투명). 있고 없고로 높이가 1px 씩 달라지면
+    //    목록에서 칩 바닥선이 흔들린다 — 설계서 §2-2 의 「칩 고정폭 스캔 라인」과 같은 축이다.
+    border: t.border
+      ? `1px ${t.borderStyle ?? 'solid'} var(${t.border})`
+      : '1px solid transparent',
   };
 }
 

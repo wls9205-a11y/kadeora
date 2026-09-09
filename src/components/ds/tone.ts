@@ -14,7 +14,13 @@
 //    말할 수 없고 «무엇 위에 얹히는지» 를 알아야 한다. 그래서 on(바탕) 을 같이 적는다.
 
 /** 톤 이름. 의미 축이지 색 축이 아니다 — 'green' 이 아니라 'success'. */
-export type Tone = 'neutral' | 'brand' | 'success' | 'warning' | 'error' | 'info';
+export type Tone =
+  | 'neutral' | 'brand' | 'success' | 'warning' | 'error' | 'info'
+  // ── DS2 단계 시맨틱 (2026-09-09). 일반 의미 톤과 «섞지 않으려고» 접두를 둔다.
+  //    success/info 로 대신하지 않은 이유: 단계는 6개 의미 톤보다 축이 많고(9),
+  //    한 톤을 두 뜻으로 쓰면 나중에 한쪽만 바꾸고 싶을 때 못 바꾼다.
+  | 'stagePlanned' | 'stagePreSale' | 'stageOpen' | 'stageAward'
+  | 'stageBuild' | 'stageMoveIn' | 'stageClosed' | 'stageTerminated' | 'stageUnknown';
 
 export interface ToneTokens {
   /** 글자색 토큰 */
@@ -23,6 +29,13 @@ export interface ToneTokens {
   bg: string;
   /** 테두리 토큰. 없으면 투명. */
   border?: string;
+  /**
+   * 테두리 모양. 기본은 solid.
+   * ⚠️ 'dashed' 는 «정보 부재» 전용이다(단계 미확인·미매핑). 대비를 올리면 그 톤이
+   *    stageClosed 와 거의 같은 회색이 되어 색으로는 안 갈리는데, 점선이 그 구분을 진다.
+   *    장식이 아니라 «색이 못 하는 일을 대신하는» 자리라 토큰 표에 둔다.
+   */
+  borderStyle?: 'solid' | 'dashed';
   /**
    * 이 배지가 «얹히는» 바탕. 반투명 bg 의 합성 대비를 계산할 때 필요하다.
    * 카드·표 안에 놓이는 것이 기본이라 --bg-surface 를 전제한다.
@@ -39,7 +52,86 @@ export const TONE: Record<Tone, ToneTokens> = {
   warning: { fg: '--warning',        bg: '--warning-bg',  on: '--bg-surface' },
   error:   { fg: '--error',          bg: '--error-bg',    on: '--bg-surface' },
   info:    { fg: '--info',           bg: '--info-bg',     on: '--bg-surface' },
+
+  // ── 단계 시맨틱 ─────────────────────────────────────────────────────────
+  // ⚠️ 이 표에 넣는 순간 scripts/contrast-audit.ts 가 «자동으로» 순회한다
+  //    (Object.entries(TONE)). 별도 등록처가 없는 것이 의도다 — 등록을 잊을 자리를 안 만든다.
+  // ⛔ 값은 tokens.css 에 있고 여기엔 토큰 이름만 적는다. 그 파일 주석에
+  //    「왜 설계서 hex 를 그대로 못 썼는가」가 실측과 함께 적혀 있다.
+  stagePlanned:    { fg: '--stage-planned',    bg: '--stage-planned-bg',    on: '--bg-surface' },
+  stagePreSale:    { fg: '--stage-presale',    bg: '--stage-presale-bg',    on: '--bg-surface' },
+  stageOpen:       { fg: '--stage-open',       bg: '--stage-open-bg',       on: '--bg-surface' },
+  stageAward:      { fg: '--stage-award',      bg: '--stage-award-bg',      on: '--bg-surface' },
+  stageBuild:      { fg: '--stage-build',      bg: '--stage-build-bg',      on: '--bg-surface' },
+  stageMoveIn:     { fg: '--stage-movein',     bg: '--stage-movein-bg',     on: '--bg-surface' },
+  stageClosed:     { fg: '--stage-closed',     bg: '--stage-closed-bg',     border: '--stage-closed-border', on: '--bg-surface' },
+  stageTerminated: { fg: '--stage-terminated', bg: '--stage-terminated-bg', on: '--bg-surface' },
+  stageUnknown:    { fg: '--stage-unknown',    bg: '--stage-unknown-bg',    border: '--stage-unknown-border', borderStyle: 'dashed', on: '--bg-surface' },
 };
+
+/**
+ * lifecycle_stage → 단계 톤.
+ *
+ * ⛔ 라벨은 여기서 정하지 «않는다». `@/lib/apt/lifecycle-label` 이 한글 라벨의 단일 원본이고,
+ *    그 파일은 「라벨 맵이 4곳에 복사돼 값이 갈렸다」는 사고 뒤에 만들어졌다.
+ *    설계서 §1 은 칩 라벨을 따로 줬지만(4개 정비 단계를 「공고 전」 하나로 뭉치는 등),
+ *    그걸 쓰면 관리처분인가·조합설립 같은 «실무 분기» 가 화면에서 사라진다.
+ *    → 색은 여기서 묶고, 글자는 원본을 그대로 쓴다. 스캔축은 얻고 정보는 안 버린다.
+ *
+ * ⚠️ 여기 없는 값은 stageUnknown 으로 떨어진다. 화면에서는 NULL 과 «같은 칩» 이다 —
+ *    사용자에게 「미확인」과 「미매핑」은 같은 정보 부재라서다.
+ *    다만 로그·DOM 에서는 갈라 둔다(StageChip 의 data-ds-stage) — 새 stage 가 들어온
+ *    신호까지 지우면 인리치 백로그가 돌지 않는다.
+ */
+export const STAGE_TONE: Record<string, Tone> = {
+  // 공고 전 — 아직 모집공고가 없다. 정비 5단계 + 부지계획.
+  site_planning: 'stagePlanned',
+  union_established: 'stagePlanned',
+  constructor_selected: 'stagePlanned',
+  plan_approved: 'stagePlanned',
+  mgmt_approved: 'stagePlanned',
+  redevelopment_active: 'stagePlanned',
+
+  pre_announcement: 'stagePreSale',
+
+  // 지금 신청·계약할 수 있다.
+  model_house_open: 'stageOpen',
+  special_supply: 'stageOpen',
+  subscription_open: 'stageOpen',
+  unsold_active: 'stageOpen',
+
+  award_pending: 'stageAward',
+  award_announced: 'stageAward',
+
+  construction: 'stageBuild',
+
+  // 입주·기축.
+  pre_move_in: 'stageMoveIn',
+  move_in_ready: 'stageMoveIn',
+  move_in: 'stageMoveIn',
+  move_in_started: 'stageMoveIn',
+  post_move_in: 'stageMoveIn',
+  landmark_active: 'stageMoveIn',
+  active_trade: 'stageMoveIn',
+  resale: 'stageMoveIn',
+
+  contract_signing: 'stageClosed',
+  contract: 'stageClosed',
+  // ⚠️ stageTerminated(시공 해지)에 대응하는 lifecycle_stage 는 «아직 없다».
+  //    CV-N 워처의 cancel 이벤트 축이라 단계 컬럼이 아니라 사건으로 온다.
+  //    톤만 미리 두고 매핑은 비워 둔다 — 쓰이지 않는 톤도 감사는 잰다.
+};
+
+/** 모르는 stage·NULL 은 「정보 부재」 한 칸으로 접는다. */
+export function stageToneOf(stage: string | null | undefined): Tone {
+  if (!stage) return 'stageUnknown';
+  return STAGE_TONE[stage] ?? 'stageUnknown';
+}
+
+/** 이 stage 가 표에 «없는» 값인가 — 로그·백로그 신호용. NULL 은 미매핑이 아니다. */
+export function isUnmappedStage(stage: string | null | undefined): boolean {
+  return !!stage && !(stage in STAGE_TONE);
+}
 
 /**
  * D6 확신도 → 톤.
