@@ -10,7 +10,7 @@
 //    우측 열은 세대수만 다루고, 없으면 '미공개' 로 둔다.
 
 import Link from 'next/link';
-import { lifecycleLabel } from '@/lib/apt/lifecycle-label';
+import { StageChip } from '@/components/apt/StageChip';
 import { isRecentStageChange, pipelineHref, type AptPipelineItem } from '@/lib/apt/pipeline';
 import { unitCell } from '@/lib/apt/units';
 import ListThumb from '@/components/ui/ListThumb';
@@ -38,7 +38,6 @@ function fmtStageDate(iso: string | null): string | null {
 export default function PipelineCard({ item, now }: { item: AptPipelineItem; now?: number }) {
   const name = item.house_nm || '(이름 없음)';
   const href = pipelineHref(item);
-  const stage = lifecycleLabel(item.status);
   const isNew = isRecentStageChange(item.stage_updated_at, now);
   const note = item.confidence ? CONFIDENCE_NOTE[item.confidence] : undefined;
   // 공고 전 현장이라 '미공개' 가 아니라 '미정' 이다 — 아직 정해지지 않았다 (V17 F-2).
@@ -57,7 +56,15 @@ export default function PipelineCard({ item, now }: { item: AptPipelineItem; now
 
       <span style={{ minWidth: 0 }}>
         <span className="kd-lrow-t">
-          {stage && <span className="kd-lrow-badge is-soon">{stage}</span>}
+          {/* DS2 §7② — 단계 칩을 StageChip 으로 옮긴다.
+              종전엔 `is-soon` 한 벌이라 **모든 단계가 같은 파랑**이었다. 착공도 조합설립도
+              분양 예고도 색이 같아서, 목록을 색으로 훑는 축 자체가 없었다.
+              ⚠️ size="dense" 는 기존 치수(9.5px/800)를 «그대로» 쓴다 — 색만 바뀌고
+                 행 높이·리듬은 안 바뀐다. DS 사다리(12px/500)로 올릴지는 실화면 대조 뒤
+                 별도 판정이다(Badge 의 size 주석).
+              ⚠️ item.status 를 그대로 넘긴다. 라벨·톤·미매핑 판정은 전부 StageChip 안에서
+                 단일 원본을 거친다 — 여기서 다시 lifecycleLabel 을 부르지 않는다. */}
+          <StageChip stage={item.status} size="dense" />
           {isNew && <span className="kd-lrow-badge is-hot">NEW</span>}
           {name}
         </span>

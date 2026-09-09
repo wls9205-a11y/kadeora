@@ -14,8 +14,16 @@ import { TONE, type Tone } from '@/components/ds/tone';
 export interface BadgeProps {
   children: ReactNode;
   tone?: Tone;
-  /** 촘촘한 목록 행 안에서 쓰는 작은 치수. */
-  size?: 'sm' | 'md';
+  /**
+   * 치수. sm/md 는 DS 타입 사다리(--fs-xs/--fs-sm) 위에 있다.
+   *
+   * ⚠️ 'dense' 는 «사다리 밖» 이다 — 9.5px/800. 기존 목록 칩(.kd-lrow-badge)의 실물
+   *    치수를 그대로 흡수하려고 둔다. DS 로 올리면 12px/500 이 되어 폰트 +26% ·
+   *    굵기 3단계 하락이라 밀집 행의 리듬이 눈에 띄게 바뀐다.
+   * ⛔ 새 화면에 dense 를 쓰지 말 것. 이건 «갈아타는 동안» 밀도를 보존하는 다리이고,
+   *    사다리로 올릴지는 실화면 대조 뒤의 «별도 판정» 이다(설계서 §2-1 축).
+   */
+  size?: 'dense' | 'sm' | 'md';
   /** 스크린리더용 보충 설명. 색만으로 의미를 전달하지 않기 위한 자리다. */
   title?: string;
 }
@@ -45,11 +53,12 @@ export function Badge({ children, tone = 'neutral', size = 'sm', title }: BadgeP
         display: 'inline-flex',
         alignItems: 'center',
         gap: 4,
-        padding: size === 'sm' ? '2px 7px' : '4px 10px',
-        borderRadius: 'var(--radius-pill)',
-        fontSize: size === 'sm' ? 'var(--fs-xs)' : 'var(--fs-sm)',
+        padding: size === 'dense' ? '1px 5px' : size === 'sm' ? '2px 7px' : '4px 10px',
+        borderRadius: size === 'dense' ? 3 : 'var(--radius-pill)',
+        fontSize: size === 'dense' ? '9.5px' : size === 'sm' ? 'var(--fs-xs)' : 'var(--fs-sm)',
         // ⚠️ 굵기 사다리(설계서 §2 TY1): 라벨은 500. 700 은 «희소 수치» 자리다.
-        fontWeight: 500,
+        //    dense 만 800 인데, 그건 흡수한 기존 목록 칩의 값이다(위 size 주석).
+        fontWeight: size === 'dense' ? 800 : 500,
         lineHeight: 1.35,
         whiteSpace: 'nowrap',
         verticalAlign: 'middle',

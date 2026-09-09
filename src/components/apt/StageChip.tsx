@@ -19,7 +19,8 @@ const UNKNOWN_LABEL = '단계 미확인';
 
 export interface StageChipProps {
   stage: string | null | undefined;
-  size?: 'sm' | 'md';
+  /** 'dense' 는 기존 목록 행(.kd-lrow-badge) 치수를 그대로 쓴다 — Badge 의 size 주석 참조. */
+  size?: 'dense' | 'sm' | 'md';
 }
 
 export function StageChip({ stage, size = 'sm' }: StageChipProps) {
@@ -32,6 +33,8 @@ export function StageChip({ stage, size = 'sm' }: StageChipProps) {
       //    그러나 DOM 에는 갈라 남긴다 — 새 stage 가 들어왔다는 신호까지 지우면
       //    인리치 백로그가 돌지 않는다. 감사·수집이 이 속성을 센다.
       data-ds-stage={stage ? (isUnmappedStage(stage) ? '__unmapped' : stage) : '__null'}
+      // 기존 칩이 갖고 있던 행 안 리듬. dense 로 갈아탈 때 이것까지 가져와야 자리가 안 밀린다.
+      style={size === 'dense' ? { marginRight: 5, verticalAlign: '1px' } : undefined}
     >
       <Badge
         tone={tone}
