@@ -21,6 +21,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
+import { safeSlice } from '@/lib/text-safe';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -140,9 +141,11 @@ function composeMeta(current: string | null | undefined, title: string, summary:
   const srcParts = [summary, content].filter(Boolean).map((s) => stripMarkdown(String(s)));
   let joined = srcParts.join(' ').replace(/\s+/g, ' ').trim();
   if (!joined) joined = title;
-  let base = joined.slice(0, 160);
-  if (base.length < 150) base = `${title} — ${joined}`.replace(/\s+/g, ' ').trim().slice(0, 160);
-  if (base.length < 150) base = (base + ' · 카더라 데이터 분석').slice(0, 160);
+  // ⛔ .slice 금지 — 형제(issue-seo-enrich)가 이 자리에서 이모지 서로게이트 쌍을
+  //    반토막 내 PostgREST 에 30시간 동안 10/10 거절당했다. 같은 함수를 복제한 곳이다.
+  let base = safeSlice(joined, 160);
+  if (base.length < 150) base = safeSlice(`${title} — ${joined}`.replace(/\s+/g, ' ').trim(), 160);
+  if (base.length < 150) base = safeSlice(base + ' · 카더라 데이터 분석', 160);
   return base;
 }
 
@@ -155,7 +158,7 @@ function buildArticleJsonLd(p: {
     '@context': 'https://schema.org',
     '@type': 'Article',
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
-    headline: p.title.slice(0, 110),
+    headline: safeSlice(p.title, 110),
     description: p.description,
     image: p.coverImage ? [p.coverImage] : undefined,
     datePublished: p.publishedAt || new Date().toISOString(),

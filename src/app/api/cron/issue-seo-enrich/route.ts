@@ -20,6 +20,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 import { dbw } from '@/lib/cron-db-log';
+import { safeSlice, stripLoneSurrogates } from '@/lib/text-safe';
 
 export const maxDuration = 120;
 export const runtime = 'nodejs';
@@ -54,30 +55,50 @@ function composeMetaDescription(input: {
   const parts: string[] = [];
   if (input.summary) parts.push(stripMarkdown(input.summary));
   if (input.excerpt) parts.push(stripMarkdown(input.excerpt));
-  parts.push(stripMarkdown(input.content).slice(0, 400));
+  parts.push(safeSlice(stripMarkdown(input.content), 400));
 
   let joined = parts.filter((p) => p && p.length > 0).join(' ').replace(/\s+/g, ' ').trim();
   if (joined.length === 0) joined = input.title;
 
   // 먼저 가장 의미 있는 첫 구간 추출
-  let base = joined.slice(0, META_MAX);
+  // ⛔ .slice 를 쓰지 않는다. 그것이 이 크론을 30시간 동안 10/10 전패시킨 자리다 —
+  //    아래 return 의 주석을 볼 것.
+  let base = safeSlice(joined, META_MAX);
 
   // 너무 짧으면 title 을 앞에 prepend
   if (base.length < META_MIN) {
     const prefix = `${input.title} — `;
-    base = (prefix + joined).replace(/\s+/g, ' ').trim().slice(0, META_MAX);
+    base = safeSlice((prefix + joined).replace(/\s+/g, ' ').trim(), META_MAX);
   }
 
   // 길이 조정: 150 미만이면 '· 카더라 분석' 같은 꼬리 추가
   if (base.length < META_MIN) {
-    base = (base + ' · 카더라 데이터 분석').slice(0, META_MAX);
+    base = safeSlice(base + ' · 카더라 데이터 분석', META_MAX);
   }
 
   // 문장 경계에서 깔끔히 자르기 (151~160 사이를 목표)
   if (base.length > META_MAX) {
-    base = base.slice(0, META_MAX);
+    base = safeSlice(base, META_MAX);
   }
-  return base;
+  /**
+   * ⚠️ 마지막 방어선. 원본에 «이미» 깨진 서로게이트가 있으면 자르기를 고쳐도 남는다.
+   *
+   * ── 이 함수가 30시간 동안 10건을 전패시킨 경위 (2026-09-09 실측) ─────────────
+   * 이 계열 글은 머리에 「핵심 요약」 이모지 블록이 붙는 템플릿이라, joined 의
+   * 160번째 «코드유닛» 이 그 이모지 한가운데에 떨어진다. 이모지는 서로게이트 쌍
+   * (2 코드유닛)이라 .slice(0,160) 이 쌍을 반토막 냈다. 실측: 두 건 다 인덱스 159.
+   *
+   * JSON.stringify 는 그 반쪽을 짝 없는 이스케이프(U+D83C)로 얌전히 내보내고
+   * JS 의 JSON.parse 도 통과시킨다 — 그래서 코드에서는 아무 이상이 안 보였다.
+   * 거절한 것은 PostgREST 였고 그 메시지가 「Empty or invalid json」이었다.
+   * 본문이 «비었다» 는 뜻이 아니라 «파서가 못 읽었다» 는 뜻이다. 그 한 줄 때문에
+   * 15분마다, 하루 96회씩, 같은 10건이 똑같이 죽었다.
+   *
+   * ⛔ 이 병은 처음이 아니다. 2026-08-25 blog-meta-rewrite-submit 이 30일 성공 0 이었고
+   *    그때 text-safe.ts 가 «바로 이걸 막으려고» 만들어졌다.
+   *    없어서 못 막은 게 아니라 있는 걸 안 써서 못 막았다.
+   */
+  return stripLoneSurrogates(base);
 }
 
 function buildArticleJsonLd(params: {
@@ -96,7 +117,7 @@ function buildArticleJsonLd(params: {
     '@context': 'https://schema.org',
     '@type': 'Article',
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
-    headline: params.title.slice(0, 110),
+    headline: safeSlice(params.title, 110),
     description: params.description,
     image: params.coverImage ? [params.coverImage] : undefined,
     datePublished: params.publishedAt || new Date().toISOString(),
@@ -128,12 +149,12 @@ async function handler(_req: NextRequest) {
       const sb = getSupabaseAdmin();
       const start = Date.now();
 
-      // s258 patch #1: 깨진 jsonb 3건 자동 제외 (마이그레이션 후 점진적 제거)
-      const KNOWN_BROKEN_IDS = [
-        'af0349a4-3134-4536-a288-f16d4c1e457d',
-        'ef5aaaf4-49ce-4c7f-a6bd-b1175876baf0',
-        'c85d05b1-5f9f-4665-84ac-60f82b38a824',
-      ];
+      // ⛔ 「깨진 jsonb 3건」이라며 영구 제외해 두었던 자리다. 깨진 것은 jsonb 가 아니라
+      //    잘라 보내는 쪽이었고(위 composeMetaDescription 주석), 실측하니 그 셋도
+      //    본문에 이모지를 2개씩 가진 «같은 계열» 이었다(97599·97794·99092).
+      //    원인을 고쳤으니 제외를 걷는다. 다시 실패하면 이제는 에러 문구가 원인을 말한다 —
+      //    이름으로 덮어 두면 그 셋은 영원히 SEO 를 못 받는다.
+      const KNOWN_BROKEN_IDS: string[] = [];
       const { data: pending, error: fetchErr } = await (sb as any)
         .from('issue_alerts')
         .select('id, title, summary, blog_post_id')
@@ -226,7 +247,6 @@ async function handler(_req: NextRequest) {
           };
           if (metaChanged) {
             updatePayload.meta_description = newMeta;
-            metaFixed++;
           }
 
           const { error: updErr } = await sb.from('blog_posts').update(updatePayload).eq('id', post.id);
@@ -235,6 +255,10 @@ async function handler(_req: NextRequest) {
             failed++;
             continue;
           }
+          // ⚠️ «쓰고 나서» 센다. 종전엔 update 앞에서 올려서, 10건이 전부 거절당한
+          //    회전이 meta_fixed:10 · enriched:0 으로 보고됐다. 고쳐지지 않은 것을
+          //    「고쳤다」고 세는 계기판은 없느니만 못하다 — 적재를 확인하고 센다.
+          if (metaChanged) metaFixed++;
 
           dbw('issue-seo-enrich', 'issue_alerts.update@238', await (sb as any)
             .from('issue_alerts')
