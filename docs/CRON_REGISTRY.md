@@ -144,3 +144,137 @@ ORDER BY fails DESC;
 > ⚠️ 판정 전 3중 확인: ① cron_logs 4회·created 0 ② pg_cron 등록 없음 ③ 저장소 내 호출자.
 > ③ 이 «비어 있지 않았다» — admin 팬아웃 둘이 부르고 있었다. 그래서 그 둘도 같이 끊었다.
 > gap-watch 지표 참조는 0건(확인함).
+
+---
+
+## ⏰ pg_cron 시각대 정본 — UTC · KST 병기 (2026-09-09 · 1회 정리)
+
+### 먼저, 「혼재」는 등록에 있지 않다
+
+실측: `cron.timezone = GMT`, `TimeZone = UTC`.
+**모든 pg_cron 스케줄은 예외 없이 UTC 로 해석된다.** 일부는 UTC 로, 일부는 KST 로
+등록되어 있다는 말은 성립하지 않는다 — pg_cron 은 잡마다 시각대를 갖지 않는다.
+
+혼재는 «등록» 이 아니라 «의도» 에 있다. 어떤 잡은 저자가 원하는 KST 시각을 그대로
+숫자로 썼고(그래서 9시간 어긋났고), 어떤 잡은 KST→UTC 환산을 해서 썼다.
+표만 보면 둘이 똑같이 생겨서 구분되지 않는다 — 그래서 이 표가 필요하다.
+
+⚠️ 2026-09-08 의 오독이 정확히 이 지점이었다. `cvn_name_watch` 의 `10 21 * * *` 를
+   「밤 21:10 KST」로 읽었지만 실제는 **새벽 06:10 KST** 다.
+   ⛔ 다만 `docs/CRON_REGISTRY.md` 자체는 틀리지 않았다 — 위 CV-N 절이 처음부터
+      「06:10 KST」로 적고 있었다. 문서가 없어서가 아니라 안 봐서 틀렸다.
+
+### ⛔ 날짜가 하루 밀리는 자리 (요일 지정 잡의 함정)
+
+**UTC 시각이 15시 이상이면 KST 로는 «다음 날» 이다.** 매일 도는 잡은 상관없지만
+요일을 지정한 잡은 요일 자체가 밀린다. 지금 해당되는 5본:
+
+| 잡 | 등록(UTC 요일) | 실제 실행(KST 요일) |
+|---|---|---|
+| `cvn_brand_registry` | 일 20:50 | **월** 05:50 |
+| `region-infer-backfill` | 일 19:00 | **월** 04:00 |
+| `apt-interests-cleanup-weekly` | 일 19:00 | **월** 04:00 |
+| `weekly_vacuum_analyze_blog` | 일 19:23 | **월** 04:23 |
+| `blog-taxonomy-drift` | 월 21:50 | **화** 06:50 |
+
+⚠️ `blog-taxonomy-drift` 는 이름·성격상 「주초」를 의도한 것으로 보이는데 실제로는
+   화요일에 돈다. **판단이 필요한 자리라 여기 적어만 둔다 — 이번 정리에서 시각은
+   하나도 바꾸지 않았다(변경은 별도 승인).**
+
+### 고정 시각 잡 전수 (KST 이른 시각 → 늦은 시각 순)
+
+분 단위·매시 잡(`* * * * *`, `*/5`, `*/15`, `45 * * * *` 등)은 시각대와 무관하므로
+이 표에서 뺐다. 헷갈리는 것은 «하루 한 번 정해진 시각에 도는» 잡들뿐이다.
+
+| 잡 | jobid | 스케줄(UTC) | UTC | **KST** | 요일 |
+|---|---|---|---|---|---|
+| `blog-stale-unpublish` | 136 | `0 17 * * *` | 17:00 | **02:00 (+1일)** | 매일 |
+| `kadeora-naver-sc-sync` | 141 | `30 17 * * *` | 17:30 | **02:30 (+1일)** | 매일 |
+| `apt-subscription-archive-daily` | 151 | `0 18 * * *` | 18:00 | **03:00 (+1일)** | 매일 |
+| `kakao-channel-sync` | 132 | `0 18 * * *` | 18:00 | **03:00 (+1일)** | 매일 |
+| `kadeora-refresh-search-trends` | 144 | `0 18 * * *` | 18:00 | **03:00 (+1일)** | 매일 |
+| `aggregate-user-daily-summary` | 93 | `8 18 * * *` | 18:08 | **03:08 (+1일)** | 매일 |
+| `ci-kpi-daily-snapshot` | 67 | `9 18 * * *` | 18:09 | **03:09 (+1일)** | 매일 |
+| `sync-complex-profiles-daily` | 170 | `12 18 * * *` | 18:12 | **03:12 (+1일)** | 매일 |
+| `view-logs-backfill-daily` | 38 | `25 18 * * *` | 18:25 | **03:25 (+1일)** | 매일 |
+| `cover-image-backfill` | 138 | `30 18 * * *` | 18:30 | **03:30 (+1일)** | 매일 |
+| `apt-marketing-leads-cleanup-daily` | 152 | `30 18 * * *` | 18:30 | **03:30 (+1일)** | 매일 |
+| `admin_alerts_auto_archive` | 112 | `36 18 * * *` | 18:36 | **03:36 (+1일)** | 매일 |
+| `og-cards-refresh` | 137 | `0 19 * * *` | 19:00 | **04:00 (+1일)** | 매일 |
+| `region-infer-backfill` | 135 | `0 19 * * 0` | 19:00 | **04:00 (+1일)** | 일(UTC)→**월** |
+| `enrich_apt_images_safe` | 128 | `0 19 * * *` | 19:00 | **04:00 (+1일)** | 매일 · **비활성** |
+| `apt-interests-cleanup-weekly` | 153 | `0 19 * * 0` | 19:00 | **04:00 (+1일)** | 일(UTC)→**월** |
+| `refresh_cron_health` | 117 | `0 19 * * *` | 19:00 | **04:00 (+1일)** | 매일 |
+| `gsc-sync-daily` | 107 | `17 19 * * *` | 19:17 | **04:17 (+1일)** | 매일 |
+| `auto_fill_related_slugs_daily` | 124 | `17 19 * * *` | 19:17 | **04:17 (+1일)** | 매일 |
+| `weekly_vacuum_analyze_blog` | 127 | `23 19 * * 0` | 19:23 | **04:23 (+1일)** | 일(UTC)→**월** |
+| `faq_extract` | 86 | `27 19 * * *` | 19:27 | **04:27 (+1일)** | 매일 |
+| `search-engine-ping` | 139 | `0 20 * * *` | 20:00 | **05:00 (+1일)** | 매일 |
+| `curate-refresh` | 166 | `40 20 * * *` | 20:40 | **05:40 (+1일)** | 매일 |
+| `cvn_brand_registry` | 176 | `50 20 * * 0` | 20:50 | **05:50 (+1일)** | 일(UTC)→**월** |
+| `check-seo-automation-health` | 158 | `0 21 * * *` | 21:00 | **06:00 (+1일)** | 매일 |
+| `builder-watch-hanwoong` | 174 | `0 21 * * *` | 21:00 | **06:00 (+1일)** | 매일 |
+| `cvn_name_watch` | 175 | `10 21 * * *` | 21:10 | **06:10 (+1일)** | 매일 |
+| `blog-restore-pace` | 167 | `15 21 * * *` | 21:15 | **06:15 (+1일)** | 매일 |
+| `lifecycle-stage-refresh` | 164 | `23 21 * * *` | 21:23 | **06:23 (+1일)** | 매일 · **비활성** |
+| `gap_watch_daily` | 171 | `40 21 * * *` | 21:40 | **06:40 (+1일)** | 매일 |
+| `blog-taxonomy-drift` | 169 | `50 21 * * 1` | 21:50 | **06:50 (+1일)** | 월(UTC)→**화** |
+| `kadeora-series-autopublish` | 160 | `0 22 * * *` | 22:00 | **07:00 (+1일)** | 매일 |
+| `apt-deadline-alert-daily` | 36 | `7 22 * * *` | 22:07 | **07:07 (+1일)** | 매일 |
+| `naver_blog_content` | 178 | `30 22 * * *` | 22:30 | **07:30 (+1일)** | 매일 |
+| `nv5_rank_target_lifecycle` | 179 | `50 22 * * *` | 22:50 | **07:50 (+1일)** | 매일 |
+| `series-queue-watchdog` | 161 | `0 23 * * *` | 23:00 | **08:00 (+1일)** | 매일 |
+| `in-app-digest-daily` | 35 | `15 23 * * *` | 23:15 | **08:15 (+1일)** | 매일 |
+| `exchange-rate-morning` | 4 | `29 23 * * *` | 23:29 | **08:29 (+1일)** | 매일 |
+| `consent-renewal-check` | 133 | `0 0 * * *` | 00:00 | **09:00** | 매일 |
+| `consent-expiry-revoke` | 134 | `30 0 * * *` | 00:30 | **09:30** | 매일 |
+| `signup-health-daily` | 92 | `35 0 * * *` | 00:35 | **09:35** | 매일 |
+| `blog_meta_rewrite_submit` | 89 | `10 2 * * *` | 02:10 | **11:10** | 매일 |
+| `kakao_place_fetch` | 102 | `0 3 * * *` | 03:00 | **12:00** | 매일 |
+| `kadeora-blog-image-validate` | 56 | `9 3 * * 1` | 03:09 | **12:09** | 월 |
+| `big_event_fact_refresh` | 62 | `47 3 * * *` | 03:47 | **12:47** | 매일 |
+| `admin_alerts_archive_daily` | 122 | `13 4 * * *` | 04:13 | **13:13** | 매일 |
+| `purge_cron_logs_daily` | 140 | `15 4 * * *` | 04:15 | **13:15** | 매일 |
+| `backlink-sync-weekly` | 109 | `24 4 * * 1` | 04:24 | **13:24** | 월 |
+| `apt_satellite_crawl` | 84 | `0 5 * * 1` | 05:00 | **14:00** | 월 |
+| `subscription_big_event_bridge` | 63 | `24 5 * * 1` | 05:24 | **14:24** | 월 |
+| `exchange-rate-afternoon` | 5 | `30 6 * * 1-5` | 06:30 | **15:30** | 평일 |
+| `reactivate-dormant-weekly` | 39 | `4 10 * * 0` | 10:04 | **19:04** | 일 |
+| `streak-alert-daily` | 37 | `5 12 * * *` | 12:05 | **21:05** | 매일 |
+
+### 시간대 창을 갖는 잡
+
+| 잡 | 스케줄(UTC) | KST 창 | 의도 |
+|---|---|---|---|
+| `dart-ingest-daily` | `*/15 0-9 * * 1-5` | **09:00~18:45 평일** | KST 업무시간에 맞춘 «환산 등록» 이다 |
+| `kadeora-refresh-stock-issue-scores-weekday` | `3-58/15 0-15 * * 1-5` | **09:03~익일 00:58 평일** | 국내장+미국장 |
+| `stock-fundamentals-kr` | `0 */2 * * 1-5` | 홀수시(01,03,…,23) | |
+| `admin-issue-alerts-backfill` | `2 */3 * * *` | 00,03,06,…,21시 | |
+| `blog_backfill_submit` · `cron-failure-watch` · `cron-health-monitor-6h` · `refresh-mv-seo-portal-stats` | `*/6` 계열 | 03,09,15,21시 | |
+
+## ⛔ 신규 등록 규율 (2026-09-09 신설)
+
+1. **스케줄은 UTC 로 쓴다.** 선택지가 없다 — `cron.timezone` 이 GMT 다.
+2. **원하는 KST 시각에서 9를 «빼서» UTC 를 만든다.** 음수가 되면 24를 더하고
+   요일 지정이 있으면 요일도 하루 «당긴다»(KST 월요일 = UTC 일요일 15시 이후).
+3. **잡 이름 옆이나 이 문서에 KST 를 반드시 병기한다.**
+   `SELECT cron.schedule('foo', '10 21 * * *', ...)  -- 06:10 KST` 처럼.
+   ⚠️ pg_cron 의 `command` 는 주석을 보존하므로 커맨드 안에 KST 를 적어 두면
+      `cron.job` 조회만으로도 의도가 보인다. 이 표를 다시 만들 필요가 없어진다.
+4. ⛔ **「밤 9시에 돌린다」 같은 말로 합의하지 않는다.** 어느 시각대인지 말하지 않은
+   시각은 절반의 확률로 9시간 틀린다 — 그게 어제 일어난 일이다.
+
+### 이 표를 다시 만드는 법
+
+```sql
+-- 고정 시각 잡의 UTC·KST 병기
+SELECT jobname, jobid, schedule,
+       lpad(split_part(schedule,' ',2),2,'0')||':'||lpad(split_part(schedule,' ',1),2,'0') AS utc,
+       lpad((((split_part(schedule,' ',2))::int + 9) % 24)::text,2,'0')
+         ||':'||lpad(split_part(schedule,' ',1),2,'0')
+         || CASE WHEN (split_part(schedule,' ',2))::int >= 15 THEN ' (+1d)' ELSE '' END AS kst,
+       split_part(schedule,' ',5) AS dow_utc, active
+  FROM cron.job
+ WHERE split_part(schedule,' ',2) ~ '^\d+$'
+ ORDER BY (((split_part(schedule,' ',2))::int + 9) % 24), (split_part(schedule,' ',1))::int;
+```
