@@ -23,6 +23,7 @@ import { classifyNewsBatch, type NewsInput } from '@/lib/cvn/extract';
 import { applyCandidate, loadSites, readSwitch } from '@/lib/cvn/apply';
 import { registerRankTargets } from '@/lib/cvn/rank-targets';
 import type { NameCandidateInput, SiteLite } from '@/lib/cvn/decide';
+import type { NewsCard } from '@/lib/cvn/extract';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -168,11 +169,42 @@ async function handler(req: NextRequest) {
         };
       }
 
-      // ⚠️ 한 콜에 묶는다. 건당으로 쪼개면 일 상한이 순식간에 마른다.
+      // ⚠️ 건당으로 쪼개지 않는다 — 그러면 일 상한이 순식간에 마른다.
+      // ⛔ 그렇다고 «한 콜» 로 묶지도 않는다. 2026-09-09 새벽이 그 대가를 치렀다:
+      //    풀 36건이 콜 하나에 들어갔고 그 콜 하나가 지면 부족으로 text 를 못 뱉자
+      //    회전 전체가 processed 0 으로 끝났다. 백필은 한 건도 소화되지 않았다.
+      //    이 파일 머리말이 「하나의 실패가 그날 회전을 죽이면 안 된다」고 적어 둔 바로 그 병이다.
+      // ⚠️ 그래서 덩어리로 «나눠서» 부르고, 한 덩어리가 죽어도 나머지는 살린다.
+      //    18 은 한 덩어리가 지면 안에 넉넉히 들어가면서 풀 40 을 3콜 안에 끝내는 자리다.
+      const CHUNK = 18;
       const batch = pool.slice(0, 40);
-      const got = await classifyNewsBatch(batch.map(({ title, description, url }) => ({ title, description, url })));
-      if (got.kind !== 'ok' || !got.value) {
-        return { processed: 0, metadata: { error: `${got.kind} ${got.detail}`, pool: pool.length } };
+      const cards: NewsCard[] = [];
+      const failures: string[] = [];
+      let calls = 0;
+
+      for (let i = 0; i < batch.length; i += CHUNK) {
+        // ⚠️ 덩어리마다 상한을 다시 본다. 예산은 콜 단위로 닳는다.
+        if (spent + calls >= budget) {
+          failures.push(`일 AI 상한 소진 ${spent + calls}/${budget} — 남은 ${batch.length - i}건 이월`);
+          break;
+        }
+        const slice = batch.slice(i, i + CHUNK);
+        calls += 1;
+        const got = await classifyNewsBatch(slice.map(({ title, description, url }) => ({ title, description, url })));
+        if (got.kind !== 'ok' || !got.value) {
+          failures.push(`[${i}-${i + slice.length - 1}] ${got.kind} ${got.detail}`);
+          continue;
+        }
+        cards.push(...got.value);
+      }
+
+      // ⛔ 「한 덩어리도 못 읽었다」일 때만 회전을 실패로 접는다.
+      //    일부만 실패하면 읽어낸 몫은 그대로 적재하고 실패는 metadata 에 남긴다.
+      if (!cards.length) {
+        return {
+          processed: 0,
+          metadata: { error: failures.join(' | ') || 'no_result 분류 0건', pool: pool.length, calls },
+        };
       }
 
       const runId = `cvn-n2-${new Date().toISOString().slice(0, 10)}`;
@@ -181,7 +213,7 @@ async function handler(req: NextRequest) {
       let held = 0;
       const outcomes: any[] = [];
 
-      for (const card of got.value) {
+      for (const card of cards) {
         const seed = byUrl.get(card.url);
         const input: NameCandidateInput = {
           proposedName: card.proposedName,
@@ -202,7 +234,9 @@ async function handler(req: NextRequest) {
           builderRaw: card.builder,
           totalUnits: card.units,
           // 같은 회전에서 같은 (사업명, 예정명)을 말한 «다른» 기사 수.
-          crossRefs: got.value.filter(
+          // ⚠️ 덩어리를 넘어서 «회전 전체» 를 본다. 덩어리 안에서만 세면
+          //    같은 이름을 말한 기사가 다른 덩어리에 있을 때 교차 근거가 조용히 0 이 된다.
+          crossRefs: cards.filter(
             (o) => o.url !== card.url && o.proposedName === card.proposedName,
           ).length,
         };
@@ -264,11 +298,13 @@ async function handler(req: NextRequest) {
       }
 
       return {
-        processed: got.value.length,
+        processed: cards.length,
         metadata: {
-          targets: targets.length, queries, pool: pool.length, classified: got.value.length,
+          targets: targets.length, queries, pool: pool.length, classified: cards.length,
           applied, held, auto_apply: autoApply, shadow: !autoApply,
-          budget: `${spent + 1}/${budget}`,
+          // ⚠️ 실제로 «쏜 콜 수» 로 센다. 예전엔 +1 고정이라 예산 표기가 늘 틀렸다.
+          budget: `${spent + calls}/${budget}`, calls,
+          ...(failures.length ? { partial_failures: failures } : {}),
           outcomes: outcomes.slice(0, 30),
         },
       };

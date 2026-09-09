@@ -19,7 +19,7 @@
  */
 import { badJson, callFailed, noResult, ok, type Outcome } from '@/lib/net/outcome';
 // ⚠️ 관문 경유 — 원장·쿼터가 한 곳에 모인다(LB-1).
-import { anthropicJson } from '@/lib/llm/gateway';
+import { anthropicJson, textBlockOf } from '@/lib/llm/gateway';
 import { canonicalBuilder, parseUnits } from '@/lib/verify/builders';
 import { parseAddress } from '@/lib/builder-sites/parse';
 import type { PresaleSource } from '@/lib/builder-sites/presale-registry';
@@ -37,6 +37,12 @@ import type { CandidateFact } from './candidate';
  *       잰다(CV-B). 일치율이 기준을 넘으면 그때 «데이터로» 내린다
  */
 const MODEL = 'claude-opus-5';
+/**
+ * ⛔ 4000 이었다. 형제(cvn/extract.ts)가 2026-09-09 새벽에 바로 이 숫자로 회전을 잃었다 —
+ *    Opus 5 는 thinking 이 «기본으로» 켜져 있어 max_tokens 를 생각과 답이 나눠 쓴다.
+ *    여기는 아직 안 터졌을 뿐 같은 지뢰다. 공식 권고 비스트리밍 16000 으로 올린다.
+ */
+const MAX_OUTPUT_TOKENS = 16_000;
 /** 섀도 평가용 허용 목록. ⛔ 임의 문자열을 모델 이름으로 흘려보내지 않는다. */
 const ALLOWED_MODELS = new Set([MODEL, 'claude-sonnet-5', 'claude-haiku-4-5-20251001']);
 /**
@@ -218,7 +224,10 @@ ${body}`;
       headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
         model,
-        max_tokens: 4000,
+        max_tokens: MAX_OUTPUT_TOKENS,
+        // ⛔ Haiku 4.5 에는 effort 를 «보내지 않는다» — 그 모델은 이 파라미터를 400 으로 거절한다.
+        //    섀도 평가(ALLOWED_MODELS)가 haiku 를 태우는 경로라 무조건 실으면 대조군이 통째로 죽는다.
+        ...(model.startsWith('claude-haiku') ? {} : { output_config: { effort: 'low' as const } }),
         system: SYSTEM,
         messages: [{ role: 'user', content: user }],
       }),
@@ -234,10 +243,8 @@ ${body}`;
 
   if (call.kind !== 'ok' || !call.value) return { ...call, value: null } as Outcome<ExtractedCard[]>;
 
-  const raw = call.value?.content?.find((b: any) => b?.type === 'text')?.text;
-  if (typeof raw !== 'string' || !raw) {
-    return noResult<ExtractedCard[]>(call.status, 'text 블록 없음');
-  }
+  const { text: raw, why } = textBlockOf(call.value);
+  if (!raw) return noResult<ExtractedCard[]>(call.status, why);
 
   const m = raw.match(/\[[\s\S]*\]/);
   // ⚠️ 「배열이 없다」는 호출 실패가 아니라 «읽을 수 없는 응답» 이다. 재시도해도 같다.

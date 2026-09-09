@@ -15,11 +15,25 @@
 import { badJson, noResult, ok, type Outcome } from '@/lib/net/outcome';
 // ⚠️ 관문을 거친다 — 원장 기록·쿼터가 여기 한 곳에 있다. 직접 fetchJson 을 부르면
 //    이 호출은 다시 «관측 밖» 이 된다(2026-09-08 실측: 55곳 중 51곳이 그랬다).
-import { anthropicJson } from '@/lib/llm/gateway';
+import { anthropicJson, textBlockOf } from '@/lib/llm/gateway';
 import { htmlToText } from '@/lib/presale/extract';
 import type { EventType } from './decide';
 
 const MODEL = 'claude-opus-5';
+/**
+ * ⛔ 4000 이었다. 그 숫자가 2026-09-09 새벽 회전을 통째로 죽였다.
+ *    Opus 5 는 «thinking 이 기본으로 켜진» 모델이다(4.8·4.7 과 다르다 — 그쪽은 꺼진 게 기본).
+ *    그래서 max_tokens 는 «답의 길이» 가 아니라 «생각 + 답» 이 함께 쓰는 지면이다.
+ *    21:10Z 실측: 입력 6,220자에 output_tokens 4000/4000 — 생각이 지면을 다 쓰고
+ *    text 블록에 닿지 못했다. 응답은 200·success 였고 크래시는 없었다.
+ * ⚠️ 공식 권고치가 비스트리밍 16000 이다. 낮추지 않는다.
+ */
+const MAX_OUTPUT_TOKENS = 16_000;
+/**
+ * 두 콜 다 «주어진 글에서 뽑아 적는» 추출·분류다. 지면을 넓힌 만큼 생각 값이 같이
+ * 뛰지 않도록 effort 를 낮춘다 — 이 작업 모양에 권고되는 자리이고, 되돌리려면 이 줄만 고친다.
+ */
+const EFFORT = 'low' as const;
 /** CV-1 과 같은 상한. 목록 한 장이 통째로 들어가면서 콜당 비용이 예측 가능한 선이다. */
 const MAX_INPUT_CHARS = 40_000;
 /** 뉴스는 제목+요약이라 훨씬 짧다. 한 번에 여러 건을 묶어 콜 수를 줄인다. */
@@ -104,7 +118,8 @@ export async function extractRegistryCards(
       headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 4000,
+        max_tokens: MAX_OUTPUT_TOKENS,
+        output_config: { effort: EFFORT },
         system: REGISTRY_SYSTEM,
         messages: [{ role: 'user', content: `브랜드: ${brand}\n브랜드관 URL: ${registryUrl}\n\n페이지 본문:\n${body}` }],
       }),
@@ -119,8 +134,8 @@ export async function extractRegistryCards(
 
 
   if (call.kind !== 'ok' || !call.value) return { ...call, value: null } as Outcome<RegistryCard[]>;
-  const raw = call.value?.content?.find((b: any) => b?.type === 'text')?.text;
-  if (typeof raw !== 'string' || !raw) return noResult<RegistryCard[]>(call.status, 'text 블록 없음');
+  const { text: raw, why } = textBlockOf(call.value);
+  if (!raw) return noResult<RegistryCard[]>(call.status, why);
   const m = raw.match(/\[[\s\S]*\]/);
   if (!m) return badJson<RegistryCard[]>(call.status, `배열 없음: ${raw.slice(0, 80)}`);
   try {
@@ -222,7 +237,8 @@ export async function classifyNewsBatch(items: NewsInput[]): Promise<Outcome<New
       headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 4000,
+        max_tokens: MAX_OUTPUT_TOKENS,
+        output_config: { effort: EFFORT },
         system: NEWS_SYSTEM,
         messages: [{ role: 'user', content: body }],
       }),
@@ -237,8 +253,8 @@ export async function classifyNewsBatch(items: NewsInput[]): Promise<Outcome<New
 
 
   if (call.kind !== 'ok' || !call.value) return { ...call, value: null } as Outcome<NewsCard[]>;
-  const raw = call.value?.content?.find((b: any) => b?.type === 'text')?.text;
-  if (typeof raw !== 'string' || !raw) return noResult<NewsCard[]>(call.status, 'text 블록 없음');
+  const { text: raw, why } = textBlockOf(call.value);
+  if (!raw) return noResult<NewsCard[]>(call.status, why);
   const m = raw.match(/\[[\s\S]*\]/);
   if (!m) return badJson<NewsCard[]>(call.status, `배열 없음: ${raw.slice(0, 80)}`);
   try {

@@ -241,6 +241,28 @@ export async function anthropicFetch(
   return res;
 }
 
+/**
+ * Messages 응답에서 text 블록을 꺼낸다. 없으면 «왜 없는지» 를 함께 돌려준다.
+ *
+ * ⚠️ 2026-09-09 실측 — cvn-name-watch 침묵의 진짜 사인이 여기 있었다.
+ *    21:10Z 회전은 크래시하지 않았다. 200 으로 완주했고 콜도 성공(success)이었는데
+ *    `output_tokens 4000 / max_tokens 4000` — thinking 이 상한을 통째로 먹어 text 블록에
+ *    닿지 못했다. 입력은 6,220자뿐이었다.
+ * ⛔ 그런데 로그에 남은 것은 「text 블록 없음」 한 줄이 전부였다. 그 한 줄로는
+ *    「모델이 할 말이 없었다」와 「지면이 모자랐다」가 구분되지 않는다 —
+ *    outcome.ts 가 세 갈래로 가른 것과 같은 병이고, 같은 처방을 쓴다.
+ *    stop_reason·블록 종류·output_tokens 를 함께 적으면 다음 사고는 한 줄로 읽힌다.
+ */
+export function textBlockOf(body: any): { text: string | null; why: string } {
+  const blocks: any[] = Array.isArray(body?.content) ? body.content : [];
+  const text = blocks.find((b) => b?.type === 'text')?.text;
+  if (typeof text === 'string' && text) return { text, why: '' };
+  const kinds = blocks.map((b) => String(b?.type ?? '?')).join(',') || '블록 0개';
+  const stop = String(body?.stop_reason ?? '?');
+  const out = Number(body?.usage?.output_tokens ?? 0);
+  return { text: null, why: `text 블록 없음 (stop_reason=${stop} · 블록=${kinds} · output=${out})` };
+}
+
 /** 쿼터 때문에 막힌 응답인가 — 호출부가 「모델이 거절함」과 구분하고 싶을 때 쓴다. */
 export const isQuotaBlocked = (res: Response): boolean =>
   res.status === 429 && res.headers.get('x-kadeora-quota') !== null;
