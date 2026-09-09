@@ -14,7 +14,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { fetchAll } from '@/lib/db/fetchBatched';
 import {
-  GAP_METRICS, digestSeverity, formatDigest, severityOf,
+  GAP_METRICS, digestSeverity, formatDigest, readingSeverity,
   type GapReading,
 } from '@/lib/gap/metrics';
 // ⚠️ 라우트 모듈은 헬퍼를 export 하지 못한다(생성 타입이 거부). 판정 본문은 lib 에 산다.
@@ -254,7 +254,14 @@ async function handler(req: NextRequest) {
 
   readings.push(
     { def: def('cvn_name_preempt'), value: preempt, prev: prev.get('cvn_name_preempt') ?? null,
-      detail: { sampled: candRows.length } },
+      detail: { sampled: candRows.length },
+      // ⛔ 분모가 0 이면 0% 가 아니라 «못 쟀다» 다. 종전엔 preempt 가 0 인 채로
+      //    임계(critAt 15)를 지나 critical 이 됐다 — 실측 2026-09-08 이 그랬고,
+      //    그때 news: 계열 후보는 «0건» 이라 애초에 잰 것이 없었다.
+      //    「재보니 최악」과 「아예 못 쟀다」가 같은 빨강이면 둘 다 못 읽는다.
+      ...(candRows.length === 0
+        ? { unmeasured: '보도(news:)로 들어온 후보가 0건 — 분모가 없어 선점률이 성립하지 않는다. 워처가 후보를 만들기 시작하면 열린다' }
+        : {}) },
     { def: def('cvn_brand_alias_coverage'), value: coverage, prev: prev.get('cvn_brand_alias_coverage') ?? null,
       detail: { denom: redev.length, with_brand: withBrand.length } },
     { def: def('cvn_alias_heal'), value: heal.rehealed, prev: prev.get('cvn_alias_heal') ?? null,
@@ -277,14 +284,16 @@ async function handler(req: NextRequest) {
 
   if (!dry) {
     await admin.from('gap_watch_snapshots').insert(readings.map((r) => ({
-      metric: r.def.key, value: r.value, severity: severityOf(r.def, r.value, r.prev),
-      detail: r.detail ?? null,
+      // ⚠️ 적재하는 심각도와 알림에 나가는 심각도가 «같아야» 한다. 종전엔 여기만
+      //    severityOf 를 직접 불러서, 그날 못 잰 지표가 표에는 critical 로 남았다.
+      metric: r.def.key, value: r.value, severity: readingSeverity(r),
+      detail: r.unmeasured ? { ...(r.detail ?? {}), unmeasured: r.unmeasured } : (r.detail ?? null),
     })));
     if (send) {
       await admin.from('admin_alerts').insert({
         type: 'gap_watch',
         severity: sev === 'critical' ? 'critical' : sev === 'warning' ? 'warning' : 'info',
-        title: sev === 'ok' ? '갭워치 주간 — 손볼 것 없음' : `갭워치 — 손볼 것 ${readings.filter((r) => severityOf(r.def, r.value, r.prev) !== 'ok').length}건`,
+        title: sev === 'ok' ? '갭워치 주간 — 손볼 것 없음' : `갭워치 — 손볼 것 ${readings.filter((r) => readingSeverity(r) !== 'ok').length}건`,
         message: body,
         metadata: { readings: readings.map((r) => ({ k: r.def.key, v: r.value, p: r.prev ?? null })) },
       });

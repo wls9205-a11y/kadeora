@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  GAP_METRICS, digestSeverity, formatDigest, severityOf, type GapReading,
+  GAP_METRICS, digestSeverity, formatDigest, readingSeverity, severityOf, type GapReading,
 } from '@/lib/gap/metrics';
 import { countSimilarPairs } from '@/lib/gap/similar-pairs';
 
@@ -8,9 +8,38 @@ const def = (k: string) => GAP_METRICS.find((m) => m.key === k)!;
 
 describe('CV-4 갭워치 심각도', () => {
   it('lower_is_better — 절대 임계', () => {
-    expect(severityOf(def('permits_unmatched'), 10)).toBe('ok');
-    expect(severityOf(def('permits_unmatched'), 250)).toBe('warning');
-    expect(severityOf(def('permits_unmatched'), 1465)).toBe('critical');
+    expect(severityOf(def('candidates_queued'), 10)).toBe('ok');
+    expect(severityOf(def('candidates_queued'), 60)).toBe('warning');
+    expect(severityOf(def('candidates_queued'), 150)).toBe('critical');
+  });
+
+  // 기지 결측은 «양» 이 아니라 «변화» 로 운다 — 매일 켜지는 빨강은 이틀이면 배경이 된다.
+  it('deltaOnly — 큰 값이 유지되면 조용하고, 늘 때만 운다', () => {
+    const d = def('permits_unmatched');
+    expect(d.deltaOnly).toBeTruthy();
+    expect(severityOf(d, 1283, 1283)).toBe('ok');      // 변화 없음
+    expect(severityOf(d, 1283, 1361)).toBe('ok');      // 줄었다
+    expect(severityOf(d, 1310, 1283)).toBe('warning'); // +27
+    expect(severityOf(d, 1400, 1283)).toBe('critical');// +117
+    expect(severityOf(d, 99999)).toBe('ok');           // 직전 관측이 없으면 증가분이 없다
+  });
+
+  it('deltaOnly 지표는 조용할 때도 누적 절대값을 다이제스트에 남긴다', () => {
+    const body = formatDigest([{ def: def('permits_unmatched'), value: 1283, prev: 1283 }]);
+    expect(body).toContain('손볼 것 없음');
+    expect(body).toContain('누적 1283');
+  });
+
+  // 분모가 0 인 비율 지표가 0% 로 떨어져 critical 이 되던 자리.
+  it('그날 못 잰 지표는 0 이어도 빨강으로 올리지 않는다', () => {
+    const r: GapReading = {
+      def: def('cvn_name_preempt'), value: 0, prev: null,
+      unmeasured: '보도(news:) 후보 0건 — 분모 없음',
+    };
+    expect(severityOf(r.def, 0)).toBe('critical');   // 순수 함수는 여전히 최악으로 읽는다
+    expect(readingSeverity(r)).toBe('ok');           // 그날 사정을 얹으면 조용하다
+    expect(digestSeverity([r])).toBe('ok');
+    expect(formatDigest([r])).toContain('이번 회전 측정 불가');
   });
 
   it('higher_is_better — 줄어드는 쪽이 사고다', () => {
@@ -40,12 +69,12 @@ describe('CV-4 갭워치 심각도', () => {
 
   it('다이제스트는 손볼 것에 «할 일» 을 붙인다', () => {
     const readings: GapReading[] = [
-      { def: def('permits_unmatched'), value: 1465, prev: 1465 },
+      { def: def('permits_unmatched'), value: 1600, prev: 1465 },   // +135 → 위험
       { def: def('pre_announcement'), value: 31, prev: 28 },
     ];
     const body = formatDigest(readings, '2026-09-01T00:00:00Z');
     expect(body).toContain('손볼 것 1건');
-    expect(body).toContain('(변화 없음)');
+    expect(body).toContain('(+135)');
     expect(body).toContain('(+3)');
     expect(body).toContain('detail.by_status');   // 할 일이 pending/unmatched 로 갈린다
     expect(digestSeverity(readings)).toBe('critical');
