@@ -86,6 +86,18 @@ export interface AptPipelinePayload {
   page: number;
   page_size: number;
   total_pages: number;
+  /**
+   * 단계별 내역. RPC 가 «게이트 통과 · 페이지 이전» 집합 위에서 센 것이라
+   * 값들의 합이 total 과 «항상» 같다 — 그 등식이 이 필드의 검증 지점이다.
+   * ⚠️ 구버전 RPC 는 안 내려준다. 그때는 {} 다 — 없는 것을 0 으로 «세지» 말 것.
+   */
+  by_status: Record<string, number>;
+  /**
+   * 히어로 2지표. ⛔ 프론트에서 total − construction 으로 «만들지 않는다».
+   *    2026-09-09 실측이 그 위험을 보여 줬다 — 게이트 있는 수(부산 345)와 없는 수(착공 80)를
+   *    섞으면 짝이 안 맞는다. 같은 문에서 나온 값은 320 · 25 다.
+   */
+  groups: { pre_notice: number; construction: number };
   items: AptPipelineItem[];
 }
 
@@ -96,6 +108,8 @@ export const EMPTY_PIPELINE: AptPipelinePayload = {
   page: 1,
   page_size: PIPELINE_PAGE_SIZE,
   total_pages: 0,
+  by_status: {},
+  groups: { pre_notice: 0, construction: 0 },
   items: [],
 };
 
@@ -109,6 +123,16 @@ function normalize(raw: unknown, region: string, limit: number): AptPipelinePayl
     page: Number(r.page) > 0 ? Number(r.page) : 1,
     page_size: Number(r.page_size) > 0 ? Number(r.page_size) : limit,
     total_pages: Number(r.total_pages) || 0,
+    // ⚠️ 숫자만 통과시킨다. RPC 가 새 키를 늘려도 화면이 문자열을 세지 않는다.
+    by_status: Object.fromEntries(
+      Object.entries((r.by_status ?? {}) as Record<string, unknown>)
+        .map(([k, v]) => [k, Number(v)])
+        .filter(([, v]) => Number.isFinite(v as number)),
+    ) as Record<string, number>,
+    groups: {
+      pre_notice: Number(r.groups?.pre_notice) || 0,
+      construction: Number(r.groups?.construction) || 0,
+    },
     items: Array.isArray(r.items) ? (r.items as AptPipelineItem[]) : [],
   };
 }
