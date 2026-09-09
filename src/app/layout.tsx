@@ -117,7 +117,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="search" type="application/opensearchdescription+xml" title="카더라 검색" href="/opensearch.xml" />
         <meta name="msvalidate.01" content="BAE0BF3F5071F16E8BAE497D195B2FD6" />
         <meta name="google-adsense-account" content="ca-pub-2356113563328542" />
-        <Script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2356113563328542" crossOrigin="anonymous" strategy="afterInteractive" />
+        {/* DS2 §6-3 — 애드센스 «공식 로더 규격» 그대로 둔다 (2026-09-09).
+            ⛔ next/script 를 쓰지 않는다. <head> 안의 next/script 는 Next 가 경고를 내고
+               data-nscript 속성이 붙어 구글이 문서화한 스니펫 형태와 달라진다.
+            ⚠️ async 는 유지된다 — 파싱을 막지 않는다. afterInteractive 보다 «이르게» 뜨는
+               것은 자동광고가 head 로더를 전제하기 때문이고, 그게 구글 규격이다.
+            ⚠️ 아래 GA 두 개는 next/script 그대로다. 그쪽은 head 밖이라 경고 대상이 아니고
+               규격을 요구하는 제3자도 아니다 — 한꺼번에 바꾸지 않는다. */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2356113563328542"
+          crossOrigin="anonymous"
+        />
         {/* iOS PWA 아이콘 — v6 캐시 갱신 */}
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=7" />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=7" />

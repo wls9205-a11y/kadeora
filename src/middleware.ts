@@ -12,7 +12,12 @@ const BOT_PATHS = ['/wp-admin', '/wp-login.php', '/.env', '/.git', '/phpmyadmin'
 // ⚠️ 배열로 둔다. 아래 Report-Only 초안이 «이 배열에서 파생» 되어야 두 정책이 갈라지지 않는다.
 const CSP_PARTS = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://va.vercel-scripts.com https://*.tosspayments.com https://*.kakaocdn.net https://*.kakao.com https://dapi.kakao.com https://www.googletagmanager.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://fundingchoicesmessages.google.com",
+  // DS2 §6-2 (2026-09-09) — *.adtrafficquality.google 을 script-src·frame-src 에 «더한다».
+  // 실측: 이 호스트는 connect-src 에만 있었다. 애드센스의 품질·부정클릭 모듈은 그 호스트에서
+  // «스크립트와 iframe» 으로 오므로 connect 만 열어 둔 상태에서는 실제로 차단된다.
+  // ⚠️ 「미사용 정리」 쪽이 아니다 — 애드센스는 실사용 중이다(layout.tsx 로더 +
+  //    blog/[slug] 의 AdSlot). 쓰는 것을 막고 있었으므로 화이트리스트가 맞다.
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://va.vercel-scripts.com https://*.tosspayments.com https://*.kakaocdn.net https://*.kakao.com https://dapi.kakao.com https://www.googletagmanager.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://*.adtrafficquality.google https://fundingchoicesmessages.google.com",
   "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
   // 세션 142 P0: 모든 https CDN 이미지 허용 (imgnews.naver.net, pstatic, lottecastle 등).
   // http: 제거 (safeImg 블랙리스트 와 정합 — 혼합 콘텐츠 차단).
@@ -22,7 +27,7 @@ const CSP_PARTS = [
   // 302 로 넘기는 최종 응답 호스트이며, CSP 는 리다이렉트 홉마다 검사하므로 둘 다 필요하다.
   // 빠져 있으면 fetch 가 CORS 이전 단계에서 'TypeError: Failed to fetch' 로 차단된다.
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cdn.jsdelivr.net https://*.kakao.com https://*.kakaocdn.net https://*.daumcdn.net https://accounts.google.com https://*.tosspayments.com https://*.sentry.io https://*.upstash.io https://open.er-api.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://www.google.com https://google.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://*.adtrafficquality.google https://script.google.com https://script.googleusercontent.com",
-  "frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://*.tosspayments.com https://*.googlesyndication.com https://googleads.g.doubleclick.net",
+  "frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://*.tosspayments.com https://*.googlesyndication.com https://googleads.g.doubleclick.net https://*.adtrafficquality.google",
   "frame-ancestors 'self' https://*.tossmini.com",
   "base-uri 'self'",
   "form-action 'self' https://kauth.kakao.com https://sharer.kakao.com https://accounts.google.com https://www.googletagmanager.com",
