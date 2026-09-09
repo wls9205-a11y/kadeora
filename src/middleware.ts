@@ -27,7 +27,10 @@ const CSP_PARTS = [
   // 302 로 넘기는 최종 응답 호스트이며, CSP 는 리다이렉트 홉마다 검사하므로 둘 다 필요하다.
   // 빠져 있으면 fetch 가 CORS 이전 단계에서 'TypeError: Failed to fetch' 로 차단된다.
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cdn.jsdelivr.net https://*.kakao.com https://*.kakaocdn.net https://*.daumcdn.net https://accounts.google.com https://*.tosspayments.com https://*.sentry.io https://*.upstash.io https://open.er-api.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://www.google.com https://google.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://*.adtrafficquality.google https://script.google.com https://script.googleusercontent.com",
-  "frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://*.tosspayments.com https://*.googlesyndication.com https://googleads.g.doubleclick.net https://*.adtrafficquality.google",
+  // ⚠️ www.google.com 은 애드센스 sodar(부정클릭 측정)가 «iframe» 으로 부른다.
+  //    accounts.google.com 만 열려 있어 enforced 정책에서 실차단되고 있었다 —
+  //    §6-2 에서 adtrafficquality 를 열었을 때 같이 봤어야 했던 자리다(같은 모듈의 두 다리).
+  "frame-src 'self' https://kauth.kakao.com https://accounts.google.com https://www.google.com https://*.tosspayments.com https://*.googlesyndication.com https://googleads.g.doubleclick.net https://*.adtrafficquality.google",
   "frame-ancestors 'self' https://*.tossmini.com",
   "base-uri 'self'",
   "form-action 'self' https://kauth.kakao.com https://sharer.kakao.com https://accounts.google.com https://www.googletagmanager.com",
