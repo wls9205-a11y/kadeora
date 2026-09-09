@@ -198,12 +198,26 @@ async function handler(req: NextRequest) {
         cards.push(...got.value);
       }
 
-      // ⛔ 「한 덩어리도 못 읽었다」일 때만 회전을 실패로 접는다.
-      //    일부만 실패하면 읽어낸 몫은 그대로 적재하고 실패는 metadata 에 남긴다.
+      // ⛔ 「분류 0건」을 실패로 적지 않는다. 이 파일 머리말이 금지한 바로 그것이다 —
+      //    「검색해도 안 나온다」는 결함이 아니라 «아직 시공사가 안 정해졌다» 는 대기 상태다.
+      //    2026-09-09 04:12 실적재 회전이 정확히 이 자리에 걸렸다: 두 덩어리 다 성공했는데
+      //    이름 사건이 없어서 error:"no_result 분류 0건" 으로 적혔다. 청크화가
+      //    「전부 실패」와 「전부 성공인데 이벤트 없음」을 한 분기로 접은 탓이다.
+      // ⚠️ 가르는 기준은 cards 가 아니라 «failures» 다. 읽지 못한 덩어리가 있었는가로 판정한다.
       if (!cards.length) {
+        if (!failures.length) {
+          return {
+            processed: 0,
+            metadata: {
+              targets: targets.length, queries, pool: pool.length, calls,
+              classified: 0, budget: `${spent + calls}/${budget}`,
+              message: '이름 사건 없음 — 기사는 읽었고 그중 단지명 사건이 없었다. 결함이 아니라 대기 상태다',
+            },
+          };
+        }
         return {
           processed: 0,
-          metadata: { error: failures.join(' | ') || 'no_result 분류 0건', pool: pool.length, calls },
+          metadata: { error: failures.join(' | '), pool: pool.length, calls },
         };
       }
 

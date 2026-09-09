@@ -192,6 +192,37 @@ async function handler(req: NextRequest) {
 
     const rows = attempt.rows;
 
+    /**
+     * ── 2026-09-09 실측 · 4중 적재 ────────────────────────────────────────
+     * 창이 [now-5d, now-2d] 로 «4일» 인데 크론은 매일 돈다. 그래서 같은 날짜가
+     * 네 번 조회되고, 여기가 upsert 가 아니라 insert 라 네 번 «적재» 됐다.
+     * 실측: 표 전체가 (date,query,page,device,country) 기준 정확히 4행씩이다 —
+     * 2026-04 분까지 예외 없이 4. 즉 이 표를 세는 모든 지표가 4배로 부풀어 있다.
+     *
+     * ⛔ 유니크 인덱스가 없어 upsert 를 쓸 수 없다(pkey 는 id 뿐).
+     *    스키마를 건드리는 대신 «다시 싣기 전에 그 날짜를 비운다» — 회전이 멱등해진다.
+     * ⚠️ rows 가 0 이면 아무것도 비우지 않는다. 구글이 잠깐 빈 응답을 준 날
+     *    멀쩡한 과거를 날리는 것이 이 수리로 만들 수 있는 최악이다.
+     * ⚠️ 창 전체가 아니라 «실제로 받은 날짜» 만 비운다. 창으로 비우면 구글이 더는
+     *    주지 않는 날짜까지 사라져, 수리가 조용한 소실로 바뀐다.
+     */
+    let cleared = 0;
+    if (rows.length) {
+      const dates = Array.from(new Set(rows.map((r) => String(r.keys[0])).filter(Boolean)));
+      const res = await (sb as any)
+        .from('gsc_search_analytics').delete({ count: 'exact' }).in('date', dates);
+      if (res.error) {
+        // ⛔ 못 비웠으면 «싣지 않는다». 그냥 넣으면 중복이 한 겹 더 쌓일 뿐이다.
+        console.error('[gsc-sync] window clear fail', res.error.message?.slice(0, 200));
+        return NextResponse.json({
+          ok: true, skipped: 'window_clear_failed', property: usedProperty,
+          date_range: [start, end], rows: rows.length,
+          err: String(res.error.message || '').slice(0, 160),
+        });
+      }
+      cleared = res.count ?? 0;
+    }
+
     let inserted = 0;
     let failedBatches = 0;
     for (let i = 0; i < rows.length; i += 500) {
@@ -224,6 +255,8 @@ async function handler(req: NextRequest) {
       // 0행일 때만 채워진다. 어떤 속성이 열려 있는지 보이면 원인이 바로 잡힌다.
       ...(availableProperties ? { available_properties: availableProperties } : {}),
       rows: rows.length,
+      // 재적재 전에 비운 행 수. rows 보다 «크면» 그만큼 과거의 중복이 걷힌 것이다.
+      cleared,
       inserted,
       failed_batches: failedBatches,
     });
