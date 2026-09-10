@@ -984,4 +984,33 @@
   @media (min-width: 1024px) {
     .kd-mobile-only { display: none; }
   }
+
+  /* ── 상단 공유방 띠 — 모바일 카드 / 데스크톱 풀폭 (UI_INSTRUCTION_20260910 §1.A) ──
+     ⚠️ 기하(geometry)를 여기로 뺀 이유: 이 띠는 «상단 크롬 스택의 첫 칸» 이고
+        점유 높이가 --kd-banner-h → --kd-header-top 으로 흘러간다(tokens.css:232).
+        모바일에서 카드가 되면 점유 높이가 52 → 72(10+52+10)로 바뀌므로 값과 모양이
+        «같이» 움직여야 한다. 한쪽만 고치면 헤더가 띠를 덮거나 사이가 벌어진다.
+     ⚠️ 인라인 style 에 display 를 두지 «않는다» — 반응형 클래스를 이길 수 있다.
+        Navigation.tsx 547·490 이 정확히 그 함정으로 md:hidden 이 무력화돼 있었다. */
+  .kd-talk-banner {
+    --kd-talk-inset: 10px;
+    position: fixed;
+    top: var(--kd-talk-inset);
+    left: var(--kd-talk-inset);
+    right: var(--kd-talk-inset);
+    z-index: 110;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-inline: 16px;
+    border-radius: var(--radius-md);   /* 12px — 스케일에 이미 있는 단이라 신설하지 않는다 */
+    text-decoration: none;
+  }
+  @media (min-width: 768px) {
+    .kd-talk-banner {
+      --kd-talk-inset: 0px;
+      border-radius: 0;
+    }
+  }
+
 }

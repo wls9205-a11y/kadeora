@@ -12,6 +12,12 @@ import { isAptSiteDetailPath } from '@/lib/apt/is-site-detail';
 /** 배너 높이(px). spacer 와 공유. */
 export const STICKY_BANNER_HEIGHT = 52;
 
+/** 모바일 카드 여백(px). 기하 정의는 components.css 의 `.kd-talk-banner` 가 갖는다 —
+ *  여기 숫자는 «점유 높이 계산» 한 곳에만 쓴다. 두 값이 갈리면 헤더가 띠를 덮는다. */
+const MOBILE_INSET = 10;
+/** 모바일에서 띠가 실제로 먹는 세로 공간 = 위 여백 + 높이 + 아래 여백. */
+const MOBILE_BANNER_SPACE = STICKY_BANNER_HEIGHT + MOBILE_INSET * 2;
+
 /**
  * 인라인 '이미지' 배너가 들어가는 라우트 — 여기선 상단 배너를 렌더하지 않는다.
  *
@@ -72,10 +78,13 @@ export default function StickyTalkBanner() {
        *    첫 페인트부터 확정이다.
        * ⚠️ @layer 밖이라 tokens.css 의 :root(@layer tokens) 기본값을 항상 이긴다 —
        *    레이어 있는 규칙보다 없는 규칙이 세다. 순서에 기대지 않는다. */}
-      <style>{`:root{--kd-banner-h:${STICKY_BANNER_HEIGHT}px}`}</style>
+      {/* ⚠️ 모바일은 카드(여백 10)라 점유 높이가 72, 데스크톱 풀폭은 52 다.
+             --kd-banner-h 가 --kd-header-top 으로 흘러가므로 브레이크포인트마다
+             «값» 이 달라야 헤더가 띠와 겹치지 않는다. */}
+      <style>{`:root{--kd-banner-h:${MOBILE_BANNER_SPACE}px}@media (min-width:768px){:root{--kd-banner-h:${STICKY_BANNER_HEIGHT}px}}`}</style>
 
-      {/* fixed 배너가 덮는 최상단 공간을 flow 에서 확보 */}
-      <div aria-hidden="true" style={{ height: STICKY_BANNER_HEIGHT }} />
+      {/* fixed 배너가 덮는 최상단 공간을 flow 에서 확보 — 값은 위 토큰이 갖는다 */}
+      <div aria-hidden="true" style={{ height: 'var(--kd-banner-h)' }} />
 
       <a
         ref={viewRef}
@@ -84,7 +93,7 @@ export default function StickyTalkBanner() {
         rel="noopener noreferrer"
         aria-label={`부동산 정보 공유방 — 현재 ${count}명 참여 중인 오픈 카톡방. 새 창으로 열기`}
         onClick={handleClick}
-        className="fixed left-0 top-0 z-[110] flex w-full items-center gap-[10px] px-4 no-underline"
+        className="kd-talk-banner"
         style={{ background: YELLOW, height: STICKY_BANNER_HEIGHT }}
       >
         {/* 라이브 점 — 맥박 */}

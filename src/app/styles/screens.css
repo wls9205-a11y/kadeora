@@ -238,13 +238,20 @@
 
   /* ── H5-1 : 홈 히어로 ─────────────────────────────────────────────────── */
   .kd-home-hero {
+    /* ⚠️ DS 트랙 이관 대상 — 26·22·12px 은 현행 radius 스케일(8/12/16/20/999)에 없는 단이다.
+       토큰을 신설하지 «않고» 컴포넌트 상수로 둔다(UI_INSTRUCTION_20260910 §1.A).
+       값이 산재하지 않도록 이 세 줄이 유일한 정의처다 — 아래 768px 블록에서 덮는다. */
+    --kd-hero-radius: 22px;        /* 모바일 */
+    --kd-hero-inset: 12px;         /* 모바일 좌우 여백 — 풀블리드에서 카드로 */
+    --kd-hero-stat-radius: 16px;   /* 스탯 카드. 종전 --radius-sm(8px) */
     position: relative;
     /* ⚠️ svh. iOS 사파리는 주소창 접힘으로 vh 가 «점프» 해 검색창이 하단 바에
        가렸다 나타났다 한다. svh 는 작은 쪽으로 고정돼 항상 보인다. */
     /* ⚠️ H6-4 — 데스크탑 1080 에서 콘텐츠가 260px 뿐이라 하단 절반이 빈 네이비였다.
        높이를 줄이고 «남는 자리는 데이터 띠로» 채운다. 이미지로 채우지 않는다. */
     min-height: min(55svh, 440px);
-    margin: 0 0 var(--sp-xl);
+    margin: 0 var(--kd-hero-inset) var(--sp-xl);
+    border-radius: var(--kd-hero-radius);
     /* ⚠️ 이 값은 src/lib/og/brand.ts 의 BRAND_BG 와 «바이트 단위로 같다».
        한쪽만 고치면 OG 카드와 첫 화면이 갈린다. 고칠 땐 반드시 양쪽. */
     background: var(--brand-hero-bg);
@@ -315,7 +322,7 @@
     min-height: 56px;              /* 터치 타깃 하한 */
     display: flex; flex-direction: column; justify-content: center; gap: 2px;
     padding: 10px 12px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--kd-hero-stat-radius);
     background: var(--brand-navy-mid);
     color: var(--text-inverse);
     text-decoration: none;
@@ -345,7 +352,12 @@
   }
 
   @media (min-width: 768px) {
-    .kd-home-hero { min-height: min(52svh, 460px); }
+    .kd-home-hero {
+      /* 데스크톱은 풀블리드 복귀 — 좌우 여백 0, 라운드만 한 단 크게 */
+      --kd-hero-radius: 26px;
+      --kd-hero-inset: 0px;
+      min-height: min(52svh, 460px);
+    }
   }
 
   /* 헤더 검색 ↔ 히어로 검색 — «둘 중 하나만» 잡히게 한다.
