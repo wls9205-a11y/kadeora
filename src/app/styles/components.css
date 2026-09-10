@@ -1013,4 +1013,46 @@
     }
   }
 
+  /* ── 단톡방 입장 FAB (UI_INSTRUCTION_20260910 §1.B) ────────────────────────
+     ⚠️ 표시·기하를 «전부» 여기서 정한다. 컴포넌트 인라인 style 은 색 2개뿐이다.
+        인라인 display 를 두면 반응형 규칙이 무력화된다 — 이 파일이 그 규율의 자리다.
+     ⚠️ 하단값은 탭바 존재를 «전제하지 않는다». 데스크톱은 24 로 독립,
+        모바일만 탭바(64) 위 리듬을 따른다. 탭바가 나중에 걷혀도 데스크톱은 안 흔들린다. */
+  .kd-talk-fab {
+    position: fixed;
+    right: 16px;
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+    z-index: 99;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 46px;            /* 탭 영역 하한 44 이상 */
+    min-width: 46px;
+    padding-inline: 16px;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    text-decoration: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+    transition: padding 0.18s ease, gap 0.18s ease, width 0.18s ease;
+  }
+  .kd-talk-fab__label { white-space: nowrap; }
+
+  /* 모바일만 접힌다. 데스크톱은 확장형 «상시» 라 이 규칙 밖이다. */
+  @media (max-width: 767px) {
+    .kd-talk-fab[data-collapsed='true'] {
+      width: 46px;
+      padding-inline: 0;
+      gap: 0;
+    }
+    .kd-talk-fab[data-collapsed='true'] .kd-talk-fab__label { display: none; }
+  }
+  @media (min-width: 768px) {
+    .kd-talk-fab { right: 24px; bottom: 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .kd-talk-fab { transition: none; }
+  }
 }

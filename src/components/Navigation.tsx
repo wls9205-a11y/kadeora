@@ -8,7 +8,7 @@ import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { useAuth } from '@/components/AuthProvider';
 import { haptic } from '@/lib/haptic';
 import { isTossMode } from '@/lib/toss-mode';
-import { isAptSiteDetailPath } from '@/lib/apt/is-site-detail';
+import TalkFab from '@/components/banner/TalkFab';
 import LiveActivityIndicator from '@/components/LiveActivityIndicator';
 import UniversalSearchBar from '@/components/search/UniversalSearchBar';
 
@@ -497,10 +497,14 @@ export function Navigation() {
            ⚠️ A/B 실측: 채널 평균차 1.59 · «최대 12/255» — 육안 식별 불가다.
               95% 불투명이라 blur 의 몫이 5% 뿐이었다. 반투명은 그대로 둔다. */
         borderTop:'1px solid var(--nav-border)',
-        display:'flex', alignItems:'flex-end', justifyContent:'space-around',
+        /* ⛔ display 를 인라인으로 두지 «않는다». 인라인(1,0,0,0)은 반응형 클래스
+              (0,1,0)를 언제나 이겨 md:hidden 이 무력화된다 — 이 바가 1920px 데스크톱에
+              상단 내비와 «함께» 떠 있던 원인이다(2026-09-10 실측).
+              같은 파일 233 행이 대조군이다: `hidden md:flex` + 인라인 display 없음 → 정상. */
+        alignItems:'flex-end', justifyContent:'space-around',
         paddingBottom:'max(6px, env(safe-area-inset-bottom))',
         paddingTop:0,
-      }} className="md:hidden">
+      }} className="flex md:hidden">
         {MOBILE_TABS.map(item => {
           const active = isActive(item.href);
           return (
@@ -537,25 +541,14 @@ export function Navigation() {
         </button>
       </nav>
 
-      {/* FAB 글쓰기 버튼 — 모바일 전용.
-           ⚠️ B8-1: 현장 상세에서는 렌더하지 «않는다». 그 자리를 SiteFloatingActions
-              (공유 · 현장 댓글)가 쓴다. 컴포넌트를 지우는 게 아니라 그 한 화면에서만 끊는 것 —
-              ClientShell 이 홈에서 NoticeBanner 를 끊는 것과 같은 방식이다.
-           ⚠️ CSS 로 감추지 않는 이유: display:none 은 앵커를 DOM 에 남긴다.
-              /write 는 정리 예정 라우트라(H7-6) 보이지 않는 링크로 남기면 안 된다. */}
-      {!isAptSiteDetailPath(pathname ?? '') && (
-      <Link href="/write" aria-label="글쓰기" onClick={() => haptic('medium')} className="md:hidden" style={{
-        position:'fixed', bottom: 'calc(68px + env(safe-area-inset-bottom))', right: 16,
-        zIndex: 99, width: 52, height: 52, borderRadius: '50%',
-        background: 'var(--brand)', color: '#fff',
-        display:'flex', alignItems:'center', justifyContent:'center',
-        boxShadow: '0 4px 16px rgba(59,123,246,0.4)',
-        textDecoration: 'none',
-        transition: 'transform 0.15s ease, box-shadow 0.2s ease',
-      }}>
-        <PenSquare size={22} strokeWidth={2.2} />
-      </Link>
-      )}
+      {/* 우하단 FAB — 글쓰기(/write)에서 부정공 단톡방으로 «교체» 했다
+           (UI_INSTRUCTION_20260910 §1.B).
+           ⚠️ 현장 상세 제외 조건은 걷어낸 글쓰기 FAB 와 «같다» — 판정은 TalkFab 안에 있다.
+              그 화면 우하단은 SiteFloatingActions 의 점유 지도(68/124/180 +54)가 쓴다.
+           ⚠️ 작성 진입점은 사라지지 않는다: 데스크톱 사용자 메뉴 · 더보기 시트 ·
+              GlobalMissionBar · 피드 EmptyState 에 상존하고, 피드 목록 상단 작성 버튼을
+              «같은 커밋» 에서 신설해 보강했다. */}
+      <TalkFab />
       {moreOpen && (
         <div style={{ position:'fixed', inset:0, zIndex: 9999 }}>
           <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.5)' }} onClick={() => setMoreOpen(false)} />

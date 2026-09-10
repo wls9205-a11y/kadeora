@@ -33,6 +33,11 @@ export const TALK_MEMBER_COUNT = 1240;
  *   rail         현장 상세 데스크탑 우측 레일 (v3 커밋4 · ≥1024px 에서만 렌더)
  *   faq          FAQ 마지막 항목
  *   inline       블로그 본문 이미지 배너 (레거시)
+ *   fab          우하단 플로팅 버튼 (UI_INSTRUCTION_20260910 §1.B)
+ *
+ * ⚠️ 새 진입점은 «새 이벤트명» 이 아니라 «새 슬롯» 으로 붙인다. 이벤트를 늘리면
+ *    슬롯별 클릭률을 한 쿼리로 못 낸다 — 이 모듈 머리의 「user_events 한 곳으로 통일」이
+ *    그 뜻이다. 유니온 타입이라 오타는 컴파일에서 걸린다.
  */
 export type TalkSlot =
   | 'sticky'
@@ -41,7 +46,8 @@ export type TalkSlot =
   | 'bottom_bar'
   | 'rail'
   | 'faq'
-  | 'inline';
+  | 'inline'
+  | 'fab';
 
 export type TalkTrackProps = {
   /** 어느 현장이 방으로 사람을 보내는지 — 핵심 지표. 현장 밖 슬롯은 생략. */
