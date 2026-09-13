@@ -35,7 +35,7 @@ async function handler(_req: NextRequest) {
     let processed = 0;
     // ⚠️ 스킵을 «세고 적는다». 전에는 `continue`·`catch {}` 가 아무것도 안 남겨서
     //    「전패」가 원장에만 보이고 cron_logs 는 processed 0 한 줄뿐이었다.
-    const skips = { not_ok: 0, timeout: 0, short_text: 0, error: 0, budget: 0 };
+    const skips = { not_ok: 0, timeout: 0, short_text: 0, truncated: 0, error: 0, budget: 0 };
     const calls: Array<{ slug: string; ms: number; prompt_chars: number; status?: number; stop_reason?: string; text_chars?: number; err?: string }> = [];
 
     const start = Date.now();
@@ -76,6 +76,10 @@ async function handler(_req: NextRequest) {
         const text = data.content?.[0]?.text;
         call.text_chars = text?.length ?? 0;
         if (!text || text.length < 500) { skips.short_text++; continue; }
+        // ⛔ 잘린 글은 저장하지 않는다. 2026-09-13 재점화 5건 중 3건이 max_tokens 에서 문장 중간
+        //    절단된 채 공개됐다(면책 문구 누락 포함 — 세션 A 가 NULL 로 되돌렸다).
+        //    토큰 상한은 올리지 않는다. 프롬프트가 지면 안에 끝내라고 요구하고, 그래도 잘리면 버린다.
+        if (data?.stop_reason === 'max_tokens') { skips.truncated++; continue; }
 
         dbw('apt-analysis-gen', 'apt_sites.update@55', await (admin as any).from('apt_sites')
           .update({ analysis_text: text, analysis_generated_at: new Date().toISOString() })
@@ -105,7 +109,8 @@ function buildPrompt(site: any, sub: any, trades: any[]): string {
   const comp = sub?.competition_rate_1st ? `${Number(sub.competition_rate_1st).toFixed(1)}:1` : '';
   const tr = trades.map((t: any) => `${t.deal_date} ${t.exclusive_area}㎡ ${t.floor}층 ${(Number(t.deal_amount)/10000).toFixed(1)}억`).join(' / ');
 
-  return `한국 부동산 전문 분석가로서 "${n}" 현장 종합 분석 2,000자+ 작성.
+  // ⚠️ 「2,000자+」 만 두면 상한이 없어 max_tokens(4000) 에서 잘렸다(9/13 3/5). 상한과 «완결» 을 함께 요구한다.
+  return `한국 부동산 전문 분석가로서 "${n}" 현장 종합 분석을 2,000~3,000자로 작성. 반드시 3,000자 안에서 FAQ와 면책문구까지 끝낼 것.
 
 데이터: 위치=${r} ${site.sigungu||''} ${site.dong||''}, 시공사=${b}, 세대수=${u||'미공개'}, 입주=${site.move_in_date||sub?.mvn_prearnge_ym||'미정'}, 분양가=${pMin||pMax||'미공개'} ${sub?.is_price_limit?'(상한제)':''}, 역=${site.nearby_station||'없음'}, 학군=${site.school_district||'없음'}, 교통점수=${site.transit_score||'-'}/100${comp?`, 경쟁률=${comp}`:''}${tr?`, 실거래=${tr}`:''}
 
