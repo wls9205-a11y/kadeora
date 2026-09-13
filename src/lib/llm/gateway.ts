@@ -61,6 +61,53 @@ export function quotaBlocked(used: number, cap: number): boolean {
   return used >= cap;
 }
 
+/**
+ * FINAL_HC_20260913 B — 모델 단가(USD / 1M 토큰). ⛔ 코드에 값을 두지 않는다.
+ * 정본은 app_config(namespace='llm', key='model_prices'). 모델이 늘면 행만 고친다.
+ * cache_write·cache_read 는 캐시 토큰 단가(없으면 in 의 1.25배·0.1배로 본다 — API 과금 규칙).
+ */
+export interface ModelPrice { in: number; out: number; cache_write?: number; cache_read?: number }
+export type ModelPrices = Record<string, ModelPrice>;
+
+export interface UsageRow {
+  model: string;
+  input_tokens: number;
+  output_tokens: number;
+  cache_creation_tokens?: number;
+  cache_read_tokens?: number;
+}
+
+/**
+ * 한 행의 비용(USD). 단가표에 없는 모델은 «표의 최고가» 로 센다.
+ * ⚠️ 0 으로 세면 새 모델을 쓰는 주식계열이 쿼터를 통째로 우회한다. 과대가 과소보다 안전하다.
+ */
+export function costUsd(row: UsageRow, prices: ModelPrices): number {
+  let p = prices[row.model];
+  if (!p) {
+    const all = Object.values(prices);
+    if (!all.length) return 0;
+    p = all.reduce((a, b) => (b.out > a.out ? b : a));
+  }
+  const cw = p.cache_write ?? p.in * 1.25;
+  const cr = p.cache_read ?? p.in * 0.1;
+  return (
+    (Number(row.input_tokens) || 0) * p.in +
+    (Number(row.output_tokens) || 0) * p.out +
+    (Number(row.cache_creation_tokens) || 0) * cw +
+    (Number(row.cache_read_tokens) || 0) * cr
+  ) / 1e6;
+}
+
+/**
+ * 비용축 1:9 — 주식계열 누적 비용이 «오늘 전체 비용 × share» 에 도달하면 막는다(>=).
+ * ⚠️ 오늘 지출이 0 이면 주식계열 첫 호출도 막힌다. 「9할을 부동산에」가 목표라 의도된 동작이다
+ *    — 그 대신 이 모드는 app_config 스위치(stock_share_basis='cost')로만 켜진다.
+ * ⛔ 부동산은 이 함수를 거치지 않는다. 분모 전환이 부동산을 잠그는 회귀를 막는 자리다.
+ */
+export function stockCostBlocked(stockUsd: number, totalUsd: number, share: number): boolean {
+  return stockUsd >= Math.max(0, totalUsd) * Math.max(0, share);
+}
+
 /** 주식 계열 — 1:9 의 「1」. */
 const STOCK_SIDE: ReadonlySet<LLMCategory> = new Set<LLMCategory>(['stock', 'finance']);
 
@@ -68,6 +115,9 @@ interface QuotaConfig {
   budget: number;
   stockShare: number;
   enabled: boolean;
+  /** 'calls'(기존) | 'cost'. cost 인데 단가표가 비면 calls 로 떨어진다. */
+  basis: 'calls' | 'cost';
+  prices: ModelPrices;
 }
 
 let cfgCache: { at: number; cfg: QuotaConfig } | null = null;
@@ -75,7 +125,7 @@ const CFG_TTL_MS = 60_000;
 
 async function loadConfig(): Promise<QuotaConfig> {
   if (cfgCache && Date.now() - cfgCache.at < CFG_TTL_MS) return cfgCache.cfg;
-  const fallback: QuotaConfig = { budget: 200, stockShare: 0.1, enabled: true };
+  const fallback: QuotaConfig = { budget: 200, stockShare: 0.1, enabled: true, basis: 'calls', prices: {} };
   try {
     const sb = getSupabaseAdmin() as any;
     const { data } = await sb.from('app_config').select('key, value').eq('namespace', 'llm');
@@ -86,6 +136,8 @@ async function loadConfig(): Promise<QuotaConfig> {
       // ⚠️ 값이 «없으면» 켜진 것으로 본다. 설정 조회 실패로 쿼터가 조용히 풀리면
       //    1:9 가 무너진 것을 아무도 모른다.
       enabled: m.get('quota_enabled') !== false,
+      basis: m.get('stock_share_basis') === 'cost' ? 'cost' : 'calls',
+      prices: (m.get('model_prices') && typeof m.get('model_prices') === 'object') ? m.get('model_prices') : {},
     };
     cfgCache = { at: Date.now(), cfg };
     return cfg;
@@ -128,6 +180,62 @@ async function spentToday(category?: 'stock_side' | 'all'): Promise<number> {
     // ⛔ 셀 수 없으면 «막지 않는다». 계측 실패로 생성이 멈추면 그날 콘텐츠가 통째로 사라진다.
     return 0;
   }
+}
+
+/**
+ * 오늘(KST 달력일) 성공 호출의 비용(USD) — 주식계열·전체.
+ * spentToday 와 같은 규칙: success 만, 실패·skipped 제외. 셀 수 없으면 null(=막지 않는다).
+ */
+async function spentCostToday(prices: ModelPrices): Promise<{ stock: number; total: number } | null> {
+  try {
+    const sb = getSupabaseAdmin() as any;
+    const { data, error } = await sb
+      .from('llm_usage_logs')
+      .select('category, model, input_tokens, output_tokens, cache_creation_tokens, cache_read_tokens')
+      .gte('created_at', kstDayStartIso())
+      .eq('status', 'success')
+      .limit(5000);
+    if (error) return null;
+    let stock = 0;
+    let total = 0;
+    for (const r of (data ?? []) as any[]) {
+      const c = costUsd(r, prices);
+      total += c;
+      if (STOCK_SIDE.has(r.category)) stock += c;
+    }
+    return { stock, total };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 주식계열 판정 — 관문 3함수(fetch·json·create)가 «같은 문» 을 쓴다.
+ * ⚠️ 셋이 각자 판정하면 한쪽만 바뀌어 경로별로 1:9 가 갈라진다(B 착수 시 실제로 3벌 복제였다).
+ * 막을 때 { code, reason } · 통과면 null.
+ */
+async function stockSideVerdict(
+  category: LLMCategory,
+  cfg: QuotaConfig,
+): Promise<{ code: string; reason: string } | null> {
+  if (!STOCK_SIDE.has(category)) return null;   // ⛔ 부동산·infra 는 비율 상한 비대상
+  if (cfg.basis === 'cost' && Object.keys(cfg.prices).length) {
+    const spent = await spentCostToday(cfg.prices);
+    if (spent && stockCostBlocked(spent.stock, spent.total, cfg.stockShare)) {
+      return {
+        code: 'quota_stock_cost',
+        reason: `주식계열 비용 몫 소진 $${spent.stock.toFixed(4)}/$${(spent.total * cfg.stockShare).toFixed(4)} (1:9 크레딧)`,
+      };
+    }
+    return null;
+  }
+  const cap = stockCap(cfg.budget, cfg.stockShare);
+  const usedStock = await spentToday('stock_side');
+  if (quotaBlocked(usedStock, cap)) {
+    // ⚠️ 버려지는 것이 아니다. 이 자리를 비우면 그날 예산의 나머지가 부동산 큐 차례가 된다.
+    return { code: 'quota_stock', reason: `주식계열 몫 소진 ${usedStock}/${cap} (1:9)` };
+  }
+  return null;
 }
 
 function fireLog(row: Record<string, unknown>): void {
@@ -183,18 +291,15 @@ export async function anthropicFetch(
       });
       return quotaResponse(`일 예산 소진 ${usedAll}/${cfg.budget}`);
     }
-    if (STOCK_SIDE.has(ctx.category)) {
-      const cap = stockCap(cfg.budget, cfg.stockShare);
-      const usedStock = await spentToday('stock_side');
-      if (quotaBlocked(usedStock, cap)) {
-        // ⚠️ 버려지는 것이 아니다. 이 자리를 비우면 그날 예산의 나머지가 부동산 큐 차례가 된다.
-        fireLog({
-          ...base, model: 'n/a', input_tokens: 0, output_tokens: 0,
-          cache_creation_tokens: 0, cache_read_tokens: 0, duration_ms: 0,
-          status: 'skipped', error_code: 'quota_stock',
-        });
-        return quotaResponse(`주식계열 몫 소진 ${usedStock}/${cap} (1:9)`);
-      }
+    // daily_budget_calls 는 위에서 폭주 차단용 이중 상한으로 그대로 선다(B).
+    const verdict = await stockSideVerdict(ctx.category, cfg);
+    if (verdict) {
+      fireLog({
+        ...base, model: 'n/a', input_tokens: 0, output_tokens: 0,
+        cache_creation_tokens: 0, cache_read_tokens: 0, duration_ms: 0,
+        status: 'skipped', error_code: verdict.code,
+      });
+      return quotaResponse(verdict.reason);
     }
   }
 
@@ -319,13 +424,10 @@ export async function anthropicJson<T = unknown>(
       fireLog({ ...base, ...zero, status: 'skipped', error_code: 'quota_daily' });
       return callFailed<T>(429, `일 예산 소진 ${usedAll}/${cfg.budget}`);
     }
-    if (STOCK_SIDE.has(ctx.category)) {
-      const cap = stockCap(cfg.budget, cfg.stockShare);
-      const usedStock = await spentToday('stock_side');
-      if (quotaBlocked(usedStock, cap)) {
-        fireLog({ ...base, ...zero, status: 'skipped', error_code: 'quota_stock' });
-        return callFailed<T>(429, `주식계열 몫 소진 ${usedStock}/${cap} (1:9)`);
-      }
+    const verdict = await stockSideVerdict(ctx.category, cfg);
+    if (verdict) {
+      fireLog({ ...base, ...zero, status: 'skipped', error_code: verdict.code });
+      return callFailed<T>(429, verdict.reason);
     }
   }
 
@@ -376,12 +478,10 @@ export async function anthropicCreate<T = any>(
       fireLog({ ...base, ...zero, status: 'skipped', error_code: 'quota_daily' });
       return null;   // ⛔ 던지지 않는다 — 호출부의 null 처리로 자연히 skip 된다
     }
-    if (STOCK_SIDE.has(ctx.category)) {
-      const cap = stockCap(cfg.budget, cfg.stockShare);
-      if (quotaBlocked(await spentToday('stock_side'), cap)) {
-        fireLog({ ...base, ...zero, status: 'skipped', error_code: 'quota_stock' });
-        return null;
-      }
+    const verdict = await stockSideVerdict(ctx.category, cfg);
+    if (verdict) {
+      fireLog({ ...base, ...zero, status: 'skipped', error_code: verdict.code });
+      return null;
     }
   }
 
