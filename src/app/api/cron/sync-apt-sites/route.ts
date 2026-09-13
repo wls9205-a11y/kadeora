@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 //       동명 시군구(중구·서구·동구) 혼동이었다. 거부는 반드시 로그로 남는다.
 import { assertCoordInRegion } from '@/lib/geo/region-bbox';
 import { withCronAuth } from '@/lib/cron-auth';
+import { withCronLogging } from '@/lib/cron-logger';
 import { generateAptSlugStrict } from '@/lib/apt-slug';
 
 export const maxDuration = 300;
@@ -23,13 +24,24 @@ const makeSlug = generateAptSlugStrict;
 const extractSigungu = (addr: string | null) =>
   addr?.match(/(?:시|도)\s+(\S+구|\S+시|\S+군)/)?.[1] || null;
 
-async function handler(_req: NextRequest) {
+async function run() {
   const start = Date.now();
   const sb = getSupabaseAdmin();
   let inserted = 0;
   let updated = 0;
   let scored = 0;
   const errors: string[] = [];
+  // FINAL_HC_20260913 C-4 — 쓰기 실패를 «사유별로 센다».
+  // ⚠️ apt_sites_slug_dup_key_uidx(slug_dup_key(slug) WHERE is_active) 충돌은 «의도된 차단» 이다
+  //    (같은 현장의 표기 변형이 두 번째 활성 행이 되는 것을 막는 가드). 전에는 매 회전 error 로그
+  //    한 줄로 찍혀 진짜 실패와 섞였다. 가드 충돌은 skip 으로 세고, 나머지만 errors 로 올린다.
+  // ⚠️ 배치 upsert(50행)에서 가드에 한 행이 걸리면 PostgREST 는 «배치 전체» 를 거절한다.
+  //    이 카운트가 0 이 아니면 같은 배치의 정상 행도 못 들어갔다는 뜻이다(행 단위 재시도는 별건).
+  let dupGuardSkipped = 0;
+  const noteWriteError = (error: { code?: string; message?: string }) => {
+    if (error.code === '23505' && String(error.message ?? '').includes('slug_dup_key')) { dupGuardSkipped++; return; }
+    errors.push(`write: ${String(error.message ?? '').slice(0, 200)}`);
+  };
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Step 1: 청약(apt_subscriptions) → apt_sites
@@ -52,11 +64,16 @@ async function handler(_req: NextRequest) {
         move_in_date: s.mvn_prearnge_ym, builder: s.constructor_nm, developer: s.developer_nm,
         source_ids: { subscription_id: String(s.id), house_manage_no: s.house_manage_no },
         nearby_station: s.nearest_station, school_district: s.nearest_school,
+        // ⚠️ 화석(FINAL_HC_20260913 C-4) — '2026-01-01' 은 작성 시점의 «올해» 가 박제된 값이다.
+        //    2027 이 되어도 2026 청약이 계속 active/wave1 로 남는다. 제거하지 않은 이유:
+        //    apt_sites.status 는 살아 있는 소비자가 있다(apt/[id] 관련 현장 필터 ·
+        //    get_apt_sites_with_thumbnails · get_uncovered_apt_sites). lifecycle_stage 가
+        //    정본으로 넘어간 게 아니라서, 규칙을 바꾸면 그 셋의 노출이 함께 바뀐다 — 별건 판정.
         status: s.rcept_bgnde && s.rcept_bgnde >= '2026-01-01' ? 'active' : 'closed',
         sitemap_wave: s.rcept_bgnde && s.rcept_bgnde >= '2026-01-01' ? 1 : 2,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'slug', ignoreDuplicates: false });
-      if (error) console.error('[sync-apt-sites] insert fail', error.message?.slice(0, 200));
+      if (error) noteWriteError(error);
       else inserted++;
     }
   } catch (e: unknown) { errors.push(`sub: ${errMsg(e)}`); }
@@ -152,7 +169,7 @@ async function handler(_req: NextRequest) {
       for (let i = 0; i < insertable.length; i += 50) {
         const { error } = await sb.from('apt_sites')
           .upsert(insertable.slice(i, i + 50), { onConflict: 'slug', ignoreDuplicates: true });
-        if (error) console.error('[sync-apt-sites] insert fail', error.message?.slice(0, 200));
+        if (error) noteWriteError(error);
         else inserted += Math.min(50, insertable.length - i);
       }
       // 업데이트는 10건씩 병렬
@@ -242,9 +259,8 @@ async function handler(_req: NextRequest) {
         const { error } = await sb.from('apt_sites').upsert(rows, {
           onConflict: 'slug', ignoreDuplicates: true,
         });
-        if (error) console.error('[sync-apt-sites] insert fail', error.message?.slice(0, 200));
-        if (!error) tradeInserted += rows.length;
-        else errors.push(`trade-batch-${i}: ${error.message}`);
+        if (error) noteWriteError(error);
+        else tradeInserted += rows.length;
       }
     }
     inserted += tradeInserted;
@@ -315,7 +331,7 @@ async function handler(_req: NextRequest) {
       // 배치 삽입
       for (let i = 0; i < newRows.length; i += 50) {
         const { error } = await sb.from('apt_sites').upsert(newRows.slice(i, i + 50), { onConflict: 'slug', ignoreDuplicates: true });
-        if (error) console.error('[sync-apt-sites] insert fail', error.message?.slice(0, 200));
+        if (error) noteWriteError(error);
         else unsoldInserted += Math.min(50, newRows.length - i);
       }
       // 업데이트 10건씩 병렬
@@ -491,8 +507,9 @@ async function handler(_req: NextRequest) {
 
   const elapsed = Date.now() - start;
 
-  return NextResponse.json({
+  return {
     success: true,
+    dupGuardSkipped,
     inserted,
     redevSkippedNew: skippedNew,
     redevRelinked: relinked,
@@ -503,7 +520,26 @@ async function handler(_req: NextRequest) {
     unsoldInserted,
     elapsed: `${elapsed}ms`,
     errors: errors.length ? errors : undefined,
+  };
+}
+
+/**
+ * FINAL_HC_20260913 C-4 — cron_logs 에 남긴다. 전에는 매일 04:00Z 발화하면서
+ * cron_logs 무기록이라 「돌았나·몇 건 넣었나」를 런타임 로그 보존 기간 안에서만 알 수 있었다.
+ */
+async function handler(_req: NextRequest) {
+  let payload: Awaited<ReturnType<typeof run>> | null = null;
+  const logged = await withCronLogging('sync-apt-sites', async () => {
+    payload = await run();
+    return {
+      processed: payload.inserted + payload.updated,
+      created: payload.inserted,
+      updated: payload.updated,
+      failed: payload.errors?.length ?? 0,
+      metadata: { ...payload },
+    };
   });
+  return NextResponse.json(payload ?? logged);
 }
 
 export const GET = withCronAuth(handler);

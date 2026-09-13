@@ -136,11 +136,10 @@ const CRON_GROUPS = {
     '/api/cron/blog-calculator-guide',
     '/api/cron/blog-comparison',
     '/api/cron/blog-competition-rate',
-    '/api/cron/blog-disclosure',
+    /* ⛔ blog-disclosure · blog-investor-flow 제거 — 2026-03 고정 창 박제 라우트라 410 묘비(2026-09-13 C-4). */
     '/api/cron/blog-district-guide',
     '/api/cron/blog-dividend-etf',
     '/api/cron/blog-exchange-rate',
-    '/api/cron/blog-investor-flow',
     '/api/cron/blog-life-guide',
     '/api/cron/blog-loan-guide',
     '/api/cron/blog-market-pulse',
