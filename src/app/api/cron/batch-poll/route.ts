@@ -176,7 +176,11 @@ async function handler(req: NextRequest) {
       fanout[name] = r.ok ? 'ok' : `http_${r.status}`;
       if (!r.ok) console.error(`[batch-poll] fanout ${name} → ${r.status}`);
     } catch (e: any) {
-      fanout[name] = 'error';
+      // ⚠️ 45s 타임아웃은 «실패» 가 아니다. 호출측이 끊어도 피호출 함수는 서버에서 끝까지 돈다
+      //    (2026-09-13 실측: blog-meta-rewrite-poll 이 abort 뒤에도 200 완료, blog_image_batch 4→1).
+      //    이걸 error 로 올리면 매 틱 failed 가 찍혀 헬스 감시가 늑대소년이 된다.
+      const name_ = String(e?.name ?? '');
+      fanout[name] = name_ === 'TimeoutError' || name_ === 'AbortError' ? 'timeout_continues' : 'error';
       console.error(`[batch-poll] fanout ${name}: ${String(e?.message ?? e).slice(0, 160)}`);
     }
   }
@@ -197,7 +201,7 @@ async function logged(req: NextRequest) {
     const out = await handler(req);
     if (out instanceof NextResponse) { payload = out; return { processed: 0, metadata: { skipped: true } }; }
     payload = NextResponse.json({ ok: true, ...out });
-    const failedFanout = Object.entries(out.fanout).filter(([, v]) => v !== 'ok');
+    const failedFanout = Object.entries(out.fanout).filter(([, v]) => v !== 'ok' && v !== 'timeout_continues');
     if (failedFanout.length) {
       throw new Error(`fanout_failed ${JSON.stringify(Object.fromEntries(failedFanout))} · polled=${out.polled}`);
     }
