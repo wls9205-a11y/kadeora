@@ -2,17 +2,20 @@
  * 카더라 이메일 템플릿 — 라이트 테마, 모바일 최적화
  */
 
-import { createHmac } from 'crypto';
 import { SITE_URL } from '@/lib/constants';
+import { generateUnsubToken } from '@/lib/unsub-token';
 
-export function generateUnsubToken(email: string): string {
-  const secret = process.env.UNSUBSCRIBE_SECRET || process.env.NEXTAUTH_SECRET || 'kadeora-unsub-secret';
-  return createHmac('sha256', secret).update(email.toLowerCase().trim()).digest('hex');
+/**
+ * 수신거부 URL. ⚠️ 비밀이 없으면 null — 위조 가능한 토큰 링크를 내보내지 않는다(C-1).
+ * 템플릿은 unsubAnchor() 로 감싸 null 이면 링크를 생략한다(href="null" 금지).
+ */
+export function buildUnsubUrl(email: string): string | null {
+  const token = generateUnsubToken(email);
+  return token ? `${SITE_URL}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${token}` : null;
 }
 
-export function buildUnsubUrl(email: string): string {
-  const token = generateUnsubToken(email);
-  return `${SITE_URL}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${token}`;
+export function unsubAnchor(url: string | null, style: string, label: string): string {
+  return url ? `<a href="${url}" style="${style}">${label}</a>` : '';
 }
 
 /** 현재 연월 기반 UTM campaign 문자열 (예: 2026_04) */
@@ -129,7 +132,7 @@ export function reEngagementEmail({
     이 메일은 카더라(kadeora.app) 가입 시 동의하신 이메일로 발송되었습니다.
   </p>
   <p style="font-size:12px;margin:0;">
-    <a href="${unsubUrl}" style="color:#64748B;text-decoration:underline;">수신거부</a>
+    ${unsubAnchor(unsubUrl, 'color:#64748B;text-decoration:underline;', '수신거부')}
     <span style="color:#CBD5E1;margin:0 8px;">·</span>
     <a href="${SITE_URL}/notifications/settings?utm_source=email" style="color:#64748B;text-decoration:underline;">알림 설정</a>
   </p>
@@ -405,7 +408,7 @@ export function onboardingNudgeEmail({
   <p style="font-size:11px;color:#94A3B8;margin:0 0 6px;line-height:1.6;">
     이 메일은 카더라(kadeora.app) 가입 시 동의하신 이메일로 발송되었습니다.
   </p>
-  <a href="${unsubUrl}" style="font-size:11px;color:#94A3B8;text-decoration:underline;">수신 거부</a>
+  ${unsubAnchor(unsubUrl, 'font-size:11px;color:#94A3B8;text-decoration:underline;', '수신 거부')}
 </td></tr>
 </table>
 </td></tr>

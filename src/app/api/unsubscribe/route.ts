@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { createHmac } from 'crypto';
+import { verifyUnsubToken } from '@/lib/unsub-token';
 
 /**
  * GET /api/unsubscribe?email=xxx&token=yyy
- * 
- * token = HMAC-SHA256(email, UNSUBSCRIBE_SECRET) — 위조 방지
+ *
+ * token = HMAC-SHA256(email, UNSUBSCRIBE_SECRET) — 위조 방지. 규칙은 lib/unsub-token.ts 한 곳.
+ * ⚠️ 구 폴백 서명은 2026-10-11 KST 까지만 받는다(기발송 메일 링크 보존) — 그 뒤 자동 거부.
  * 이메일 수신거부 — email_subscribers + profiles.marketing_agreed 동시 해제
  */
-
-function generateToken(email: string): string {
-  const secret = process.env.UNSUBSCRIBE_SECRET || process.env.NEXTAUTH_SECRET || 'kadeora-unsub-secret';
-  return createHmac('sha256', secret).update(email.toLowerCase().trim()).digest('hex');
-}
 
 export async function GET(req: NextRequest) {
   const email = req.nextUrl.searchParams.get('email');
@@ -23,7 +19,8 @@ export async function GET(req: NextRequest) {
   }
 
   // 토큰 검증
-  if (!token || token !== generateToken(email)) {
+  // ⚠️ 비밀 미설정·불일치는 «명시 거부» 페이지(200 HTML). 500 이면 메일 클라이언트에서 깨진 화면이 된다.
+  if (!verifyUnsubToken(email, token)) {
     return new NextResponse(html('유효하지 않은 수신거부 링크입니다.', false), { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
   }
 

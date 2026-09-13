@@ -4,7 +4,7 @@
  * 무료 한도: 100통/일, 3,000통/월
  */
 
-import { buildUnsubUrl } from './email-templates';
+import { buildUnsubUrl, unsubAnchor } from './email-templates';
 import { SITE_URL } from '@/lib/constants';
 
 let resendInstance: any = null;
@@ -84,7 +84,7 @@ function wrapEmailTemplate(to: string, subject: string, body: string): string {
     이 메일은 카더라(kadeora.app) 알림 설정에 따라 발송되었습니다.
   </p>
   <p style="font-size:12px;margin:0;">
-    <a href="${unsubUrl}" style="color:#64748B;text-decoration:underline;">수신거부</a>
+    ${unsubAnchor(unsubUrl, 'color:#64748B;text-decoration:underline;', '수신거부')}
     <span style="color:#CBD5E1;margin:0 8px;">·</span>
     <a href="${SITE_URL}/notifications/settings?utm_source=email" style="color:#64748B;text-decoration:underline;">알림 설정</a>
   </p>
