@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { anthropicPollFetch } from '@/lib/llm/gateway';
+import { withCronLogging } from '@/lib/cron-logger';
 
 import { SITE_URL } from '@/lib/constants';
 export const runtime = 'nodejs';
@@ -62,13 +63,14 @@ async function handler(req: NextRequest) {
     .in('status', ['submitted', 'in_progress'])
     .order('submitted_at', { ascending: true });
 
-  if (!jobs || jobs.length === 0) {
-    return NextResponse.json({ ok: true, polled: 0, message: 'no pending jobs' });
-  }
-
+  /* ⛔⛔ 여기 있던 `jobs 없으면 즉시 return('no pending jobs')` 가 15일 정지의 사인이다(2026-09-13).
+   *    A3 병합(8/27)으로 형제 폴러 넷의 스케줄을 걷고 이 파일 «끝» 의 팬아웃에 태웠는데,
+   *    blog_batch_jobs 가 비어 있으면 팬아웃에 닿기 전에 돌아갔다. 결과: 형제 넷 cron_logs 전원
+   *    8/27 정지 · rewrite_batches 241·242 가 15일 submitted · 각자의 in_progress 가드가
+   *    analysis·rewrite 신규 제출까지 잠갔다. 「내 일 없음」은 «내 루프만» 건너뛴다. */
   const summary: any[] = [];
 
-  for (const job of jobs as any[]) {
+  for (const job of (jobs ?? []) as any[]) {
     const info = await fetchBatchStatus(job.batch_id);
     if (!info) {
       summary.push({ batch_id: job.batch_id, err: 'status_fetch_failed' });
@@ -179,8 +181,30 @@ async function handler(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ ok: true, polled: jobs.length, summary, fanout });
+  return { polled: (jobs ?? []).length, summary, fanout };
 }
 
-export const GET = handler;
-export const POST = handler;
+/**
+ * cron_logs 에 남긴다 — 이 폴러는 기록이 없어서 15일 침묵이 «돌지 않음» 인지 «기록만 없음» 인지
+ * 가를 수 없었다. 팬아웃 결과를 metadata 에 두고, 하나라도 실패면 error 로 승격한다
+ * (예외로 올려 withCronLogging 이 error 로 적게 한다. 응답은 룰 #5 대로 200).
+ */
+async function logged(req: NextRequest) {
+  // ⚠️ 인증은 기록 «앞» 에서. 뒤에 두면 외부 요청마다 cron_logs 행이 생긴다.
+  if (!verifyCronAuth(req as any)) return new NextResponse('ok', { status: 200 });
+  let payload: any = null;
+  const result = await withCronLogging('batch-poll', async () => {
+    const out = await handler(req);
+    if (out instanceof NextResponse) { payload = out; return { processed: 0, metadata: { skipped: true } }; }
+    payload = NextResponse.json({ ok: true, ...out });
+    const failedFanout = Object.entries(out.fanout).filter(([, v]) => v !== 'ok');
+    if (failedFanout.length) {
+      throw new Error(`fanout_failed ${JSON.stringify(Object.fromEntries(failedFanout))} · polled=${out.polled}`);
+    }
+    return { processed: out.polled, metadata: { summary: out.summary, fanout: out.fanout } };
+  });
+  return payload ?? NextResponse.json(result);
+}
+
+export const GET = logged;
+export const POST = logged;
