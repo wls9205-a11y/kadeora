@@ -1,3 +1,4 @@
+// ⛔ 로컬 API 403 확정(2026-09-13 판정 · 카카오 콘솔 복구 영구 skip) — 스케줄 없음, 수동 전용.
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { verifyCronAuth } from '@/lib/cron-auth';

@@ -14,7 +14,7 @@
 //
 // ⚠️ AdSense 유닛과 250px 미만 간격에 두지 말 것.
 
-import { KAKAO_TALK_URL, TALK_MEMBER_COUNT, trackTalkClick } from '@/lib/talk-banner';
+import { KAKAO_TALK_URL, TALK_MEMBER_LABEL, trackTalkClick } from '@/lib/talk-banner';
 import { useTalkView } from './useTalkView';
 
 /** 하단 고정 바가 이 블록의 노출 여부를 관찰하는 앵커. */
@@ -49,7 +49,7 @@ function buildLine(p: SiteTalkCTAProps, count: string) {
 export default function SiteTalkCTA(props: SiteTalkCTAProps) {
   const { siteSlug } = props;
   const viewRef = useTalkView<HTMLDivElement>('site_cta', { site_slug: siteSlug });
-  const count = TALK_MEMBER_COUNT.toLocaleString();
+  const count = TALK_MEMBER_LABEL;
   const line = buildLine(props, count);
 
   return (

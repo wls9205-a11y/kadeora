@@ -1,3 +1,5 @@
+// ⛔ pg_cron 119(collect-complex-images-backup) unschedule — 2026-09-13 HC_CLOSE K-1. 근거는 대상 0/39,556 완주.
+//    이 축은 카카오 «이미지» 검색이라 로컬 API 403 과 별개다. 라우트 존치(수동 전용).
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';

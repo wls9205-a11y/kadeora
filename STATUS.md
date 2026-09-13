@@ -1,3 +1,38 @@
+## 2026-09-13 — HC_CLOSE: 카카오 로컬 «영구 skip» 판정 반영 · 회원수 하한 표기 · 보류 둘 확정
+
+### ⛔ 판정 — 카카오 로컬 API 콘솔 복구 «영구 skip» (Node · 2026-09-13)
+
+로컬 API(`dapi.kakao.com/v2/local/*`)는 2026-08-26 부터 403 `SERVICE_DISABLED`(OPEN_MAP_AND_LOCAL 꺼짐).
+**콘솔 조작은 하지 않기로 확정했다.** 후임 세션은 콘솔 재확인 계단을 다시 밟지 말 것 —
+「로컬 API 가 안 된다」는 버그가 아니라 **판정된 전제**다. 로컬 API 소비 스케줄의 산출은 영구 0.
+
+### K-1 — 로컬 축 스케줄 비활성 (4본)
+
+| 대상 | 강도 | 조치 |
+|---|---|---|
+| redev-geocode | 퇴역 | vercel.json 스케줄 제거 · 라우트 410 묘비 · god-mode 팬아웃 제거. 근거 이중: 403 영구 + 주소 없는 169곳(403 무관 산출 불가) |
+| apt-geocode | 스케줄만 | vercel.json 제거 · 라우트 존치(수동 전용 주석) |
+| kakao-place-fetch | pg_cron 102 unschedule | 마이그레이션 `k1_unschedule_kakao_local_axis_2026-09-13.sql`. ⛔ failed 큐 2,000 **리셋 금지**(재403 과금뿐) |
+| collect-complex-images-backup | pg_cron 119 unschedule | 같은 마이그레이션. ⚠️ 근거는 403 이 아니라 **대상 0/39,556 완주** — 이 축은 카카오 «이미지» 검색으로 로컬 403 과 별개 |
+
+4면: cron.job 102·119 잔존 0 · `.github/workflows` 4본 참조 0 · src 호출자는 god-mode 의 collect-complex-images(라우트 존치라 유지)뿐.
+경계 밖(무접촉): 로컬 API 사용 + 스케줄 보유는 `apt-enrich-location`(vercel.json) 하나 — 지시서가 이미 경계로 명시. `lib/geocode/index.ts` 는 importer 0, `region/from-coords` 는 사용자 요청 API(스케줄 없음).
+⚠️ 연쇄: `apt-satellite-crawl` 은 apt-geocode 가 채운 좌표를 첫 칸으로 둔다 — apt-geocode 스케줄이 멈췄으니 이 파이프의 신규 좌표 공급도 멈춘다(기존 좌표 대상은 무관).
+
+### K-2 — 회원수 하한 표기 (C-5 ㄴ)
+
+`TALK_MEMBER_COUNT = 1240`(숫자) → `TALK_MEMBER_LABEL = '1,200+'`(표시 문자열). 숫자 export 자체를 없애
+`toLocaleString` 으로 정확 숫자가 새는 경로를 막았다. 실측 1,240(2026-07-18) 기준 · 수동 갱신 불필요.
+렌더: StickyTalkBanner 「1,200+명」 · SiteTalkCTA 「분양가 확정 소식을 카톡으로 · 1,200+명 참여 중」.
+
+### K-3 — 보류 확정 (집행 0)
+
+- **B 보류**: `stock_share_basis` 행 미투입, 콜 수 분모 현행 유지. 재설계(주식계열 **절대 예산**형)는 별건 지시 대기.
+- **리라이트 보류**: `llm.rewrite_submit_enabled=false` 유지. 재개는 «부분 리라이트 재설계 + 선정축 교체(합성 view_count 탈피) + in-progress 가드 category 수리» **세트로만**.
+
+### 남은 시간표 — 세션 A 판독
+17:05 회차 → 내일 04:00Z(4본 발화 0 확인 포함) → 모레 truncated 2차.
+
 ## 2026-09-08 — NV-5 집행: VIEW 파이프 소생 · 표적 수명 · 「구멍」 셋 중 둘은 구멍이 아니었다
 
 방안서_NV5 FINAL 「고」(소커밋 6 포괄) 집행. 규명이 판정을 바꾼 자리가 셋이다.

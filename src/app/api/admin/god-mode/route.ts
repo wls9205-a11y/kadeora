@@ -58,7 +58,7 @@ const CRON_GROUPS = {
     '/api/cron/sync-apt-sites',
     '/api/cron/sync-complex-profiles',
     '/api/cron/stock-theme-daily',
-    '/api/cron/redev-geocode',
+    /* ⛔ redev-geocode 제거 — 2026-09-13 퇴역(카카오 로컬 영구 403 · 410 묘비). */
     '/api/cron/apt-backfill-details',
     '/api/cron/apt-parse-announcement',
     '/api/cron/apt-parse-pdf-pricing',

@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import {
   KAKAO_TALK_URL,
-  TALK_MEMBER_COUNT,
+  TALK_MEMBER_LABEL,
   trackTalkClick,
 } from '@/lib/talk-banner';
 import { useTalkView } from './useTalkView';
@@ -53,7 +53,7 @@ export default function StickyTalkBanner() {
     trackTalkClick('sticky');
   };
 
-  const count = TALK_MEMBER_COUNT.toLocaleString();
+  const count = TALK_MEMBER_LABEL;
 
   return (
     <>

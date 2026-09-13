@@ -2,7 +2,10 @@
  * [image-source] kakao-place-fetch — kakao_place_queue 50건 → Kakao Local API 키워드 검색 →
  *   첫 place_url image fetch → hydrateImage → apt_sites.og_image_url 갱신 + image_source_pool INSERT
  *
- * 15m. verifyCronAuth + acquire_cron_lock + PREEMPT_MS 260s.
+ * ⛔ 스케줄 없음 — pg_cron 102 unschedule(2026-09-13 HC_CLOSE K-1). 카카오 로컬 API 영구 403(콘솔 복구 영구 skip).
+ *    수동 전용. kakao_place_queue failed 2,000 은 리셋 금지 — 재403 과금뿐.
+ *
+ * (구) 15m. verifyCronAuth + acquire_cron_lock + PREEMPT_MS 260s.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
