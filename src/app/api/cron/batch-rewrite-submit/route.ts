@@ -21,6 +21,18 @@ export async function GET(req: NextRequest) {
   const result = await withCronLogging('batch-rewrite-submit', async () => {
     const admin = getSupabaseAdmin();
 
+    /* ⛔ 제출 보류 가드 — 세션 A 임시 조치(2026-09-13), Node 확정(보류 / 재개-재설계) 대기.
+     *    241 수확 실측: 6건 중 5건(83%) max_tokens 절단 → 수확 게이트에서 폐기(과금은 됨).
+     *    본문 «전체 재작성» 을 5,000tok 에 담는 구조라 표본이 아니라 산수 문제다.
+     *    8/29~9/13 제출 정지 15일을 아무도 못 느꼈고(무영향 실증), 선정축 view_count 는 합성값이다.
+     *    ⚠️ 값이 «정확히 true» 일 때만 연다. 행이 없거나 조회가 실패하면 닫힌 쪽 — 이 가드의 기본이 보류다.
+     *    재개: app_config(namespace='llm', key='rewrite_submit_enabled') 를 true 로. 배포 불필요. */
+    const { data: gate } = await (admin as any).from('app_config')
+      .select('value').eq('namespace', 'llm').eq('key', 'rewrite_submit_enabled').maybeSingle();
+    if (gate?.value !== true) {
+      return { processed: 0, metadata: { reason: 'submit_held', gate: gate?.value ?? null } };
+    }
+
     // Check if there's already a batch in progress
     const { data: active } = await (admin as any).from('rewrite_batches')
       .select('id')
