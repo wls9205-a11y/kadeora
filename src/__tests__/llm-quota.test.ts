@@ -5,7 +5,7 @@
  *    조용한 실패는 다이제스트가 숫자를 들고 올 때까지 일주일을 간다.
  */
 import { describe, expect, it } from 'vitest';
-import { costUsd, llmCategoryOfContent, quotaBlocked, stockCap, stockCostBlocked } from '@/lib/llm/gateway';
+import { costUsd, isQuotaBlocked, llmCategoryOfContent, quotaBlocked, quotaResponse, stockCap, stockCostBlocked } from '@/lib/llm/gateway';
 
 describe('LB-3 — 주식계열 상한 산식', () => {
   it('기본값 200 × 0.10 = 20', () => {
@@ -104,5 +104,21 @@ describe('FINAL_HC_20260913 B — 크레딧(가중 비용) 1:9', () => {
       if (r.category !== 'realestate') stock += c;
     }
     expect(stock / total).toBeCloseTo(0.57, 2);
+  });
+});
+
+describe('FINAL_HC_20260913 C-3 — 쿼터 응답은 «던지지 않는다»', () => {
+  it('⛔ 한글 사유로 합성 429 를 만들어도 ByteString 예외가 나지 않는다 (9/8~11 실사고: index 0 = 51452 「주」)', async () => {
+    const reason = '주식계열 몫 소진 20/20 (1:9)';
+    let res: Response | null = null;
+    expect(() => { res = quotaResponse(reason); }).not.toThrow();
+    expect(res!.status).toBe(429);
+    expect(isQuotaBlocked(res!)).toBe(true);
+    expect(decodeURIComponent(res!.headers.get('x-kadeora-quota')!)).toBe(reason);
+    expect((await res!.json()).error.message).toBe(reason);
+  });
+
+  it('일 예산 사유(「일」로 시작)도 같다', () => {
+    expect(() => quotaResponse('일 예산 소진 200/200')).not.toThrow();
   });
 });

@@ -329,7 +329,8 @@ export default async function FeedDetailPage({ params }: Props) {
   if ((post.profiles as { is_seed?: boolean } | null)?.is_seed === true) return notFound();
 
   if (post.slug && !isNaN(Number(id)) && post.slug !== id) {
-    permanentRedirect(`/feed/${post.slug}`);
+    // ⚠️ slug 에 한글이 있다. 비인코딩이면 Location 헤더가 ERR_INVALID_CHAR 로 죽는다(C-3).
+    permanentRedirect(`/feed/${encodeURIComponent(post.slug)}`);
   }
 
 

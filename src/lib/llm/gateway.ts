@@ -247,10 +247,18 @@ function fireLog(row: Record<string, unknown>): void {
   }
 }
 
-function quotaResponse(reason: string): Response {
+/**
+ * ⛔⛔ 헤더 값은 ByteString(0-255)만 된다. 사유는 한글이다.
+ *    2026-09-08~11 이 자리가 `'x-kadeora-quota': reason` 이라 `new Response()` 가
+ *    「character at index 0 has a value of 51452」(='주'식계열…)로 «던졌다».
+ *    위 주석이 약속한 「예외로 던지지 않는다」가 배포 첫날부터 성립하지 않았고,
+ *    quota_stock 차단 수백 건이 전부 호출부 예외로 튀었다(FINAL_HC_20260913 C-3).
+ *    사유 원문은 body 에 있고, 헤더는 «표지» 라 인코딩해 둔다.
+ */
+export function quotaResponse(reason: string): Response {
   return new Response(JSON.stringify({ error: { type: 'kadeora_quota', message: reason } }), {
     status: 429,
-    headers: { 'content-type': 'application/json', 'x-kadeora-quota': reason },
+    headers: { 'content-type': 'application/json', 'x-kadeora-quota': encodeURIComponent(reason) },
   });
 }
 

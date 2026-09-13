@@ -5,7 +5,7 @@ import { join } from 'path';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { OG_CAT } from '@/lib/og-tokens';
 import { SITE_URL } from '@/lib/constants';
-import { sanitizeRowForOG } from '@/lib/og-sanitize';
+import { sanitizeForOG, sanitizeRowForOG } from '@/lib/og-sanitize';
 import { brandSurface, BRAND_BG_SOLID, GOLD } from '@/lib/og/brand';
 
 export const runtime = 'nodejs';
@@ -530,7 +530,9 @@ function renderFallback(slug: string | null, ratio: RatioKey = '1x1'): React.Rea
         단지 정보
       </div>
       <div style={{ display: 'flex', fontSize: wide ? 26 : 22, color: 'rgba(255,255,255,0.66)', fontWeight: 600 }}>
-        {slug ? `slug=${slug}` : `대한민국 ${aptLabel} 커뮤니티`}
+        {/* ⚠️ site 행은 sanitizeRowForOG 를 거치지만 slug 는 «쿼리스트링 원문» 이라 거치지 않았다.
+            깨진 퍼센트 인코딩이 U+FFFD 로 디코드돼 들어오면 폰트 밖 글자 → dynamic font throw (C-3). */}
+        {slug ? `slug=${sanitizeForOG(slug)}` : `대한민국 ${aptLabel} 커뮤니티`}
       </div>
     </div>
   );
