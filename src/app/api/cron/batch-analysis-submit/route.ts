@@ -35,9 +35,11 @@ export async function GET(_req: NextRequest) {
     const requests = items.map((item: any) => {
       if (category === 'apt-analysis') {
         const n = item.name||'', r = item.region||'', b = item.builder||'';
+        // ⚠️ 「2000자+」(상한 없음)·4000tok 이던 242 수확분이 81건 중 21건(26%) max_tokens 절단 → 과금 후 폐기.
+        //    실시간 크론(d0d483ee)과 같은 «상한+완결» 지시. 수확측 게이트(665b5557)는 그대로 둔다.
         const pMin = item.price_min ? `${(item.price_min/10000).toFixed(1)}억` : '';
         const pMax = item.price_max ? `${(item.price_max/10000).toFixed(1)}억` : '';
-        return { custom_id: `apt-${item.id}`, params: { model: AI_MODEL_HAIKU, max_tokens: 4000, messages: [{ role: 'user', content: `한국 부동산 전문가로서 "${n}" 종합 분석 2000자+.\n데이터: ${r} ${item.sigungu||''} ${item.dong||''}, 시공=${b}, ${item.total_units||'?'}세대, 입주=${item.move_in_date||'미정'}, 분양가=${pMin||pMax||'미공개'}, 역=${item.nearby_station||'-'}, 학군=${item.school_district||'-'}, 교통=${item.transit_score||'-'}/100\n필수5섹션(##): 입지분석, 분양가분석, 청약전략, 입주준비([계산→](/calc) [진단→](/apt/diagnose)), FAQ(### Q. 5개). 마크다운,목차금지,##볼드금지,면책문구.` }] } };
+        return { custom_id: `apt-${item.id}`, params: { model: AI_MODEL_HAIKU, max_tokens: 4000, messages: [{ role: 'user', content: `한국 부동산 전문가로서 "${n}" 종합 분석을 2,000~3,000자로. 반드시 3,000자 안에서 FAQ와 면책까지 끝낼 것.\n데이터: ${r} ${item.sigungu||''} ${item.dong||''}, 시공=${b}, ${item.total_units||'?'}세대, 입주=${item.move_in_date||'미정'}, 분양가=${pMin||pMax||'미공개'}, 역=${item.nearby_station||'-'}, 학군=${item.school_district||'-'}, 교통=${item.transit_score||'-'}/100\n필수5섹션(##): 입지분석, 분양가분석, 청약전략, 입주준비([계산→](/calc) [진단→](/apt/diagnose)), FAQ(### Q. 5개). 마크다운,목차금지,##볼드금지,면책문구.` }] } };
       } else {
         const s = item, isUS = s.currency==='USD';
         const p = isUS ? `$${Number(s.price).toFixed(2)}` : `${Number(s.price).toLocaleString()}원`;
