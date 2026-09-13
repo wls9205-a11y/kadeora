@@ -3,7 +3,7 @@ import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
-const INDEXNOW_KEY = '3a23def313e1b1283822c54a0f9a5675';
+import { INDEXNOW_KEY } from '@/lib/indexnow';
 const SITE_URL = 'https://kadeora.app';
 export const maxDuration = 30;
 

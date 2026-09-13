@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
+import { SITE_URL } from '@/lib/constants';
 const CRONS: { key: string; vercelPath: string; pgCronLogName: string; label: string }[] = [
   { key: 'big-event-news-detect', vercelPath: '/api/cron/big-event-news-detect', pgCronLogName: 'big-event-news-detect', label: '🔍 뉴스 감지' },
   { key: 'big-event-fact-refresh', vercelPath: '/api/cron/big-event-fact-refresh', pgCronLogName: 'big-event-fact-refresh', label: '🧪 팩트 점수 갱신' },
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
   if (!secret) return NextResponse.json({ error: 'CRON_SECRET missing' }, { status: 500 });
 
-  const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+  const base = SITE_URL;
   try {
     const res = await fetch(`${base}${target.vercelPath}`, {
       headers: { Authorization: `Bearer ${secret}` },

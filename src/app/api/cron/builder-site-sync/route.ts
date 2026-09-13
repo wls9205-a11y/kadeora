@@ -39,6 +39,7 @@ import {
   verifyBrandFooter,
 } from '@/lib/builder-sites/hero';
 
+import { SITE_URL } from '@/lib/constants';
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 
@@ -76,7 +77,7 @@ function parseByProfile(site: BuilderSite, html: string): BuilderSiteCard[] {
  */
 async function saveHero(slug: string, url: string, builder: string): Promise<boolean> {
   const res = await fetch(
-    new URL('/api/admin/apt-cover', process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kadeora.app').toString(),
+    new URL('/api/admin/apt-cover', SITE_URL).toString(),
     {
       method: 'POST',
       headers: {
@@ -329,7 +330,7 @@ async function handler(_req: NextRequest) {
         }
 
         // ② credit 은 시공사명만. 화면에 그대로 나간다 — URL·수집일·경로를 넣지 않는다.
-        const coverRes = await fetch(new URL('/api/admin/apt-cover', process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kadeora.app').toString(), {
+        const coverRes = await fetch(new URL('/api/admin/apt-cover', SITE_URL).toString(), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -7,6 +7,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { scoreIssue, extractKeywords, detectIssueType, keywordWeight } from '@/lib/issue-scoring';
 import type { IssueCandidate } from '@/lib/issue-scoring';
 
+import { SITE_URL } from '@/lib/constants';
 /**
  * issue-detect 크론 — 부동산+주식 이슈 실시간 탐지
  *
@@ -533,7 +534,7 @@ async function handler(_req: NextRequest) {
       // v2: score 50+ → issue-draft 즉시 트리거 (20분 대기 없이 즉시 발행)
       if (score.final_score >= 50) {
         try {
-          const draftUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app'}/api/cron/issue-draft`;
+          const draftUrl = `${SITE_URL}/api/cron/issue-draft`;
           fetch(draftUrl, {
             method: 'GET',
             headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` },

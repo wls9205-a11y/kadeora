@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { requireAdmin } from '@/lib/admin-auth';
 
+import { SITE_URL } from '@/lib/constants';
 export const maxDuration = 120;
 
 const CRON_SEQUENCE = [
@@ -33,7 +34,7 @@ export async function POST() {
   const auth = await requireAdmin();
   if ('error' in auth) return auth.error;
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+  const baseUrl = SITE_URL;
   const secret = process.env.CRON_SECRET || '';
   const results: any[] = [];
   const BATCH_SIZE = 5;

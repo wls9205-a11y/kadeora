@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 
+import { SITE_URL } from '@/lib/constants';
 /**
  * issue-preempt 크론 — 분양 전 단계 이슈 선점 감지
  *
@@ -435,7 +436,7 @@ async function handler(_req: NextRequest) {
   // 새 이슈 발견 시 issue-draft 즉시 트리거
   if (allResults.length > 0) {
     try {
-      const draftUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app'}/api/cron/issue-draft`;
+      const draftUrl = `${SITE_URL}/api/cron/issue-draft`;
       fetch(draftUrl, {
         method: 'GET',
         headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` },

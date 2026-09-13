@@ -2,13 +2,14 @@ import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
+import { SITE_URL } from '@/lib/constants';
 export async function POST() {
   const auth = await requireAdmin();
   if ('error' in auth) return auth.error;
 
   const admin = getSupabaseAdmin();
   const cronSecret = process.env.CRON_SECRET || '';
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+  const baseUrl = SITE_URL;
   const headers = { Authorization: `Bearer ${cronSecret}` };
 
   // 1. 전체 삭제

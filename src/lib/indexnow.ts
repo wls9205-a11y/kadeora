@@ -1,3 +1,4 @@
+import { SITE_URL } from '@/lib/constants';
 /**
  * IndexNow — Bing/Yandex/Naver에 URL 즉시 색인 요청
  * 블로그 발행, 게시글 작성 시 호출
@@ -5,8 +6,8 @@
 // 호스팅된 IndexNow 키 (public/3a23def313e1b1283822c54a0f9a5675.txt = 200).
 // env 미설정 시 no-op 되던 게 indexnow-urgent/batch 71일 무제출의 원인 → 실측 검증된
 // 호스팅 키를 fallback 으로. (api.indexnow.org / bing 200 확인, naver 422 는 포털측 이슈)
-const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '3a23def313e1b1283822c54a0f9a5675';
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+export const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '3a23def313e1b1283822c54a0f9a5675';
+const SITE = SITE_URL;
 
 export interface IndexNowResult {
   ok: boolean;       // 하나 이상의 포털이 수락(2xx)

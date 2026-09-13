@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronLogging } from '@/lib/cron-logger';
 
+import { INDEXNOW_KEY } from '@/lib/indexnow';
 const BATCH = 50;
 const SITE_URL = 'https://kadeora.app';
 
@@ -71,7 +72,7 @@ export async function GET(req: NextRequest) {
             host: 'kadeora.app',
             // 호스팅된 키로 교정 (kadeora-indexnow-key 는 미호스팅 → 404). 기본 keyLocation
             // (kadeora.app/{key}.txt) 이 3a23…675.txt=200 로 해소.
-            key: process.env.INDEXNOW_KEY || '3a23def313e1b1283822c54a0f9a5675',
+            key: INDEXNOW_KEY,
             urlList: urls,
           }),
         }).catch(() => {});

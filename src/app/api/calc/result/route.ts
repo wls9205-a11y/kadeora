@@ -10,6 +10,7 @@ import { saveCalcResult, getCalcResult } from '@/lib/calc/result-share';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { getConfig } from '@/lib/app-config';
 
+import { SITE_URL } from '@/lib/constants';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       shortId,
       url: `/calc/${calcCategory}/${calcSlug}/r/${shortId}`,
-      fullUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app'}/calc/${calcCategory}/${calcSlug}/r/${shortId}`,
+      fullUrl: `${SITE_URL}/calc/${calcCategory}/${calcSlug}/r/${shortId}`,
     });
   } catch (e: any) {
     return NextResponse.json({ error: 'save_failed', detail: e?.message }, { status: 500 });

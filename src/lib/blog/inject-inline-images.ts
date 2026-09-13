@@ -1,3 +1,4 @@
+import { SITE_URL } from '@/lib/constants';
 /**
  * 세션 146 B4 / 세션 152 수정 — 블로그 markdown 에 인라인 이미지 자동 삽입.
  *
@@ -22,7 +23,6 @@ export interface InjectResult {
   totalImages: number; // 삽입 후 총 이미지 개수
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 const TARGET_MIN = 4;
 const TARGET_MAX = 6;
 

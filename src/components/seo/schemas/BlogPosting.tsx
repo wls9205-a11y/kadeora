@@ -1,7 +1,7 @@
 import JsonLd from '../JsonLd';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
 
+import { SITE_URL } from '@/lib/constants';
 interface Props {
   slug: string;
   title: string;

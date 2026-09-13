@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { SITE_URL } from '@/lib/constants';
 export const dynamic = 'force-dynamic';
 
 /**
@@ -29,7 +30,7 @@ export async function GET(req: NextRequest) {
 
   const clientId = process.env.NAVER_CAFE_CLIENT_ID || '';
   const clientSecret = process.env.NAVER_CAFE_CLIENT_SECRET || '';
-  const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app'}/api/naver/callback`;
+  const redirectUri = `${SITE_URL}/api/naver/callback`;
 
   // Exchange code for tokens
   const tokenRes = await fetch('https://nid.naver.com/oauth2.0/token', {

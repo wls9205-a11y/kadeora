@@ -12,6 +12,7 @@ import { verifyCronAuth } from '@/lib/cron-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { anthropicPollFetch } from '@/lib/llm/gateway';
 
+import { SITE_URL } from '@/lib/constants';
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 
@@ -162,7 +163,7 @@ async function handler(req: NextRequest) {
     'blog-backfill-poll',
     'blog-meta-rewrite-poll',
   ];
-  const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+  const base = SITE_URL;
   const fanout: Record<string, string> = {};
   for (const name of FANOUT) {
     try {

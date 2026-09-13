@@ -1,3 +1,4 @@
+import { SITE_URL } from '@/lib/constants';
 /**
  * social-proof.ts — 소셜프루프 숫자 유틸리티
  * 
@@ -50,7 +51,7 @@ export function fmtSocial(n: number, style: 'comma' | 'approx' = 'comma'): strin
 /** 서버 사이드: 소셜프루프 데이터 가져오기 (ISR 캐시) */
 export async function fetchSocialProof(): Promise<SocialProofData> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+    const baseUrl = SITE_URL;
     const res = await fetch(`${baseUrl}/api/stats/social-proof`, {
       next: { revalidate: 3600 },
     });

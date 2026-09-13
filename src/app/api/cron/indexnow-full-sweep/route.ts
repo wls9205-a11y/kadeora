@@ -5,7 +5,7 @@ import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { SITE_URL } from '@/lib/constants';
 
-const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '3a23def313e1b1283822c54a0f9a5675';
+import { INDEXNOW_KEY } from '@/lib/indexnow';
 const BATCH_SIZE = 5000; // IndexNow 최대 10,000이지만 안전하게
 
 /**

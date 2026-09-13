@@ -28,7 +28,7 @@ export interface OAuthToken {
 
 export function buildGscAuthUrl(state: string): string | null {
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
-  const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL || SITE_URL;
+  const siteOrigin = SITE_URL;
   if (!clientId) return null;
   const params = new URLSearchParams({
     client_id: clientId,
@@ -45,7 +45,7 @@ export function buildGscAuthUrl(state: string): string | null {
 export async function exchangeCodeForTokens(code: string): Promise<OAuthToken | null> {
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
-  const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL || SITE_URL;
+  const siteOrigin = SITE_URL;
   if (!clientId || !clientSecret) return null;
 
   const body = new URLSearchParams({

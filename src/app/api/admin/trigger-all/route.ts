@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { SITE_URL } from '@/lib/constants';
 export const maxDuration = 60;
 
 const TARGETS = [
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+  const base = SITE_URL;
   const results: Record<string, string> = {};
 
   await Promise.allSettled(

@@ -12,8 +12,9 @@ import BlogPostingSchema from '@/components/seo/schemas/BlogPosting';
 import FAQPageSchema from '@/components/seo/schemas/FAQPage';
 import BreadcrumbListSchema from '@/components/seo/schemas/BreadcrumbList';
 
+import { SITE_URL } from '@/lib/constants';
 export const revalidate = 3600;
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://kadeora.app';
+const SITE = SITE_URL;
 
 const ALLOWED_KEYWORDS = new Set([
   '청약일정', '청약', '실거래', '시세', '재개발', '재건축', '미분양', '분양', '전세', '매매',
