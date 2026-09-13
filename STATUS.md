@@ -35,6 +35,11 @@
 - **B 보류**: `stock_share_basis` 행 미투입, 콜 수 분모 현행 유지. 재설계(주식계열 **절대 예산**형)는 별건 지시 대기.
 - **리라이트 보류**: `llm.rewrite_submit_enabled=false` 유지. 재개는 «부분 리라이트 재설계 + 선정축 교체(합성 view_count 탈피) + in-progress 가드 category 수리» **세트로만**.
 
+### K-4 — 수신거부 새 서명 실검증: 잔여로 이월
+테스트 발송 미실행(email_send_logs 9/10~13 발송 0). `/api/admin/send-email` 은 requireAdmin(브라우저 어드민 세션) 전용이라 CC 경로 없음 · 브라우저 경로 포기(Node 판정).
+→ **다음 실발송 메일에서 수신거부 링크 실검증.** Node 가 언제든 앞당길 수 있다 — ⚠️ 어드민 화면에 이 API 를 부르는 «버튼은 없다»(src 호출처 0, 2026-09-13 grep). 어드민 로그인된 kadeora.app 탭의 콘솔에서
+`fetch('/api/admin/send-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({target:'test'})}).then(r=>r.json()).then(console.log)` 1회(기본 수신 TEST_EMAIL).
+
 ### 남은 시간표 — 세션 A 판독
 redev-geocode 410 실확인 완료(14:38) → 17:05 회차 → 비활성 5본 발화 0 — 원래 발화 시각별: cci 10분 간격(즉시) · place-fetch 03:00Z · redev 05:15/17:15Z · apt-geocode 18:40Z · enrich 10:00Z(HC_ENRICH 배포 이후 첫 회차가 기준선) → 모레 truncated 2차.
 
