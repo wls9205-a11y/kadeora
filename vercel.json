@@ -141,10 +141,6 @@
       "schedule": "0 19 * * *"
     },
     {
-      "path": "/api/cron/apt-enrich-location",
-      "schedule": "0 10 * * *"
-    },
-    {
       "path": "/api/cron/collect-site-images",
       "schedule": "0 4 * * *"
     },

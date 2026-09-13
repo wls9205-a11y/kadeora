@@ -19,6 +19,11 @@
 경계 밖(무접촉): 로컬 API 사용 + 스케줄 보유는 `apt-enrich-location`(vercel.json) 하나 — 지시서가 이미 경계로 명시. `lib/geocode/index.ts` 는 importer 0, `region/from-coords` 는 사용자 요청 API(스케줄 없음).
 ⚠️ 연쇄: `apt-satellite-crawl` 은 apt-geocode 가 채운 좌표를 첫 칸으로 둔다 — apt-geocode 스케줄이 멈췄으니 이 파이프의 신규 좌표 공급도 멈춘다(기존 좌표 대상은 무관).
 
+**+5본째 (HC_ENRICH_20260913 · 문서 개정으로 ⛔ 해제)**: `apt-enrich-location` — vercel.json `0 10 * * *` 제거 · 라우트 머리 주석(수동 전용) · 라우트·데이터 존치.
+해제 사유: ⛔ 근거였던 «영향 미실측» 소멸 — 외부 호출은 카카오 로컬 category API 단일 의존 · maxDuration 300 → apt-geocode 동일 클래스(산출 영구 0).
+4면: pg_cron 0 · workflows 0 · 수동 팬아웃 god-mode·trigger-all 에 경로 잔존(라우트 존치라 유지). 나머지 ⛔(cover-image-backfill · issue-trend · collect-site-images · from-coords · geocode/index.ts)는 무접촉 유지.
+기록만: from-coords 6시간 호출 0(미사용 표면 — 숨은 비용 없음) · geocode/index.ts 죽은 코드는 위생 백로그 · 위성 좌표 공급 단절은 수용(근본은 입력 주소 부재).
+
 ### K-2 — 회원수 하한 표기 (C-5 ㄴ)
 
 `TALK_MEMBER_COUNT = 1240`(숫자) → `TALK_MEMBER_LABEL = '1,200+'`(표시 문자열). 숫자 export 자체를 없애
@@ -31,7 +36,7 @@
 - **리라이트 보류**: `llm.rewrite_submit_enabled=false` 유지. 재개는 «부분 리라이트 재설계 + 선정축 교체(합성 view_count 탈피) + in-progress 가드 category 수리» **세트로만**.
 
 ### 남은 시간표 — 세션 A 판독
-17:05 회차 → 내일 04:00Z(4본 발화 0 확인 포함) → 모레 truncated 2차.
+redev-geocode 410 실확인 완료(14:38) → 17:05 회차 → 비활성 5본 발화 0 — 원래 발화 시각별: cci 10분 간격(즉시) · place-fetch 03:00Z · redev 05:15/17:15Z · apt-geocode 18:40Z · enrich 10:00Z(HC_ENRICH 배포 이후 첫 회차가 기준선) → 모레 truncated 2차.
 
 ## 2026-09-08 — NV-5 집행: VIEW 파이프 소생 · 표적 수명 · 「구멍」 셋 중 둘은 구멍이 아니었다
 

@@ -1,3 +1,4 @@
+// ⛔ 카카오 로컬 API 403 확정(2026-09-13 판정) — 스케줄 없음, 수동 전용. (HC_ENRICH_20260913 · vercel.json 0 10 * * * 제거)
 import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
