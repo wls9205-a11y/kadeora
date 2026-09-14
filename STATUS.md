@@ -1,3 +1,15 @@
+## 2026-09-14 — NW-B 본대 집행: 15쌍 병합 · 301 · aggregate B안 (Node 직접 「본대 고」)
+
+1. `merge_succession` 15쌍 — run_id `nwb-main-20260914-<pid>`, 원장 15행, 진입 별칭 손실 0.
+   C2(영도센트럴에일린의뜰, vn 2)에서 auto_variants 발화 → 같은 트랜잭션 자가 복원 정상(2→7).
+   필터 컷 11(K1 2·K2 4·P3 2·P5 2·P2 건별 「서면 롯데캐슬」 1). total_units 충돌 10건은 coalesce 로 survivor 유지(F4 → NW-4).
+2. `apt_site_merges` 15행 (446 → 461).
+3. 301 맵 — ⚠️ DB 모드 생성기는 «구 slug 가 아직 활성» 쌍을 뺀다. dead 를 먼저 끄면 배포까지 404 공백이라
+   원장을 TSV 로 뽑아(md5 `cd723a0a…` DB 대조) `--tsv` 로 생성 → 커밋 8eaaef1c → 배포 반영(우암1 301 실측) 확인.
+4. dead 15행 비활성 → 15개 전부 301 → survivor 200 실측.
+5. aggregate B안 — `동삼2-재개발.source_ids.redev_children` · 1·2단지 `redev_parent` (is_aggregate 는 미분양 집계 표시라 불사용).
+- 광고 relink(dead slug 착지 키워드) 는 별도 게이트 — 미접촉.
+
 ## 2026-09-14 — merge_succession() 적용 · 감만1 단독 시험 (중단점 NW-B′ — 본대 금지)
 
 `docs/PV_INSTRUCTION_20260910.md` ① 을 적용했다(`cvb_merge_succession_2026-09-14.sql`). 초안 결함 4건을 적용 시 고쳤다:
