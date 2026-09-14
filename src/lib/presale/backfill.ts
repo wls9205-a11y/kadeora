@@ -34,6 +34,8 @@ export type DocCard = ExtractedCard & {
   holdReason?: string;
   siteType?: 'subscription' | 'redevelopment';
   lifecycleStage?: DocStage;
+  /** confidence_note 에 덧붙일 한 줄 — 수치 상충 시 «이설» 보존용(최신 공적 계획 채택 규칙). */
+  noteExtra?: string;
 };
 
 /**
@@ -206,11 +208,13 @@ const NW_20260914_SEEDABLE: DocCard[] = [
   redev({ rawName: '대구 신암9구역 재개발', region: '대구', sigungu: '동구',
     addrRaw: '대구광역시 동구 신암동 642-1번지 일원', totalUnits: 1226, builderRaw: '현대건설',
     lifecycleStage: 'constructor_selected',
+    noteExtra: '근거 단건 — 2019-12 수주 기사뿐, 이후 단계 원문 미확인',
     sourceUrl: 'https://www.dnews.co.kr/uhtml/view.jsp?idxno=201912072051030490972' }),
   // 대구 남구청 정비사업 현황(1,065·13개동 — 현대건설 2022 발표 1,107보다 최신 계획) · 통합심의 가결 2024-12
   redev({ rawName: '대구 봉덕1동 우리주택 재개발', region: '대구', sigungu: '남구',
     addrRaw: '대구광역시 남구 봉덕동 976-2', totalUnits: 1065, builderRaw: '현대건설',
     lifecycleStage: 'constructor_selected',
+    noteExtra: '세대수 이설 — 남구청 최신 계획 1,065(13개동) 채택 · 현대건설 발표(2022-01) 1,107(12개동)',
     sourceUrl: 'https://www.hdec.kr/kr/newsroom/news_view.aspx?NewsSeq=484&NewsType=LATEST&NewsListType=news_clist' }),
   // 대한경제 2021-05-24 수주(737·49층) · 한국주택경제 2026-08-27 사업시행 변경인가 준비·2027 관리처분 목표
   redev({ rawName: '구미 원평구역 도시정비형 재개발', region: '경북', sigungu: '구미시',

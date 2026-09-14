@@ -414,7 +414,7 @@ async function seedSite(
     stage_source: `crawl:${src.key}`,
     // 독립 원출처 «1곳»(시공사 공식)이다. D6 상 estimated 이고 verified 가 아니다.
     confidence: 'estimated',
-    confidence_note: `${src.label} — ${card.sourceUrl}`,
+    confidence_note: `${src.label} — ${card.sourceUrl}${doc.noteExtra ? ` · ${doc.noteExtra}` : ''}`,
     supply_type: supplyType,
     // R2 — 민영이 아니면 페이지는 살리고 광고에서만 뺀다.
     ad_blocked: adBlockedFor(supplyType),
