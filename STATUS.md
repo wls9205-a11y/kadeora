@@ -1,3 +1,24 @@
+## 2026-09-14 — merge_succession() 적용 · 감만1 단독 시험 (중단점 NW-B′ — 본대 금지)
+
+`docs/PV_INSTRUCTION_20260910.md` ① 을 적용했다(`cvb_merge_succession_2026-09-14.sql`). 초안 결함 4건을 적용 시 고쳤다:
+| # | 초안 | 그대로였다면 |
+|---|---|---|
+| ⑴ | `site_name_applies_op_check` 에 `merge_succeed` 없음 | 집행 경로 원장 INSERT 23514 → 승계 전체 롤백. dry 는 원장을 안 써서 «통과해 보인다» |
+| ⑵ | security definer 인데 REVOKE 없음 | anon 이 RPC 로 승계 쓰기 가능 |
+| ⑶ | `order by field` | RETURNS TABLE OUT 변수와 겹쳐 42702 — 첫 dry 에서 즉사 |
+| ⑷ | `search_path = public` | pg_temp 암묵 선두 — definer 함수의 임시 객체 가로채기 여지 |
+
+**감만1** (`감만1-재개발` → `부산-감만1-재개발`, run_id `nwb-prime-gamman1-20260914`): dry 가 문서 기대표와 전건 일치 → 집행.
+재조회: total_units NULL→9092 · builder NULL→「대우건설, 동부건설」(builder_normalized 동반) · dong 감만동 보존 ·
+address 사업지 보존(조합사무실 미승계) · 별칭 13→14(「남 감만1 재개발」 1개, auto_variants 교체 없음) ·
+원장 merge_succeed 1행(before 13 / after 14) · stage 이벤트 0 · anon/authenticated EXECUTE false.
+
+⏳ **사후 판독**: 다음 sync-apt-sites(04:00Z) 경과 후 survivor 의 builder·total_units 잔존 확인.
+문서가 「정체 미규명」으로 남긴 04:02Z 대량 스윕은 sync-apt-sites 로 보인다(스케줄 `0 4 * * *` · 감만1 두 행 updated_at 04:02).
+Step 2 는 source_ids·좌표·updated_at 만 쓴다 — 스칼라 덮임이 관측되면 그때 별건.
+
+⚠️ 본대(NW-B 15쌍) 전 확인할 것: 함수는 dead 별칭을 «통째로» 붙인다 — 「부산」「재개발」 같은 단독 토큰·「남 감만1 재개발」류 조각도 따라온다(감만1은 survivor 가 이미 보유해 1개만 붙음).
+
 ## 2026-09-14 — NW-1 v2: 정비 원천 단계 → lifecycle_stage 동기화 (설계서_NW_20260913 v1.5)
 
 ### 원인
