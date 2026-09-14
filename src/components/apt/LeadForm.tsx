@@ -395,8 +395,27 @@ export default function LeadForm({
   // 서식을 다시 입히면 캐럿이 끝으로 튄다 — 재렌더 후 복원할 "앞쪽 숫자 개수"를 담아둔다.
   const caretDigitsRef = useRef<number | null>(null);
 
+  // Q-7 — 하이드레이션 «전» 에 친 값. 느린 회선·인앱 브라우저에서는 HTML 이 먼저 보여 사용자가 바로 친다.
+  //   그 값은 DOM 에만 있고 state 는 '' 라서, 첫 재렌더(제출·오류 표시)에서 입력이 «지워진다»
+  //   (2026-09-14 재현: 3G+CPU×4 에서 이름·연락처를 친 뒤 제출 → 빈칸 + 「이름을 입력해 주세요」).
+  const formRef = useRef<HTMLFormElement>(null);
+
   // 임시 보관 복원
   useEffect(() => {
+    // ⚠️ 초안보다 «먼저» 읽어 두고 «나중에» 덮는다 — 방금 사람이 친 값이 예전 초안보다 새 값이다.
+    const f = formRef.current;
+    const domVal = (id: string) => (f?.querySelector<HTMLInputElement | HTMLSelectElement>(`#${id}`)?.value ?? '');
+    const domChecked = (key: string) => !!f?.querySelector<HTMLInputElement>(`input[data-kd="${key}"]`)?.checked;
+    const typed = {
+      name: domVal('kd-lead-name'),
+      phone: domVal('kd-lead-phone'),
+      birthDate: domVal('kd-lead-birth'),
+      homeRegion: domVal('kd-lead-region'),
+      consent: domChecked('consent'),
+      marketingOk: domChecked('marketing'),
+      company: f?.querySelector<HTMLInputElement>('input[name="company"]')?.value ?? '',
+    };
+
     const raw = lsGet(draftKey);
     if (raw) {
       try {
@@ -420,6 +439,14 @@ export default function LeadForm({
         lsRemove(draftKey);
       }
     }
+    if (typed.name) setName(typed.name);
+    if (typed.phone) setPhone(formatPhone(typed.phone));
+    if (typed.birthDate) setBirthDate(onlyDigits(typed.birthDate).slice(0, 6));
+    if (typed.homeRegion && homeRegions.includes(typed.homeRegion)) setHomeRegion(typed.homeRegion);
+    if (typed.consent) setConsent(true);
+    if (typed.marketingOk) setMarketingOk(true);
+    // 허니팟도 같은 규칙 — 봇이 하이드레이션 전에 채웠다고 통과시키지 않는다.
+    if (typed.company) setCompany(typed.company);
     restored.current = true;
   }, [draftKey]);
 
@@ -678,7 +705,7 @@ export default function LeadForm({
             : copy.lede}
         </p>
 
-        <form onSubmit={handleSubmit} noValidate style={{ position: 'relative' }}>
+        <form ref={formRef} onSubmit={handleSubmit} noValidate style={{ position: 'relative' }}>
           <div style={{ marginBottom: 12 }}>
             <label htmlFor="kd-lead-name" style={labelStyle}>이름</label>
             <input
@@ -800,6 +827,7 @@ export default function LeadForm({
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-sm)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
+                data-kd="consent"
                 checked={consent}
                 aria-invalid={!!errors.consent}
                 aria-describedby={errors.consent ? 'kd-lead-consent-err' : undefined}
@@ -829,6 +857,7 @@ export default function LeadForm({
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-sm)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
+                data-kd="marketing"
                 checked={marketingOk}
                 onChange={e => setMarketingOk(e.target.checked)}
                 style={{ width: 18, height: 18, marginTop: 1, flexShrink: 0, accentColor: 'var(--brand)' }}
