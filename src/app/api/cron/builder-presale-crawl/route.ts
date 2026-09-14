@@ -347,16 +347,34 @@ async function upsertCandidate(
   },
 ) {
   const now = new Date().toISOString();
+  const source = `crawl:${src.key}`;
+  const norm = normName(stripProvisional(card.rawName));
+
+  // ⛔ seeded → matched «강등» 금지 (NW-3 실측, 2026-09-14).
+  //    같은 카드가 다음 실행에 오면 자기가 만든 현장에 이름으로 붙어 matched 가 된다. 그대로
+  //    upsert 하면 seeded_site_id 가 NULL 로 덮여 「이 현장은 이 카드가 만들었다」가 원장에서 사라진다.
+  //    doc:NW_20260914 2회차가 1회차 시드 5건을 그렇게 덮었다(수동 원복). 크롤 소스도 매일 같은 경로다.
+  //    붙은 곳이 «자기가 시드한 현장» 이면 관측 시각만 갱신하고 판정은 그대로 둔다.
+  if (v.resolution === 'matched' && v.matchedSiteId) {
+    const { data: prev } = await admin.from('presale_candidates')
+      .select('id, resolution, seeded_site_id').eq('source', source).eq('norm_name', norm).maybeSingle();
+    if (prev?.resolution === 'seeded' && prev.seeded_site_id === v.matchedSiteId) {
+      await admin.from('presale_candidates')
+        .update({ last_seen_at: now, updated_at: now }).eq('id', prev.id);
+      return;
+    }
+  }
+
   let seededSiteId: string | null = null;
   if (v.seededSlug) {
     const { data } = await admin.from('apt_sites').select('id').eq('slug', v.seededSlug).maybeSingle();
     seededSiteId = data?.id ?? null;
   }
   await admin.from('presale_candidates').upsert({
-    source: `crawl:${src.key}`,
+    source,
     source_url: card.sourceUrl,
     raw_name: card.rawName,
-    norm_name: normName(stripProvisional(card.rawName)),
+    norm_name: norm,
     region: card.region,
     sigungu: card.sigungu,
     addr_raw: card.addrRaw,
