@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { fmtAmount } from '@/lib/format';
 import JsonLd from '@/components/seo/JsonLd';
+import { stripSyntheticPrice } from '@/lib/apt/synthetic-price';
 
 export const revalidate = 3600;
 export const maxDuration = 30;
@@ -23,11 +24,12 @@ interface Props { params: Promise<{ name: string }> }
 //    사전을 고치면 백필을 다시 돌려야 한다 (docs/m2/B-2_시공사정규화.md).
 const fetchBuilder = cache(async (builder: string) => {
   const sb = getSupabaseAdmin();
-  const { data: sites } = await sb.from('apt_sites')
-    .select('slug, name, region, sigungu, site_type, total_units, price_min, price_max, built_year, move_in_date, status, interest_count, images')
+  const { data: sites } = await (sb as any).from('apt_sites')
+    .select('slug, name, region, sigungu, site_type, total_units, price_min, price_max, price_source, built_year, move_in_date, status, interest_count, images')
     .eq('is_active', true).contains('builder_normalized', [builder])
     .order('interest_count', { ascending: false }).limit(200);
-  return sites || [];
+  // Q-1 F1 — 합성 분양가는 카드·평균 어디에도 싣지 않는다
+  return ((sites || []) as any[]).map(stripSyntheticPrice);
 });
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

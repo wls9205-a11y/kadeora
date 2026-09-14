@@ -124,6 +124,8 @@ async function fetchRegionData(region: string) {
     s.from('apt_sites')
       .select('price_min,price_max')
       .ilike('region', `%${region}%`).eq('is_active', true)
+      // Q-1 F1 — 합성 분양가(지역 채움값)를 평균에 섞으면 평균이 채움값으로 수렴한다
+      .is('price_source', null)
       .gt('price_min', 0).gt('price_max', 0)
       .limit(50) as unknown as Promise<any>,
   ]);

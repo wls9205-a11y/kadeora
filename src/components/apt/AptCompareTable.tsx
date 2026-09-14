@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { isSyntheticPrice } from '@/lib/apt/synthetic-price';
 
 interface Props {
   slug: string;
@@ -33,6 +34,7 @@ interface FullSite {
   price_max?: number | null;
   lifecycle_stage?: string | null;
   popularity_score?: number | null;
+  price_source?: string | null;
 }
 
 const LIFECYCLE_GRADE: Record<string, string> = {
@@ -73,15 +75,19 @@ export default async function AptCompareTable({ slug, currentSite }: Props) {
   let nearbyDetails: FullSite[] = [];
   if (nearbySlugs.length > 0) {
     const { data: detailData } = await (sb as any).from('apt_sites')
-      .select('slug,name,total_units,price_min,price_max,lifecycle_stage,popularity_score')
+      .select('slug,name,total_units,price_min,price_max,price_source,lifecycle_stage,popularity_score')
       .in('slug', nearbySlugs);
     nearbyDetails = ((detailData ?? []) as FullSite[]);
   }
   const detailBySlug = new Map<string, FullSite>(nearbyDetails.map(d => [d.slug, d]));
+  // Q-1 F1 — 합성 분양가(지역 채움값) 이웃은 «행째» 뺀다. 남기면 「분양가」 열이 전 행 같은 숫자가 된다.
+  const comparable = nearbyRows.filter(n => !isSyntheticPrice(detailBySlug.get(n.nearby_slug)));
+  // 현재 현장 한 줄만 남으면 비교가 아니다 — 섹션을 그리지 않는다.
+  if (comparable.length === 0) return null;
 
   const rows = [
     { ...currentSite, slug, isCurrent: true },
-    ...nearbyRows.map(n => {
+    ...comparable.map(n => {
       const d = detailBySlug.get(n.nearby_slug);
       return {
         slug: n.nearby_slug,

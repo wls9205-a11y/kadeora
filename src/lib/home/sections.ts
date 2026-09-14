@@ -96,10 +96,12 @@ export function buildFakePriceSet(
 
 /** 이 행의 가격을 렌더해도 되는가. */
 export function priceOf(
-  row: { price_min: number | null; price_max: number | null; lifecycle_stage: string | null },
+  row: { price_min: number | null; price_max: number | null; lifecycle_stage: string | null; price_source?: string | null },
   fake: Set<string>,
 ): HomeRow['price'] {
   const { price_min: lo, price_max: hi, lifecycle_stage: st } = row;
+  // Q-1 F1 — DB 판정(price_source='synthetic')이 먼저다. 아래 fake 집합은 그 이전부터 있던 홈 전용 보조 판정.
+  if (row.price_source === 'synthetic') return null;
   if (lo == null || hi == null || lo <= 0) return null;
   // 정비사업은 분양가가 확정되기 전이다. 숫자가 있어도 그건 확정가가 아니다.
   if (REDEV_STAGES.has(st ?? '')) return null;
@@ -107,12 +109,12 @@ export function priceOf(
   return { min: lo, max: hi };
 }
 
-const COLS = 'slug,name,region,sigungu,lifecycle_stage,total_units,price_min,price_max,page_views,content_score,hero_image_url,hero_license_tier';
+const COLS = 'slug,name,region,sigungu,lifecycle_stage,total_units,price_min,price_max,price_source,page_views,content_score,hero_image_url,hero_license_tier';
 
 type Raw = {
   slug: string; name: string; region: string | null; sigungu: string | null;
   lifecycle_stage: string | null; total_units: number | null;
-  price_min: number | null; price_max: number | null;
+  price_min: number | null; price_max: number | null; price_source?: string | null;
   page_views: number | null; content_score: number | null;
   hero_image_url: string | null; hero_license_tier: string | null;
 };

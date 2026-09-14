@@ -36,6 +36,7 @@ import { siteEntity } from '@/lib/seo/entity';
 import FieldNote from '@/components/apt/FieldNote';
 
 import { leadFormAvailable, leadKind } from '@/lib/apt/lead-eligibility';
+import { stripSyntheticPrice } from '@/lib/apt/synthetic-price';
 import { canUseHeroImage } from '@/lib/apt/hero-license';
 import { canShowPriceChange, pcArea, priceChangeDirection, PRICE_CHANGE_COLS } from '@/lib/apt/price-change';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
@@ -116,7 +117,7 @@ async function resolveParam(rawId: string) {
 
 async function fetchUnifiedData(slug: string) {
   const sb = getSupabaseAdmin();
-  const APT_COLS = 'id,slug,name,display_name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,builder_normalized,developer,total_units,supply_units,complex_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,hero_license_tier,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url,tx_match_prefix,confidence,confidence_note,expected_sale_period,expected_sale_source,expected_sale_period_asof';
+  const APT_COLS = 'id,slug,name,display_name,site_type,region,sigungu,dong,address,description,seo_title,seo_description,builder,builder_normalized,developer,total_units,supply_units,complex_units,built_year,move_in_date,status,is_active,content_score,interest_count,page_views,comment_count,images,satellite_image_url,og_image_url,key_features,faq_items,nearby_facilities,nearby_station,school_district,price_min,price_max,price_comparison,search_trend,latitude,longitude,source_ids,created_at,updated_at,og_cards,hero_image_url,hero_image_source,hero_image_credit,hero_license_tier,lifecycle_stage,review_score,review_count,faqs,data_quality_score,remaining_units,general_units,official_url,discount_pct,agent_kakao_url,tx_match_prefix,confidence,confidence_note,expected_sale_period,expected_sale_source,expected_sale_period_asof,price_source';
 
   // Phase 1: apt_sites — exact slug → multi-stage fuzzy fallback
   let { data: site } = await (sb as any).from('apt_sites').select(APT_COLS).eq('slug', slug).maybeSingle();
@@ -179,6 +180,8 @@ async function fetchUnifiedData(slug: string) {
       }
     }
   }
+  // Q-1 F1 — 합성 분양가는 «읽는 순간» 비운다. 헤더·title·og:price·FAQ·JSON-LD·비교가 전부 이 값을 따로 읽는다.
+  if (site) site = stripSyntheticPrice(site);
   const sourceIds = (site?.source_ids || {}) as Record<string, string>;
 
   // SEO 분석 텍스트 (database.ts에 없는 컬럼 — as any 패턴)
@@ -416,7 +419,7 @@ async function fetchUnifiedData(slug: string) {
   const [sameBuilderR, regionPriceR] = await Promise.allSettled([
     // 같은 시공사 다른 현장 (분양가 포함)
     builderSafe ? sb.from('apt_subscriptions').select('id, house_nm, region_nm, tot_supply_hshld_co, rcept_bgnde, house_type_info').ilike('constructor_nm', `%${builderSafe}%`).neq('house_nm', name).order('rcept_bgnde', { ascending: false }).limit(5) : Promise.resolve({ data: [] }),
-    region ? sb.from('apt_sites').select('price_min, price_max').eq('region', region).eq('is_active', true).gt('price_min', 0).gt('price_max', 0).limit(100) : Promise.resolve({ data: [] }),
+    region ? sb.from('apt_sites').select('price_min, price_max').eq('region', region).eq('is_active', true).is('price_source', null).gt('price_min', 0).gt('price_max', 0).limit(100) : Promise.resolve({ data: [] }),
   ]);
   const [regionTradesR, complexR] = await Promise.allSettled([
     // ⚠️ `region_nm` 을 같이 건다. 시군구 이름은 전국에서 유일하지 않다 —
