@@ -1,3 +1,13 @@
+## 2026-09-14 — NW-1 경기·서울 확장 · NW-3 결측 10곳 시드 · 후보 원장 강등 가드
+
+- **NW-1 확장**: dry(경기 231→적용 220 · 서울 150→적용 45 · review 0)가 채팅 정답지와 전건 일치 → 채팅 SQL backfill
+  (이벤트 265건 전부 `backfill:`) → 재 dry apply 0 → `REDEV_LIFECYCLE_REGIONS = ['부산','경기','서울']`.
+  경기 적용분은 post_move_in 126 · mgmt 29 · union 26 · construction 25 · site 14. 서울 무변화 105 중 1건은 source `manual`.
+- **NW-3**: 문서 소스 레지스트리(`DOC_SOURCES`) + `doc:NW_20260914` 카드 11장 → 시드 10(대구 7·구미 1·울산 2, 전부 redevelopment·원문 단계) + 원평2 보류.
+  DocCard 에 `siteType`·`lifecycleStage`·`noteExtra` 추가. 울산 B-07 옛 근거 없는 queued 행은 rejected+superseded note.
+- **강등 가드**(5e7e3f58): 재실행이 자기 시드 현장에 matched 로 붙으면 seeded 원장을 덮던 결함. NW 5건 + desian:presale 3건(9/13) 원복.
+- 잔여: 3지역 통합 첫 자연 회전(내일 13:00 KST, written 0 기대) · CV-N 21:10 신규 10곳 별칭 · dong 결측 2(수성1·B-04).
+
 ## 2026-09-14 — NW-B 본대 집행: 15쌍 병합 · 301 · aggregate B안 (Node 직접 「본대 고」)
 
 1. `merge_succession` 15쌍 — run_id `nwb-main-20260914-<pid>`, 원장 15행, 진입 별칭 손실 0.
@@ -50,7 +60,7 @@ Step 2 는 source_ids·좌표·updated_at 만 쓴다 — 스칼라 덮임이 관
 | 기록자 | 대상 행 | stage_source |
 |---|---|---|
 | `refresh_subscription_stages` | subscription · NULL/derived_subscription | derived_subscription |
-| **`sync_redev_lifecycle` (신규)** | redev_id 보유 · NULL/`redev:%` | `redev:<source>` |
+| **`sync_redev_lifecycle` (신규)** | redev_id 보유 · NULL/`redev:%` · 지역 = `REDEV_LIFECYCLE_REGIONS` | `redev:busan_opendata` · `redev:gyeonggi_opendata` · `redev:seoul_opendata` |
 | dart redev-pipeline | DART 매칭 구역(잠금 제외) | dart |
 | admin apt-stage | 사람 | admin / admin:machine |
 | permits-promote · builder-presale-crawl | INSERT 시점만 | permit:* / crawl:* |

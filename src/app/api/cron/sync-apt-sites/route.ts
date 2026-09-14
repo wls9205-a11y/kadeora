@@ -515,8 +515,10 @@ async function run() {
   // ⛔ 해제·조합해산은 쓰지 않고 review 로만 돌려준다 → metadata.redevLifecycle.review.
   // ⚠️ 매일 회전은 backfill=false 다(원천이 실제로 움직인 것 = 「움직인 현장」에 나가도 된다).
   //    밀린 값을 한꺼번에 고칠 때는 SQL 로 backfill=true 를 따로 부른다.
-  // ⚠️ 지역은 판정을 통과한 곳만 연다. 경기·서울은 NULL 충전 성격이라 별도 중단점 후 추가.
-  const REDEV_LIFECYCLE_REGIONS = ['부산'];
+  // ⚠️ 지역은 판정을 통과한 곳만 연다 — 추가 순서는 «dry 목록 판독 → SQL backfill 선행 → 배열 추가».
+  //    배열을 먼저 늘리면 밀린 교정분이 backfill 표시 없이 찍혀 「움직인 현장」·주간 글로 샌다.
+  //    부산 2026-09-14(27건) · 경기·서울 2026-09-14(220·45건, 전부 NULL 충전) 선행 완료.
+  const REDEV_LIFECYCLE_REGIONS = ['부산', '경기', '서울'];
   let redevLifecycle: Record<string, unknown> | null = null;
   try {
     const { data, error } = await (sb as any).rpc('sync_redev_lifecycle', {
