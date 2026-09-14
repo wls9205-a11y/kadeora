@@ -22,7 +22,8 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { classifyNewsBatch, type NewsInput } from '@/lib/cvn/extract';
 import { applyCandidate, loadSites, readSwitch } from '@/lib/cvn/apply';
 import { registerRankTargets } from '@/lib/cvn/rank-targets';
-import type { NameCandidateInput, SiteLite } from '@/lib/cvn/decide';
+import { checkAliasUniqueness, decideTier, matchSite, type NameCandidateInput, type SiteLite } from '@/lib/cvn/decide';
+import { cvnDocSourceFor, toCandidateInput } from '@/lib/cvn/doc-cards';
 import type { NewsCard } from '@/lib/cvn/extract';
 
 export const maxDuration = 300;
@@ -87,6 +88,75 @@ async function spentToday(admin: any): Promise<number> {
 
 const REDEV = /(재개발|재건축|촉진|정비사업|지구단위)/;
 
+/**
+ * 문서 카드 한 벌을 applyCandidate 로 통과시킨다 (BP70 §1-6).
+ * ⛔ 판정·쓰기 규칙을 여기서 새로 만들지 않는다 — matchSite·decideTier·유일성·autoapply 는 apply.ts 의 것이다.
+ * ⚠️ 재실행 안전: 후보 upsert 키가 (source_url, proposed_name) 이고, 별칭은 이미 있으면 다시 넣지 않는다.
+ *    글감(issue_alerts)은 같은 출처 URL 의 cvn_name_event 가 이미 있으면 다시 넣지 않는다.
+ */
+async function runDocCards(admin: any, key: string, dry: boolean) {
+  const src = cvnDocSourceFor(key);
+  if (!src) return { processed: 0, metadata: { error: `unknown doc source: ${key}` } };
+
+  const autoApply = await readSwitch(admin, 'autoapply_enabled', false);
+  const sites = await loadSites(admin);
+  const runId = `cvn-doc-${key}-${new Date().toISOString().slice(0, 10)}`;
+  const outcomes: any[] = [];
+  let applied = 0;
+
+  for (const card of src.cards) {
+    const input = toCandidateInput(src, card);
+    if (dry) {
+      const m = matchSite(input, sites);
+      const d = decideTier(input, m);
+      const site = m.siteId ? sites.find((s) => s.id === m.siteId) : null;
+      const uniq = d.apply && site ? checkAliasUniqueness(input.proposedName, site.id, sites) : null;
+      outcomes.push({
+        name: card.proposedName, project: card.projectName, match: m.how, site: site?.name ?? null,
+        tier: d.tier, res: uniq && !uniq.ok ? 'merge_queue' : d.resolution, reason: d.reason,
+        cross_refs: input.crossRefs, dry: true,
+      });
+      continue;
+    }
+
+    const out = await applyCandidate(input, sites, { admin, runId, autoApply });
+    if (out.wrote) applied += 1;
+    let targeted: any = null;
+    if (out.wrote && (out.tier === 'T-A' || out.tier === 'T-B')) {
+      targeted = await registerRankTargets(admin, card.proposedName);
+      const { data: seen } = await admin.from('issue_alerts').select('id')
+        .eq('source_type', 'cvn_name_event').contains('source_urls', [input.sourceUrl]).limit(1);
+      if (!seen?.length) {
+        const { error } = await admin.from('issue_alerts').insert({
+          title: `${card.projectName} — ${card.proposedName}`.slice(0, 200),
+          summary: card.note ?? null,
+          category: 'apt',
+          source_type: 'cvn_name_event',
+          sub_category: card.eventType,
+          source_urls: card.sources,
+          detected_keywords: [card.proposedName, card.projectName],
+          apt_site_id: out.siteId,
+          region_sigungu: card.sigungu,
+          // 뉴스 경로와 같은 45 — 문턱(25)·발행 임계(35) 위, 사람이 만든 고득점 이슈 아래.
+          base_score: 45,
+          final_score: 45,
+          raw_data: { tier: out.tier, resolution: out.resolution, builder: card.builderRaw ?? null, units: card.totalUnits ?? null, doc: key },
+        });
+        if (error) outcomes.push({ name: card.proposedName, issue_insert_error: error.message });
+      }
+    }
+    outcomes.push({
+      name: card.proposedName, tier: out.tier, res: out.resolution, wrote: out.wrote, reason: out.reason,
+      ...(targeted ? { targets: targeted } : {}),
+    });
+  }
+
+  return {
+    processed: src.cards.length,
+    metadata: { doc: key, dry, applied, auto_apply: autoApply, outcomes },
+  };
+}
+
 /** 정비형 현장 중 «브랜드 별칭이 없는» 것 → 시공사 공란 순으로 표적을 고른다. */
 function pickTargets(sites: SiteLite[], brands: string[], limit: number): SiteLite[] {
   const hasBrand = (s: SiteLite) => {
@@ -111,6 +181,12 @@ async function handler(req: NextRequest) {
       if (!(await readSwitch(admin, 'watcher_enabled', true))) {
         return { processed: 0, metadata: { skipped: 'cvn.watcher_enabled = false' } };
       }
+
+      // BP70 — 문서 카드 모드(`?doc=<key>`). 뉴스 검색·AI 분류를 건너뛰고 «뒤 문» 만 지난다.
+      // ⚠️ 일 크론에는 끼지 않는다. 부를 때만 돈다.
+      const docKey = sp.get('doc');
+      if (docKey) return runDocCards(admin, docKey, dry);
+
       if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) {
         return { processed: 0, metadata: { error: 'NAVER keys missing' } };
       }

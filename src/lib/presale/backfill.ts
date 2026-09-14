@@ -244,6 +244,122 @@ const NW_20260914_HELD: DocCard[] = [
 
 export const NW_20260914_CARDS: DocCard[] = [...NW_20260914_SEEDABLE, ...NW_20260914_HELD];
 
+/* ══ BP70 — 부울경 분양예정 대조 결측 (최종지시서_BP70_20260914 §2) ═════════════════
+ * 조사일 2026-09-14. 원문 근거는 언론·지자체·시행/시공사 공식만(애그리게이터·나무위키는 힌트로도 카드에 안 싣는다).
+ *
+ * ⚠️ 지시서 명단 30행을 «그대로» 옮기지 않았다. 실측으로 갈렸다:
+ *    · 이미 분양·준공·입주: 에코델타 5BL(엘가 로제비앙 — 2026-03 청약, DB 에 있음) · 대상 웰라움 달동(2025 준공) ·
+ *      다인로얄팰리스 신항 2차(오피스, 2020 분양) · 회원3(e편한세상 창원 파크센트럴) · 양덕2(롯데캐슬 센텀골드) ·
+ *      양덕4(롯데캐슬 하버팰리스) · 두산위브더제니스 양산 2차(2023 분양) · 사송 A-2(LH 신혼희망타운, 2022 분양)
+ *    · 진례 C-1BL 은 «민간임대 별건» 이 아니다 — LH 726(공공분양 387+분양전환 임대 339) 한 사업이고 DB 에 이미 있다.
+ *    → 위 9건은 카드로도 넣지 않는다. 「없다」가 아니라 «분양예정이 아니다» 라서다.
+ * ⚠️ 이름: 브랜드가 원문에 없으면 원문 사업명으로 앉힌다(「하늘채」「중흥S-클래스 2차」「더폴 금정」 등은 애그리게이터뿐).
+ * ⚠️ SKY.V 센텀은 666실 «전량 오피스텔» 이다(아파트 0) — total_units 를 비워 두고 note 에 남긴다.
+ */
+export const BP70_20260914_SOURCE: PresaleSource = {
+  key: 'doc:BP70_20260914',
+  builder: '',
+  brand: '',
+  label: 'BP70 — 부울경 분양예정 대조 결측 (최종지시서_BP70_20260914 §2)',
+  listUrl: 'https://github.com/wls9205-a11y/kadeora/blob/main/STATUS.md',
+  kind: 'presale',
+  robotsCheckedAt: '2026-09-14',
+};
+
+const GIMHAE_PERMITS = 'https://www.gimhae.go.kr/00954/01023/01274.web?amode=view&idx=2576678&gcode=1095';
+const CHANGWON_REDEV = 'https://www.changwon.go.kr/cwportal/depart/11070/13563.web?gcode=1407&idx=869600&amode=view';
+
+const BP70_20260914_SEEDABLE: DocCard[] = [
+  // 부산일보 2026-01-08 건축심의 확정(64층 2동) · 파이낸셜뉴스 2026-01-09. 시공 신세기건설(동원개발 계열)
+  card({ rawName: 'SKY.V 센텀', region: '부산', sigungu: '해운대구',
+    addrRaw: '부산광역시 해운대구 우동 1522번지 일대', builderRaw: '신세기건설',
+    noteExtra: '오피스텔 666실 전량(아파트 0) — 「이르면 올해 연말 분양」(부산일보 2026-01-08) · 교차 파이낸셜뉴스 2026-01-09',
+    sourceUrl: 'https://mobile.busan.com/view/busan/view.php?code=2026010818232711045' }),
+  // 부산일보 2022-07-20 — 옛 롯데마트 금정점 부지 역세권 지구단위계획 주상복합(372, 기부채납 40). 우성종합건설 매입(2019)
+  card({ rawName: '부곡동 223-1 주상복합', region: '부산', sigungu: '금정구',
+    addrRaw: '부산광역시 금정구 부곡동 223-1번지 일대', totalUnits: 372, builderRaw: '우성종합건설',
+    noteExtra: '옛 롯데마트 금정점 부지 · 재건축 아님 · 「더폴 금정」 명칭은 언론 원문 미확인(애그리게이터뿐) — 별칭 보류',
+    sourceUrl: 'https://www.busan.com/view/busan/view.php?code=2022072019321013222' }),
+  // 부산일보 2026-07-07 착공 · 더파워뉴스 2025-01-07(시공 벽산엔지니어링·350+OT22). 분양 사이트는 BS한양·360 — 시공사 교체 보도 미확인
+  card({ rawName: '구포강변뷰 지역주택조합', region: '부산', sigungu: '북구',
+    addrRaw: '부산광역시 북구 구포동 500번지 일원', lifecycleStage: 'construction',
+    noteExtra: '세대수·시공사 상충(350·벽산엔지니어링 2025-01 vs 360·BS한양 분양사이트) — 확정 전 공란 · 「한양수자인 구포」 명칭 언론 미확인',
+    sourceUrl: 'https://mobile.busan.com/view/youngman/view.php?code=2026070715343693356' }),
+  // 삼성물산 뉴스룸 2025-06 · 울산신문·한국경제 2025-06-29 — 시공사 선정 총회. 「래미안 엘리미엄 울산」은 제안명(T-C)
+  redev({ rawName: '울산 남구 B-04 재개발', region: '울산', sigungu: '남구',
+    addrRaw: '울산광역시 남구 신정동 1586번지 일대', totalUnits: 1441, builderRaw: '삼성물산',
+    lifecycleStage: 'constructor_selected',
+    noteExtra: '중구 B-04(4,080)와 별개 구역 · 제안명 래미안 엘리미엄 울산(확정 전)',
+    sourceUrl: 'https://www.hankyung.com/article/2025062965976' }),
+  // 동원개발 공식 분양예정 목록(2026 예정) · 한국경제 2025-10-28 · 경상일보 2025-11-03 — 998세대
+  card({ rawName: '울산 더파크 비스타동원', region: '울산', sigungu: '북구',
+    addrRaw: '울산광역시 북구 중산동 105-1', totalUnits: 998, builderRaw: '동원개발',
+    noteExtra: '부산 사상 「더파크 비스타동원」·울산 남구 「문수로 비스타 더파크」와 별개',
+    sourceUrl: 'https://www.hankyung.com/article/2025102877531' }),
+  // 딜사이트 2025-02-03 — 시행 송강산업개발·시공 SGC이앤씨, 179+OT52. ⚠️ 브릿지론 단계 5년 정체(착공 전)
+  card({ rawName: '울산 달동 더리브', region: '울산', sigungu: '남구',
+    addrRaw: '울산광역시 남구 달동 1247-3번지 일원', totalUnits: 179, builderRaw: 'SGC이앤씨',
+    noteExtra: '브릿지론 단계 장기 정체 — 착공·분양 일정 원문 없음',
+    sourceUrl: 'https://dealsite.co.kr/articles/135533' }),
+  // 뉴시스 2025-05-26 — 32층 8동, 635→631 세대 변경. 시공사·브랜드 원문 없음
+  card({ rawName: '울산 청량읍 덕하리 공동주택', region: '울산', sigungu: '울주군',
+    addrRaw: '울산광역시 울주군 청량읍 덕하리 465-3번지 일원', totalUnits: 631,
+    sourceUrl: 'https://www.newsis.com/view/NISX20250526_0003190584' }),
+  // 창원시 재개발·재건축 현황(2025-11-30) — KCC건설 487(분양 472·임대 15), 관리처분(변경) 2025-04-11
+  redev({ rawName: '양덕3구역 재개발', region: '경남', sigungu: '창원시',
+    addrRaw: '경상남도 창원시 마산회원구 양덕동 72-9번지 일원', totalUnits: 487, builderRaw: 'KCC건설',
+    lifecycleStage: 'mgmt_approved', sourceUrl: CHANGWON_REDEV }),
+  // 창원시 현황(2025-11-30) · 한국주택경제 2024-03-14 — 이수건설·SGC이테크 컨소시엄 1,415, 관리처분 2025-01
+  redev({ rawName: '경화구역 재개발', region: '경남', sigungu: '창원시',
+    addrRaw: '경상남도 창원시 진해구 경화동 539번지 일원', totalUnits: 1415, builderRaw: '이수건설, SGC이테크건설',
+    lifecycleStage: 'mgmt_approved',
+    noteExtra: '지번 이설 — 창원시 PDF 539 · 창원시 웹표(2026-02) 533 · 가칭 「브라운스톤 더 리브」 확정 전',
+    sourceUrl: CHANGWON_REDEV }),
+  // 경남신문 2026-08-06·07-13 — 1·2블록 2,040세대, 태영건설 분양, 연말 공고 전망
+  card({ rawName: '창원 자족형 복합행정타운 공동주택', region: '경남', sigungu: '창원시',
+    addrRaw: '경상남도 창원시 마산회원구 회성동 일원', totalUnits: 2040, builderRaw: '태영건설',
+    noteExtra: '민간분양 보도(태영건설) — 이름 표지가 없어 게이트가 미상으로 봄 · 교차 경남신문 2026-07-13',
+    sourceUrl: 'http://www.knnews.co.kr/news/articleView.php?idxno=1548156' }),
+  // 김해시 주택건설사업계획 승인 현황(2026-01-05) — 사업주체 중봉건설 959, 2022-09 승인·미착공
+  card({ rawName: '김해 내덕지구 1B 2-2L 공동주택', region: '경남', sigungu: '김해시',
+    addrRaw: '경상남도 김해시 내덕동 도시개발사업지구 1B 2-2L', totalUnits: 959,
+    noteExtra: '2022-09 사업승인·미착공(2026-01 기준) · 「중흥S-클래스 2차」 명칭 언론 미확인',
+    sourceUrl: GIMHAE_PERMITS }),
+  // 김해시 승인 현황(2026-01-05) — 878, 2022-05 승인·미착공
+  card({ rawName: '김해 주촌면 선지리 공동주택', region: '경남', sigungu: '김해시',
+    addrRaw: '경상남도 김해시 주촌면 선지리 452-1', totalUnits: 878,
+    noteExtra: '2022-05 사업승인·미착공(2026-01 기준) · 「주촌 힐스테이트」 명칭·시공사 원문 미확인',
+    sourceUrl: GIMHAE_PERMITS }),
+  // 김해시 승인 현황(2026-01-05) — 삼정건설 310, 2020-08 승인·미착공
+  card({ rawName: '김해 부원동 지역주택조합', region: '경남', sigungu: '김해시',
+    addrRaw: '경상남도 김해시 부원동 819-2', totalUnits: 310, builderRaw: '삼정건설',
+    noteExtra: '2020-08 사업승인·미착공(2026-01 기준) · 「부원역 삼정그린코아 더베스트」 명칭 언론 미확인',
+    sourceUrl: GIMHAE_PERMITS }),
+];
+
+const BP70_20260914_HELD: DocCard[] = [
+  card({ rawName: '울산 우정동 주상복합', region: '울산', sigungu: '중구', sourceUrl: '',
+    holdReason: '후보 3건 모호(더폴 우정 92-1 기분양 · 태화강 비스타동원 1~3차 · SKY.V 울산우정) — 지번·세대수 특정 후 해제' }),
+  card({ rawName: '김해 신문동 600 주상복합', region: '경남', sigungu: '김해시', sourceUrl: GIMHAE_PERMITS,
+    holdReason: '승인 목록에 세대수·시공사 미기재 · 「하늘채」 명칭 애그리게이터뿐 — 교차 근거 대기' }),
+  card({ rawName: '사천 송지 엘크루', region: '경남', sigungu: '사천시', sourceUrl: 'https://www.etoday.co.kr/news/view/1995070',
+    holdReason: '용현면 송지리 지역주택조합 750(2021-02 승인) — 이후 착공·분양·준공 여부 미확인. 센텀포레와 별건' }),
+  card({ rawName: '용원하버시티 에일린의 뜰', region: '경남', sigungu: '창원시', sourceUrl: '',
+    holdReason: '아이에스동서 공식 목록에 없음 · 애그리게이터뿐' }),
+  card({ rawName: '통영 한림풀에버', region: '경남', sigungu: '통영시', sourceUrl: '',
+    holdReason: '용남면 619 — 나무위키뿐' }),
+  card({ rawName: '거제 장승포 서희스타힐스', region: '경남', sigungu: '거제시', sourceUrl: 'http://www.speconomy.com/news/articleView.html?idxno=53370',
+    holdReason: '2015 조합원 모집 기사뿐 · 사업승인 미확인' }),
+  card({ rawName: '창원 무동지구 2차 동원로얄듀크', region: '경남', sigungu: '창원시', sourceUrl: '',
+    holdReason: '1차(525, 2023-12 준공)만 보도 · 「2차」는 애그리게이터뿐' }),
+  card({ rawName: '밀양 내이동 2차', region: '경남', sigungu: '밀양시', sourceUrl: 'https://www.tfmedia.co.kr/news/article.html?no=120944',
+    holdReason: '쌍용건설 2022 공급계획 단건 — 이후 근거 없음' }),
+  card({ rawName: '울산 다운2지구 C-1BL 공동주택', region: '울산', sigungu: '중구', sourceUrl: 'https://www.econovill.com/news/articleView.html?idxno=702877',
+    holdReason: '「연내 분양 예정」(2025-07) 뒤 공고 미확인 · 시공사 포털뿐 · PV_20260829 카드가 유사 현장 병합 검토로 대기 중' }),
+];
+
+export const BP70_20260914_CARDS: DocCard[] = [...BP70_20260914_SEEDABLE, ...BP70_20260914_HELD];
+
 /**
  * 문서 소스 레지스트리 — 라우트가 key 로 알아본다.
  * ⛔ 「문이 하나여야 규칙이 하나다」. 문서 배치가 늘어도 뒤 문(matchSite·seedGate·seedSite·
@@ -252,6 +368,7 @@ export const NW_20260914_CARDS: DocCard[] = [...NW_20260914_SEEDABLE, ...NW_2026
 export const DOC_SOURCES: Array<{ source: PresaleSource; cards: DocCard[] }> = [
   { source: BACKFILL_SOURCE, cards: BACKFILL_CARDS },
   { source: NW_20260914_SOURCE, cards: NW_20260914_CARDS },
+  { source: BP70_20260914_SOURCE, cards: BP70_20260914_CARDS },
 ];
 
 export const docSourceFor = (key: string) =>

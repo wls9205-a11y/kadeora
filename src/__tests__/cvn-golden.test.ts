@@ -265,3 +265,71 @@ describe('CV-N 충돌 경로 — 주입이 아니라 병합 큐', () => {
     expect(out.aliasAdded).toBe('아크로 광안');
   });
 });
+
+/* ── BP70 — 문서 카드(손 시드)도 «같은 검증층» 을 지난다 ─────────────────────────
+ * ⛔ 손으로 조사한 이름이라고 티어·유일성 게이트를 건너뛰지 않는다(판정회신 BP70-1 E-②).
+ *    카드는 toCandidateInput 을 거쳐 뉴스 경로와 똑같은 NameCandidateInput 이 되고,
+ *    그 뒤는 applyCandidate 한 문이다.
+ */
+import { toCandidateInput, type CvnDocSource } from '@/lib/cvn/doc-cards';
+
+const docSrc = (cards: CvnDocSource['cards']): CvnDocSource => ({ key: 'TEST', label: 'test', cards });
+const laroche = GOLDEN_CASES[0];
+
+describe('CV-N 문서 카드 — 자동 소스와 같은 게이트', () => {
+  it('서로 다른 출처 2건이면 T-B 로 적용된다', () => {
+    const src = docSrc([{
+      proposedName: '아크로 라로체', eventType: 'name_confirm', projectName: laroche.projectName,
+      region: '부산', sigungu: laroche.sigungu,
+      sources: ['https://example.invalid/a', 'https://example.invalid/b'],
+    }]);
+    const input = toCandidateInput(src, src.cards[0]);
+    expect(input.source).toBe('doc:TEST');
+    expect(input.crossRefs).toBe(1);
+    const d = decideTier(input, matchSite(input, GOLDEN_SITES));
+    expect(d.tier).toBe('T-B');
+    expect(d.apply).toBe(true);
+  });
+
+  it('같은 출처를 두 번 적어도 교차로 세지 않는다 — pending 으로 남는다', () => {
+    const src = docSrc([{
+      proposedName: '아크로 라로체', eventType: 'name_confirm', projectName: laroche.projectName,
+      region: '부산', sigungu: laroche.sigungu,
+      sources: ['https://example.invalid/a', 'https://example.invalid/a'],
+    }]);
+    const input = toCandidateInput(src, src.cards[0]);
+    expect(input.crossRefs).toBe(0);
+    const d = decideTier(input, matchSite(input, GOLDEN_SITES));
+    expect(d.apply).toBe(false);
+    expect(d.resolution).toBe('pending');
+  });
+
+  it('bid(제안명)는 손 시드여도 T-C held — apt_sites 를 건드리지 않는다', async () => {
+    const src = docSrc([{
+      proposedName: '아크로 라로체', eventType: 'bid', projectName: laroche.projectName,
+      region: '부산', sigungu: laroche.sigungu,
+      sources: ['https://example.invalid/a', 'https://example.invalid/b'],
+    }]);
+    const { admin, calls } = fakeAdmin();
+    const out = await applyCandidate(toCandidateInput(src, src.cards[0]), GOLDEN_SITES, {
+      admin, runId: 'test-doc-bid', autoApply: true,
+    });
+    expect(out.tier).toBe('T-C');
+    expect(out.wrote).toBe(false);
+    expect(calls.filter((c) => c.table === 'apt_sites')).toHaveLength(0);
+  });
+
+  it('유일성 충돌이면 손 시드도 주입이 아니라 병합 큐', async () => {
+    const src = docSrc([{
+      proposedName: CONFLICT_CASE.proposedName, eventType: 'win', projectName: CONFLICT_CASE.projectName,
+      region: '부산', sigungu: CONFLICT_CASE.sigungu,
+      sources: ['https://example.invalid/a', 'https://example.invalid/b'],
+    }]);
+    const { admin, calls } = fakeAdmin();
+    const out = await applyCandidate(toCandidateInput(src, src.cards[0]), CONFLICT_SITES, {
+      admin, runId: 'test-doc-conflict', autoApply: true,
+    });
+    expect(out.resolution).toBe('merge_queue');
+    expect(calls.filter((c) => c.table === 'apt_sites')).toHaveLength(0);
+  });
+});
