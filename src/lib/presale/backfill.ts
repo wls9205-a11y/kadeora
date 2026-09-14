@@ -23,8 +23,18 @@
 import type { PresaleSource } from '@/lib/builder-sites/presale-registry';
 import type { ExtractedCard } from '@/lib/presale/extract';
 
-/** 문서 카드. holdReason 이 있으면 시드하지 않고 큐에 남긴다. */
-export type DocCard = ExtractedCard & { holdReason?: string };
+/**
+ * 문서 카드. holdReason 이 있으면 시드하지 않고 큐에 남긴다.
+ * siteType·lifecycleStage 는 NW-3(2026-09-14) — 정비구역을 «분양예정» 으로 앉히지 않으려고 둔다.
+ * ⚠️ 값은 원문 근거의 단계만. 모르면 비워 두지 말고 가장 낮은 확인 단계를 쓴다.
+ */
+export type DocStage = 'union_established' | 'constructor_selected' | 'plan_approved' | 'mgmt_approved'
+  | 'construction' | 'pre_announcement';
+export type DocCard = ExtractedCard & {
+  holdReason?: string;
+  siteType?: 'subscription' | 'redevelopment';
+  lifecycleStage?: DocStage;
+};
 
 /**
  * ⚠️ 이 소스는 fetch 하지 않는다. listUrl 은 «근거 문서» 를 가리키는 표식이다.
@@ -143,3 +153,102 @@ const HELD: DocCard[] = [
 
 /** 라우트가 쓰는 카드 전량. 시드 후보 먼저, 보류 뒤. */
 export const BACKFILL_CARDS: DocCard[] = [...SEEDABLE, ...HELD];
+
+/* ══ NW-3 — 나무위키 경상권 대조 결측 11곳 (설계서_NW_20260913 v2.0) ═══════════════
+ * 원문 근거는 언론·지자체만(나무위키·분양대행 제외). 조사일 2026-09-14.
+ *
+ * ⚠️ rawName 은 «구역명» 이다. 「더샵 엘리체」「힐스테이트 하이스트」 같은 이름은 대부분
+ *    시공사 선정 때의 «제안명» 이라 확정명이 아니다(CV-N T-C 규약). 브랜드 별칭은
+ *    cvn-name-watch 백필 모드가 뉴스로 붙인다 — 그 크론의 표적이 「브랜드 별칭 없는 정비」다.
+ * ⚠️ 단계는 원문으로 확인된 가장 높은 단계. 정비구역을 pre_announcement 로 앉히지 않는다.
+ * ⚠️ 설계서의 「중구 B-04 롯데×GS」는 구식이다 — 2022-06 해지, 2023-04 삼성물산·현대건설 선정.
+ */
+export const NW_20260914_SOURCE: PresaleSource = {
+  key: 'doc:NW_20260914',
+  builder: '',
+  brand: '',
+  label: 'NW-3 — 나무위키 경상권 대조 결측 정비구역 (설계서_NW_20260913)',
+  listUrl: 'https://github.com/wls9205-a11y/kadeora/blob/main/STATUS.md',
+  kind: 'presale',
+  robotsCheckedAt: '2026-09-14',
+};
+
+const redev = (c: Omit<DocCard, 'statusRaw' | 'kind' | 'siteType'>): DocCard =>
+  card({ siteType: 'redevelopment', ...c });
+
+const NW_20260914_SEEDABLE: DocCard[] = [
+  // 블로터 2025-08-20 — 공사비 협상·본PF 리파이낸싱. 헤럴드경제 2026-01 공급 목록에 「11월 분양 예정」
+  redev({ rawName: '대구 노원2동 주택재개발', region: '대구', sigungu: '북구',
+    addrRaw: '대구광역시 북구 노원동2가 319번지 일원', totalUnits: 1558, builderRaw: '포스코이앤씨',
+    expectedPeriodRaw: '2026년 11월', lifecycleStage: 'pre_announcement',
+    sourceUrl: 'https://www.bloter.net/news/articleView.html?idxno=642399' }),
+  // 한국주택경제 2026-04-28 — 세입자 조사·정비기반시설 설계 용역 발주(인가 단계 미확인)
+  redev({ rawName: '대구 반고개 재개발', region: '대구', sigungu: '달서구',
+    addrRaw: '대구광역시 달서구 두류동 840번지 일대', totalUnits: 1254, builderRaw: '포스코이앤씨, 롯데건설',
+    lifecycleStage: 'constructor_selected',
+    sourceUrl: 'https://www.arunews.com/news/articleView.html?idxno=62132' }),
+  // 한국주택경제 2024-12-04 — 사업시행인가 2024-11-20(임대 45 포함 818)
+  redev({ rawName: '대구 서문지구 재개발', region: '대구', sigungu: '중구',
+    addrRaw: '대구광역시 중구 대신동 1021번지 일원', totalUnits: 818, builderRaw: 'GS건설',
+    lifecycleStage: 'plan_approved',
+    sourceUrl: 'https://www.arunews.com/news/articleView.html?idxno=46628' }),
+  // 한국경제 2022-03-02 수주(1,901) · 하우징헤럴드 2026-01-13 석면조사업체 선정
+  redev({ rawName: '대구 수성1지구 재개발', region: '대구', sigungu: '수성구',
+    addrRaw: '대구광역시 수성구 신천동로 306 일대', totalUnits: 1901, builderRaw: 'DL이앤씨',
+    lifecycleStage: 'constructor_selected',
+    sourceUrl: 'https://www.housingherald.co.kr/news/articleView.html?idxno=60547' }),
+  // 영남일보 2025-05-06 — 건축심의 조건부 통과(1,112)
+  redev({ rawName: '대구 신암4 재정비촉진구역', region: '대구', sigungu: '동구',
+    addrRaw: '대구광역시 동구 신암동 628-10번지 일대', totalUnits: 1112, builderRaw: 'GS건설',
+    lifecycleStage: 'constructor_selected',
+    sourceUrl: 'https://www.yeongnam.com/web/view.php?key=20250506025084905' }),
+  // 대한경제 2019-12-09 — 현대건설 선정(1,226). ⚠️ 이후 단계 원문 미확인 — 근거가 오래됐다
+  redev({ rawName: '대구 신암9구역 재개발', region: '대구', sigungu: '동구',
+    addrRaw: '대구광역시 동구 신암동 642-1번지 일원', totalUnits: 1226, builderRaw: '현대건설',
+    lifecycleStage: 'constructor_selected',
+    sourceUrl: 'https://www.dnews.co.kr/uhtml/view.jsp?idxno=201912072051030490972' }),
+  // 대구 남구청 정비사업 현황(1,065·13개동 — 현대건설 2022 발표 1,107보다 최신 계획) · 통합심의 가결 2024-12
+  redev({ rawName: '대구 봉덕1동 우리주택 재개발', region: '대구', sigungu: '남구',
+    addrRaw: '대구광역시 남구 봉덕동 976-2', totalUnits: 1065, builderRaw: '현대건설',
+    lifecycleStage: 'constructor_selected',
+    sourceUrl: 'https://www.hdec.kr/kr/newsroom/news_view.aspx?NewsSeq=484&NewsType=LATEST&NewsListType=news_clist' }),
+  // 대한경제 2021-05-24 수주(737·49층) · 한국주택경제 2026-08-27 사업시행 변경인가 준비·2027 관리처분 목표
+  redev({ rawName: '구미 원평구역 도시정비형 재개발', region: '경북', sigungu: '구미시',
+    addrRaw: '경상북도 구미시 원평동 24번지 일대', totalUnits: 737, builderRaw: '포스코이앤씨',
+    lifecycleStage: 'plan_approved',
+    sourceUrl: 'https://www.arunews.com/news/articleView.html?idxno=66424' }),
+  // 한국주택경제 2024-04-02 통합심의 조건부 통과(1,304) · 울산MBC 2026-07-06 사업시행인가 준비(HDC 유지)
+  redev({ rawName: '울산 남구 B-07 재개발', region: '울산', sigungu: '남구',
+    addrRaw: '울산광역시 남구 신정동 872번지 일원', totalUnits: 1304, builderRaw: 'HDC현대산업개발',
+    lifecycleStage: 'constructor_selected',
+    sourceUrl: 'https://www.usmbc.co.kr/NewsArticle/849470' }),
+  // 뉴시스 2026-07-21 — 관리처분인가(2024)·이주 약 96%·수용재결 지연(4,080). 시공 삼성물산·현대건설(2023-04)
+  redev({ rawName: '울산 중구 B-04 재개발', region: '울산', sigungu: '중구',
+    addrRaw: '울산광역시 중구 북정동·교동 일대', totalUnits: 4080, builderRaw: '삼성물산, 현대건설',
+    lifecycleStage: 'mgmt_approved',
+    sourceUrl: 'https://www.newsis.com/view/NISX20260721_0003717393' }),
+];
+
+const NW_20260914_HELD: DocCard[] = [
+  // 월요신문 2026-07-22 변경계약 2,023세대 vs 한국주택경제 2026-08-27 「29층 770세대」 — 세대수 상충
+  redev({ rawName: '구미 원평2동 주택재개발', region: '경북', sigungu: '구미시',
+    addrRaw: '경상북도 구미시 원평동 7-43번지 일대', totalUnits: 2023, builderRaw: 'GS건설',
+    lifecycleStage: 'mgmt_approved',
+    sourceUrl: 'https://www.wolyo.co.kr/news/articleView.html?idxno=315366',
+    holdReason: '세대수 상충(2,023 vs 770) — 정본 확인 후 해제' }),
+];
+
+export const NW_20260914_CARDS: DocCard[] = [...NW_20260914_SEEDABLE, ...NW_20260914_HELD];
+
+/**
+ * 문서 소스 레지스트리 — 라우트가 key 로 알아본다.
+ * ⛔ 「문이 하나여야 규칙이 하나다」. 문서 배치가 늘어도 뒤 문(matchSite·seedGate·seedSite·
+ *    upsertCandidate)은 그대로 하나다. 문서 소스는 `?source=` 로 부를 때만 돈다.
+ */
+export const DOC_SOURCES: Array<{ source: PresaleSource; cards: DocCard[] }> = [
+  { source: BACKFILL_SOURCE, cards: BACKFILL_CARDS },
+  { source: NW_20260914_SOURCE, cards: NW_20260914_CARDS },
+];
+
+export const docSourceFor = (key: string) =>
+  DOC_SOURCES.find((d) => d.source.key === key) ?? null;

@@ -28,7 +28,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { fetchAll } from '@/lib/db/fetchBatched';
 import { PRESALE_SOURCES, type PresaleSource } from '@/lib/builder-sites/presale-registry';
-import { BACKFILL_CARDS, BACKFILL_SOURCE, type DocCard } from '@/lib/presale/backfill';
+import { docSourceFor, type DocCard } from '@/lib/presale/backfill';
 import { extractCards, fetchListHtml, type ExtractedCard } from '@/lib/presale/extract';
 import {
   adBlockedFor, isProvisional, judgeSupplyType, normName, provisionalSlug,
@@ -132,8 +132,11 @@ async function handler(req: NextRequest) {
 
   // ⚠️ 문서 백필 소스는 «부를 때만» 돈다. 매일 도는 목록에 끼우면 같은 카드를 날마다
   //    다시 판정하게 되고, 로그에서 진짜 신규가 묻힌다. (`?source=doc:PV_20260829`)
-  const sources = only === BACKFILL_SOURCE.key
-    ? [BACKFILL_SOURCE]
+  // ⚠️ 문서 소스는 레지스트리(DOC_SOURCES)가 key 로 알아본다. 크롤 목록(PRESALE_SOURCES)에는 없어서
+  //    인자 없는 일 크론에는 끼지 않는다.
+  const doc = only ? docSourceFor(only) : null;
+  const sources = doc
+    ? [doc.source]
     : PRESALE_SOURCES.filter((s) => !only || s.key === only);
   const decisions: Decision[] = [];
   const health: Array<Record<string, unknown>> = [];
@@ -151,13 +154,14 @@ async function handler(req: NextRequest) {
     // 문서 백필 — fetch·AI 추출을 타지 않는다. 카드가 이미 «검토된 목록» 이기 때문이다.
     // ⛔ 그래도 뒤 문(matchSite·seedGate·seedSite·upsertCandidate)은 «똑같이» 지난다.
     //    손 INSERT 를 두지 않는 이유가 그것이다 — 문이 하나여야 규칙이 하나다.
-    if (src.key === BACKFILL_SOURCE.key) {
+    const docSrc = docSourceFor(src.key);
+    if (docSrc) {
       // 문서 백필 — fetch·AI 추출을 타지 않는다. 카드가 이미 «검토된 목록» 이라서다.
       // ⛔ 뒤 문(matchSite·seedGate·seedSite·upsertCandidate)은 «똑같이» 지난다.
       //    손 INSERT 를 두지 않는 이유가 그것이다 — 문이 하나여야 규칙이 하나다.
       // ⚠️ health 에 적지 않는다. 그 표는 «어댑터가 썩었는가» 를 보는 곳이고,
       //    문서 소스에는 어댑터가 없다. 0카드가 사고인 소스와 섞으면 표가 거짓말을 한다.
-      cards = BACKFILL_CARDS;
+      cards = docSrc.cards;
       outcome = 'doc';
     } else {
       try {
@@ -225,7 +229,7 @@ async function handler(req: NextRequest) {
           } else if (dry) {
             resolution = 'seeded';
             seededSlug = provisionalSlug(card.rawName);
-            note = '(dry) 시드 예정';
+            note = `(dry) 시드 예정 — ${(card as DocCard).siteType ?? 'subscription'}·${(card as DocCard).lifecycleStage ?? 'pre_announcement'}`;
             seeded++;
           } else {
             const made = await seedSite(admin, src, card, supplyType);
@@ -390,19 +394,22 @@ async function seedSite(
   const { data: dup } = await admin.from('apt_sites').select('id').eq('slug', slug).maybeSingle();
   if (dup) return { ok: false, error: `slug 중복: ${slug}` };
 
+  // NW-3 — 문서 카드는 단계·유형을 «원문 근거대로» 지정할 수 있다. 크롤 카드는 기존 그대로.
+  // ⚠️ 시공사 선정·사업시행인가 단계 정비구역을 pre_announcement(분양예정)로 앉히면 단계 오도다.
+  const doc = card as DocCard;
   const { error } = await admin.from('apt_sites').insert({
     slug,
     name: cleanName,
     // 「(가칭)」은 «화면 이름» 에만 남긴다. slug 에서는 뗀다.
     display_name: isProvisional(card.rawName) ? card.rawName : null,
-    site_type: 'subscription',
+    site_type: doc.siteType ?? 'subscription',
     region: card.region,
     sigungu: card.sigungu,
     dong: dongOf(card.addrRaw),
     address: card.addrRaw,
     builder: card.builderRaw,
     total_units: card.totalUnits,
-    lifecycle_stage: 'pre_announcement',
+    lifecycle_stage: doc.lifecycleStage ?? 'pre_announcement',
     // D2 — 소스 유래 자동 시드다. 사람이 옮겨 적은 것과 구분되는 축이 이 값이다.
     stage_source: `crawl:${src.key}`,
     // 독립 원출처 «1곳»(시공사 공식)이다. D6 상 estimated 이고 verified 가 아니다.
