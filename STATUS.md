@@ -1,3 +1,35 @@
+## 2026-09-14 — NW-1 v2: 정비 원천 단계 → lifecycle_stage 동기화 (설계서_NW_20260913 v1.5)
+
+### 원인
+`sync-apt-sites` 가 `redevelopment_projects.stage` 를 `source_ids.redev_stage` 에만 복사하고
+`lifecycle_stage` 로 옮기지 않았다. 원천 「준공」 구역이 site_planning 으로 노출(부산 24).
+정본 매퍼 `map_redev_stage()` 는 이미 있었다. 「stage_source NULL = 소스 미기록」은 오판이었다.
+
+### 조치
+- DB 함수 `sync_redev_lifecycle(regions, dry, backfill)` — service_role 전용. 대상 = stage_source NULL
+  또는 `redev:%` · stage_locked 아님. 매퍼 NULL(해제·조합해산)은 쓰지 않고 review 로 반환.
+- `get_weekly_stage_movers` 에 `backfill:%` 제외 추가(`get_apt_recent_moves` H7-3b 와 같은 규칙).
+- `sync-apt-sites` Step 8 — 매일 `p_backfill=false`, **부산만**(`REDEV_LIFECYCLE_REGIONS`).
+- 부산 backfill 교정(채팅 SQL 집행, CC 재조회 확인): written 27 = post_move_in 25 · union_established 1 ·
+  site_planning 1 · 이벤트 27건 전부 `backfill:` · 재 dry apply 0.
+
+### 기록자 대장 — `apt_sites.lifecycle_stage` (Rule #115)
+| 기록자 | 대상 행 | stage_source |
+|---|---|---|
+| `refresh_subscription_stages` | subscription · NULL/derived_subscription | derived_subscription |
+| **`sync_redev_lifecycle` (신규)** | redev_id 보유 · NULL/`redev:%` | `redev:<source>` |
+| dart redev-pipeline | DART 매칭 구역(잠금 제외) | dart |
+| admin apt-stage | 사람 | admin / admin:machine |
+| permits-promote · builder-presale-crawl | INSERT 시점만 | permit:* / crawl:* |
+
+### ⚠️ 함정
+- review 를 `apt_stage_review_queue` 에 넣지 말 것 — 승인 버튼이 `applyConstructorSelected` 라
+  constructor_selected·confirmed·dart 로 덮인다. review = `cron_logs.metadata.redevLifecycle.review` + confidence_note.
+- 경기 220 · 서울 45 은 lifecycle NULL 충전 — 지역 추가 전 dry 중단점 1회. 첫 교정은 backfill=true 로 SQL 선행 후 배열 확장.
+
+### NW-B
+병합 배치 CSV `docs/nw/NW-B_merge_batch_2026-09-14.csv`(24행) — 채팅 판정 완료, 집행 전제 = `merge_succession()` 적용.
+
 ## 2026-09-13 — HC_CLOSE: 카카오 로컬 «영구 skip» 판정 반영 · 회원수 하한 표기 · 보류 둘 확정
 
 ### ⛔ 판정 — 카카오 로컬 API 콘솔 복구 «영구 skip» (Node · 2026-09-13)

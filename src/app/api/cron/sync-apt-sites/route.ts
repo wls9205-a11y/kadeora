@@ -505,6 +505,35 @@ async function run() {
     }
   } catch (e: unknown) { errors.push(`relink: ${errMsg(e)}`); }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Step 8: 정비 원천 단계 → lifecycle_stage (NW-1 v2, 2026-09-14)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // ⚠️ 위 Step 2 는 원천 단계를 source_ids.redev_stage 에만 복사한다. lifecycle_stage 로
+  //    옮기는 곳이 없어서 원천 「준공」 구역 24곳이 site_planning 으로 노출됐다(부산 실측).
+  //    판정·쓰기는 DB 함수 sync_redev_lifecycle 가 한다 — 매퍼는 기존 map_redev_stage() 재사용.
+  // ⛔ stage_source NULL 이거나 이 함수가 쓴('redev:%') 행만. 사람·DART·permit 이 쓴 값은 안 건드린다.
+  // ⛔ 해제·조합해산은 쓰지 않고 review 로만 돌려준다 → metadata.redevLifecycle.review.
+  // ⚠️ 매일 회전은 backfill=false 다(원천이 실제로 움직인 것 = 「움직인 현장」에 나가도 된다).
+  //    밀린 값을 한꺼번에 고칠 때는 SQL 로 backfill=true 를 따로 부른다.
+  // ⚠️ 지역은 판정을 통과한 곳만 연다. 경기·서울은 NULL 충전 성격이라 별도 중단점 후 추가.
+  const REDEV_LIFECYCLE_REGIONS = ['부산'];
+  let redevLifecycle: Record<string, unknown> | null = null;
+  try {
+    const { data, error } = await (sb as any).rpc('sync_redev_lifecycle', {
+      p_regions: REDEV_LIFECYCLE_REGIONS, p_dry: false, p_backfill: false,
+    });
+    if (error) errors.push(`redev-lifecycle: ${String(error.message).slice(0, 200)}`);
+    else if (data) {
+      const d = data as { apply?: unknown[]; review?: unknown[] } & Record<string, unknown>;
+      redevLifecycle = {
+        regions: d.regions, scanned: d.scanned, apply_count: d.apply_count,
+        written: d.written, review_count: d.review_count,
+        apply_samples: (d.apply ?? []).slice(0, 20),
+        review: (d.review ?? []).slice(0, 50),
+      };
+    }
+  } catch (e: unknown) { errors.push(`redev-lifecycle: ${errMsg(e)}`); }
+
   const elapsed = Date.now() - start;
 
   return {
@@ -518,6 +547,7 @@ async function run() {
     scored,
     tradeInserted,
     unsoldInserted,
+    redevLifecycle,
     elapsed: `${elapsed}ms`,
     errors: errors.length ? errors : undefined,
   };
