@@ -190,12 +190,17 @@ async function fetchUnifiedData(slug: string) {
   let siteEvents: Awaited<ReturnType<typeof fetchSiteEvents>> = [];
   if (site?.id) {
     const [atR, evR] = await Promise.all([
-      (sb as any).from('apt_sites').select('analysis_text').eq('id', site.id).maybeSingle(),
+      (sb as any).from('apt_sites').select('analysis_text, analysis_generated_at').eq('id', site.id).maybeSingle(),
       fetchSiteEvents(site.id),
     ]);
-    // Q-2 F2 — 합성 분양가 현장의 AI 분석은 그 값으로 쓰였다(「분양가 2.1억원은 적정 범위」). 렌더만 막는다(행 보존).
-    //   ⚠️ 「생성 180일 초과」 축은 analysis_text 에 생성 시각 열이 없어 «측정 불가» — 넣지 않았다.
-    analysisText = (site as any)?.price_source === 'synthetic' ? null : (atR?.data?.analysis_text || null);
+    // Q-2 F2 — 렌더만 막는다(행 보존). 두 축:
+    //   ① 합성 분양가 현장 — 분석이 그 값으로 쓰였다(「분양가 2.1억원은 적정 범위」, 범천1-1 실측)
+    //   ② 생성 180일 초과 — 「현재 단계」「최근 시세」를 말하는 글이 반년 넘게 그대로면 사실과 어긋난다.
+    //      analysis_generated_at 보유 6,294/6,295 · 최고령 161일(2026-09-14) → 10월부터 자동 발동한다.
+    //      ⚠️ 생성 시각이 «없는» 행은 막지 않는다 — 모르는 것을 낡았다고 단정하지 않는다.
+    const genAt = Date.parse(atR?.data?.analysis_generated_at ?? '');
+    const stale = Number.isFinite(genAt) && Date.now() - genAt > 180 * 86_400_000;
+    analysisText = (site as any)?.price_source === 'synthetic' || stale ? null : (atR?.data?.analysis_text || null);
     siteEvents = evR;
   }
 
