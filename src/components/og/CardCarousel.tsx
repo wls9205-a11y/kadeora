@@ -71,7 +71,8 @@ export default function CardCarousel({ slug, name, cards }: CardCarouselProps) {
       </div>
       <style>{`
         .kd-card-carousel::-webkit-scrollbar { display: none; }
-        @media (min-width: 640px) {
+        /* ⚠️ R-4: 640 은 표준 BP(480·767·768·1024) 밖 잔여값 → 768 로 수렴. */
+        @media (min-width: 768px) {
           .kd-card-carousel > div { flex: 0 0 calc((100% - 24px) / 3) !important; max-width: none !important; }
         }
       `}</style>

@@ -112,6 +112,8 @@ export default async function AptCompareTable({ slug, currentSite }: Props) {
         <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: 0.5 }}>인근 단지 비교</span>
         <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>총 {rows.length}곳</span>
       </div>
+      {/* ⚠️ R-2: <768 은 통째로 숨지만 768 근처에서 긴 단지명·분양가 범위가 섹션 overflow:hidden 에 잘린다. */}
+      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-xs)' }}>
         <thead>
           <tr style={{ background: 'var(--bg-hover)' }}>
@@ -145,6 +147,7 @@ export default async function AptCompareTable({ slug, currentSite }: Props) {
           })}
         </tbody>
       </table>
+      </div>
       <style>{`
         @media (max-width: 767.98px) {
           .apt-compare-table { display: none !important; }

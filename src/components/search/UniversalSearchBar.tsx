@@ -477,6 +477,8 @@ export default function UniversalSearchBar({
                 lineHeight: 1.3,
                 color: "var(--text-tertiary)",
                 whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
               {suggestionLabel}

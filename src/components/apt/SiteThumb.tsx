@@ -190,7 +190,7 @@ export default function SiteThumb({
         </span>
       ) : (
         stage && size >= 56 && (
-          <span style={{ fontSize: 8, opacity: 0.85, lineHeight: 1, whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 8, opacity: 0.85, lineHeight: 1, whiteSpace: 'nowrap', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {stage}
           </span>
         )

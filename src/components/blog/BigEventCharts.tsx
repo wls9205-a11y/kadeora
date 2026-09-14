@@ -161,7 +161,8 @@ export default async function BigEventCharts({ eventId }: Props) {
     const chart3 = (
       <section style={CARD} aria-label={`${ev.name} Stage 타임라인`}>
         <h3 style={TITLE}>🏗️ {ev.name} 재건축 진행 Stage (현재 {currentStage}/7)</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+        {/* ⚠️ R-3: 1fr 은 min-content 아래로 안 줄어 390px 에서 7칸이 카드 밖으로 넘친다. minmax(0,…) 로 수축 허용. */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: 4 }}>
           {[1, 2, 3, 4, 5, 6, 7].map((s) => {
             const active = s === currentStage;
             const past = s < currentStage;

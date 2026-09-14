@@ -59,6 +59,9 @@ export default function SpecTable({
         background: 'var(--bg-surface)',
       }}
     >
+      {/* ⚠️ R-2: 바깥 div 의 overflow:hidden 은 모서리용이라, 긴 값(URL 등)이 390px 에서 «잘려» 보였다.
+          가로 스크롤 래퍼를 안에 한 겹 둔다 — 모서리 클립은 그대로. */}
+      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
         {caption ? (
           <caption
@@ -108,6 +111,7 @@ export default function SpecTable({
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

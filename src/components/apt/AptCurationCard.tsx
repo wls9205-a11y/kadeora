@@ -107,7 +107,7 @@ export default function AptCurationCard({ item, today }: { item: AptHubItem; tod
       <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
         <SubscriptionAlertButton aptName={item.house_nm ?? name} compact />
         {checked && (
-          <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
+          <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', whiteSpace: 'nowrap', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {checked} 확인
           </span>
         )}

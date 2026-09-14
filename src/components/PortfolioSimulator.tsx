@@ -122,7 +122,7 @@ export default function PortfolioSimulator({ stocks, isKR }: Props) {
           <div style={{ height: 20, borderRadius: 'var(--radius-xs)', overflow: 'hidden', display: 'flex', marginBottom: 6 }}>
             {holdings.map((h, i) => (
               <div key={h.stock.symbol} style={{ width: `${h.alloc}%`, background: SEG_COLORS[i % SEG_COLORS.length], display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'width .3s', overflow: 'hidden' }}>
-                {h.alloc > 10 && <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.9)', whiteSpace: 'nowrap' }}>{h.stock.name.slice(0, 4)}</span>}
+                {h.alloc > 10 && <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.9)', whiteSpace: 'nowrap', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{h.stock.name.slice(0, 4)}</span>}
               </div>
             ))}
           </div>

@@ -48,7 +48,7 @@ export default function RecentMovesStrip({
         >
           이번 주 움직인 현장
         </h2>
-        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
+        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', whiteSpace: 'nowrap', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {metaLine(regionLabel(region), '최근 7일')}
         </span>
       </div>

@@ -52,8 +52,8 @@ export default function StockTreemap({ stocks, isKR }: Props) {
         시총 트리맵 · 크기=시총 · 색상=등락
       </div>
 
-      {/* 트리맵 그리드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gridAutoRows: '24px', gap: 4, marginBottom: 'var(--sp-sm)' }}>
+      {/* 트리맵 그리드 — ⚠️ R-3: 1fr 은 섹터명 min-content 아래로 안 줄어 390px 에서 넘친다. minmax(0,…) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gridAutoRows: '24px', gap: 4, marginBottom: 'var(--sp-sm)' }}>
         {sectors.map((sec, i) => {
           const capRatio = sec.total / maxTotal;
           const cs = Math.max(2, Math.round(capRatio * 10));

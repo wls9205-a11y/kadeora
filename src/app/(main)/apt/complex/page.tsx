@@ -212,7 +212,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--sp-xs)' }}>
-                    <span style={{ fontSize: 13, fontWeight: isActive ? 600 : 500, color: isActive ? 'var(--brand-navy)' : 'var(--text-primary)', whiteSpace: 'nowrap' }}>{r.region}</span>
+                    <span style={{ fontSize: 13, fontWeight: isActive ? 600 : 500, color: isActive ? 'var(--brand-navy)' : 'var(--text-primary)', whiteSpace: 'nowrap', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.region}</span>
                     <span style={{ fontSize: 12, fontWeight: 700, color: isActive ? 'var(--brand-navy)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>{r.count.toLocaleString()}</span>
                   </div>
                   <div style={{ display: 'flex', width: '100%', height: 3, borderRadius: 4, overflow: 'hidden', marginTop: 2, background: 'var(--bg-hover)' }}>

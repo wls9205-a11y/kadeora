@@ -182,7 +182,7 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
       )}
 
       <style>{`@keyframes kd-fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:640px){.kd-region-kpi{grid-template-columns:repeat(3,minmax(0,1fr))!important}.kd-region-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important}}`}</style>
+@media(max-width:767.98px){.kd-region-kpi{grid-template-columns:repeat(3,minmax(0,1fr))!important}.kd-region-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important}}`}</style>
     </div>
   );
 }
