@@ -23,6 +23,8 @@ export interface CuratedSite {
   price_min: number | null;   // 만원
   price_max: number | null;   // 만원
   total_units: number | null;
+  /** Q-3 — 일반분양 세대. 있을 때만 「일반분양」이라 부른다. */
+  general_units?: number | null;
   lifecycle_stage: string | null;
 }
 
@@ -195,9 +197,14 @@ export default function SiteCard({ site }: { site: CuratedSite }) {
           </div>
         ) : null}
 
-        {site.total_units ? (
+        {/* Q-3 F7 — total_units 는 «총» 세대다. 「일반분양」은 general_units 가 있을 때만 쓴다. */}
+        {site.general_units ? (
           <div style={{ ...MONO, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 2 }}>
-            일반분양 {site.total_units.toLocaleString('ko-KR')}세대
+            일반분양 {site.general_units.toLocaleString('ko-KR')}세대
+          </div>
+        ) : site.total_units ? (
+          <div style={{ ...MONO, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 2 }}>
+            총 {site.total_units.toLocaleString('ko-KR')}세대
           </div>
         ) : null}
 

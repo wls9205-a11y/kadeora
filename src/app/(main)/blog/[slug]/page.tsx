@@ -800,7 +800,7 @@ export default async function BlogDetailPage({ params }: Props) {
   // - 기존 Promise.allSettled 뭉치에 합치지 않는다 (Rule #49 — /apt/[id] 504 의 원인이었다)
   // - slug 단건 조회라 인덱스를 탄다
   // ONESHOT §C-1: 단계별 문구를 쓰려면 lifecycle_stage 도 들고 와야 한다.
-  let leadSite: { slug: string; name: string; region: string | null; sigungu: string | null; lifecycle_stage: string | null } | null = null;
+  let leadSite: { slug: string; name: string; region: string | null; sigungu: string | null; lifecycle_stage: string | null; isRedev: boolean } | null = null;
   // v3 커밋6: '이 글이 다루는 현장' 행은 lead 대상 단계가 아니어도 낸다 —
   //   지금까지 블로그에서 현장 페이지로 가는 동선이 아예 없었다.
   let hubSite: { slug: string; name: string; region: string | null } | null = null;
@@ -813,12 +813,12 @@ export default async function BlogDetailPage({ params }: Props) {
   //   hub_apt_slug 는 폴백으로 남긴다 — 수동 지정분을 잃지 않는다.
   if (post.apt_site_id || post.hub_apt_slug) {
     try {
-      const baseQ = (sb as any).from('apt_sites').select('id, slug, name, region, sigungu, lifecycle_stage');
+      const baseQ = (sb as any).from('apt_sites').select('id, slug, name, region, sigungu, lifecycle_stage, site_type, source_ids');
       const { data: ls } = await (post.apt_site_id
         ? baseQ.eq('id', post.apt_site_id).maybeSingle()
         : baseQ.eq('slug', post.hub_apt_slug).maybeSingle());
       if (ls) { hubSite = { slug: ls.slug, name: ls.name, region: ls.region ?? null }; aboutEntity = siteEntity({ id: ls.id, slug: ls.slug, name: ls.name, region: ls.region, sigungu: ls.sigungu }); }
-      if (ls && isLeadEligible(ls.lifecycle_stage)) leadSite = { slug: ls.slug, name: ls.name, region: ls.region ?? null, sigungu: ls.sigungu ?? null, lifecycle_stage: ls.lifecycle_stage ?? null };
+      if (ls && isLeadEligible(ls.lifecycle_stage)) leadSite = { slug: ls.slug, name: ls.name, region: ls.region ?? null, sigungu: ls.sigungu ?? null, lifecycle_stage: ls.lifecycle_stage ?? null, isRedev: ls.site_type === 'redevelopment' || !!(ls.source_ids as any)?.redev_id };
     } catch {
       /* 조회 실패는 본문 렌더를 막지 않는다 — 폼만 생략한다 */
     }
@@ -1392,6 +1392,7 @@ export default async function BlogDetailPage({ params }: Props) {
           region={leadSite.region}
           sigungu={leadSite.sigungu}
           lifecycleStage={leadSite.lifecycle_stage}
+          isRedev={leadSite.isRedev}
           variant="blog"
         />
       )}

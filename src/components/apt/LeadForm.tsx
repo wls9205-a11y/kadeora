@@ -72,6 +72,8 @@ type LeadFormProps = {
    */
   siteSlug?: string;
   siteName?: string; // apt_sites.name
+  /** Q-8 — 정비사업 현장인가. false 면 공고 전 문구가 「이 현장 분양 소식」판. 모르면 비워 둔다. */
+  isRedev?: boolean;
   /**
    * 현장별 공급 평형. 페이지가 house_type_info 에서 파생해 내려준다 (현장마다 다름).
    * v6-1: 다시 쓴다. 비어 있으면 STANDARD_TYPES 로 떨어진다 —
@@ -309,6 +311,7 @@ export default function LeadForm({
   variant = 'detail',
   lifecycleStage,
   regionChoices,
+  isRedev,
 }: LeadFormProps) {
   const isHome = variant === 'home';
   // 홈인데 선택지가 안 내려왔으면 셀렉트를 필수로 걸 수 없다. 폼을 막는 대신
@@ -317,7 +320,7 @@ export default function LeadForm({
   const needsRegion = homeRegions.length > 0;
   // ONESHOT §C-1: 단계별 문구 한 벌. 세 화면(폼·액션바·레일)이 같은 말을 해야 한다.
   // H1-3: 홈은 단계가 없다 — stage 로 고르지 않고 홈 한 벌을 그대로 쓴다.
-  const copy = isHome ? leadCopyForHome() : leadCopy(lifecycleStage, siteName);
+  const copy = isHome ? leadCopyForHome() : leadCopy(lifecycleStage, siteName, { redev: isRedev });
   const mountedAt = useRef(Date.now());
 
   // §5-3: 본문 폼이 **실제로 화면에 들어온 순간**만 노출로 센다.

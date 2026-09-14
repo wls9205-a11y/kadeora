@@ -21,3 +21,18 @@ describe('Q-1 합성 분양가', () => {
       .toEqual({ min: 56600, max: 86900 });
   });
 });
+
+import { dropAmountFaqs } from '@/lib/apt/synthetic-price';
+describe('Q-2 합성가 현장 FAQ', () => {
+  const items = [
+    { q: '범천1-1구역 재개발 분양가 2.1억원에서 추가 비용이 더 있을까요?', a: '...' },
+    { q: '시공사는 어디인가요?', a: '현대건설입니다.' },
+    { q: '계약금은?', a: '분양가 21,000만원 기준 10%' },
+  ];
+  it('synthetic 이면 금액 문항만 뺀다', () => {
+    expect(dropAmountFaqs(items, true).map((i) => i.q)).toEqual(['시공사는 어디인가요?']);
+  });
+  it('synthetic 이 아니면 그대로', () => {
+    expect(dropAmountFaqs(items, false)).toHaveLength(3);
+  });
+});

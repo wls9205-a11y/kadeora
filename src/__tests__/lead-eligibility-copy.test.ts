@@ -102,3 +102,21 @@ describe('§C-1 — 단계별 문구', () => {
     }
   });
 });
+
+describe('Q-8 — 비정비 현장은 「구역」이라 말하지 않는다', () => {
+  it('redev:false 면 「이 현장 분양 소식」판 — 집계 유형은 그대로 진행상황알림', () => {
+    for (const s of ['pre_announcement', 'site_planning', 'construction']) {
+      const c = leadCopy(s, '', { redev: false });
+      expect(c.cta, s).toBe('이 현장 분양 소식 알림 받기');
+      expect(`${c.cta}${c.lede}${c.band}${c.button}`.includes('구역'), s).toBe(false);
+      expect(c.inquiryType).toBe('진행상황알림');
+    }
+  });
+  it('redev:true·미지정은 정비판 그대로', () => {
+    expect(leadCopy('mgmt_approved', '', { redev: true }).cta).toBe('이 구역 진행 상황 알림 받기');
+    expect(leadCopy('mgmt_approved').cta).toBe('이 구역 진행 상황 알림 받기');
+  });
+  it('공고 전이 아닌 단계는 갈라지지 않는다', () => {
+    expect(leadCopy('subscription_open', '', { redev: false }).cta).toBe(leadCopy('subscription_open').cta);
+  });
+});

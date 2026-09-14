@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { anthropicFetch } from '@/lib/llm/gateway';
+import { stripSyntheticPrice } from '@/lib/apt/synthetic-price';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -36,13 +37,14 @@ export async function GET(_req: NextRequest) {
 
     // 부동산 클러스터 대상: 분석 있고 클러스터 없는 현장
     const { data: aptSites } = await (admin as any).from('apt_sites')
-      .select('slug, name, region, sigungu, builder, total_units, price_min, price_max, nearby_station, school_district, move_in_date')
+      .select('slug, name, region, sigungu, builder, total_units, price_min, price_max, price_source, nearby_station, school_district, move_in_date')
       .eq('is_active', true)
       .not('analysis_text', 'is', null)
       .order('page_views', { ascending: false, nullsFirst: false })
       .limit(50);
 
-    for (const site of (aptSites || [])) {
+    // Q-1 §4-1 — 합성 분양가를 글 본문에 인용하지 않는다. 비워서 넘기면 프롬프트가 「분양가 미공개」로 쓴다
+    for (const site of ((aptSites || []) as any[]).map(stripSyntheticPrice)) {
       // 이미 클러스터 있는지 확인
       const { count } = await admin.from('blog_posts')
         .select('id', { count: 'exact', head: true })

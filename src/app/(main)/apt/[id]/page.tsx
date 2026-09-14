@@ -36,7 +36,7 @@ import { siteEntity } from '@/lib/seo/entity';
 import FieldNote from '@/components/apt/FieldNote';
 
 import { leadFormAvailable, leadKind } from '@/lib/apt/lead-eligibility';
-import { stripSyntheticPrice } from '@/lib/apt/synthetic-price';
+import { dropAmountFaqs, stripSyntheticPrice } from '@/lib/apt/synthetic-price';
 import { canUseHeroImage } from '@/lib/apt/hero-license';
 import { canShowPriceChange, pcArea, priceChangeDirection, PRICE_CHANGE_COLS } from '@/lib/apt/price-change';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
@@ -193,7 +193,9 @@ async function fetchUnifiedData(slug: string) {
       (sb as any).from('apt_sites').select('analysis_text').eq('id', site.id).maybeSingle(),
       fetchSiteEvents(site.id),
     ]);
-    analysisText = atR?.data?.analysis_text || null;
+    // Q-2 F2 — 합성 분양가 현장의 AI 분석은 그 값으로 쓰였다(「분양가 2.1억원은 적정 범위」). 렌더만 막는다(행 보존).
+    //   ⚠️ 「생성 180일 초과」 축은 analysis_text 에 생성 시각 열이 없어 «측정 불가» — 넣지 않았다.
+    analysisText = (site as any)?.price_source === 'synthetic' ? null : (atR?.data?.analysis_text || null);
     siteEvents = evR;
   }
 
@@ -826,6 +828,8 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
   // V17 F-2: 공고 전 현장은 값이 "없는" 게 아니라 "아직 정해지지 않은" 것이다.
   //   PIPELINE_STAGES + 부지계획·분양 예고 = 공고 전 7단계.
   const lc = (site as any)?.lifecycle_stage ?? '';
+  // Q-8 — 공고 전 문구의 정비/비정비 분기. 정비는 site_type 또는 정비 원천 연결로 판정한다.
+  const isRedevSite = (site as any)?.site_type === 'redevelopment' || !!((site as any)?.source_ids?.redev_id);
   const preAnnouncement =
     !sub && (isPipelineStage(lc) || lc === 'site_planning' || lc === 'pre_announcement');
 
@@ -850,7 +854,8 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
     .sort((a, b) => a - b)
     .map(n => `${n}㎡`);
 
-  const dbFaq = Array.isArray(site?.faq_items) ? site.faq_items as { q: string; a: string }[] : [];
+  const isSynPrice = (site as any)?.price_source === 'synthetic';
+  const dbFaq = dropAmountFaqs(Array.isArray(site?.faq_items) ? site.faq_items as { q: string; a: string }[] : [], isSynPrice);
   // DB FAQ가 없으면 자동 생성 (네이버 FAQ 리치스니펫 확보)
   const faq: { q: string; a: string }[] = dbFaq.length > 0 ? dbFaq : [
     { q: `${name} 위치가 어디인가요?`, a: `${name}은(는) ${region} ${site?.sigungu || ''} ${site?.dong || site?.address || ''}에 위치해 있습니다. ${site?.nearby_station || sub?.nearest_station ? `최근접 역은 ${site?.nearby_station || sub?.nearest_station}입니다.` : ''}` },
@@ -941,7 +946,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
           review_score: (site as any)?.review_score ?? null,
           review_count: (site as any)?.review_count ?? null,
           og_cards: (site as any)?.og_cards ?? null,
-          faqs: (site as any)?.faqs ?? null,
+          faqs: Array.isArray((site as any)?.faqs) ? dropAmountFaqs((site as any).faqs, isSynPrice) : ((site as any)?.faqs ?? null),
           move_in_date: site?.move_in_date ?? null,
         }}
         origin={SITE_URL}
@@ -1338,6 +1343,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
           region={site.region}
           sigungu={site.sigungu}
           lifecycleStage={lc}
+          isRedev={isRedevSite}
         />
       )}
 
@@ -1505,6 +1511,8 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
                 </p>
               </div>
             )}
+            {/* ⚠️ R-1: 이 표만 스크롤 래퍼가 없었다. 값이 긴 행(주소 등)이 390px 에서 카드 밖으로 밀어낸다. */}
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' as const }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
               <tbody>
                 {rows.map(([l, v], i) => (
@@ -1521,6 +1529,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
                 ))}
               </tbody>
             </table>
+            </div>
             {/* v10-B6: 표 안에 흩어져 있던 '방에서 물어보기' 를 여기 한 줄로 모은다.
                 미공개 행이 하나라도 있을 때만 낸다 — 다 채워진 현장에 물어볼 것을 만들지 않는다. */}
             {firstEmpty && (
@@ -2163,7 +2172,8 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
                 {myPriceMax > 0 && (
                   <tr style={{ borderTop: '1.5px solid var(--brand)', background: 'var(--bg-hover)' }}>
                     <td style={{ padding: '5px 6px', fontWeight: 600, color: 'var(--brand)' }}>{name}</td>
-                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>분양중</td>
+                    {/* Q-4 F4 — 단계 라벨은 lifecycle-label 한 곳에서. 「분양중」 하드 라벨이 착공·관리처분 현장에도 붙었다 */}
+                    <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>{stageLabel(lc) ?? '-'}</td>
                     <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 700, color: 'var(--brand)' }}>{fmtAmount(myPriceMax)}</td>
                     <td style={{ padding: '5px 6px', textAlign: 'right', fontWeight: 700, color: 'var(--brand)' }}>{myPpyeong > 0 ? `${myPpyeong.toLocaleString()}만` : '-'}</td>
                     <td style={{ padding: '5px 6px', textAlign: 'right', color: 'var(--text-tertiary)' }}>-</td>
@@ -2642,7 +2652,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
       {/* v3 커밋2: 모바일 하단 고정 바 — 좌(주) 리드폼 / 우(부) 카톡.
            리드폼이 뷰포트에 들어오면 스스로 숨는다.
            하단 탭바(z-100)·글쓰기 FAB(z-99)와의 겹침은 컴포넌트 안에서 처리한다. */}
-      <SiteActionBar siteSlug={slug} showLeadForm={showLeadForm} lifecycleStage={lc} />
+      <SiteActionBar siteSlug={slug} showLeadForm={showLeadForm} lifecycleStage={lc} isRedev={isRedevSite} />
       {/* B8-1: 우하단 플로팅 스택 — 피드 글쓰기 FAB 자리를 「공유 · 현장 댓글」이 받는다.
            ⚠️ 공유 URL 은 generateMetadata 의 canonical 과 «같은 문자열» 이어야 한다
               (`${SITE_URL}/apt/${slug}`). 파라미터를 붙이지 않는다. */}
@@ -2694,6 +2704,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
           showLeadForm={showLeadForm}
           nearby={nearbySites}
           lifecycleStage={lc}
+          isRedev={isRedevSite}
         />
         </div>
       </aside>

@@ -76,10 +76,12 @@ export type SiteActionBarProps = {
   showLeadForm?: boolean;
   /** ONESHOT §C-1: 단계별 문구. 세 화면이 같은 말을 해야 한다. */
   lifecycleStage?: string | null;
+  /** Q-8 — 정비사업 현장인가. 모르면 비워 둔다(정비판 문구). */
+  isRedev?: boolean;
 };
 
-export default function SiteActionBar({ siteSlug, showLeadForm = false, lifecycleStage }: SiteActionBarProps) {
-  const copy = leadCopy(lifecycleStage);
+export default function SiteActionBar({ siteSlug, showLeadForm = false, lifecycleStage, isRedev }: SiteActionBarProps) {
+  const copy = leadCopy(lifecycleStage, '', { redev: isRedev });
   // 리드폼이 화면에 들어오면 접는다 — 폼을 보고 있는데 '폼으로 가기' 를 띄우지 않는다.
   const [visible, setVisible] = useState(true);
   const [seen, setSeen] = useState(false);

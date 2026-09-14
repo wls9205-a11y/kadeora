@@ -114,9 +114,26 @@ const COPY: Record<LeadCopyKind, Omit<LeadCopy, 'cta'> & { cta: (name: string) =
   },
 };
 
-export function leadCopy(stage: string | null | undefined, siteName = ''): LeadCopy {
+/**
+ * Q-8 — 공고 전 문구의 «비정비» 판. 「이 구역」은 정비구역을 가리키는 말이다.
+ * 분양예정 신규 현장(SKY.V 센텀 등)·기분양 공사 중 현장에 「이 구역 진행 상황」은 대상이 틀린다.
+ * ⚠️ inquiryType 은 정비판과 «같다»(진행상황알림) — 미처리 경보의 '분양상담' 집계와 섞지 않는 규칙은 그대로다.
+ */
+const PRE_NOTICE_SITE: Omit<LeadCopy, 'cta'> & { cta: (name: string) => string } = {
+  band: '분양 소식 알림 · 무료',
+  cta: () => '이 현장 분양 소식 알림 받기',
+  lede: '모집공고·분양가·일정이 나오면 알려드립니다. 확정되기 전 내용은 확정으로 안내하지 않습니다.',
+  inquiryType: '진행상황알림',
+  button: '분양 소식 알림',
+};
+
+/**
+ * @param opts.redev 정비사업 현장인가(site_type='redevelopment' 또는 redev 원천 연결).
+ *   ⚠️ 모르면(undefined) 예전 문구(정비판)를 그대로 낸다 — 호출부가 «아는 곳에서만» 갈라 쓴다.
+ */
+export function leadCopy(stage: string | null | undefined, siteName = '', opts: { redev?: boolean } = {}): LeadCopy {
   const kind = leadCopyKind(stage);
-  const c = COPY[kind];
+  const c = kind === 'pre_notice' && opts.redev === false ? PRE_NOTICE_SITE : COPY[kind];
   return { band: c.band, cta: c.cta(siteName), lede: c.lede, inquiryType: c.inquiryType, button: c.button };
 }
 

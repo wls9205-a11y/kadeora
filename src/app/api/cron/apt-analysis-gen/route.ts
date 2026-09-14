@@ -5,6 +5,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { withCronAuth } from '@/lib/cron-auth';
 import { dbw } from '@/lib/cron-db-log';
 import { anthropicFetch } from '@/lib/llm/gateway';
+import { stripSyntheticPrice } from '@/lib/apt/synthetic-price';
 
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
@@ -23,12 +24,15 @@ async function handler(_req: NextRequest) {
   const result = await withCronLogging('apt-analysis-gen', async () => {
     const admin = getSupabaseAdmin();
 
-    const { data: sites } = await (admin as any).from('apt_sites')
-      .select('id, slug, name, region, sigungu, dong, address, builder, developer, total_units, built_year, move_in_date, status, price_min, price_max, nearby_station, school_district, nearby_facilities, transit_score, price_comparison, extension_cost')
+    const { data: rawSites } = await (admin as any).from('apt_sites')
+      .select('id, slug, name, region, sigungu, dong, address, builder, developer, total_units, built_year, move_in_date, status, price_min, price_max, price_source, nearby_station, school_district, nearby_facilities, transit_score, price_comparison, extension_cost')
       .is('analysis_text', null)
       .eq('is_active', true)
       .order('page_views', { ascending: false, nullsFirst: false })
       .limit(5);
+    // Q-1·Q-2 — 합성 분양가(지역 채움값)를 프롬프트에 싣지 않는다. 실으면 「분양가 2.1억원은 적정」 같은
+    //   문장이 다시 태어난다(범천1-1 실측). 재생성도 이 문을 지나므로 여기서 한 번 막으면 된다.
+    const sites = ((rawSites ?? []) as any[]).map(stripSyntheticPrice);
 
     if (!sites || sites.length === 0) return { processed: 0, metadata: { reason: 'all_done' } };
 

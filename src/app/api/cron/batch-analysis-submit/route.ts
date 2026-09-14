@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { anthropicFetch } from '@/lib/llm/gateway';
+import { stripSyntheticPrice } from '@/lib/apt/synthetic-price';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -15,12 +16,13 @@ export async function GET(_req: NextRequest) {
     if (active && active.length > 0) return { processed: 0, metadata: { reason: 'batch_in_progress' } };
 
     const { data: aptSites } = await (admin as any).from('apt_sites')
-      .select('id, name, region, sigungu, dong, builder, total_units, move_in_date, price_min, price_max, nearby_station, school_district, transit_score')
+      .select('id, name, region, sigungu, dong, builder, total_units, move_in_date, price_min, price_max, price_source, nearby_station, school_district, transit_score')
       .is('analysis_text', null).eq('is_active', true)
       .order('page_views', { ascending: false, nullsFirst: false }).limit(500);
 
     let category = 'apt-analysis';
-    let items = aptSites || [];
+    // Q-1·Q-2 — 합성 분양가(지역 채움값)는 프롬프트에 싣지 않는다
+    let items = ((aptSites || []) as any[]).map(stripSyntheticPrice);
 
     if (items.length === 0) {
       const { data: stocks } = await (admin as any).from('stock_quotes')

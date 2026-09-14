@@ -37,6 +37,8 @@ export type SiteDetailRailProps = {
   siteName: string;
   /** ONESHOT §C-1: 단계별 문구 */
   lifecycleStage?: string | null;
+  /** Q-8 — 정비사업 현장인가. 모르면 비워 둔다(정비판 문구). */
+  isRedev?: boolean;
   region: string;
   sigungu?: string | null;
   dong?: string | null;
@@ -61,7 +63,7 @@ const panelTitle: React.CSSProperties = {
 };
 
 export default function SiteDetailRail({
-  siteSlug, siteName, region, sigungu, dong, showLeadForm, nearby, lifecycleStage,
+  siteSlug, siteName, region, sigungu, dong, showLeadForm, nearby, lifecycleStage, isRedev,
 }: SiteDetailRailProps) {
   const talkRef = useTalkView<HTMLAnchorElement>('rail', { site_slug: siteSlug });
   /* P0-A′ — 레일 진입 카드의 «노출» 이 없었다. 실측 8/25~8/31: 노출 0 · 클릭 1.
@@ -84,7 +86,7 @@ export default function SiteDetailRail({
            brand 색은 «테두리로만» 남긴다 — 정체성은 유지하고 가독성은 배경이 책임진다. */
         <div ref={leadRef} style={{ ...panel, borderColor: 'var(--brand)', background: 'var(--bg-surface)' }}>
           <p style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px', lineHeight: 1.4, wordBreak: 'keep-all' }}>
-            {siteName} {leadCopy(lifecycleStage).band.replace(' · 무료', '')}
+            {siteName} {leadCopy(lifecycleStage, '', { redev: isRedev }).band.replace(' · 무료', '')}
           </p>
           <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: '0 0 10px', lineHeight: 1.5, wordBreak: 'keep-all' }}>
             잔여 세대·일정을 담당자가 직접 안내해 드립니다.
