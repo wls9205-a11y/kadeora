@@ -706,9 +706,11 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   );
   const numGate = verifyNumbers(article.content, allow);
   if (!numGate.ok && issue.category === 'apt') {
+    // ⚠️ 막힌 초안은 blog_posts 에 넣지 않는다(미발행 수문). 판독용으로 글감 행에만 남긴다 — 무엇이 막혔는지 사람이 읽을 수 있어야 규칙을 고친다.
     dbw('issue-draft', 'issue_alerts.update@number_gate', await (sb as any).from('issue_alerts').update({
       publish_decision: 'number_unverified', fail_reason: 'number_unverified',
       block_reason: `수치 출처 미확인 ${numGate.unverified.length}/${numGate.checked}: ${numGate.unverified.slice(0, 12).join(' · ')}`.slice(0, 500),
+      raw_data: { ...(issue.raw_data ?? {}), blocked_draft: { at: new Date().toISOString(), title: article.title, unverified: numGate.unverified, checked: numGate.checked, content: article.content.slice(0, 16000) } },
     }).eq('id', issue.id));
     return { decision: 'number_unverified', score: issue.final_score, title: article.title, numGate: { category: issue.category, ...numGate } };
   }
