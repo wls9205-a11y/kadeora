@@ -16,6 +16,7 @@ import { getFreshnessContext, deriveFreshnessFields } from '@/lib/blog/freshness
 import { dbw } from '@/lib/cron-db-log';
 import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
 import { sortForGeneration } from '@/lib/content/realestate-priority';
+import { stripSyntheticPrice } from '@/lib/apt/synthetic-price';
 
 /**
  * issue-draft v2 — AI 기사 생성 + 자동 발행 + 이미지 + 피드 포스트
@@ -150,10 +151,14 @@ type GenResult = { title: string; content: string; slug: string; keywords: strin
 async function buildSiteContext(sb: any, siteId: string | null | undefined): Promise<string> {
   if (!siteId) return '';
   try {
-    const { data } = await sb.from('apt_sites')
-      .select('slug, name, display_name, sigungu, region, builder, total_units, expected_sale_period')
+    const { data } = await (sb as any).from('apt_sites')
+      .select('slug, name, display_name, sigungu, region, builder, total_units, complex_units, expected_sale_period, expected_sale_period_asof, price_min, price_max, price_source, site_type, source_ids')
       .eq('id', siteId).maybeSingle();
     if (!data) return '';
+    // AB-2 · Q-1 — 합성 분양가(지역 채움값)는 싣지 않는다. 비우면 아래 줄이 「미공개」로 안내한다.
+    const priced = stripSyntheticPrice(data);
+    const isRedev = data.site_type === 'redevelopment' || !!data.source_ids?.redev_id;
+    const units = data.complex_units || data.total_units;
     const disp = (data.display_name || '').trim();
     // display 규격이 「{예정명} — {구역명}」이라 제목에는 앞쪽(예정명)만 쓴다.
     const preferred = (disp.split(' — ')[0] || disp || data.name || '').trim();
@@ -162,8 +167,16 @@ async function buildSiteContext(sb: any, siteId: string | null | undefined): Pro
       `- 표기할 이름: 「${preferred}」 ${preferred !== data.name ? `(구역명: ${data.name})` : ''}`,
       data.sigungu ? `- 지역: ${[data.region, data.sigungu].filter(Boolean).join(' ')}` : '',
       data.builder ? `- 시공사: ${data.builder}` : '- 시공사: 미정(단정하지 말 것)',
-      data.total_units ? `- 세대수: ${data.total_units}세대` : '- 세대수: 미정(단정하지 말 것)',
-      data.expected_sale_period ? `- 예상 분양 시기: ${data.expected_sale_period}` : '',
+      units ? `- 세대수: ${units}세대` : '- 세대수: 미정(단정하지 말 것)',
+      data.expected_sale_period
+        ? `- 예상 분양 시기: ${data.expected_sale_period}${data.expected_sale_period_asof ? ` (${String(data.expected_sale_period_asof).slice(0, 10)} 기준 보도 — 본문·FAQ 에 기준일을 함께 쓴다)` : ''}`
+        : '',
+      priced.price_min && priced.price_max
+        ? `- 분양가: ${priced.price_min.toLocaleString()}만~${priced.price_max.toLocaleString()}만원`
+        : '- 분양가: 미공개 — 금액을 추정하거나 단정하지 말 것. 「분양가 미공개·모집공고 후 확정」 문형으로만 쓴다',
+      isRedev
+        ? '- 사업 성격: 정비사업(재개발·재건축) — 「구역」 표현 가능'
+        : '- 사업 성격: 일반 분양 현장 — ⛔ 「구역」이라 부르지 않는다(정비구역이 아니다). 「현장」·「단지」로 쓴다',
     ].filter(Boolean);
     return lines.join('\n');
   } catch {
@@ -196,7 +209,7 @@ async function generateArticle(issue: any, bigEventContext = '', siteContext = '
 - 카더라 내부 링크 3개 이상: [텍스트](/apt), [텍스트](/stock), [텍스트](/blog) 등
 ${isPreempt ? `
 ## 선점형 콘텐츠 특별 규칙:
-- 예상 분양가, 예상 경쟁률, 입지 분석을 깊이 있게
+- 예상 경쟁률, 입지 분석을 깊이 있게. 분양가는 «주변 시세 비교» 로만 설명하고, 공고 전 금액을 확정값처럼 쓰지 않는다(F1)
 - 주변 시세 비교 테이블 필수 (반경 1km 내 단지)
 - 청약 전략 가이드 섹션 포함 (가점/추첨, 자금계획)
 - "이 정보는 공식 발표 전 수집된 것으로 변동될 수 있습니다" 면책 포함
@@ -222,6 +235,14 @@ ${siteContext}` : ''}
 ⚠️ FAQ는 **필수**입니다. 누락 시 기사가 발행되지 않습니다.
 반드시 "## 자주 묻는 질문" 섹션을 포함하고, Q./A. 형식으로 5~8개 작성하세요.
 구글/네이버 FAQPage 리치스니펫용이므로 형식을 정확히 지켜주세요.
+${issue.category === 'apt' ? `
+## FAQ 규격 (AB-2 · AI 브리핑 인용)
+- 질문은 «사람이 실제로 검색창에 치는 말» 로: 「{현장명} 분양가는 얼마인가요?」「{현장명} 분양 일정은 언제인가요?」「{현장명} 시공사는 어디인가요?」 형태
+- 답의 «첫 문장» 이 질문에 바로 답하는 정의형 문장이어야 한다(「{현장명}의 시공사는 ○○입니다.」). 배경 설명은 그 뒤에
+- 숫자(세대수·층수·일정)를 넣고, 보도·공고에서 온 값은 «기준일» 을 괄호로 적는다(예: 「2026년 10월 분양예정(2026-09-10 보도 기준)」)
+- 분양가가 미공개면 금액을 쓰지 않는다 — 「분양가 미공개·모집공고 후 확정」
+- 「이 글의 현장」의 사업 성격이 일반 분양이면 질문·답 어디에도 「구역」을 쓰지 않는다
+` : ''}
 
 기사 유형: ${template}
 카테고리: ${catKo}
