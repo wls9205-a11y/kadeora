@@ -137,6 +137,7 @@ export type DraftFailReason =
   | 'model_error'   // (레거시) 8/31 이전에 쌓인 뭉친 값
   | 'api_4xx'       // API 가 요청을 거절 — 같은 요청을 다시 보내도 같은 답이다
   | 'api_5xx'       // API 쪽 일시 장애 — 재시도에 의미가 있다
+  | 'quota'         // LLM 관문 쿼터(합성 429). API 거절이 아니다 — 재시도 횟수를 «쓰지 않고» 미룬다
   | 'no_key'
   | 'empty_text'
   | 'exception'
@@ -320,6 +321,9 @@ ${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑,
          「3일 전 그 장애가 무엇이었나」에 답하지 못한다. 판정에 쓸 사실은 DB 에 둔다.
          ⚠️ 400 의 본문에는 사유가 «문장으로» 들어 있다(잘못된 파라미터인지, 한도인지).
             그 문장이 곧 수리 대상을 정한다 — 없으면 추측만 남는다. */
+      // ⚠️ 관문 쿼터의 합성 429 는 api_4xx 가 아니다(2026-09-15 실측: 주식·경제 몫 소진으로 48h 59건이
+      //    재시도 3회를 «쿼터로» 다 쓰고 ai_failed 로 영구 소각됐다). 헤더로 가려 미룬다.
+      if (res.headers.get('x-kadeora-quota')) return { article: null, failReason: 'quota' };
       return { article: null, failReason: res.status >= 500 ? 'api_5xx' : 'api_4xx' };
     }
     const data = await res.json();
@@ -644,6 +648,11 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   const { article, failReason } = await generateArticle(issue, bigEventContext, siteContext);
   if (!article) {
     // A3: 재시도 로직 — retry_count < 3이면 is_processed=false로 리셋
+    if (failReason === 'quota') {
+      // 재시도 횟수를 올리지 않고 큐로 되돌린다 — 쿼터가 풀리는 날 그대로 다시 뽑힌다.
+      dbw('issue-draft', 'issue_alerts.update@quota', await (sb as any).from('issue_alerts').update({ is_processed: false, publish_decision: null, fail_reason: 'quota' }).eq('id', issue.id));
+      return { decision: 'quota_deferred', score: issue.final_score };
+    }
     const newRetry = retryCount + 1;
     if (newRetry < 3) {
       dbw('issue-draft', 'issue_alerts.update@530', await (sb as any).from('issue_alerts').update({ is_processed: false, publish_decision: null, retry_count: newRetry, fail_reason: failReason }).eq('id', issue.id));
