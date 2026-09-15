@@ -1,3 +1,4 @@
+import React from 'react';
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import Link from 'next/link';
@@ -9,6 +10,7 @@ import { REGIONS } from '@/lib/regions';
 import { siteEntity } from '@/lib/seo/entity';
 import RecentObservations from '@/components/apt/RecentObservations';
 import JsonLd from '@/components/seo/JsonLd';
+import { upcomingFaqs, upcomingItems } from '@/lib/apt/upcoming-sales';
 
 async function SigunguLinks({ region }: { region: string }) {
   const sb = getSupabaseAdmin();
@@ -154,6 +156,29 @@ async function fetchRegionData(region: string) {
   // ⚠️ 이 때문에 라운드가 둘이 된다(목록 5개 병렬 → 메타 1회). `revalidate = 3600`
   //    ISR 이라 사용자 체감 지연은 없다. Rule #49 의 「병렬 뭉치에 합치지 말 것」은
   //    /apt/[id] 대상이고 여기는 해당 없다.
+  // E-7·E-11 — 공고 전 분양예정 현장. 원천 네 목록에 안 잡혀 허브에서 구조적으로 빠져 있었다.
+  //   ⚠️ region 은 «정확 일치» — apt_sites.region 은 17개 고정값이다(presale/candidate.ts REGIONS).
+  const [upcomingRes, recentSeedRes] = await Promise.all([
+    (s as any).from('apt_sites')
+      .select('slug,name,display_name,sigungu,expected_sale_period,expected_sale_period_asof')
+      .eq('region', region).eq('is_active', true).not('expected_sale_period', 'is', null)
+      .order('expected_sale_sort', { ascending: true }).limit(60),
+    // 최근 자동 시드(문서 카드·인허가·크롤)인데 분양 시기가 아직 없는 현장 — «시기 미확인» 으로만 싣는다
+    (s as any).from('apt_sites')
+      .select('slug,name,display_name,sigungu,lifecycle_stage,created_at')
+      .eq('region', region).eq('is_active', true).is('expected_sale_period', null)
+      .or('stage_source.like.crawl:%,stage_source.like.permit:%')
+      .gte('created_at', new Date(Date.now() - 60 * 86_400_000).toISOString())
+      .order('created_at', { ascending: false }).limit(12),
+  ]);
+  const shortName = (r: any) => String(r.display_name || r.name || '').split(' — ')[0].trim();
+  const todayYm = new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 7);
+  const upcoming = upcomingItems(((upcomingRes?.data || []) as any[]).map((r) => ({
+    slug: r.slug, name: shortName(r), sigungu: r.sigungu, period: r.expected_sale_period, asof: r.expected_sale_period_asof,
+  })), todayYm);
+  const recentSeeds = ((recentSeedRes?.data || []) as any[]).map((r) => ({ slug: r.slug, name: shortName(r), sigungu: r.sigungu as string | null }));
+  const upcomingFaq = upcomingFaqs(region, upcoming, todayYm);
+
   const names = Array.from(new Set(([
     ...((subsRes?.data || []) as any[]).map((r: any) => r.house_nm),
     ...((tradesRes?.data || []) as any[]).map((r: any) => r.apt_name),
@@ -202,6 +227,9 @@ async function fetchRegionData(region: string) {
     unsolds: unsoldRes?.data || [],
     priceStats,
     siteMeta,
+    upcoming,
+    recentSeeds,
+    upcomingFaq,
   };
 }
 
@@ -301,6 +329,7 @@ export default async function RegionLandingPage({ params }: Props) {
           두 FAQ 를 말하면 수집기가 어느 쪽을 쓰는지 우리가 모른다 — 하나로 합치고 하단 블록은 지웠다.
           ⛔ 문장에 숫자를 «쓰지» 않는다. 전부 조회 결과 변수다(하드코딩 금지). */}
       <JsonLd data={{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+        ...data.upcomingFaq.map((f) => ({"@type":"Question","name":f.q,"acceptedAnswer":{"@type":"Answer","text":f.a}})),
         {"@type":"Question","name":`${decoded} 아파트 분양 일정은 어디서 확인하나요?`,"acceptedAnswer":{"@type":"Answer","text":`이 페이지에서 ${decoded} 아파트 분양·청약 일정을 매일 갱신합니다. 지금은 청약 ${data.subscriptions.length}건을 접수 일정·분양가와 함께 보고 있습니다.`}},
         {"@type":"Question","name":`${decoded} 미분양·줍줍(무순위)은 어디서 보나요?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 미분양·선착순 현장 ${data.unsolds.length}건을 카더라 미분양 페이지(${SITE_URL}/apt/unsold/${encodeURIComponent(decoded)})에서 잔여세대와 함께 확인할 수 있습니다.`}},
         {"@type":"Question","name":`${decoded} 재개발 진행 단계는 어떻게 보나요?`,"acceptedAnswer":{"@type":"Answer","text":`${decoded} 재개발·재건축 ${data.redevelopments.length}건의 조합설립·사업시행·관리처분 단계를 재개발 현황 페이지(${SITE_URL}/apt/redev)에서 단계별로 볼 수 있습니다.`}},
@@ -420,6 +449,41 @@ export default async function RegionLandingPage({ params }: Props) {
           </div>
         );
       })()}
+
+      {/* E-7 — 분양예정 단지. 원천 네 목록(청약·실거래·재개발·미분양)에 안 잡히는 공고 전 현장을 허브에 싣는다.
+           ⚠️ 시기는 원문 정밀도 그대로(salePeriodText)·기준일 병기. 지나간 시기는 upcomingItems 가 뺀다. */}
+      {(data.upcoming.length > 0 || data.recentSeeds.length > 0) && (
+        <section style={{ marginBottom: 'var(--sp-2xl)' }} aria-labelledby="region-upcoming">
+          <h2 id="region-upcoming" style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>📅 {decoded} 분양예정 단지 <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)', marginLeft: 6 }}>{data.upcoming.length}곳</span></h2>
+          {data.upcoming.length > 0 && (
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: 6 }}>
+              {data.upcoming.map((u) => (
+                <li key={u.slug} style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--sp-sm)', fontSize: 'var(--fs-sm)', padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)' }}>
+                  <Link href={`/apt/${encodeURIComponent(u.slug)}`} style={{ minWidth: 0, color: 'var(--text-primary)', fontWeight: 600, textDecoration: 'none', overflowWrap: 'anywhere' }}>
+                    {u.name}{u.sigungu ? <span style={{ fontWeight: 400, color: 'var(--text-tertiary)', marginLeft: 6, fontSize: 11 }}>{u.sigungu}</span> : null}
+                  </Link>
+                  <span style={{ flexShrink: 0, textAlign: 'right', color: 'var(--text-secondary)', fontSize: 11 }}>
+                    {u.text}{u.asof ? <span style={{ display: 'block', color: 'var(--text-tertiary)' }}>{String(u.asof).slice(0, 10)} 보도 기준</span> : null}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {data.recentSeeds.length > 0 && (
+            <>
+              <h3 style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', margin: '12px 0 6px' }}>최근 등록 · 분양 시기 미확인</h3>
+              <p style={{ margin: 0, fontSize: 12, lineHeight: 1.8, color: 'var(--text-secondary)', wordBreak: 'keep-all' }}>
+                {data.recentSeeds.map((r, i) => (
+                  <React.Fragment key={r.slug}>
+                    {i > 0 ? ' · ' : ''}
+                    <Link href={`/apt/${encodeURIComponent(r.slug)}`} style={{ color: 'var(--brand)', textDecoration: 'none' }}>{r.name}</Link>
+                  </React.Fragment>
+                ))}
+              </p>
+            </>
+          )}
+        </section>
+      )}
 
       {/* 청약 섹션 */}
       {data.subscriptions.length > 0 && (
@@ -581,6 +645,13 @@ export default async function RegionLandingPage({ params }: Props) {
       <section style={{ marginBottom: 'var(--sp-xl)' }}>
         <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>{decoded} 분양 자주 묻는 질문</h2>
         <dl style={{ margin: 0, fontSize: 12, lineHeight: 1.7, color: 'var(--text-secondary)', wordBreak: 'keep-all' }}>
+          {/* E-11 — 질문형 FAQ. JSON-LD 와 «같은 말» (위 FAQPage 에 같은 배열을 싣는다) */}
+          {data.upcomingFaq.map((f) => (
+            <React.Fragment key={f.q}>
+              <dt style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: 8 }}>{f.q}</dt>
+              <dd style={{ margin: '2px 0 0' }}>{f.a}</dd>
+            </React.Fragment>
+          ))}
           <dt style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: 8 }}>{decoded} 아파트 분양 일정은 어디서 확인하나요?</dt>
           <dd style={{ margin: '2px 0 0' }}>이 페이지에서 {decoded} 아파트 분양·청약 일정을 매일 갱신합니다. 지금은 청약 {data.subscriptions.length}건을 접수 일정·분양가와 함께 보고 있습니다.</dd>
           <dt style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: 8 }}>{decoded} 미분양·줍줍(무순위)은 어디서 보나요?</dt>
