@@ -18,7 +18,8 @@ import { SECTION_SCROLL_MARGIN } from '@/components/apt/SiteJumpBar';
 import { SITE_URL } from '@/lib/constants';
 import { leadCopy, leadCopyForHome } from '@/lib/apt/lead-copy';
 import { leadKind } from '@/lib/apt/lead-eligibility';
-import { trackLeadSubmit, trackLeadView } from '@/lib/apt/lead-track';
+import { trackLeadStart, trackLeadSubmit, trackLeadView } from '@/lib/apt/lead-track';
+import { BUDGET_CHOICES, CALL_TIME_CHOICES, LEAD_PILOT_API, leadPilotArm } from '@/lib/apt/lead-pilot';
 
 /* ⚠️ 값을 여기서 다시 읽지 않는다 — lead-eligibility 의 LEAD_ENDPOINT 한 곳이 원본이다.
    두 벌이면 한쪽만 고쳐져 「폼은 서는데 버튼이 없다」 같은 어긋남이 다시 난다(V4-D P0-A). */
@@ -323,6 +324,24 @@ export default function LeadForm({
   const copy = isHome ? leadCopyForHome() : leadCopy(lifecycleStage, siteName, { redev: isRedev });
   const mountedAt = useRef(Date.now());
 
+  // E-12 — 선택 필드 파일럿. 군은 현장 slug 해시(홈은 밖). 실험군만 스위치를 묻고, 켜져 있을 때만 두 칸을 그린다.
+  const pilotArm = isHome ? null : leadPilotArm(siteSlug);
+  const [pilotOn, setPilotOn] = useState(false);
+  const [budgetRange, setBudgetRange] = useState('');
+  const [callTime, setCallTime] = useState('');
+  const startedRef = useRef(false);
+  useEffect(() => {
+    if (pilotArm !== 'exp') return;
+    let alive = true;
+    fetch(LEAD_PILOT_API).then(r => r.json()).then((j: { enabled?: boolean }) => { if (alive) setPilotOn(j?.enabled === true); }).catch(() => {});
+    return () => { alive = false; };
+  }, [pilotArm]);
+  const markStart = () => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+    trackLeadStart('body', { site_slug: siteSlug, lifecycle_stage: lifecycleStage, pilot_arm: pilotArm ?? undefined, pilot_fields: pilotArm === 'exp' && pilotOn });
+  };
+
   // §5-3: 본문 폼이 **실제로 화면에 들어온 순간**만 노출로 센다.
   // ⚠️ 마운트 시점에 세지 않는다 — 폼은 페이지 하단에 있어 대부분의 방문자는 보지 못한다.
   //    마운트로 세면 분모가 부풀어 전환율이 실제보다 낮게 나온다.
@@ -336,7 +355,7 @@ export default function LeadForm({
         for (const e of entries) {
           if (!e.isIntersecting || fired) continue;
           fired = true;
-          trackLeadView('body', { site_slug: siteSlug, lifecycle_stage: lifecycleStage });
+          trackLeadView('body', { site_slug: siteSlug, lifecycle_stage: lifecycleStage, pilot_arm: pilotArm ?? undefined });
           io.disconnect();
         }
       },
@@ -619,7 +638,14 @@ export default function LeadForm({
       // §5-3: 실제로 기록된 건만 전환으로 센다.
       // ⚠️ silent-drop 은 허니팟(봇)이다 — 성공 화면은 보여주되 전환에는 넣지 않는다.
       if (outcome === 'recorded') {
-        trackLeadSubmit('body', { site_slug: siteSlug, lifecycle_stage: lifecycleStage });
+        trackLeadSubmit('body', { site_slug: siteSlug, lifecycle_stage: lifecycleStage, pilot_arm: pilotArm ?? undefined, pilot_fields: pilotArm === 'exp' && pilotOn });
+        // E-12 — 선택 입력은 자체 테이블로만(시트 미전송). 실패해도 접수에는 영향 없다.
+        if (pilotArm === 'exp' && pilotOn && (budgetRange || callTime)) {
+          fetch(LEAD_PILOT_API, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true,
+            body: JSON.stringify({ leadRef: leadRefRef.current, siteSlug, budget: budgetRange || null, callTime: callTime || null }),
+          }).catch(() => {});
+        }
       }
       setDone(true);
       return;
@@ -708,7 +734,7 @@ export default function LeadForm({
             : copy.lede}
         </p>
 
-        <form ref={formRef} onSubmit={handleSubmit} noValidate style={{ position: 'relative' }}>
+        <form ref={formRef} onSubmit={handleSubmit} onFocusCapture={markStart} noValidate style={{ position: 'relative' }}>
           <div style={{ marginBottom: 12 }}>
             <label htmlFor="kd-lead-name" style={labelStyle}>이름</label>
             <input
@@ -813,6 +839,26 @@ export default function LeadForm({
               {hasSiteTypes && <p style={hintStyle}>이 현장 공급 평형</p>}
             </div>
           </div>
+
+          {/* E-12 파일럿 — 실험군·스위치 켜짐일 때만. ⛔ 선택 입력(필수화 금지). */}
+          {pilotArm === 'exp' && pilotOn && (
+            <div className="kd-lead-grid" style={{ marginBottom: 12 }}>
+              <div>
+                <label htmlFor="kd-lead-budget" style={labelStyle}>예산 범위 <span style={{ fontWeight: 400 }}>(선택)</span></label>
+                <select id="kd-lead-budget" value={budgetRange} onChange={e => setBudgetRange(e.target.value)} style={fieldStyle}>
+                  <option value="">선택 안 함</option>
+                  {BUDGET_CHOICES.map(b => <option key={b} value={b}>{b}</option>)}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="kd-lead-calltime" style={labelStyle}>통화 가능 시간 <span style={{ fontWeight: 400 }}>(선택)</span></label>
+                <select id="kd-lead-calltime" value={callTime} onChange={e => setCallTime(e.target.value)} style={fieldStyle}>
+                  <option value="">선택 안 함</option>
+                  {CALL_TIME_CHOICES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+            </div>
+          )}
 
           {/* 허니팟 — 사람에게는 보이지 않는다 */}
           <input

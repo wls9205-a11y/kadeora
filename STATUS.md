@@ -1,3 +1,11 @@
+## 2026-09-15 (밤 4) — ABG 증분 5·6: 추정 표현 사전 · E-8 · E-12 A/B
+
+- 증분5: number-verify 추정 표현 사전(예상·추정·대략 / 안팎·전후·선·~대) · 의미 축 매칭 설계 1p · RULES#149. GSC 부검: OAuth 계정에 kadeora.app 속성 없음(0~1행) · Vercel Web Analytics 미활성(404) → page_views human 기준선.
+- E-8(2e23b45e): 백업 670(합성 645·실거래 주입 25) → 가격·price_source NULL · sync_apt_prices 3단계 제거. 가격 보유 5,663→4,993. 게이트: 익일 03:00Z sync 후 재등장 0.
+- E-12: 현장 slug FNV 해시 절반 A/B · 실험군만 선택 입력(예산·통화 시간) · 값은 lead_pilot_extras(leadRef, 시트 미전송) · lead_form_start 이벤트 신설(판정 분모) ·
+  자동 회수 fn_e12_pilot_guard(pg_cron 182, 3일 연속 20%p+ 열세 → e12.pilot_enabled=false + admin_alerts). 2주 중간 판독·유의성 미달 시 4주.
+  Node 동선: 응대 시 어드민 lead_pilot_extras(leadRef) 병행 확인.
+
 ## 2026-09-15 (밤 3) — ABG 증분 4: 재고 정리 1,052+243 · 연도 게이트 · X-9 봇 개방
 
 - 재스캔 1차 숨김 1,052(이슈 생성기 3종) · 2차 29 는 pg_cron 181 이 09-16 08:10Z 1회 실행 후 자기 해제.

@@ -119,6 +119,15 @@ export function trackLeadClick(slot: LeadSlot, props: LeadTrackProps = {}) {
 }
 
 /**
+ * E-12 — 폼 «시작»(첫 입력 포커스). 폼 인스턴스당 1회는 호출부가 보장한다.
+ * 판정 축(시작→제출)의 분모다. 노출(view)은 스크롤만으로도 세지고, 클릭은 진입점을 거친 사람만 세서 둘 다 분모로 부적합하다.
+ */
+export function trackLeadStart(slot: LeadSlot, props: LeadTrackProps = {}) {
+  if (typeof window === 'undefined') return;
+  track('lead_form_start', 'apt_lead_form', { slot, ...props });
+}
+
+/**
  * 실제 제출 성공. 노출·클릭과 같은 축에 남겨야 슬롯별 최종 전환을 한 쿼리로 낸다.
  * ⚠️ 서버(Apps Script) 응답이 recorded 일 때만 부를 것 — skipped 를 성공으로 세지 않는다.
  */
