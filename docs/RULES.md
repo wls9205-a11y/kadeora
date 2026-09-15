@@ -1016,3 +1016,25 @@ CREATE TRIGGER trg_apt_sites_auto_variants
    AI 왕복·스키마·분류 정확도는 진짜로 재고, 외부 변동은 타지 않는다.
 
 ---
+
+### RULES#148 — 배포 후 라이브 검증은 «캐시 신선도» 까지 잰다. 대리 필드·도구 스냅샷을 신선도 증거로 쓰지 않는다 (2026-09-15 신설 · NR-3)
+
+**Rule** — 배포 후 라이브 검증은
+1. **bare URL**(쿼리 없음)로도 잰다. 캐시 버스터 URL 만 보면 사용자가 받는 캐시 표면을 못 본다.
+2. 응답의 `X-Vercel-Cache`·`Age` 를 **기록**한다.
+3. **HIT 표면과 MISS 표면 양쪽에서** 실값(가격·문구)을 대조한다.
+
+⛔ 대리 필드(`naver:updated_time` 등)는 «그 쓰기가 그 필드를 건드리는지» 확인하기 전에는 신선도 증거로 쓰지 않는다.
+⚠️ 외부 검증 도구의 자체 캐시도 의심 목록에 둔다 — 동일 URL 재fetch 가 도구 스냅샷일 수 있다.
+
+**실례 (2026-09-14 NR-A)**: 세션 A 가 범천1-1 을 「배포를 관통한 캐시 고정」으로 판별했다. 근거는 og:price 잔존과
+`updated_time 04:02Z 불변` 이었다. CC 재측정 — bare URL·봇 UA 5종(HIT, Age 17~22s)·미국측 fetch 전부 신본(og:price 0).
+`updated_time` 은 `apt_sites.updated_at` 인데 `fn_mark_synthetic_prices` 는 `price_source` 만 써서 원래 안 바뀌는 값이었다.
+원인은 도구 자체 캐시로 판별 종결 — 그대로 믿었으면 불필요한 645경로 일괄 revalidate 가 집행될 뻔했다.
+반대 방향 실례: CC 도 캐시 버스터 URL 만 보고 초록을 선언한 적이 있다(같은 날). 두 방향 모두 이 규칙이 막는다.
+
+**층 실측(/apt/[id], 2026-09-14)**: `revalidate=3600` 이지만 searchParams 사용으로 동적 렌더(`no-store`) ·
+그 위에 `vercel.json` `/apt/(.*)` `Vercel-CDN-Cache-Control: s-maxage=600, stale-while-revalidate=3600`(POP 별) ·
+Next 데이터 캐시(`unstable_cache`·`revalidateTag`) 사용처 0. 정정 반영이 늦으면 revalidatePath 가 아니라 CDN 층을 본다.
+
+---
