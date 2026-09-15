@@ -8,10 +8,14 @@ export const maxDuration = 120;
 /**
  * 가격 데이터 자동 싱크 크론
  * 
- * apt_sites에 가격이 없는 현장에 대해 3가지 소스에서 자동으로 채움:
+ * apt_sites에 가격이 없는 현장에 대해 «분양가» 소스에서만 자동으로 채움:
  * 1. apt_subscriptions house_type_info → 분양가 min/max
- * 2. apt_transactions → 실거래 min/max  
- * 3. unsold_apts → 미분양 분양가
+ * 2. apt_subscriptions supply_price_info(PDF 파싱) → 분양가 min/max
+ * 3. unsold_apts → 미분양 공표 분양가
+ *
+ * ⛔ 분양가 필드(price_min/max)에 실거래를 주입하지 않는다 (E-8 · 2026-09-15).
+ *    예전 3단계(apt_transactions 단지명 min/max → 분양가)는 기축 단지의 거래가를 «분양가» 로 표시·인용하게 만들었다
+ *    (오염 25행 원복 · 백업 apt_sites_price_backup_e8_20260915). 실거래는 단지백과·실거래 축에서만 보여 준다.
  * 
  * 스케줄: 매일 1회 (0 3 * * *)
  */
