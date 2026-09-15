@@ -17,6 +17,7 @@ import { dbw } from '@/lib/cron-db-log';
 import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
 import { sortForGeneration } from '@/lib/content/realestate-priority';
 import { stripSyntheticPrice } from '@/lib/apt/synthetic-price';
+import { isLeadEligible } from '@/lib/apt/lead-eligibility';
 
 /**
  * issue-draft v2 — AI 기사 생성 + 자동 발행 + 이미지 + 피드 포스트
@@ -596,7 +597,9 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
           .eq('id', issue.id));
         return { decision: 'no_entity_quota', score: issue.final_score };
       }
-    } else {
+    } else if (!issue.apt_site_id) {
+      // ⚠️ 이미 현장이 지정된 글감(CV-N 이벤트·BP 발행 글감)은 제목으로 «다시» 맞추지 않는다.
+      //    다시 맞추면 예정명 제목(「힐스테이트 거제시그니처」)이 매칭에 실패해 no_entity 로 버려지거나 다른 현장으로 덮인다.
       const { data: matched } = await (sb as any).rpc('match_apt_site', { p_text: issue.title });
       if (!matched) {
         dbw('issue-draft', 'issue_alerts.update@gate_no_entity', await (sb as any).from('issue_alerts')
@@ -749,7 +752,16 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   const design = designs[titleHash % designs.length];
   const coverImage = `${SITE_URL}/api/og?title=${encodeURIComponent(article.title)}&category=${blogCategory}&author=${encodeURIComponent('카더라')}&design=${design}`;
 
+  // BP-B — 글감이 가리키는 현장을 허브로 «못박는다». 자동 선택(본문 첫 리드 가능 링크)은 비교 대상으로 건
+  //   다른 현장을 허브로 잡을 수 있다. 리드폼이 서는 단계일 때만(아니면 자동 선택에 맡긴다).
+  let hubForIssue: string | null = null;
+  if (issue.apt_site_id) {
+    const { data: hubSite } = await (sb as any).from('apt_sites').select('slug, lifecycle_stage, is_active').eq('id', issue.apt_site_id).maybeSingle();
+    if (hubSite?.is_active && isLeadEligible(hubSite.lifecycle_stage)) hubForIssue = hubSite.slug;
+  }
+
   const insertResult = await safeBlogInsert(sb, {
+    ...(hubForIssue ? { hub_apt_slug: hubForIssue } : {}),
     slug: article.slug, title: article.title, content: seoEnriched,
     category: blogCategory as any, tags: article.keywords,
     source_type: 'auto_issue', cron_type: 'issue-draft',
