@@ -9,6 +9,8 @@
  * ⚠️ 동치: 3.8억 ↔ 38,000만원 ↔ 380,000,000원 은 같은 값이다. 금액은 «만원 정수» 로 정규화해 비교한다.
  * ⚠️ 반올림: 데이터가 37,950만원이면 본문 「3.8억」은 통과한다(표기 단위의 유효자릿수 안의 차이).
  * ⚠️ 연도 단독(「2026년」)은 검사하지 않는다 — 기준 연도·면책 문구에 늘 쓰여 오탐만 만든다. 연월(「2026년 10월」)부터 본다.
+ * ⚠️ ABG 증분 4 §2 — 단, «연도 + 분양·청약·입주·일정·공급» 결합(「2026년 분양」「분양 2026년 일정」)은 시기 주장이라 본다.
+ *    대조는 호출부가 준 좁은 연도 목록(allow.year: esp·공고·상수)만 — 기사·실거래 기간의 연도로 허가하지 않는다. allow.year 가 없으면 검사하지 않는다.
  */
 
 export type NumKind = 'amount' | 'ym' | 'pct';
@@ -73,7 +75,25 @@ export function extractNumbers(text: string): NumToken[] {
   return [...amountTokens(t), ...ymTokens(t), ...pctTokens(t)];
 }
 
-export interface Allow { amount: number[]; ym: number[]; pct: number[] }
+export interface Allow { amount: number[]; ym: number[]; pct: number[]; /** 시기 주장 연도 허용 목록(없으면 연도 결합 토큰 미검사) */ year?: number[] }
+
+const YEAR_CLAIM = /(?:(20\d{2})\s*년(?!\s*(?:1[0-2]|0?[1-9])\s*월)(?:\s*(?:상반기|하반기|[1-4]\s*분기|초|중반|중|말|내))?\s*(?:에\s*|의\s*|중\s*)?(?:분양|청약|입주|일정|공급))|(?:(?:분양|청약|입주|공급)\s*(20\d{2})\s*년(?!\s*(?:1[0-2]|0?[1-9])\s*월)\s*(?:일정|예정))/g;
+
+/** 「2026년 분양」「2027년 하반기 입주」「분양 2026년 일정」 — 연도 결합 시기 주장. 연월(「2026년 10월 분양」)은 ym 이 본다. */
+export function yearClaimTokens(text: string): NumToken[] {
+  const out: NumToken[] = [];
+  let m: RegExpExecArray | null;
+  const re = new RegExp(YEAR_CLAIM.source, 'g');
+  while ((m = re.exec(text ?? ''))) out.push({ kind: 'ym', raw: m[0].trim(), value: Number(m[1] ?? m[2]), tolerance: 0 });
+  return out;
+}
+
+/** 좁은 소스(esp·공고·상수)에 등장하는 연도 — 「2026Q3」「2026-10」「2026H2」「2026년」 모두. */
+export function yearsIn(sources: Array<string | null | undefined>): number[] {
+  const ys = new Set<number>();
+  for (const s of sources) for (const m of String(s ?? '').matchAll(/(?<!\d)(20\d{2})(?!\d)/g)) ys.add(Number(m[1]));
+  return [...ys];
+}
 
 /** 허용 목록 — 데이터 블록·원문 요약 등 «그 글에 준 텍스트» 에서 같은 추출기로 뽑는다(추출 규칙이 하나다). */
 export function buildAllow(sources: Array<string | null | undefined>, extra: Partial<Allow> = {}): Allow {
@@ -92,5 +112,13 @@ export function verifyNumbers(body: string, allow: Allow): VerifyResult {
     const hit = pool.some((v) => Math.abs(v - t.value) <= t.tolerance);
     if (!hit) unverified.push(t.raw);
   }
-  return { ok: unverified.length === 0, checked: toks.length, unverified: Array.from(new Set(unverified)) };
+  let checked = toks.length;
+  if (allow.year) {
+    const years = allow.year;
+    for (const t of yearClaimTokens(body)) {
+      checked++;
+      if (!years.includes(t.value)) unverified.push(t.raw);
+    }
+  }
+  return { ok: unverified.length === 0, checked, unverified: Array.from(new Set(unverified)) };
 }

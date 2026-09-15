@@ -8,7 +8,7 @@
 import { dbw } from '@/lib/cron-db-log';
 import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
 import { stripSyntheticPrice } from '@/lib/apt/synthetic-price';
-import { buildAllow, verifyNumbers } from '@/lib/content/number-verify';
+import { buildAllow, verifyNumbers, yearsIn } from '@/lib/content/number-verify';
 import { extractArticleText } from '@/lib/content/article-text';
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
@@ -98,6 +98,8 @@ export async function buildSiteContext(sb: any, siteId: string | null | undefine
       priced.price_min && priced.price_max
         ? `- 분양가: ${priced.price_min.toLocaleString()}만~${priced.price_max.toLocaleString()}만원`
         : '- 분양가: 미공개 — 금액을 추정하거나 단정하지 말 것. 「분양가 미공개·모집공고 후 확정」 문형으로만 쓴다',
+      // ABG 증분 4 §4 — 비율 자리를 비워 두면 모델이 관례(「계약금 10%」)로 채운다. 비율 없는 절차 문장을 조립해 준다.
+      '- 계약금·중도금·잔금: 비율과 납부 일정은 현장별 입주자모집공고에서 확정됩니다(이 문장 그대로 쓰고 비율·금액 숫자를 붙이지 않는다)',
       isRedev
         ? '- 사업 성격: 정비사업(재개발·재건축) — 「구역」 표현 가능'
         : '- 사업 성격: 일반 분양 현장 — ⛔ 「구역」이라 부르지 않는다(정비구역이 아니다). 「현장」·「단지」로 쓴다',
@@ -230,12 +232,16 @@ export async function loadIssueContext(sb: any, issue: any): Promise<IssueContex
 /** 허용 목록. ⛔ raw_data 의 blocked_draft·edit_pending(지난 초안)은 넣지 않는다 — 넣으면 환각 숫자가 스스로를 허가한다. */
 export function buildIssueAllow(ctx: IssueContext, issue: any) {
   const nowYm = new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 7);
-  return buildAllow(
+  // ABG 증분 4 §2 — 연도 결합 시기 주장은 esp·공고·상수에서만 허가(기사·실거래 기간의 연도로는 안 된다)
+  const scheduleLines = ctx.siteContext.split('\n').filter((l) => /^- (예상 분양 시기|청약 접수|당첨자 발표|입주 예정):/.test(l));
+  const year = yearsIn([...scheduleLines, ctx.constantsBlock]);
+  const allow = buildAllow(
     [ctx.siteContext, ctx.constantsBlock, ctx.sourceText, ctx.bigEventContext, issue.title, issue.summary,
       JSON.stringify({ ...(issue.raw_data ?? {}), blocked_draft: undefined, edit_pending: undefined, source_text: undefined, number_shadow: undefined }),
       (issue.detected_keywords || []).join(' ')],
     { ym: [Number(nowYm.replace('-', ''))] },
   );
+  return { ...allow, year };
 }
 
 /** 제목+본문 판정. 제목 위반은 편집으로 못 고친다(편집은 본문만) — 호출부가 곧바로 차단한다. */

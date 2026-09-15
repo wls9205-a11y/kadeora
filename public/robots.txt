@@ -203,62 +203,41 @@ Disallow: /consultant/
 Disallow: /notifications
 Disallow: /payment/
 
-# ===== AI Crawlers =====
+# ===== AI Crawlers (ABG X-9 G-1 · 2026-09-15 · Node 봇 개방 확인) =====
+# 인용 노출이 카더라의 존재 이유라 AI 검색·답변 봇을 «전면» 연다(학습 이용 허용과 등가임을 알고 택한 전략적 개방).
+# 예전 그룹은 /apt·/blog·/calc 만 Allow 하고 파셋 차단이 없었다 — 전용 그룹은 * 규칙을 상속하지 않으므로
+# 비색인·파셋 경로를 여기에도 복제한다(Googlebot·Bingbot 그룹과 같은 목록).
 User-agent: GPTBot
-Allow: /apt/
-Allow: /blog/
-Allow: /calc/
-Disallow: /admin/
-Disallow: /api/
-
+User-agent: OAI-SearchBot
 User-agent: ChatGPT-User
-Allow: /apt/
-Allow: /blog/
-Allow: /calc/
-Disallow: /admin/
-Disallow: /api/
-
 User-agent: ClaudeBot
-Allow: /apt/
-Allow: /blog/
-Allow: /calc/
-Disallow: /admin/
-Disallow: /api/
-
+User-agent: Claude-SearchBot
+User-agent: Claude-User
 User-agent: anthropic-ai
-Allow: /apt/
-Allow: /blog/
-Allow: /calc/
-Disallow: /admin/
-Disallow: /api/
-
 User-agent: PerplexityBot
-Allow: /apt/
-Allow: /blog/
-Allow: /calc/
-Disallow: /admin/
-Disallow: /api/
-
-User-agent: Amazonbot
-Allow: /apt/
-Allow: /blog/
-Allow: /calc/
-Disallow: /admin/
-Disallow: /api/
-
+User-agent: Perplexity-User
+User-agent: Google-Extended
 User-agent: Applebot-Extended
-Allow: /apt/
-Allow: /blog/
-Allow: /calc/
-Disallow: /admin/
-Disallow: /api/
-
+User-agent: Amazonbot
 User-agent: Meta-ExternalAgent
-Allow: /apt/
-Allow: /blog/
-Allow: /calc/
+Allow: /
+Allow: /llms.txt
 Disallow: /admin/
 Disallow: /api/
+Disallow: /search?
+Disallow: /*?q=
+Disallow: /*?sort=
+Disallow: /*?utm_
+Disallow: /*?ref=
+Disallow: /apt/redev/*?
+Disallow: /write
+Disallow: /login
+Disallow: /signup
+Disallow: /onboarding
+Disallow: /consultant/
+Disallow: /notifications
+Disallow: /payment/
+Disallow: /profile/
 
 # ===== Sitemaps =====
 Sitemap: https://kadeora.app/sitemap.xml

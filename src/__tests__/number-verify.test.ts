@@ -39,6 +39,19 @@ describe('verifyNumbers', () => {
     expect(extractNumbers('1만 세대 공급, 방문객 3만 명').length).toBe(0);
   });
 
+  it('ABG 증분4 — 연도 결합 시기 주장은 좁은 연도 목록으로만 허가', () => {
+    const narrow = { ...allow, year: [2026] };
+    expect(verifyNumbers('김해 부원동 지역주택조합 분양 2026년 일정', { ...allow, year: [] }).ok).toBe(false);
+    expect(verifyNumbers('2026년 하반기 분양 예정', narrow).ok).toBe(true);
+    expect(verifyNumbers('2027년 입주 예정', narrow).unverified).toEqual(['2027년 입주']);
+    // 연월은 ym 축 — 연도 결합 토큰으로 이중 검사하지 않는다
+    expect(verifyNumbers('2026년 9월 분양', narrow).unverified).toEqual([]);
+    // 결합어가 없는 연도 단독은 검사하지 않는다
+    expect(verifyNumbers('2026년 기준 제도', { ...allow, year: [] }).ok).toBe(true);
+    // allow.year 가 없으면(다른 호출부) 연도 결합 토큰 미검사 — 기존 동작 불변
+    expect(verifyNumbers('2027년 입주 예정', allow).ok).toBe(true);
+  });
+
   it('숫자가 없는 본문은 통과(검사 0)', () => {
     expect(verifyNumbers('분양가는 미공개이며 모집공고 후 확정됩니다.', allow)).toEqual({ ok: true, checked: 0, unverified: [] });
   });
