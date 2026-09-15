@@ -73,7 +73,6 @@ export default async function AptDataPage() {
     url: `${SITE}/apt/data`,
     provider: { '@type': 'Organization', name: '카더라', url: SITE },
     inLanguage: 'ko-KR',
-    dateModified: new Date().toISOString(),
   };
 
   return (

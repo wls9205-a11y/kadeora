@@ -162,7 +162,7 @@ function buildArticleJsonLd(p: {
     description: p.description,
     image: p.coverImage ? [p.coverImage] : undefined,
     datePublished: p.publishedAt || new Date().toISOString(),
-    dateModified: p.updatedAt || new Date().toISOString(),
+    ...(p.updatedAt ? { dateModified: p.updatedAt } : {}),
     articleSection: p.category,
     keywords: (p.tags || []).slice(0, 12).join(','),
     author: { '@type': 'Organization', name: p.authorName || '카더라', url: SITE_URL },

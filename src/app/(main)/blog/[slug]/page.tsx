@@ -60,6 +60,18 @@ import InlineTalkBanner from '@/components/banner/InlineTalkBanner';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { siteEntity, siteEntities } from '@/lib/seo/entity';
 import JsonLd from '@/components/seo/JsonLd';
+
+/**
+ * ABG 증분 1 §3 — 「거짓 신선도 신호 금지 — 추적 불가면 생략이 정답」.
+ * blog_posts.updated_at 은 갱신 트리거가 없는 열이다(EX-B ⓑ 실증) — dateModified·modified_time 소스 금지.
+ * 실갱신 이벤트가 기록되는 열은 rewritten_at(본문 재작성) 하나라, 발행 이후의 재작성만 수정일로 선언한다.
+ */
+function realModifiedAt(post: { rewritten_at?: string | null; published_at?: string | null; created_at?: string | null }): string | null {
+  const r = post.rewritten_at;
+  const base = post.published_at || post.created_at;
+  if (!r) return null;
+  return !base || Date.parse(r) > Date.parse(base) ? r : null;
+}
 // NewsletterSubscribe 삭제 — 카카오 CTA로 통합
 
 // marked heading에 id 자동 부여 (TOC 앵커용)
@@ -313,7 +325,7 @@ export async function generateMetadata({ params }: Props) {
       title: post.title, description: descClean, type: 'article',
       siteName: '카더라', locale: 'ko_KR',
       publishedTime: post.published_at || post.created_at,
-      modifiedTime: post.updated_at || post.rewritten_at || post.published_at || post.created_at,
+      ...(realModifiedAt(post) ? { modifiedTime: realModifiedAt(post)! } : {}),
       authors: [post.author_name || '카더라'],
       tags: post.tags ?? [],
       section: post.category === 'stock' ? '주식' : post.category === 'apt' ? '부동산' : post.category === 'unsold' ? '미분양' : '재테크',
@@ -336,16 +348,15 @@ export async function generateMetadata({ params }: Props) {
           'geo.position': `${geoEntry[1].lat};${geoEntry[1].lng}`,
           'ICBM': `${geoEntry[1].lat}, ${geoEntry[1].lng}`,
         } : {}),
-        'og:updated_time': post.updated_at || post.published_at || post.created_at,
-        'naver:written_time': post.rewritten_at || post.published_at || post.created_at,
-        'naver:updated_time': post.rewritten_at || post.updated_at || post.published_at || post.created_at,
+        ...(realModifiedAt(post) ? { 'og:updated_time': realModifiedAt(post)!, 'naver:updated_time': realModifiedAt(post)! } : {}),
+        'naver:written_time': post.published_at || post.created_at,
         'naver:author': post.author_name || '카더라',
         'naver:description': descClean,
         'dg:plink': `${SITE}/blog/${slug}`,
         'article:section': section,
         'article:tag': [section, ...(post.tags ?? []).slice(0, 8), post.category === 'stock' ? '주가,배당금,실적,전망' : post.category === 'apt' ? '실거래가,시세,청약,분양가' : '투자,재테크'].filter(Boolean).join(','),
         'article:published_time': post.published_at || post.created_at,
-        'article:modified_time': post.updated_at || post.published_at || post.created_at,
+        ...(realModifiedAt(post) ? { 'article:modified_time': realModifiedAt(post)! } : {}),
         'article:author': post.author_name || '카더라',
       };
     })(),
@@ -579,7 +590,7 @@ export default async function BlogDetailPage({ params }: Props) {
     headline: post.title,
     description: ((post.meta_description && post.meta_description.length >= 30) ? post.meta_description : (post.excerpt && post.excerpt.length >= 30) ? post.excerpt : post.title).replace(/[\n\r#*_|]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160),
     datePublished: post.published_at || post.created_at,
-    dateModified: post.updated_at || post.published_at || post.created_at,
+    ...(realModifiedAt(post) ? { dateModified: realModifiedAt(post)! } : {}),
     wordCount,
     timeRequired: `PT${readingTimeMin}M`,
     author: {
@@ -1455,8 +1466,8 @@ export default async function BlogDetailPage({ params }: Props) {
         tags={post.tags}
         category={post.category}
         createdAt={post.created_at}
-        updatedAt={post.updated_at}
-        rewrittenAt={post.rewritten_at}
+        updatedAt={realModifiedAt(post)}
+        rewrittenAt={realModifiedAt(post)}
       />
 
       {/* 시리즈 네비게이션 */}

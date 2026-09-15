@@ -328,7 +328,6 @@ export default async function ComplexDetailPage({ params }: Props) {
         url: `${SITE_URL}/apt/complex/${encodeURIComponent(decoded)}`,
         keywords: [decoded, '실거래가', '아파트 시세', region, sigungu],
         creator: { '@type': 'Organization', name: '카더라', url: SITE_URL },
-        dateModified: new Date().toISOString(),
         spatialCoverage: { '@type': 'Place', name: `${region} ${sigungu}` },
         temporalCoverage: tradeList.length > 0 ? `${tradeList[tradeList.length-1]?.deal_date || ''}/${tradeList[0]?.deal_date || ''}` : '',
         distribution: { '@type': 'DataDownload', contentUrl: `${SITE_URL}/apt/complex/${encodeURIComponent(decoded)}`, encodingFormat: 'text/html' },

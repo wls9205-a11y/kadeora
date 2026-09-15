@@ -89,7 +89,6 @@ export default async function RedevLandingPage() {
     name: '재개발 재건축 현황',
     description: `전국 ${total}개 재개발·재건축 구역의 진행 단계, 시공사, 세대수 정보`,
     url: `${SITE_URL}/apt/redev`,
-    dateModified: new Date().toISOString(),
     publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL },
     image: `${SITE_URL}/api/og?title=${encodeURIComponent('전국 재개발·재건축 현황')}&category=apt&design=2`,
     breadcrumb: {

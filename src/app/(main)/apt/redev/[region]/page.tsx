@@ -128,7 +128,6 @@ export default async function RegionRedevPage({ params }: Props) {
     name: `${decodedRegion} 재개발 재건축 현황`,
     description: `${decodedRegion} ${total}개 구역의 진행 단계, 시공사, 세대수 정보`,
     url: `${SITE_URL}/apt/redev/${encodeURIComponent(decodedRegion)}`,
-    dateModified: new Date().toISOString(),
     publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL },
     breadcrumb: { '@type': 'BreadcrumbList', itemListElement: [
       { '@type': 'ListItem', position: 1, name: '홈', item: SITE_URL },

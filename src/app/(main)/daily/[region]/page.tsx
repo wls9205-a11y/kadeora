@@ -122,7 +122,6 @@ export default async function DailyReportPage({ params }: Props) {
         description: `${region} 부동산 청약·미분양·재개발 + 국내외 주식 시황`,
         url: `${SITE_URL}/daily/${encodeURIComponent(region)}`,
         datePublished: new Date(now.setHours(7, 0, 0, 0)).toISOString(),
-        dateModified: new Date().toISOString(),
         author: { '@type': 'Organization', name: '카더라', url: SITE_URL },
         publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png`, width: 192, height: 192 } },
         image: [

@@ -191,7 +191,7 @@ export default async function StockDetailPage({ params }: Props) {
         name: `${s.name} (${symbol}) 주가 정보`,
         description: s.description || `${s.name} ${s.market} 상장. 현재가 ${fmtPrice(Number(s.price), s.currency ?? undefined)}.`,
         url: `${SITE_URL}/stock/${symbol}`,
-        dateModified: s.updated_at || new Date().toISOString(),
+        ...(s.updated_at ? { dateModified: s.updated_at } : {}),
         mainEntity: {
           '@type': 'FinancialProduct',
           name: s.name,
@@ -218,7 +218,7 @@ export default async function StockDetailPage({ params }: Props) {
         description: s.description || `${s.name} ${s.market} 상장 종목 실시간 시세·재무제표·AI 분석`,
         url: `${SITE_URL}/stock/${symbol}`,
         datePublished: s.updated_at || new Date().toISOString(),
-        dateModified: s.updated_at || new Date().toISOString(),
+        ...(s.updated_at ? { dateModified: s.updated_at } : {}),
         author: { '@type': 'Organization', name: '카더라', url: SITE_URL },
         publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png`, width: 192, height: 192 } },
         image: [

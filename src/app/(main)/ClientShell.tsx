@@ -156,6 +156,8 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
                   그 근거가 오늘 사라졌다 — 남긴 이유가 없어지면 링크도 같이 회수한다. */}
               <a href="/press" style={{color:'var(--text-secondary)',textDecoration:'none'}}>보도자료</a>
               <a href="/about" style={{color:'var(--text-secondary)',textDecoration:'none'}}>소개</a>
+              <a href="/terms" style={{color:'var(--text-secondary)',textDecoration:'none'}}>이용약관</a>
+              <a href="/privacy" style={{color:'var(--text-secondary)',textDecoration:'none'}}>개인정보처리방침</a>
             </nav>
             <p>문의: {CONTACT_EMAIL}</p>
             <p style={{marginTop:4}}>© 2026 <a href="/about" style={{color:'var(--text-secondary)',textDecoration:'none',fontWeight:600}}>카더라</a>. All rights reserved.</p>

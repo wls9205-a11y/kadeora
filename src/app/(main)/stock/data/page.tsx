@@ -51,7 +51,6 @@ export default async function StockDataPage() {
     url: `${SITE}/stock/data`,
     provider: { '@type': 'Organization', name: '카더라', url: SITE },
     inLanguage: 'ko-KR',
-    dateModified: new Date().toISOString(),
   };
 
   return (

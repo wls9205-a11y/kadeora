@@ -121,7 +121,7 @@ function buildArticleJsonLd(params: {
     description: params.description,
     image: params.coverImage ? [params.coverImage] : undefined,
     datePublished: params.publishedAt || new Date().toISOString(),
-    dateModified: params.updatedAt || new Date().toISOString(),
+    ...(params.updatedAt ? { dateModified: params.updatedAt } : {}),
     articleSection: params.category,
     keywords: (params.tags || []).slice(0, 12).join(','),
     author: {
@@ -207,7 +207,7 @@ async function handler(_req: NextRequest) {
             category: post.category || 'general',
             tags: Array.isArray(post.tags) ? post.tags : [],
             publishedAt: post.published_at,
-            updatedAt: post.updated_at,
+            updatedAt: null, // ABG 증분1 §3 — updated_at 은 트리거 없는 열: 수정일 소스 금지
             authorName: post.author_name || '카더라',
           });
 
