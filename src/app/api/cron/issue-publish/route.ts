@@ -84,7 +84,7 @@ async function handler(_req: NextRequest) {
       // draft_ready_at + seo_enriched_at IS NULL row 는 issue-seo-enrich cron 이 처리 (분리 책임)
       const { data: pending, error: fetchErr } = await (sb as any)
         .from('issue_alerts')
-        .select('id, blog_post_id, final_score, is_published, seo_enriched_at, draft_ready_at')
+        .select('id, blog_post_id, final_score, is_published, seo_enriched_at, draft_ready_at, source_type, raw_data')
         .not('seo_enriched_at', 'is', null)
         .not('blog_post_id', 'is', null)
         .or('is_published.eq.false,is_published.is.null')
@@ -111,8 +111,13 @@ async function handler(_req: NextRequest) {
       const gateReasonCounts: Record<string, number> = {};
       const samples: any[] = [];
 
+      // EX-B — BP 글감(허브 발행 · BP70 문서 카드)은 판독 모드. issue-draft 와 같은 스위치를 본다(이 경로가 모르고 초안을 공개할 뻔했다).
+      //   DB 가드(trg_guard_hallucination_republish · 사유 hold:bp_review)가 한 겹 더 막는다.
+      const { data: bpSw } = await (sb as any).from('app_config').select('value').eq('namespace', 'bp').eq('key', 'hub_publish_enabled').maybeSingle();
+      const bpPublishOn = bpSw?.value === true;
       for (const issue of pending as any[]) {
         if (Date.now() - start > PREEMPT_MS) break;
+        if (!bpPublishOn && (issue.source_type === 'bp70_hub' || String(issue.raw_data?.doc ?? '').startsWith('BP70'))) continue;
         try {
           const postId = Number(issue.blog_post_id);
 

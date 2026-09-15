@@ -22,3 +22,20 @@ drop trigger if exists trg_guard_hallucination_republish on public.blog_posts;
 create trigger trg_guard_hallucination_republish
   before update of is_published on public.blog_posts
   for each row execute function public.guard_hallucination_republish();
+
+-- EX-B 증분(같은 날) — issue-publish 가 BP 판독 모드를 모르고 check_publish_gate 만 보고 BP 초안을 공개할 수 있었다(112430 gate_blocked=이미지 부족 한 겹뿐).
+--   가드 사유에 'hold:%' 추가 · BP 글감 초안 3편에 'hold:bp_review'. 해제는 세션 B 판독 후 사유를 비운다.
+create or replace function public.guard_hallucination_republish()
+returns trigger language plpgsql as $$
+begin
+  if new.is_published and not coalesce(old.is_published, false)
+     and (coalesce(new.auto_unpublished_reason, '') like 'hallucination%'
+          or coalesce(new.auto_unpublished_reason, '') like 'hold:%') then
+    new.is_published := false;
+    new.auto_publish_eligible := false;
+  end if;
+  return new;
+end $$;
+update public.blog_posts set auto_unpublished_reason = 'hold:bp_review', auto_publish_eligible = false
+ where id in (select blog_post_id from public.issue_alerts where blog_post_id is not null and (source_type = 'bp70_hub' or raw_data->>'doc' like 'BP70%'))
+   and not is_published and auto_unpublished_reason is null;
