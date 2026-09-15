@@ -186,6 +186,7 @@ ORDER BY fails DESC;
 | 날짜 | 잡 | jobid | 전 | 후(UTC · KST 동일 분) | 근거 |
 |---|---|---|---|---|---|
 | 2026-09-15 | `cron_health_v2_2min` | 131 | `*/2 * * * *` | `*/10 * * * *` | E-2 — 24h p50 0.13s·p95 3.42s·max 53s(꼬리=대기). 함수 `lock_timeout=3s` 동반. 이름은 이력이라 유지 |
+| 2026-09-15 | `issue-draft-edit`(신설) | 180 | — | `5-59/10 * * * *` | ABG X-2 — 생성/편집 회차 분리. `?mode=edit` · cron_logs `issue-draft-edit` · 마이그레이션 `abg_x2_issue_draft_edit_cron_2026-09-15.sql` |
 | 2026-09-15 | `ci-alert-monitor-15m` | 68 | `4-49/15 * * * *` | `4 * * * *` | E-2 — KPI 4종이 7일·24h 집계. 임계값 불변. 함수 `lock_timeout=3s` 동반 |
 
 게이트: 24h 두 잡 실행시간 합 기준선 812s(131: 695s · 68: 117s, 2026-09-15 01:20Z) → **≤406s**.
