@@ -70,6 +70,7 @@ import LoginGate from '@/components/LoginGate';
 import AptBookmarkButton from '@/components/AptBookmarkButton';
 import SiteRow from '@/components/apt/SiteRow';
 import JsonLd from '@/components/seo/JsonLd';
+import { buildSiteOverview } from '@/lib/apt/site-overview';
 const RegulationBadges = dynamic(() => import('@/components/RegulationBadges'));
 const CostSimulator = dynamic(() => import('@/components/CostSimulator'));
 // C3: ContentLock 제거
@@ -986,7 +987,7 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
       {sub?.rcept_bgnde && new Date(sub.rcept_endde || sub.rcept_bgnde) >= new Date() && <JsonLd data={{ '@context': 'https://schema.org', '@type': 'Event', name: `${name} 청약 접수`, startDate: sub.rcept_bgnde, endDate: sub.rcept_endde, eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode', location: { '@type': 'VirtualLocation', url: `${SITE_URL}/apt/${slug}` }, organizer: { '@type': 'Organization', name: site?.builder || sub.constructor_nm || '청약홈', url: sub.pblanc_url || SITE_URL }, image: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&subtitle=${encodeURIComponent('청약 접수')}` }} />}
 
       {/* JSON-LD 5: Article + SpeakableSpecification (voice search, Google Discover) */}
-      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'Article', headline: `${displayName} ${tLabel[sType] || '분양'} 정보`, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, datePublished: site?.created_at || sub?.fetched_at || new Date().toISOString(), dateModified: site?.updated_at || new Date().toISOString(), author: { '@type': 'Organization', name: '카더라', url: SITE_URL }, publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png`, width: 192, height: 192 } }, image: [...(heroPhotoUrl ? [{ '@type': 'ImageObject', url: heroPhotoUrl, width: 1200, height: 630, name: `${name} 항공 이미지` }] : []), { '@type': 'ImageObject', url: `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(slug)}&card=1`, width: 630, height: 630, name: `${name} 분양 인포그래픽` }, { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&subtitle=${encodeURIComponent(region)}`, width: 1200, height: 630 }], thumbnailUrl: developerHeroUrl || `${SITE_URL}/api/og-square?title=${encodeURIComponent(name)}&category=apt`, mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/apt/${slug}` }, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.site-description'] } }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'Article', headline: `${displayName} ${tLabel[sType] || '분양'} 정보`, description: site?.description || `${region} ${name}`, url: `${SITE_URL}/apt/${slug}`, datePublished: site?.created_at || sub?.fetched_at || new Date().toISOString(), dateModified: site?.updated_at || new Date().toISOString(), author: { '@type': 'Organization', name: '카더라', url: SITE_URL }, publisher: { '@type': 'Organization', name: '카더라', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-192.png`, width: 192, height: 192 } }, image: [...(heroPhotoUrl ? [{ '@type': 'ImageObject', url: heroPhotoUrl, width: 1200, height: 630, name: `${name} 항공 이미지` }] : []), { '@type': 'ImageObject', url: `${SITE_URL}/api/og-apt?slug=${encodeURIComponent(slug)}&card=1`, width: 630, height: 630, name: `${name} 분양 인포그래픽` }, { '@type': 'ImageObject', url: `${SITE_URL}/api/og?title=${encodeURIComponent(name)}&design=2&subtitle=${encodeURIComponent(region)}`, width: 1200, height: 630 }], thumbnailUrl: developerHeroUrl || `${SITE_URL}/api/og-square?title=${encodeURIComponent(name)}&category=apt`, mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/apt/${slug}` }, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '#apt-overview-lead'] } }} />
 
       {/* JSON-LD 6: Product (price range → Google price chip in SERP) */}
       {/* Product 스키마 제거 — ApartmentComplex+RealEstateListing으로 대체됨 */}
@@ -1220,6 +1221,42 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
       {/* ── M6 A-1 · ① 이 단지가 뭔가 ──
            점프바 '이 단지' 칩의 목적지. 높이 0 앵커라 레이아웃에 끼어들지 않는다. */}
       <div id="about-group" aria-hidden="true" style={{ scrollMarginTop: SECTION_SCROLL_MARGIN }} />
+
+      {/* AB-1 — 「단지 개요」 정의문 리드. AI 브리핑·음성 검색이 인용하는 «첫 문단» 을 실데이터로 세운다.
+           ⚠️ F2 분석문(AI 생성)과 독립 — 템플릿 파생이라 AI·쿼터 무관. NULL 은 문장에서 빠지고, 가격은 합성가를 비운 값만.
+           ⚠️ 세대수·분양가는 바로 아래 핵심 지표에도 있다(v10 §3 「한 번만」). 여기는 «문장» 으로 한 번 더 말하는 자리라
+              AI 가 섹션 하나만 떼어 가도 단지를 설명할 수 있어야 한다는 AB-1 요구가 우선이다. */}
+      {(() => {
+        const ov = buildSiteOverview({
+          name: String(displayName ?? name).split(' — ')[0],
+          region, sigungu, dong: (site as any)?.dong ?? null,
+          builder: builderName ?? null,
+          siteType: (site as any)?.site_type ?? null,
+          stageLabel: stageLabel(lc),
+          schedule,
+          units: units.complex ?? units.supply ?? (siteUnconfirmed ? null : (site as any)?.total_units ?? null),
+          maxFloor: (sub as any)?.max_floor ?? (redev as any)?.max_floor ?? null,
+          priceText: !siteUnconfirmed && site?.price_min && site?.price_max ? `${fmtAmount(site.price_min)}~${fmtAmount(site.price_max)}` : null,
+          built: lc === 'post_move_in' || lc === 'landmark_active',
+        });
+        if (!ov.lead) return null;
+        return (
+          <section className="apt-card apt-overview" aria-labelledby="apt-sec-overview">
+            <h2 id="apt-sec-overview" className="apt-section-title">단지 개요</h2>
+            <p id="apt-overview-lead" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.7, margin: '0 0 10px', wordBreak: 'keep-all' }}>{ov.lead}</p>
+            {ov.bullets.length > 0 && (
+              <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: 4 }}>
+                {ov.bullets.map((b) => (
+                  <li key={b.label} style={{ display: 'flex', gap: 'var(--sp-sm)', fontSize: 'var(--fs-xs)', lineHeight: 1.6 }}>
+                    <span style={{ flexShrink: 0, minWidth: 64, color: 'var(--text-tertiary)' }}>{b.label}</span>
+                    <span style={{ minWidth: 0, color: 'var(--text-secondary)', wordBreak: 'keep-all', overflowWrap: 'anywhere' }}>{b.value}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        );
+      })()}
 
       {/* ── v10 §3 · 핵심 지표 4칸 ──
            분양가·세대수·입주·D-day 는 **페이지에 여기 한 번만** 나온다.
