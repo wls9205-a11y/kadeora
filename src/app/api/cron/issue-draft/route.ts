@@ -701,7 +701,8 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   //   ⚠️ 부동산은 막는다. 주식·경제는 원문 요약에 수치가 적게 실려 오탐이 커서 «섀도»(기록만) — 통과율을 보고 확대 판정.
   const nowYm = new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 7);
   const allow = buildAllow(
-    [siteContext, bigEventContext, issue.title, issue.summary, JSON.stringify(issue.raw_data ?? {}), (issue.detected_keywords || []).join(' ')],
+    // ⛔ raw_data 의 blocked_draft(지난번에 막힌 초안)는 허용 목록에 넣지 않는다 — 넣으면 환각 숫자가 스스로를 허가한다.
+    [siteContext, bigEventContext, issue.title, issue.summary, JSON.stringify({ ...(issue.raw_data ?? {}), blocked_draft: undefined }), (issue.detected_keywords || []).join(' ')],
     { ym: [Number(nowYm.replace('-', ''))] },
   );
   const numGate = verifyNumbers(article.content, allow);
