@@ -18,6 +18,7 @@ import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
 import { sortForGeneration } from '@/lib/content/realestate-priority';
 import { stripSyntheticPrice } from '@/lib/apt/synthetic-price';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
+import { buildAllow, verifyNumbers } from '@/lib/content/number-verify';
 
 /**
  * issue-draft v2 — AI 기사 생성 + 자동 발행 + 이미지 + 피드 포스트
@@ -180,6 +181,34 @@ async function buildSiteContext(sb: any, siteId: string | null | undefined): Pro
         ? '- 사업 성격: 정비사업(재개발·재건축) — 「구역」 표현 가능'
         : '- 사업 성격: 일반 분양 현장 — ⛔ 「구역」이라 부르지 않는다(정비구역이 아니다). 「현장」·「단지」로 쓴다',
     ].filter(Boolean);
+
+    // EX-A ① — 실데이터 블록. 글이 쓸 수 있는 «숫자» 는 이 블록과 원문 요약에 있는 것뿐이다(수치 출처율 게이트가 대조).
+    //   ⚠️ 없는 줄은 만들지 않는다(AB-1 원칙). 표가 될 행이 없으면 표도 없다.
+    if (data.region && data.sigungu) {
+      const since = new Date(Date.now() - 183 * 86_400_000).toISOString().slice(0, 10);
+      const { data: tx } = await (sb as any).from('apt_transactions')
+        .select('deal_amount, deal_date')
+        .eq('region_nm', data.region).ilike('sigungu', `%${data.sigungu}%`)
+        .gte('deal_date', since).gt('deal_amount', 0)
+        .order('deal_date', { ascending: false }).limit(1000);
+      const rows = ((tx ?? []) as Array<{ deal_amount: number; deal_date: string }>);
+      if (rows.length >= 5) {
+        const amts = rows.map((r) => r.deal_amount).sort((x, y) => x - y);
+        const median = amts[Math.floor(amts.length / 2)];
+        const months = rows.map((r) => String(r.deal_date).slice(0, 7)).sort();
+        const fmt = (v: number) => (v >= 10000 ? `${Math.floor(v / 10000)}억${v % 10000 ? ` ${(v % 10000).toLocaleString()}만원` : '원'}` : `${v.toLocaleString()}만원`);
+        lines.push(`- 같은 시군구 아파트 실거래(${months[0]}~${months[months.length - 1]}, ${rows.length}건${rows.length === 1000 ? '+' : ''}): 중위 ${fmt(median)} · 최저 ${fmt(amts[0])} · 최고 ${fmt(amts[amts.length - 1])} — 단지를 특정하지 않은 시군구 전체 집계`);
+      }
+    }
+    const subId = Number(data.source_ids?.subscription_id);
+    if (subId) {
+      const { data: sub } = await (sb as any).from('apt_subscriptions')
+        .select('rcept_bgnde, rcept_endde, przwner_presnatn_de, mvn_prearnge_ym')
+        .eq('id', subId).maybeSingle();
+      if (sub?.rcept_bgnde) lines.push(`- 청약 접수: ${sub.rcept_bgnde}${sub.rcept_endde ? ` ~ ${sub.rcept_endde}` : ''} (청약홈 모집공고)`);
+      if (sub?.przwner_presnatn_de) lines.push(`- 당첨자 발표: ${sub.przwner_presnatn_de} (청약홈 모집공고)`);
+      if (sub?.mvn_prearnge_ym) lines.push(`- 입주 예정: ${String(sub.mvn_prearnge_ym).slice(0, 4)}-${String(sub.mvn_prearnge_ym).slice(4, 6)} (청약홈 모집공고)`);
+    }
     return lines.join('\n');
   } catch {
     return '';
@@ -200,7 +229,7 @@ async function generateArticle(issue: any, bigEventContext = '', siteContext = '
 규칙:
 - 분량: ${isPreempt ? '6,000~8,000자' : '5,000~7,000자'} (충분히 깊이 있게)
 - H2 섹션: 6~10개 (## 형식)
-- 마크다운 표(|---|): 최소 2개 (비교 분석 필수)
+${issue.category === 'apt' ? '- 마크다운 표는 «이 글의 현장» 데이터 블록에 표가 될 행이 있을 때만 만든다. 없으면 표를 만들지 않는다' : '- 마크다운 표(|---|): 최소 2개 (비교 분석 필수)'}
 - 핵심 수치 강조: **굵은 숫자**와 퍼센트를 적극 활용
 - 각 섹션 첫 문장에 핵심 수치 배치
 - 면책 조항 포함 (투자 판단은 본인 책임)
@@ -211,8 +240,8 @@ async function generateArticle(issue: any, bigEventContext = '', siteContext = '
 - 카더라 내부 링크 3개 이상: [텍스트](/apt), [텍스트](/stock), [텍스트](/blog) 등
 ${isPreempt ? `
 ## 선점형 콘텐츠 특별 규칙:
-- 예상 경쟁률, 입지 분석을 깊이 있게. 분양가는 «주변 시세 비교» 로만 설명하고, 공고 전 금액을 확정값처럼 쓰지 않는다(F1)
-- 주변 시세 비교 테이블 필수 (반경 1km 내 단지)
+- 입지·일정·사업 단계를 깊이 있게. 분양가·경쟁률은 데이터 블록에 있을 때만 쓴다(F1)
+- 주변 시세는 데이터 블록의 «시군구 실거래 집계» 줄만 인용한다 — 개별 단지 시세를 지어내지 않는다
 - 청약 전략 가이드 섹션 포함 (가점/추첨, 자금계획)
 - "이 정보는 공식 발표 전 수집된 것으로 변동될 수 있습니다" 면책 포함
 ` : ''}
@@ -223,6 +252,9 @@ ${issue.category === 'apt' ? `
   ⛔ 이름을 하이픈에서 자르지 않는다 — 「범천1-1구역」을 「범천1」로 쓰면 다른 현장이 된다.
 - 본문 첫머리에 «3줄 요약» 을 둔다(검색 스니펫용, 각 줄 한 문장).
 - 「공급 정보」 표를 하나 둔다: 세대수 · 시공사 · 예상 일정 · 위치. 모르는 값은 「미정」이라고 쓴다.
+⛔ 수치 규율(EX-A · 수치 출처율 100%) — 금액·연월·퍼센트는 「이 글의 현장」 블록과 원문 요약에 «있는 값» 만 쓴다.
+   추정치·예시 금액·「A아파트」 같은 가상 단지·블록보다 정밀한 시기(「3분기」를 「9월」로)를 쓰지 않는다.
+   이 규율을 어긴 숫자가 하나라도 있으면 발행 전 검증기가 글 전체를 막는다.
 ⛔ 사실 규율 — 예정명은 «확정 발표된 것» 만 단정한다. 시공사 선정 «전» 의 이름이면
    반드시 「제안 단지명」이라고 밝힌다. 확정과 제안을 섞으면 그 현장을 영영 잘못 부르게 된다.
 ${siteContext ? `
@@ -563,7 +595,7 @@ async function scheduleBuzzPosts(sb: any, issueId: string, score: number) {
 
 /* ═══════════ 메인: 이슈 1건 처리 ═══════════ */
 
-async function processOneIssue(sb: any, issue: any, config: any): Promise<{ decision: string; title?: string; score: number; slug?: string }> {
+async function processOneIssue(sb: any, issue: any, config: any): Promise<{ decision: string; title?: string; score: number; slug?: string; numGate?: { category: string; ok: boolean; checked: number; unverified: string[] } }> {
   // CAS lock
   const retryCount = issue.retry_count || 0;
   const { data: lockResult } = await (sb as any).from('issue_alerts')
@@ -665,6 +697,23 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     return { decision: 'ai_failed_final', score: issue.final_score };
   }
 
+  // EX-A ③ — 수치 출처율 100%. LLM 원문(시각화·SEO 보강 «전») 을 그 글에 준 텍스트와 대조한다.
+  //   ⚠️ 부동산은 막는다. 주식·경제는 원문 요약에 수치가 적게 실려 오탐이 커서 «섀도»(기록만) — 통과율을 보고 확대 판정.
+  const nowYm = new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 7);
+  const allow = buildAllow(
+    [siteContext, bigEventContext, issue.title, issue.summary, JSON.stringify(issue.raw_data ?? {}), (issue.detected_keywords || []).join(' ')],
+    { ym: [Number(nowYm.replace('-', ''))] },
+  );
+  const numGate = verifyNumbers(article.content, allow);
+  if (!numGate.ok && issue.category === 'apt') {
+    dbw('issue-draft', 'issue_alerts.update@number_gate', await (sb as any).from('issue_alerts').update({
+      publish_decision: 'number_unverified', fail_reason: 'number_unverified',
+      block_reason: `수치 출처 미확인 ${numGate.unverified.length}/${numGate.checked}: ${numGate.unverified.slice(0, 12).join(' · ')}`.slice(0, 500),
+    }).eq('id', issue.id));
+    return { decision: 'number_unverified', score: issue.final_score, title: article.title, numGate: { category: issue.category, ...numGate } };
+  }
+  if (!numGate.ok) console.warn(`[issue-draft] number_gate shadow(${issue.category}) ${numGate.unverified.length}/${numGate.checked}: ${numGate.unverified.slice(0, 6).join(' · ')}`);
+
   article.content = enrichVisuals(article.content, issue);
 
   // s189: SEO 마스터 — 발행 직전 위생 검사 + 자동 보강 (내부링크/EAT/meta/alt/tags)
@@ -739,7 +788,15 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
 
   const check = factCheck(seoEnriched, issue.raw_data || {}, issue.category || 'general', locationLock);
 
-  const canAutoPublish = config.auto_publish_enabled
+  // EX-A ④ — BP 글감(허브 발행 · BP70 문서 카드 이벤트)은 판독 전까지 «비공개 초안» 으로만 만든다.
+  //   app_config bp.hub_publish_enabled 가 정확히 true 일 때만 자동 발행 경로를 탄다(기본 보류).
+  const isBpIssue = issue.source_type === 'bp70_hub' || String(issue.raw_data?.doc ?? '').startsWith('BP70');
+  let bpPublishOn = false;
+  if (isBpIssue) {
+    const { data: sw } = await (sb as any).from('app_config').select('value').eq('namespace', 'bp').eq('key', 'hub_publish_enabled').maybeSingle();
+    bpPublishOn = sw?.value === true;
+  }
+  const canAutoPublish = (!isBpIssue || bpPublishOn) && config.auto_publish_enabled
     && issue.final_score >= (config.auto_publish_min_score ?? 40)
     && !issue.block_reason && check.passed
     && !(config.auto_publish_blocked_categories || []).includes(issue.category);
