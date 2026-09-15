@@ -70,6 +70,22 @@ export function unitCell(u: UnitCounts): UnitCell {
   return { label: '세대수', value: '미확인' };
 }
 
+/**
+ * ABG 증분 2 §4 — `total_units`(@deprecated) 한 칸만 가진 화면의 즉효 지혈 라벨.
+ * 청약을 거친 현장(source_ids.house_manage_no · subscription_id)은 sync-apt-sites 가 total_units 를
+ * 공고 «공급 세대수» 로 매 실행 덮는다(603곳 전부 일치 실측 · 그랑라크 1,153 vs 단지 1,521).
+ * 그래서 청약 경유면 「공급 N세대」, 단지 전체값(complex_units)이 있으면 그걸 「총」으로, 그 외만 「총 N세대」.
+ * ⚠️ 정본 정리는 컬럼 의미 사전(별건 설계). 이 함수는 표시만 정직하게 만든다.
+ */
+export function legacyUnitsLabel(site: { total_units?: number | null; complex_units?: number | null; source_ids?: Record<string, unknown> | null }): string | null {
+  const complex = pos(site.complex_units);
+  if (complex) return `총 ${complex.toLocaleString('ko-KR')}세대`;
+  const total = pos(site.total_units);
+  if (!total) return null;
+  const viaSubscription = !!(site.source_ids && (site.source_ids.house_manage_no || site.source_ids.subscription_id));
+  return `${viaSubscription ? '공급' : '총'} ${total.toLocaleString('ko-KR')}세대`;
+}
+
 /** 히어로 보조줄·공유 문구용 한 줄. 없으면 null — '0세대' 를 만들지 않는다. */
 export function unitsSummary(u: UnitCounts): string | null {
   if (u.supply && u.complex) return `분양 ${u.supply.toLocaleString('ko-KR')} / 총 ${u.complex.toLocaleString('ko-KR')}세대`;

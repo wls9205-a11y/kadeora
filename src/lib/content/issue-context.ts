@@ -86,7 +86,12 @@ export async function buildSiteContext(sb: any, siteId: string | null | undefine
       `- 표기할 이름: 「${preferred}」 ${preferred !== data.name ? `(구역명: ${data.name})` : ''}`,
       data.sigungu ? `- 지역: ${[data.region, data.sigungu].filter(Boolean).join(' ')}` : '',
       data.builder ? `- 시공사: ${data.builder}` : '- 시공사: 미정(단정하지 말 것)',
-      units ? `- 세대수: ${units}세대` : '- 세대수: 미정(단정하지 말 것)',
+      // ABG 증분 2 §4 — 청약 경유 현장의 total_units 는 공고 «공급» 세대수다(sync 덮어쓰기). 총세대로 쓰게 두면 그랑라크 1,153 사고가 된다.
+      data.complex_units
+        ? `- 단지 전체 세대수: ${data.complex_units}세대`
+        : units && (data.source_ids?.house_manage_no || data.source_ids?.subscription_id)
+          ? `- 공급 세대수(청약 공고 기준): ${units}세대 — 단지 전체 세대수는 미확인. 「총 ${units}세대」라고 쓰지 않는다`
+          : units ? `- 세대수: ${units}세대` : '- 세대수: 미정(단정하지 말 것)',
       data.expected_sale_period
         ? `- 예상 분양 시기: ${data.expected_sale_period}${data.expected_sale_period_asof ? ` (${String(data.expected_sale_period_asof).slice(0, 10)} 기준 보도 — 본문·FAQ 에 기준일을 함께 쓴다)` : ''}`
         : '',

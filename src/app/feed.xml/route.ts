@@ -6,6 +6,7 @@ export const revalidate = 1800; // 30분마다 갱신
 export const dynamic = 'force-dynamic'; // s168: 빌드타임 DB 호출 제거
 
 import { SITE_URL as SITE } from '@/lib/constants';
+import { legacyUnitsLabel } from '@/lib/apt/units';
 
 
 
@@ -45,7 +46,7 @@ export async function GET(req: NextRequest) {
   }
 
   const [blogsR, postsR, sitesR, discussR] = await Promise.all([blogQuery, postQuery,
-    supabase.from('apt_sites').select('slug, name, description, region, sigungu, builder, site_type, total_units, updated_at, created_at')
+    supabase.from('apt_sites').select('slug, name, description, region, sigungu, builder, site_type, total_units, complex_units, source_ids, updated_at, created_at')
       .eq('is_active', true).gte('content_score', 25).order('updated_at', { ascending: false }).limit(200),
     supabase.from('discussion_topics').select('id, title, description, category, option_a, option_b, vote_a, vote_b, comment_count, created_at')
       .order('created_at', { ascending: false }).limit(100),
@@ -79,7 +80,7 @@ export async function GET(req: NextRequest) {
     return {
       title: `${s.name} ${typeLabel[s.site_type] || '부동산 정보'} — ${s.region} ${s.sigungu || ''}`,
       link: `${SITE}/apt/${s.slug}`,
-      description: s.description || `${s.region} ${s.sigungu || ''} ${s.name}. ${s.builder ? `${s.builder} 시공.` : ''} ${s.total_units ? `총 ${s.total_units}세대.` : ''} 청약 일정, 분양가, 실거래가 정보를 카더라에서 확인하세요.`,
+      description: s.description || `${s.region} ${s.sigungu || ''} ${s.name}. ${s.builder ? `${s.builder} 시공.` : ''} ${legacyUnitsLabel(s as any) ? `${legacyUnitsLabel(s as any)}.` : ''} 청약 일정, 분양가, 실거래가 정보를 카더라에서 확인하세요.`,
       pubDate: new Date(s.updated_at || s.created_at).toUTCString(),
       category: typeCat[s.site_type] || '부동산',
       tags: [s.name, s.region, typeCat[s.site_type] || '부동산', s.builder].filter(Boolean),

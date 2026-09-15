@@ -18,7 +18,11 @@ const BLOG_PER_SITEMAP = 5000;
 
 interface SitemapEntry {
   url: string;
-  lastModified: string;
+  /**
+   * ABG 증분 2 — 「거짓 신선도 신호 금지 — 추적 불가면 생략」. 실갱신 이벤트(발행·재작성·생성)가 없으면 null → <lastmod> 를 싣지 않는다.
+   * ⛔ now·빌드 고정일·updated_at(blog_posts 는 트리거 없음 · apt_sites 는 sync 가 매 실행 갱신)을 쓰지 않는다.
+   */
+  lastModified: string | null;
   changeFrequency: string;
   priority: number;
 }
@@ -28,8 +32,7 @@ function toXml(entries: SitemapEntry[]): string {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${entries.map(e => `  <url>
     <loc>${e.url}</loc>
-    <lastmod>${e.lastModified}</lastmod>
-    <changefreq>${e.changeFrequency}</changefreq>
+${e.lastModified ? `    <lastmod>${e.lastModified}</lastmod>\n` : ''}    <changefreq>${e.changeFrequency}</changefreq>
     <priority>${e.priority}</priority>
   </url>`).join('\n')}
 </urlset>`;
@@ -48,7 +51,6 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
   const { id: rawId } = await props.params;
   const id = Number(rawId.replace('.xml', ''));
   const now = new Date().toISOString();
-  const buildDate = '2026-04-08T00:00:00Z'; // Static pages: fixed lastmod
 
   // ── 0: static + region + sector ──
   if (id === 0) {
@@ -106,37 +108,37 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
     const entries: SitemapEntry[] = [
       ...staticPaths.map(path => ({
         url: `${BASE}${path}`,
-        lastModified: buildDate,
+        lastModified: null,
         changeFrequency: path === '' ? 'daily' : 'weekly',
         priority: path === '' ? 1 : ['/feed', '/stock', '/apt'].includes(path) ? 0.9 : 0.7,
       })),
       ...calcPaths.map(path => ({
         url: `${BASE}${path}`,
-        lastModified: now,
+        lastModified: null,
         changeFrequency: 'monthly' as string,
         priority: path === '/calc' ? 0.9 : 0.8,
       })),
       ...REGIONS.map(r => ({
         url: `${BASE}/apt/region/${encodeURIComponent(r)}`,
-        lastModified: now,
+        lastModified: null,
         changeFrequency: 'weekly',
         priority: 0.7,
       })),
       ...SECTORS.map(s => ({
         url: `${BASE}/stock/sector/${encodeURIComponent(s)}`,
-        lastModified: now,
+        lastModified: null,
         changeFrequency: 'weekly',
         priority: 0.7,
       })),
       // 카더라 데일리 리포트 — 17개 지역
       ...['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'].flatMap(r => [
-        { url: `${BASE}/daily/${encodeURIComponent(r)}`, lastModified: now, changeFrequency: 'daily', priority: 0.85 },
-        { url: `${BASE}/daily/${encodeURIComponent(r)}/archive`, lastModified: now, changeFrequency: 'weekly', priority: 0.5 },
+        { url: `${BASE}/daily/${encodeURIComponent(r)}`, lastModified: null, changeFrequency: 'daily', priority: 0.85 },
+        { url: `${BASE}/daily/${encodeURIComponent(r)}/archive`, lastModified: null, changeFrequency: 'weekly', priority: 0.5 },
       ]),
       // 테마 페이지 (투자자 검색 키워드) — 6테마 × (전국 + 17지역) = 108 URL
       ...THEME_SLUGS.flatMap(t => [
-        { url: `${BASE}/apt/theme/${t}`, lastModified: now, changeFrequency: 'weekly' as string, priority: 0.8 },
-        ...THEME_REGIONS.map(r => ({ url: `${BASE}/apt/theme/${t}?region=${encodeURIComponent(r)}`, lastModified: now, changeFrequency: 'weekly' as string, priority: 0.7 })),
+        { url: `${BASE}/apt/theme/${t}`, lastModified: null, changeFrequency: 'weekly' as string, priority: 0.8 },
+        ...THEME_REGIONS.map(r => ({ url: `${BASE}/apt/theme/${t}?region=${encodeURIComponent(r)}`, lastModified: null, changeFrequency: 'weekly' as string, priority: 0.7 })),
       ]),
     ];
 
@@ -148,7 +150,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       for (const p of pairs) {
         entries.push({
           url: `${BASE}/apt/stage/${p.stage}/${encodeURIComponent(p.region)}`,
-          lastModified: now,
+          lastModified: null,
           changeFrequency: p.stage === 'offering' ? 'daily' : 'weekly',
           priority: p.stage === 'offering' ? 0.85 : 0.75,
         });
@@ -160,7 +162,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       for (const m of months) {
         entries.push({
           url: `${BASE}/blog/archive/${m}`,
-          lastModified: now,
+          lastModified: null,
           changeFrequency: 'monthly',
           priority: 0.6,
         });
@@ -186,7 +188,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       );
       return xmlResponse(data.map(s => ({
         url: `${BASE}/stock/${s.symbol}`,
-        lastModified: s.updated_at || now,
+        lastModified: null,
         changeFrequency: 'daily',
         priority: 0.8,
       })));
@@ -210,7 +212,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       const typeFreq: Record<string, string> = { subscription: 'daily', trade: 'weekly', redevelopment: 'weekly', unsold: 'weekly', landmark: 'monthly' };
       return xmlResponse(data.map((s: any) => ({
         url: `${BASE}/apt/${s.slug}`,
-        lastModified: s.updated_at || now,
+        lastModified: null,
         changeFrequency: typeFreq[s.site_type] || 'weekly',
         priority: s.interest_count > 0 ? Math.min((typePriority[s.site_type] || 0.7) + 0.05, 0.95) : typePriority[s.site_type] || 0.7,
       })));
@@ -254,7 +256,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       }
       return xmlResponse(filtered.map((p: any) => ({
         url: `${BASE}/feed/${p.slug || p.id}`,
-        lastModified: p.updated_at || p.created_at || now,
+        lastModified: p.created_at || null,
         changeFrequency: 'weekly',
         priority: 0.5,
       })));
@@ -272,7 +274,7 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
         const engagement = (d.vote_a || 0) + (d.vote_b || 0) + (d.comment_count || 0);
         return {
           url: `${BASE}/discuss/${d.id}`,
-          lastModified: d.created_at || now,
+          lastModified: d.created_at || null,
           changeFrequency: 'weekly',
           priority: engagement > 50 ? 0.7 : engagement > 10 ? 0.6 : 0.5,
         };
@@ -305,7 +307,6 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
         const freq = activity > 50 ? 'weekly' : 'monthly';
         return `  <url>
     <loc>${BASE}/apt/complex/${encodeURIComponent(p.apt_name)}</loc>
-    <lastmod>${p.updated_at || now}</lastmod>
     <changefreq>${freq}</changefreq>
     <priority>${prio}</priority>
     <image:image>
@@ -340,7 +341,7 @@ ${complexXml}
       );
       const sgMap = new Map<string, number>();
       for (const r of sgd) { const k = `${r.region_nm}|${r.sigungu}`; sgMap.set(k, (sgMap.get(k) || 0) + 1); }
-      for (const [k, c] of sgMap) { if (c < 10) continue; const [reg, sg] = k.split('|'); if (!reg || !sg) continue; entries.push({ url: `${BASE}/apt/area/${encodeURIComponent(reg)}/${encodeURIComponent(sg)}`, lastModified: now, changeFrequency: 'weekly', priority: c > 200 ? 0.85 : c > 50 ? 0.75 : 0.65 }); }
+      for (const [k, c] of sgMap) { if (c < 10) continue; const [reg, sg] = k.split('|'); if (!reg || !sg) continue; entries.push({ url: `${BASE}/apt/area/${encodeURIComponent(reg)}/${encodeURIComponent(sg)}`, lastModified: null, changeFrequency: 'weekly', priority: c > 200 ? 0.85 : c > 50 ? 0.75 : 0.65 }); }
       // 동 (5개+ 단지만)
       const dd = await fetchBatched<{ region_nm: string; sigungu: string; dong: string }>((off, lim) =>
         (sb as any).from('apt_complex_profiles').select('region_nm, sigungu, dong')
@@ -350,7 +351,7 @@ ${complexXml}
       );
       const dMap = new Map<string, number>();
       for (const r of dd) { const k = `${r.region_nm}|${r.sigungu}|${r.dong}`; dMap.set(k, (dMap.get(k) || 0) + 1); }
-      for (const [k, c] of dMap) { if (c < 5) continue; const [reg, sg, dg] = k.split('|'); if (!reg || !sg || !dg) continue; entries.push({ url: `${BASE}/apt/area/${encodeURIComponent(reg)}/${encodeURIComponent(sg)}/${encodeURIComponent(dg)}`, lastModified: now, changeFrequency: 'monthly', priority: c > 30 ? 0.7 : 0.6 }); }
+      for (const [k, c] of dMap) { if (c < 5) continue; const [reg, sg, dg] = k.split('|'); if (!reg || !sg || !dg) continue; entries.push({ url: `${BASE}/apt/area/${encodeURIComponent(reg)}/${encodeURIComponent(sg)}/${encodeURIComponent(dg)}`, lastModified: null, changeFrequency: 'monthly', priority: c > 30 ? 0.7 : 0.6 }); }
       // 건설사 (3개+ 현장만)
       // ⚠️ M2 B-2: 원문 builder 가 아니라 builder_normalized 를 센다.
       //    허브가 contains(builder_normalized) 로 조회하므로 사이트맵이 원문을 그대로
@@ -366,7 +367,7 @@ ${complexXml}
       for (const r of bd) {
         for (const b of (r.builder_normalized ?? [])) bMap.set(b, (bMap.get(b) || 0) + 1);
       }
-      for (const [b, c] of bMap) { if (c < 3) continue; entries.push({ url: `${BASE}/apt/builder/${encodeURIComponent(b)}`, lastModified: now, changeFrequency: 'monthly', priority: c > 20 ? 0.75 : 0.6 }); }
+      for (const [b, c] of bMap) { if (c < 3) continue; entries.push({ url: `${BASE}/apt/builder/${encodeURIComponent(b)}`, lastModified: null, changeFrequency: 'monthly', priority: c > 20 ? 0.75 : 0.6 }); }
       // 비교 페이지 — 인기 시군구 상위 단지 조합 (스팸 방지: 최대 200개)
       try {
         const { data: topComplexes } = await (sb as any).from('apt_complex_profiles')
@@ -379,7 +380,7 @@ ${complexXml}
           for (const [, names] of bySg) {
             for (let i = 0; i < names.length && compareCount < 200; i++) {
               for (let j = i + 1; j < names.length && compareCount < 200; j++) {
-                entries.push({ url: `${BASE}/apt/compare/${encodeURIComponent(names[i])}-vs-${encodeURIComponent(names[j])}`, lastModified: now, changeFrequency: 'monthly', priority: 0.55 });
+                entries.push({ url: `${BASE}/apt/compare/${encodeURIComponent(names[i])}-vs-${encodeURIComponent(names[j])}`, lastModified: null, changeFrequency: 'monthly', priority: 0.55 });
                 compareCount++;
               }
             }
@@ -412,7 +413,7 @@ ${complexXml}
               for (let j = i + 1; j < group.length && vsCount < 200; j++) {
                 entries.push({
                   url: `${BASE}/stock/${group[i].symbol}/vs/${group[j].symbol}`,
-                  lastModified: now,
+                  lastModified: null,
                   changeFrequency: 'weekly',
                   priority: 0.55,
                 });
@@ -437,7 +438,7 @@ ${complexXml}
         .neq('slug', '');
       return xmlResponse((data || []).map((g: any) => ({
         url: `${BASE}/glossary/${encodeURIComponent(g.slug)}`,
-        lastModified: g.created_at || now,
+        lastModified: g.created_at || null,
         changeFrequency: 'monthly',
         priority: 0.65,
       })));
@@ -486,7 +487,7 @@ ${complexXml}
       );
       return xmlResponse(data.map(s => ({
         url: `${BASE}/stock/${s.symbol}/chart`,
-        lastModified: s.updated_at || now,
+        lastModified: null,
         changeFrequency: 'daily',
         priority: 0.6,
       })));
@@ -509,7 +510,7 @@ ${complexXml}
       );
       return xmlResponse(data.map(s => ({
         url: `${BASE}/stock/${s.symbol}/financials`,
-        lastModified: s.updated_at || now,
+        lastModified: null,
         changeFrequency: 'weekly',
         priority: 0.6,
       })));
@@ -526,7 +527,7 @@ ${complexXml}
       // 8,145 blog → chunks 0,1 = 5000 + 3145 = 모두 cover.
       const data = await fetchBatched<any>((off, lim) =>
         sb.from('blog_posts')
-          .select('slug, title, updated_at, published_at, cover_image, image_alt, category, source_type')
+          .select('slug, title, updated_at, published_at, rewritten_at, cover_image, image_alt, category, source_type')
           .eq('is_published', true).not('published_at', 'is', null)
           .lte('published_at', now)
           .order('published_at', { ascending: false })
@@ -546,7 +547,7 @@ ${complexXml}
           const { data: series } = await sb.from('blog_series').select('slug, created_at, updated_at').eq('is_active', true);
           seriesEntries = (series || []).map((s: any) => ({
             url: `${BASE}/blog/series/${s.slug}`,
-            lastModified: s.updated_at || s.created_at || now,
+            lastModified: null,
             changeFrequency: 'weekly',
             priority: 0.7,
           }));
@@ -560,7 +561,8 @@ ${complexXml}
         const daysSincePub = Math.floor((Date.now() - pubDate.getTime()) / 86400000);
         const freq = daysSincePub <= 7 ? 'daily' : daysSincePub <= 30 ? 'weekly' : 'monthly';
         const prio = b.source_type === 'upcoming' ? 0.9 : daysSincePub <= 3 ? 0.8 : daysSincePub <= 14 ? 0.7 : daysSincePub <= 60 ? 0.6 : 0.5;
-        const lastmod = b.updated_at || b.published_at || now;
+        // 발행 이후 재작성(rewritten_at)만 수정 이벤트다. 없으면 발행일.
+        const lastmod = b.rewritten_at && b.published_at && Date.parse(b.rewritten_at) > Date.parse(b.published_at) ? b.rewritten_at : (b.published_at || null);
         const rawImg = b.cover_image || `${BASE}/api/og?title=${encodeURIComponent((b.title || '').slice(0, 60))}&category=${b.category || 'blog'}&design=2`;
         const imgUrl = rawImg.startsWith('/') ? `${BASE}${rawImg}` : rawImg;
         const imgAlt = escXml(b.image_alt || b.title || '카더라 블로그');
@@ -579,8 +581,7 @@ ${complexXml}
 
         return `  <url>
     <loc>${BASE}/blog/${b.slug}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>${freq}</changefreq>
+${lastmod ? `    <lastmod>${lastmod}</lastmod>\n` : ''}    <changefreq>${freq}</changefreq>
     <priority>${prio}</priority>
     <image:image>
       <image:loc>${escXml(imgUrl)}</image:loc>
@@ -597,8 +598,7 @@ ${complexXml}
 
       const seriesXml = seriesEntries.map(e => `  <url>
     <loc>${e.url}</loc>
-    <lastmod>${e.lastModified}</lastmod>
-    <changefreq>${e.changeFrequency}</changefreq>
+${e.lastModified ? `    <lastmod>${e.lastModified}</lastmod>\n` : ''}    <changefreq>${e.changeFrequency}</changefreq>
     <priority>${e.priority}</priority>
   </url>`).join('\n');
 
@@ -631,7 +631,7 @@ ${blogXml}
       }
       const entries = (Array.isArray(data) ? data : []).map((r: any) => ({
         url: r.url,
-        lastModified: r.last_modified ? new Date(r.last_modified).toISOString() : buildDate,
+        lastModified: r.last_modified ? new Date(r.last_modified).toISOString() : null,
         changeFrequency: r.change_freq || 'weekly',
         priority: typeof r.priority === 'number' ? r.priority : Number(r.priority) || 0.7,
       }));
@@ -660,7 +660,7 @@ ${blogXml}
       }
       const entries = (results || []).map((r: any) => ({
         url: `${BASE}/calc/${encodeURIComponent(r.calc_category)}/${encodeURIComponent(r.calc_slug)}/r/${encodeURIComponent(r.short_id)}`,
-        lastModified: r.created_at ? new Date(r.created_at).toISOString() : buildDate,
+        lastModified: r.created_at ? new Date(r.created_at).toISOString() : null,
         changeFrequency: 'monthly',
         priority: r.view_count > 100 ? 0.7 : r.view_count > 50 ? 0.6 : 0.5,
       }));

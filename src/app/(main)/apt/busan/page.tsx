@@ -29,7 +29,7 @@ const TABS = ['전체', '선착순', '분양중', '분양예정'] as const;
 type Tab = (typeof TABS)[number];
 
 const CURATED_COLS =
-  'slug,name,region,sigungu,builder,curated_status,curated_copy,satellite_image_url,price_min,price_max,total_units,lifecycle_stage';
+  'slug,name,region,sigungu,builder,curated_status,curated_copy,satellite_image_url,price_min,price_max,total_units,complex_units,source_ids,lifecycle_stage';
 
 export interface BusanBlogPost {
   id: number;

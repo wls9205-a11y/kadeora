@@ -544,6 +544,35 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     }
   }
 
+  /* ABG 증분 2 §2 — 같은 현장 사전 차단. 게시 후 유사도 검사(check_blog_similarity 는 게시글만 본다)로는
+   * 같은 현장 글감 두 개가 동시에 생성·게시되는 걸 못 막았다(거제 112430·112432 실증 — 제목 유사도 0.65·FAQ 3문 동일).
+   * 같은 apt_site_id 의 «살아 있는» 글감·초안·게시글이 있으면 나중 글감을 hold — 선행 글 게시 후 분화 여부는 사람이 판정한다.
+   * 살아 있음 = 편집 대기/중 · 판정 전(먼저 생긴 것) · 게시글 · 사유 없는 비공개 초안. 환각·중복·대체로 내린 글은 죽은 것으로 본다. */
+  if (issue.apt_site_id) {
+    const { data: siblings } = await (sb as any).from('issue_alerts')
+      .select('id, blog_post_id, publish_decision, created_at')
+      .eq('apt_site_id', issue.apt_site_id).neq('id', issue.id).limit(30);
+    const sib = (siblings ?? []) as Array<{ id: string; blog_post_id: number | null; publish_decision: string | null; created_at: string }>;
+    const postIds = sib.map((x) => x.blog_post_id).filter((v): v is number => !!v);
+    const livePosts = new Set<number>();
+    if (postIds.length > 0) {
+      const { data: posts } = await (sb as any).from('blog_posts').select('id, is_published, auto_unpublished_reason').in('id', postIds);
+      for (const bp of (posts ?? []) as Array<{ id: number; is_published: boolean; auto_unpublished_reason: string | null }>) {
+        if (bp.is_published || !bp.auto_unpublished_reason || bp.auto_unpublished_reason.startsWith('hold:bp_review')) livePosts.add(bp.id);
+      }
+    }
+    const blocker = sib.find((x) =>
+      (x.blog_post_id && livePosts.has(x.blog_post_id))
+      || x.publish_decision === 'edit_pending' || x.publish_decision === 'editing'
+      || (!x.publish_decision && !x.blog_post_id && Date.parse(x.created_at) < Date.parse(issue.created_at)));
+    if (blocker) {
+      dbw('issue-draft', 'issue_alerts.update@same_site_pending', await (sb as any).from('issue_alerts')
+        .update({ publish_decision: 'same_site_pending', block_reason: `hold:same_site_pending:${blocker.id}${blocker.blog_post_id ? `:post_${blocker.blog_post_id}` : ''}` })
+        .eq('id', issue.id));
+      return { decision: 'same_site_pending', score: issue.final_score };
+    }
+  }
+
   // 중복 체크
   const issueKeywords: string[] = issue.detected_keywords || [];
   const skipReasons: string[] = [];

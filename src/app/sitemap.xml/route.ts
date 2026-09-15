@@ -65,7 +65,6 @@ export async function GET() {
 
   const subSitemaps = ALL_IDS.map(id => `  <sitemap>
     <loc>${SITE_URL}/sitemap/${id}.xml</loc>
-    <lastmod>${now}</lastmod>
   </sitemap>`).join('\n');
 
   // image-sitemap.xml 은 그 자체가 sitemapindex(하위 50개 urlset)라서 여기 자식으로 넣으면
@@ -76,7 +75,6 @@ export async function GET() {
 ${subSitemaps}
   <sitemap>
     <loc>${SITE_URL}/news-sitemap.xml</loc>
-    <lastmod>${now}</lastmod>
   </sitemap>
 </sitemapindex>`;
 

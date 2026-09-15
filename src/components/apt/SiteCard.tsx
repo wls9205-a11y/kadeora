@@ -10,6 +10,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import LifecycleRail from '@/components/apt/LifecycleRail';
+import { legacyUnitsLabel } from '@/lib/apt/units';
 
 export interface CuratedSite {
   slug: string;
@@ -23,6 +24,8 @@ export interface CuratedSite {
   price_min: number | null;   // 만원
   price_max: number | null;   // 만원
   total_units: number | null;
+  complex_units?: number | null;
+  source_ids?: Record<string, unknown> | null;
   /** Q-3 — 일반분양 세대. 있을 때만 「일반분양」이라 부른다. */
   general_units?: number | null;
   lifecycle_stage: string | null;
@@ -197,14 +200,14 @@ export default function SiteCard({ site }: { site: CuratedSite }) {
           </div>
         ) : null}
 
-        {/* Q-3 F7 — total_units 는 «총» 세대다. 「일반분양」은 general_units 가 있을 때만 쓴다. */}
+        {/* Q-3 F7 → ABG 증분 2 §4 — 「일반분양」은 general_units 가 있을 때만. total_units 는 청약 경유면 «공급» 세대다(sync 덮어쓰기) — legacyUnitsLabel. */}
         {site.general_units ? (
           <div style={{ ...MONO, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 2 }}>
             일반분양 {site.general_units.toLocaleString('ko-KR')}세대
           </div>
-        ) : site.total_units ? (
+        ) : legacyUnitsLabel(site) ? (
           <div style={{ ...MONO, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 2 }}>
-            총 {site.total_units.toLocaleString('ko-KR')}세대
+            {legacyUnitsLabel(site)}
           </div>
         ) : null}
 
