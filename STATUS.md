@@ -1,3 +1,12 @@
+## 2026-09-15 (저녁) — EX-B 증분 · EX-A2 dry7 · 재공개 사고 수리
+
+- **ⓐ 역표본** 10/167 오탐 0. **ⓑ** blog_posts 에 updated_at 트리거 없음 → updated_at 축은 처분을 못 센다(원장 테이블 기준).
+- **② 제목 힌트 esp 유래**(45d5d6aa) · 이름 패턴 「허용 목록이 곧 생산 압박」.
+- **① policy_constants 시딩** 80행(md5 대조) — 계약금·중도금 비율 2행 제외 · 가점 32+35+17=84.
+- **dry7**: passed_first 1 · passed_after_edit 3 · blocked 3(잔존 퍼센트) → docs/exa2/EX-A2_dry7_report_20260915.md. 그랑라크 초안이 1,153세대 전파(정정 미반영).
+- ⚠️ **사고**: blog-auto-publish 가 hide 50편 재공개(03:45Z) → 재숨김 + DB 가드 트리거(hallucination%·hold:%). 112428 은 BP-B 이후 공개 상태였음(E-5 「4편」→실제 3편).
+  issue-publish BP 스위치 미확인 수리(192ca0fa) · issue-draft 타임아웃 잠금 회수·가드 60s·제목 대조(2ca5794a).
+
 ## 2026-09-15 (오후) — 판정회신 EX-A 집행: 수치 출처율 게이트 · 디에트르 시드 · 환각 감사
 
 - **③ 수치 출처율 100%**(93ca2814·68e608a5·77795a6c): `number-verify.ts` — 금액(억·만원·원 동치·반올림)·연월·퍼센트를 «그 글에 준 텍스트» 허용 목록과 대조.
