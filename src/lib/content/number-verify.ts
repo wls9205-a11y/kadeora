@@ -14,9 +14,21 @@
  */
 
 export type NumKind = 'amount' | 'ym' | 'pct';
-export interface NumToken { kind: NumKind; raw: string; value: number; tolerance: number }
+export interface NumToken { kind: NumKind; raw: string; value: number; tolerance: number; /** ABG 증분 5 — 추정 표현이 수식하는 금액 */ hedged?: boolean }
+
+/**
+ * ABG 증분 5 처방 1단 — 추정 표현 사전. 「예상·추정·대략」이 앞에서, 「안팎·전후·선·~대(원대·억대)」가 뒤에서 수식하는 금액은
+ * 허용 목록 일치 여부와 «무관하게» 막는다. 지어낸 값이 실거래 집계와 우연히 맞아 통과하는 경로(112444 「2억원대 예상 분양가」)를 끊는다.
+ * ⚠️ 「약」은 넣지 않는다 — 데이터 값의 반올림 표기(「약 3.8억」)에 늘 붙는다. 허용폭(±)은 표기 반올림용으로 그대로.
+ */
+const HEDGE_BEFORE = /(예상|추정|대략)[^\n.!?。]{0,14}$/;
+const HEDGE_AFTER = /^\s*(안팎|전후|선(?![착택정거별])|대(?![출기학구표비상응수형행]))/;
 
 const n = (s: string) => Number(s.replace(/,/g, ''));
+
+function hedgedAt(text: string, start: number, end: number): boolean {
+  return HEDGE_BEFORE.test(text.slice(Math.max(0, start - 16), start)) || HEDGE_AFTER.test(text.slice(end, end + 4));
+}
 
 /** 금액 토큰 → 만원. 「3억 8,000만」「3.8억」「38,000만원」「380,000,000원」. */
 function amountTokens(text: string): NumToken[] {
@@ -32,11 +44,11 @@ function amountTokens(text: string): NumToken[] {
       // 「3.8억」은 0.1억 단위 표기 — ±500만 안이면 같은 값으로 본다
       const decimals = (m[1].split('.')[1] ?? '').length;
       const tolerance = m[2] ? 0 : decimals === 0 ? 5000 : decimals === 1 ? 500 : 50;
-      out.push({ kind: 'amount', raw: m[0].trim(), value, tolerance });
+      out.push({ kind: 'amount', raw: m[0].trim(), value, tolerance, hedged: hedgedAt(text, m.index, m.index + m[0].length) });
     } else if (m[3] || m[4]) {
-      out.push({ kind: 'amount', raw: m[0].trim(), value: n(m[3] ?? m[4]), tolerance: 0 });
+      out.push({ kind: 'amount', raw: m[0].trim(), value: n(m[3] ?? m[4]), tolerance: 0, hedged: hedgedAt(text, m.index, m.index + m[0].length) });
     } else if (m[5]) {
-      out.push({ kind: 'amount', raw: m[0].trim(), value: Math.round(n(m[5]) / 10000), tolerance: 0 });
+      out.push({ kind: 'amount', raw: m[0].trim(), value: Math.round(n(m[5]) / 10000), tolerance: 0, hedged: hedgedAt(text, m.index, m.index + m[0].length) });
     }
   }
   return out;
@@ -108,6 +120,7 @@ export function verifyNumbers(body: string, allow: Allow): VerifyResult {
   const toks = extractNumbers(body);
   const unverified: string[] = [];
   for (const t of toks) {
+    if (t.hedged) { unverified.push(`추정:${t.raw}`); continue; }
     const pool = allow[t.kind];
     const hit = pool.some((v) => Math.abs(v - t.value) <= t.tolerance);
     if (!hit) unverified.push(t.raw);

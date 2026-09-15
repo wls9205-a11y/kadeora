@@ -32,7 +32,8 @@ describe('verifyNumbers', () => {
   it('BP-B 1회차 환각 문장은 막는다', () => {
     const r = verifyNumbers('84㎡ 기준 약 7,200~7,800만원대로 예상되며, 2026년 10월 공식 모집공고에서 확정됩니다. 평당 12.5~14만 원.', allow);
     expect(r.ok).toBe(false);
-    expect(r.unverified).toEqual(expect.arrayContaining(['7,200만원', '7,800만원', '2026년 10월', '12.5만 원', '14만 원']));
+    // 「7,800만원대로」는 추정 표현(원대) — 허용 목록과 무관하게 추정: 접두로 막힌다
+    expect(r.unverified).toEqual(expect.arrayContaining(['7,200만원', '추정:7,800만원', '2026년 10월', '12.5만 원', '14만 원']));
   });
 
   it('수량 「만」은 금액이 아니다 — 「1만 세대」·「3만 명」', () => {
@@ -50,6 +51,18 @@ describe('verifyNumbers', () => {
     expect(verifyNumbers('2026년 기준 제도', { ...allow, year: [] }).ok).toBe(true);
     // allow.year 가 없으면(다른 호출부) 연도 결합 토큰 미검사 — 기존 동작 불변
     expect(verifyNumbers('2027년 입주 예정', allow).ok).toBe(true);
+  });
+
+  it('ABG 증분5 — 추정 표현이 수식하는 금액은 허용 목록과 맞아도 막는다', () => {
+    // 블록에 「최저 2억 1,000만원」이 있어 허용폭(±5,000만)으로는 통과하던 112444 실물 문장
+    const r = verifyNumbers('예를 들어 2억원대 예상 분양가 기준으로 자기자금 30% 이상 준비가 필요합니다.', { ...allow, pct: [30] });
+    expect(r.ok).toBe(false);
+    expect(r.unverified).toContain('추정:2억원');
+    expect(verifyNumbers('예상 분양가는 3억 7,950만원 수준', allow).unverified).toEqual(['추정:3억 7,950만원']);
+    expect(verifyNumbers('최고 6억 4,500만원 안팎', allow).ok).toBe(false);
+    // 데이터 값의 반올림 표기(「약」)와 「대출」 같은 낱말은 추정 표현이 아니다
+    expect(verifyNumbers('주변 실거래 중위값은 약 3.8억입니다.', allow).ok).toBe(true);
+    expect(verifyNumbers('최저 2억 1,000만원 대출 비교', allow).ok).toBe(true);
   });
 
   it('숫자가 없는 본문은 통과(검사 0)', () => {
