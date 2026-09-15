@@ -1,3 +1,14 @@
+## 2026-09-15 (오후) — 판정회신 EX-A 집행: 수치 출처율 게이트 · 디에트르 시드 · 환각 감사
+
+- **③ 수치 출처율 100%**(93ca2814·68e608a5·77795a6c): `number-verify.ts` — 금액(억·만원·원 동치·반올림)·연월·퍼센트를 «그 글에 준 텍스트» 허용 목록과 대조.
+  부동산 차단(`number_unverified` + 초안은 `issue_alerts.raw_data.blocked_draft` 에만, blog_posts 미적재) · 주식·경제 섀도. 허용 목록에서 blocked_draft 제외(자기 허가 방지).
+- **① 실데이터 블록**: 시군구 실거래 6개월 집계(기간·건수·중위·최저·최고) · 청약 일정(모집공고). **② 표 강제 해제**(부동산).
+- **④ 판독 모드**: `app_config bp.hub_publish_enabled=false` — BP 글감은 비공개 초안만.
+- **dry 5 결과(진행 중)**: 판정 난 2편(갤러리자이·거제시그니처) 모두 차단 — 표준 비율(계약금·LTV 10~60%)·파생 금액(분양가×10%)·
+  근거 없는 비교표(「3.3㎡당 2,500만~2,800만 원」)·청약 규칙 오류(「3순위 일반인」). 프롬프트 규율만으로는 생성이 멈추지 않고, 게이트가 막는다.
+- **E-9**: 부경경마공원역 디에트르 더 리버 시드 — 임대·ad_blocked, 병합 기각 판정문 원장(9faa4b32, DocCard nearReviewRejected·supplyTypeFromSource).
+- **⑤ 기발행 환각 감사**: 시그니처 5종 180편(docs/bp70/hallucination_audit_20260915.csv) — issue-retry-stale 69 · issue-draft 49 · issue_preempt 21 외. 처분 판정 대기.
+
 ## 2026-09-15 — PQAB E-1~E-7 · TC E-9·E-11 집행 · ⛔ BP-B 1회차 보류(추정 분양가 검출)
 
 - **E-1** RULES#148(캐시 신선도 검증) 등재.
