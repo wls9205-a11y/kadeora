@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { safeBlogInsert } from '@/lib/blog-safe-insert';
 import { SITE_URL } from '@/lib/constants';
+import { loadIssueContext, buildIssueAllow, verifyIssueDraft } from '@/lib/content/issue-context';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -54,7 +55,7 @@ async function processBatch(req: NextRequest, batchSize: number): Promise<Result
 
   const { data: candidates, error: fetchErr } = await (sb as any)
     .from('issue_alerts')
-    .select('id, category, draft_title, draft_content, draft_slug, draft_keywords, source_urls, summary, final_score, publish_decision')
+    .select('id, category, title, summary, raw_data, detected_keywords, apt_site_id, source_type, draft_title, draft_content, draft_slug, draft_keywords, source_urls, final_score, publish_decision')
     .is('blog_post_id', null)
     // s273-cc fix #4: HOURLY_LIMIT (원래) + retry_skipped:daily_limit (priority_score 0 시절 잔여)
     // 둘 다 picking. similar_title 등은 진짜 거절이라 제외.
@@ -77,6 +78,26 @@ async function processBatch(req: NextRequest, batchSize: number): Promise<Result
   // 2. safeBlogInsert each
   for (const issue of (candidates ?? []) as any[]) {
     try {
+      // ABG X-3 — 게이트 우회 경로 봉인. 수동 전용이어도 issue-draft 와 «같은 검증기»(같은 문맥·같은 허용 목록)를 거친다.
+      //   부동산은 차단(blog_posts 미적재), 그 외는 섀도 기록. 차단 사유는 picking 조건(HOURLY_LIMIT·retry_skipped:daily_limit)과 겹치지 않아 재회전하지 않는다.
+      {
+        const ctx = await loadIssueContext(sb, issue);
+        const gate = verifyIssueDraft(String(issue.draft_title ?? ''), String(issue.draft_content ?? ''), buildIssueAllow(ctx, issue));
+        if (!gate.ok && issue.category === 'apt') {
+          await (sb as any).from('issue_alerts').update({
+            publish_decision: 'number_unverified', fail_reason: 'number_unverified',
+            block_reason: `retry_number_unverified ${gate.unverified.length}/${gate.checked}: ${gate.unverified.slice(0, 12).join(' · ')}`.slice(0, 500),
+          }).eq('id', issue.id);
+          result.skipped++;
+          if (result.samples.length < 5) result.samples.push({ id: issue.id, title: String(issue.draft_title).slice(0, 40), outcome: 'skip:number_unverified' });
+          continue;
+        }
+        if (!gate.ok) {
+          await (sb as any).from('issue_alerts').update({
+            raw_data: { ...(issue.raw_data ?? {}), number_shadow: { ok: false, checked: gate.checked, unverified: gate.unverified.slice(0, 30), had_source_text: !!ctx.sourceText, via: 'retry-stale' } },
+          }).eq('id', issue.id);
+        }
+      }
       const blogCategory = mapCategory(issue.category);
       const titleHash = String(issue.draft_title).split('').reduce((a: number, c: string) => a + c.charCodeAt(0), 0);
       const designs = [1, 2, 3, 4, 5, 6];

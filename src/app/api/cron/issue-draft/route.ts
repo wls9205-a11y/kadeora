@@ -16,10 +16,8 @@ import { getFreshnessContext, deriveFreshnessFields } from '@/lib/blog/freshness
 import { dbw } from '@/lib/cron-db-log';
 import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
 import { sortForGeneration } from '@/lib/content/realestate-priority';
-import { stripSyntheticPrice } from '@/lib/apt/synthetic-price';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
-import { buildAllow, verifyNumbers } from '@/lib/content/number-verify';
-import { extractArticleText } from '@/lib/content/article-text';
+import { editOutNumbers, loadIssueContext, buildIssueAllow, verifyIssueDraft, type IssueContext } from '@/lib/content/issue-context';
 import { parseSalePeriod } from '@/lib/apt/sale-period';
 import { periodWindow } from '@/lib/apt/upcoming-sales';
 
@@ -81,54 +79,6 @@ async function searchNaverImages(query: string, count = 5): Promise<{ url: strin
   }
 }
 
-/* ═══════════ [P0-FACT] big_event_registry 팩트 컨텍스트 조회 ═══════════ */
-
-async function fetchBigEventContext(sb: any, issue: any): Promise<string> {
-  if (issue?.source_type !== 'big_event_registry') return '';
-  // big_event id는 raw_data.big_event_id 또는 detected_keywords/related_entities로 잡음
-  const rawId = issue?.raw_data?.big_event_id;
-  const slugHint = issue?.raw_data?.big_event_slug;
-  try {
-    let row: any = null;
-    if (rawId) {
-      const { data } = await (sb as any).from('big_event_registry').select('*').eq('id', rawId).maybeSingle();
-      row = data;
-    }
-    if (!row && slugHint) {
-      const { data } = await (sb as any).from('big_event_registry').select('*').eq('slug', slugHint).maybeSingle();
-      row = data;
-    }
-    if (!row) return '';
-    const constructors = Array.isArray(row.key_constructors) ? row.key_constructors.join(', ') : (row.key_constructors || '미정');
-    const brand = row.new_brand_name
-      ? `${row.new_brand_name} (${row.constructor_status || 'unconfirmed'})`
-      : '미정 (수주 전)';
-    const scale = row.scale_after ? `${row.scale_before ?? '?'} → ${row.scale_after}+세대` : `${row.scale_before ?? '?'}세대`;
-    const sources = Array.isArray(row.fact_sources) && row.fact_sources.length > 0
-      ? row.fact_sources.join(' · ')
-      : '카더라 내부 노트';
-    return [
-      '',
-      '[절대 팩트 고정 - 바꾸지 말 것]',
-      `- 이름: ${row.name}${row.full_name ? ` (${row.full_name})` : ''}`,
-      `- 지역: ${row.region_sido || ''} ${row.region_sigungu || ''} ${row.region_dong || ''}`.trim(),
-      `- 준공: ${row.build_year_before ?? '미상'}년`,
-      `- 세대: ${scale}`,
-      `- 재건축 후 브랜드: ${brand}`,
-      `- 시공사: ${constructors}`,
-      `- 현 Stage: ${row.stage ?? '미정'} / 예상 완공: ${row.build_year_after_est ?? '미정'}`,
-      `- 비고: ${row.notes || ''}`,
-      `- 출처: ${sources}`,
-      '⚠️ 위 정보는 그대로 인용하라. 다른 브랜드명/시공사/세대수로 바꾸지 말 것.',
-      '⚠️ 확정되지 않은 정보(분양가, 완공일 등)는 "추정", "예상", "시나리오" 임을 명시할 것.',
-      '',
-    ].join('\n');
-  } catch (err: any) {
-    console.error('[issue-draft] fetchBigEventContext failed:', err.message);
-    return '';
-  }
-}
-
 /* ═══════════ AI 기사 생성 (v2: 에러 로깅 + og-infographic 제거) ═══════════ */
 
 /** A2 — 실패 사유 5분류. 「왜 못 만들었나」가 로그에 남아야 B1 에서 판단할 수 있다. */
@@ -149,154 +99,6 @@ export type DraftFailReason =
   | 'parse' | 'token_limit' | 'duplicate' | 'no_match';
 type GenResult = { title: string; content: string; slug: string; keywords: string[]; meta_description: string; infographic_data: Record<string, any> };
 
-/**
- * LB-5 — 현장 컨텍스트. 글이 «어느 현장의 것인지» 를 프롬프트가 알아야
- * 예정명으로 제목을 세우고 현장 상세로 내부링크를 걸 수 있다.
- * ⚠️ 없으면 빈 문자열이다 — 주인 없는 글도 계속 만들어진다(기존 동작 불변).
- */
-async function buildSiteContext(sb: any, siteId: string | null | undefined): Promise<string> {
-  if (!siteId) return '';
-  try {
-    const { data } = await (sb as any).from('apt_sites')
-      .select('slug, name, display_name, sigungu, region, builder, total_units, complex_units, expected_sale_period, expected_sale_period_asof, price_min, price_max, price_source, site_type, source_ids')
-      .eq('id', siteId).maybeSingle();
-    if (!data) return '';
-    // AB-2 · Q-1 — 합성 분양가(지역 채움값)는 싣지 않는다. 비우면 아래 줄이 「미공개」로 안내한다.
-    const priced = stripSyntheticPrice(data);
-    const isRedev = data.site_type === 'redevelopment' || !!data.source_ids?.redev_id;
-    const units = data.complex_units || data.total_units;
-    const disp = (data.display_name || '').trim();
-    // display 규격이 「{예정명} — {구역명}」이라 제목에는 앞쪽(예정명)만 쓴다.
-    const preferred = (disp.split(' — ')[0] || disp || data.name || '').trim();
-    const lines = [
-      `- 현장 상세 링크(반드시 1회 이상 사용): [${preferred}](/apt/${data.slug})`,
-      `- 표기할 이름: 「${preferred}」 ${preferred !== data.name ? `(구역명: ${data.name})` : ''}`,
-      data.sigungu ? `- 지역: ${[data.region, data.sigungu].filter(Boolean).join(' ')}` : '',
-      data.builder ? `- 시공사: ${data.builder}` : '- 시공사: 미정(단정하지 말 것)',
-      units ? `- 세대수: ${units}세대` : '- 세대수: 미정(단정하지 말 것)',
-      data.expected_sale_period
-        ? `- 예상 분양 시기: ${data.expected_sale_period}${data.expected_sale_period_asof ? ` (${String(data.expected_sale_period_asof).slice(0, 10)} 기준 보도 — 본문·FAQ 에 기준일을 함께 쓴다)` : ''}`
-        : '',
-      priced.price_min && priced.price_max
-        ? `- 분양가: ${priced.price_min.toLocaleString()}만~${priced.price_max.toLocaleString()}만원`
-        : '- 분양가: 미공개 — 금액을 추정하거나 단정하지 말 것. 「분양가 미공개·모집공고 후 확정」 문형으로만 쓴다',
-      isRedev
-        ? '- 사업 성격: 정비사업(재개발·재건축) — 「구역」 표현 가능'
-        : '- 사업 성격: 일반 분양 현장 — ⛔ 「구역」이라 부르지 않는다(정비구역이 아니다). 「현장」·「단지」로 쓴다',
-    ].filter(Boolean);
-
-    // EX-A ① — 실데이터 블록. 글이 쓸 수 있는 «숫자» 는 이 블록과 원문 요약에 있는 것뿐이다(수치 출처율 게이트가 대조).
-    //   ⚠️ 없는 줄은 만들지 않는다(AB-1 원칙). 표가 될 행이 없으면 표도 없다.
-    if (data.region && data.sigungu) {
-      const since = new Date(Date.now() - 183 * 86_400_000).toISOString().slice(0, 10);
-      const { data: tx } = await (sb as any).from('apt_transactions')
-        .select('deal_amount, deal_date')
-        .eq('region_nm', data.region).ilike('sigungu', `%${data.sigungu}%`)
-        .gte('deal_date', since).gt('deal_amount', 0)
-        .order('deal_date', { ascending: false }).limit(1000);
-      const rows = ((tx ?? []) as Array<{ deal_amount: number; deal_date: string }>);
-      if (rows.length >= 5) {
-        const amts = rows.map((r) => r.deal_amount).sort((x, y) => x - y);
-        const median = amts[Math.floor(amts.length / 2)];
-        const months = rows.map((r) => String(r.deal_date).slice(0, 7)).sort();
-        const fmt = (v: number) => (v >= 10000 ? `${Math.floor(v / 10000)}억${v % 10000 ? ` ${(v % 10000).toLocaleString()}만원` : '원'}` : `${v.toLocaleString()}만원`);
-        lines.push(`- 같은 시군구 아파트 실거래(${months[0]}~${months[months.length - 1]}, ${rows.length}건${rows.length === 1000 ? '+' : ''}): 중위 ${fmt(median)} · 최저 ${fmt(amts[0])} · 최고 ${fmt(amts[amts.length - 1])} — 단지를 특정하지 않은 시군구 전체 집계`);
-      }
-    }
-    const subId = Number(data.source_ids?.subscription_id);
-    if (subId) {
-      const { data: sub } = await (sb as any).from('apt_subscriptions')
-        .select('rcept_bgnde, rcept_endde, przwner_presnatn_de, mvn_prearnge_ym')
-        .eq('id', subId).maybeSingle();
-      if (sub?.rcept_bgnde) lines.push(`- 청약 접수: ${sub.rcept_bgnde}${sub.rcept_endde ? ` ~ ${sub.rcept_endde}` : ''} (청약홈 모집공고)`);
-      if (sub?.przwner_presnatn_de) lines.push(`- 당첨자 발표: ${sub.przwner_presnatn_de} (청약홈 모집공고)`);
-      if (sub?.mvn_prearnge_ym) lines.push(`- 입주 예정: ${String(sub.mvn_prearnge_ym).slice(0, 4)}-${String(sub.mvn_prearnge_ym).slice(4, 6)} (청약홈 모집공고)`);
-    }
-    return lines.join('\n');
-  } catch {
-    return '';
-  }
-}
-
-/**
- * EX-A2 ③ — 출처 기사 본문. 저장된 것이 있으면 그것을(재시도·재생성이 같은 원문을 보게), 없으면 한 번 받아 저장한다.
- * ⚠️ 실패는 조용히 빈 문자열 — 원문이 없다고 글감을 버리지 않는다(허용 목록이 좁아질 뿐이다).
- */
-async function loadSourceText(sb: any, issue: any): Promise<string> {
-  const saved = issue.raw_data?.source_text;
-  if (typeof saved === 'string' && saved.length > 0) return saved;
-  const url = (issue.source_urls || []).find((u: string) => /^https?:\/\//.test(u));
-  if (!url) return '';
-  try {
-    const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; KadeoraBot/1.0; +https://kadeora.app)' }, signal: AbortSignal.timeout(8000), redirect: 'follow' });
-    if (!res.ok) return '';
-    const text = extractArticleText(await res.text());
-    if (text.length < 80) return '';
-    issue.raw_data = { ...(issue.raw_data ?? {}), source_text: text };
-    dbw('issue-draft', 'issue_alerts.update@source_text', await (sb as any).from('issue_alerts').update({ raw_data: issue.raw_data }).eq('id', issue.id));
-    return text;
-  } catch {
-    return '';
-  }
-}
-
-/**
- * EX-A2 ① — 제도 상수 블록(전국 공통 · 출처 행). 확인일(verified_at) 180일 초과 행은 싣지 않고 경고를 남긴다.
- * ⚠️ 낡은 규제 수치는 무수치보다 위험하다 — 빼는 쪽이 기본이다.
- */
-async function loadPolicyConstants(sb: any): Promise<string> {
-  try {
-    const { data } = await (sb as any).from('policy_constants')
-      .select('key, item, value_text, condition, source_title, source_date, verified_at, status')
-      .eq('status', 'confirmed');
-    const rows = (data ?? []) as any[];
-    const cutoff = Date.now() - 180 * 86_400_000;
-    const fresh = rows.filter((r) => Date.parse(r.verified_at) >= cutoff);
-    const stale = rows.filter((r) => !(Date.parse(r.verified_at) >= cutoff));
-    if (stale.length > 0) {
-      // 크론이 10분마다 돈다 — 같은 경고는 24시간에 한 번만
-      const { count: recent } = await (sb as any).from('admin_alerts').select('id', { count: 'exact', head: true })
-        .eq('type', 'policy_constants_stale').gte('created_at', new Date(Date.now() - 86_400_000).toISOString());
-      if (!recent) await (sb as any).from('admin_alerts').insert({
-        type: 'policy_constants_stale', severity: 'warning',
-        title: `제도 상수 ${stale.length}행 확인일 180일 초과 — 글 주입에서 제외됨`,
-        message: stale.slice(0, 10).map((r) => `${r.key}(${String(r.verified_at).slice(0, 10)})`).join(', '),
-      }).then(() => null, () => null);
-    }
-    return fresh.map((r) => `- ${r.item}: ${r.value_text}${r.condition ? ` (${r.condition})` : ''} — ${r.source_title}, ${String(r.verified_at).slice(0, 10)} 기준`).join('\n');
-  } catch {
-    return '';
-  }
-}
-
-/**
- * EX-A2 ② — 감산 전용 편집 1회. 새 수치·표·비교를 더하지 못하게 지시하고, 결과는 호출부가 같은 게이트로 재판정한다.
- * ⚠️ 캐시·기록 축: caller 를 'issue-draft-edit' 로 갈라 원장에서 편집 호출만 셀 수 있게 한다.
- */
-async function editOutNumbers(content: string, tokens: string[], issue: any): Promise<string | null> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey || tokens.length === 0) return null;
-  try {
-    const res = await anthropicFetch(ANTHROPIC_API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({
-        model: MODEL, max_tokens: 12000,
-        system: '당신은 편집자다. 주어진 마크다운 본문에서 지정한 수치가 들어간 문장만 삭제하거나, 그 수치를 뺀 서술로 바꾼다. 새 수치·새 표·새 비교·새 문단을 추가하지 않는다. 나머지 문장은 한 글자도 바꾸지 않는다. 결과 본문만 출력한다.',
-        messages: [{ role: 'user', content: `삭제·비수치화할 수치 토큰: ${tokens.join(' | ')}\n\n본문:\n${content}` }],
-      }),
-    }, { caller: 'issue-draft-edit', category: llmCategoryOfContent(issue?.category), postId: null, metadata: { issue_id: issue?.id ?? null, tokens: tokens.length } });
-    if (!res.ok) return null;
-    const data = await res.json();
-    const text = String(data.content?.[0]?.text || '').replace(/^```(?:markdown)?\s*|```\s*$/g, '').trim();
-    // 감산이어야 한다 — 길이가 늘었으면 받지 않는다
-    if (!text || text.length > content.length * 1.02) return null;
-    return text;
-  } catch {
-    return null;
-  }
-}
-
 async function generateArticle(issue: any, bigEventContext = '', siteContext = '', sourceText = '', constantsBlock = ''): Promise<{ article: GenResult | null; failReason: DraftFailReason | null }> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) { console.error('[issue-draft] ANTHROPIC_API_KEY missing'); return { article: null, failReason: 'no_key' }; }
@@ -311,7 +113,7 @@ async function generateArticle(issue: any, bigEventContext = '', siteContext = '
 규칙:
 - 분량: ${isPreempt ? '6,000~8,000자' : '5,000~7,000자'} (충분히 깊이 있게)
 - H2 섹션: 6~10개 (## 형식)
-${issue.category === 'apt' ? '- 마크다운 표는 «이 글의 현장» 데이터 블록에 표가 될 행이 있을 때만 만든다. 없으면 표를 만들지 않는다' : '- 마크다운 표(|---|): 최소 2개 (비교 분석 필수)'}
+${issue.category === 'apt' ? '- 마크다운 표는 «이 글의 현장» 데이터 블록에 표가 될 행이 있을 때만 만든다. 없으면 표를 만들지 않는다. 표는 많아도 5개 이하' : '- 마크다운 표(|---|): 최소 2개 (비교 분석 필수)'}
 - 핵심 수치 강조: **굵은 숫자**와 퍼센트를 적극 활용
 - 각 섹션 첫 문장에 핵심 수치 배치
 - 면책 조항 포함 (투자 판단은 본인 책임)
@@ -690,7 +492,7 @@ async function scheduleBuzzPosts(sb: any, issueId: string, score: number) {
 
 /* ═══════════ 메인: 이슈 1건 처리 ═══════════ */
 
-async function processOneIssue(sb: any, issue: any, config: any): Promise<{ decision: string; title?: string; score: number; slug?: string; numGate?: { category: string; ok: boolean; checked: number; unverified: string[] } }> {
+async function processOneIssue(sb: any, issue: any, config: any): Promise<{ decision: string; title?: string; score: number; slug?: string }> {
   // CAS lock
   const retryCount = issue.retry_count || 0;
   const { data: lockResult } = await (sb as any).from('issue_alerts')
@@ -770,13 +572,9 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     return { decision: 'duplicate', score: issue.final_score };
   }
 
-  // [P0-FACT] big_event 이슈는 registry 팩트 블록을 system prompt 앞에 강제 주입
-  const bigEventContext = await fetchBigEventContext(sb, issue);
-
-  // AI 기사 생성
-  const siteContext = await buildSiteContext(sb, issue.apt_site_id);
-  const sourceText = await loadSourceText(sb, issue);
-  const constantsBlock = issue.category === 'apt' ? await loadPolicyConstants(sb) : '';
+  // [P0-FACT] big_event 팩트 블록 · 현장 블록 · 원문 · 제도 상수 — 생성 프롬프트와 게이트가 같은 문맥을 본다
+  const ctx = await loadIssueContext(sb, issue);
+  const { siteContext, sourceText, constantsBlock, bigEventContext } = ctx;
   const { article, failReason } = await generateArticle(issue, bigEventContext, siteContext, sourceText, constantsBlock);
   if (!article) {
     // A3: 재시도 로직 — retry_count < 3이면 is_processed=false로 리셋
@@ -795,52 +593,83 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   }
 
   // EX-A ③ — 수치 출처율 100%. LLM 원문(시각화·SEO 보강 «전») 을 그 글에 준 텍스트와 대조한다.
-  //   ⚠️ 부동산은 막는다. 주식·경제는 원문 요약에 수치가 적게 실려 오탐이 커서 «섀도»(기록만) — 통과율을 보고 확대 판정.
-  const nowYm = new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 7);
-  const allow = buildAllow(
-    // ⛔ raw_data 의 blocked_draft(지난번에 막힌 초안)는 허용 목록에 넣지 않는다 — 넣으면 환각 숫자가 스스로를 허가한다.
-    // EX-A2 ③ 원문 발췌(sourceText)·① 제도 상수 블록은 «입력으로 준 것» 이라 허용 소스다. 파생·환산은 여전히 막힌다.
-    [siteContext, constantsBlock, sourceText, bigEventContext, issue.title, issue.summary,
-      JSON.stringify({ ...(issue.raw_data ?? {}), blocked_draft: undefined, source_text: undefined, number_shadow: undefined }),
-      (issue.detected_keywords || []).join(' ')],
-    { ym: [Number(nowYm.replace('-', ''))] },
-  );
-  // EX-B — 제목도 대조한다. 제목의 시기·금액은 게이트 밖이었다(편집 루프는 본문만 고치므로 제목 위반은 그대로 차단).
-  const titleGate = verifyNumbers(article.title ?? '', allow);
-  let numGate = verifyNumbers(article.content, allow);
-  const firstGate = numGate;
-  // EX-A2 ② — 감산 전용 편집 1회. 차단 토큰이 든 문장을 지우거나 수치 없이 바꾸게만 하고, 결과는 «같은 게이트» 로 다시 판정한다.
+  //   ⚠️ 부동산은 막는다. 주식·경제는 «섀도»(기록만).
+  // ABG X-2 — 감산 편집은 «편집 회차» 로 넘긴다. 생성 회차 안에서 편집까지 하면 건당 ~240s 라 회전당 1건에 갇혔다.
+  const allow = buildIssueAllow(ctx, issue);
+  const gate = verifyIssueDraft(article.title, article.content, allow);
+  if (!gate.ok && issue.category === 'apt') {
+    if (!gate.titleGate.ok) {
+      // 제목 위반은 편집(본문만)으로 못 고친다 — 곧바로 차단
+      await blockNumberUnverified(sb, issue, article, gate.unverified, gate.unverified, gate.checked, false);
+      return { decision: 'number_unverified', score: issue.final_score, title: article.title };
+    }
+    dbw('issue-draft', 'issue_alerts.update@edit_pending', await (sb as any).from('issue_alerts').update({
+      publish_decision: 'edit_pending', fail_reason: null,
+      raw_data: { ...(issue.raw_data ?? {}), edit_pending: { at: new Date().toISOString(), article, first_unverified: gate.bodyGate.unverified, checked: gate.checked } },
+    }).eq('id', issue.id));
+    return { decision: 'edit_pending', score: issue.final_score, title: article.title };
+  }
+  const gateLog = issue.category === 'apt'
+    ? { gate_result: 'passed_first', first_unverified: [], checked: gate.checked }
+    : { number_shadow: { ok: gate.ok, checked: gate.checked, unverified: gate.unverified.slice(0, 30), had_source_text: !!sourceText } };
+  return finalizeArticle(sb, issue, config, article, gateLog);
+}
+
+/** 차단 기록 — 막힌 초안은 blog_posts 에 넣지 않는다(미발행 수문). 판독용으로 글감 행에만 남긴다. */
+async function blockNumberUnverified(sb: any, issue: any, article: GenResult, firstUnverified: string[], unverified: string[], checked: number, edited: boolean) {
+  const raw = { ...(issue.raw_data ?? {}), edit_pending: undefined };
+  dbw('issue-draft', 'issue_alerts.update@number_gate', await (sb as any).from('issue_alerts').update({
+    publish_decision: 'number_unverified', fail_reason: 'number_unverified',
+    block_reason: `수치 출처 미확인 ${unverified.length}/${checked}: ${unverified.slice(0, 12).join(' · ')}`.slice(0, 500),
+    raw_data: { ...raw, blocked_draft: { at: new Date().toISOString(), title: article.title, first_unverified: firstUnverified, edited, unverified, checked, content: article.content.slice(0, 16000) } },
+  }).eq('id', issue.id));
+}
+
+/**
+ * ABG X-2 — 편집 회차: edit_pending 1건. 문맥을 다시 읽어 «같은 게이트» 를 만들고, 감산 편집 1회 → 재판정.
+ * 잠금은 publish_decision edit_pending→editing CAS. 통과면 생성 회차와 같은 마무리(finalizeArticle).
+ */
+async function processEditIssue(sb: any, issue: any, config: any): Promise<{ decision: string; title?: string; score: number; slug?: string }> {
+  const { data: lock } = await (sb as any).from('issue_alerts')
+    .update({ publish_decision: 'editing', processed_at: new Date().toISOString() })
+    .eq('id', issue.id).eq('publish_decision', 'edit_pending').select('id');
+  if (!lock || lock.length === 0) return { decision: 'race', score: issue.final_score };
+  const pending = issue.raw_data?.edit_pending;
+  const article: GenResult | undefined = pending?.article;
+  if (!article?.title || !article?.content) {
+    dbw('issue-draft', 'issue_alerts.update@edit_missing', await (sb as any).from('issue_alerts').update({ publish_decision: 'ai_failed', fail_reason: 'parse' }).eq('id', issue.id));
+    return { decision: 'edit_missing', score: issue.final_score };
+  }
+  const ctx: IssueContext = await loadIssueContext(sb, issue);
+  const allow = buildIssueAllow(ctx, issue);
+  const first = verifyIssueDraft(article.title, article.content, allow);
+  const firstUnverified: string[] = pending.first_unverified ?? first.bodyGate.unverified;
+  let final = first;
   let edited = false;
-  if (!numGate.ok && issue.category === 'apt') {
-    const revised = await editOutNumbers(article.content, numGate.unverified, issue);
+  if (!first.ok && first.titleGate.ok) {
+    const revised = await editOutNumbers(article.content, first.bodyGate.unverified, issue);
     if (revised) {
-      const second = verifyNumbers(revised, allow);
       edited = true;
-      if (second.ok) { article.content = revised; }
-      numGate = second;
+      const second = verifyIssueDraft(article.title, revised, allow);
+      if (second.ok) article.content = revised;
+      final = second;
     }
   }
-  if (!titleGate.ok) {
-    numGate = { ok: false, checked: numGate.checked + titleGate.checked, unverified: [...titleGate.unverified.map((t) => `제목:${t}`), ...numGate.unverified] };
+  if (!final.ok) {
+    await blockNumberUnverified(sb, issue, article, firstUnverified, final.unverified, final.checked, edited);
+    return { decision: 'number_unverified', score: issue.final_score, title: article.title };
   }
-  if (!numGate.ok && issue.category === 'apt') {
-    // ⚠️ 막힌 초안은 blog_posts 에 넣지 않는다(미발행 수문). 판독용으로 글감 행에만 남긴다 — 무엇이 막혔는지 사람이 읽을 수 있어야 규칙을 고친다.
-    dbw('issue-draft', 'issue_alerts.update@number_gate', await (sb as any).from('issue_alerts').update({
-      publish_decision: 'number_unverified', fail_reason: 'number_unverified',
-      block_reason: `수치 출처 미확인 ${numGate.unverified.length}/${numGate.checked}: ${numGate.unverified.slice(0, 12).join(' · ')}`.slice(0, 500),
-      raw_data: { ...(issue.raw_data ?? {}), blocked_draft: { at: new Date().toISOString(), title: article.title, first_unverified: firstGate.unverified, edited, unverified: numGate.unverified, checked: numGate.checked, content: article.content.slice(0, 16000) } },
-    }).eq('id', issue.id));
-    return { decision: 'number_unverified', score: issue.final_score, title: article.title, numGate: { category: issue.category, ...numGate } };
-  }
+  issue.raw_data = { ...(issue.raw_data ?? {}), edit_pending: undefined };
+  const gateLog = { gate_result: edited ? 'passed_after_edit' : 'passed_first', first_unverified: firstUnverified.slice(0, 20), checked: first.checked };
+  return finalizeArticle(sb, issue, config, article, gateLog);
+}
+
+/** 게이트 통과 이후 — 시각화·SEO·적재·이미지·발행. 생성 회차와 편집 회차가 공유한다. */
+async function finalizeArticle(sb: any, issue: any, config: any, article: GenResult, gateLog: Record<string, unknown>): Promise<{ decision: string; title?: string; score: number; slug?: string }> {
   // 통과 기록(3분해 계측) — 부동산은 1차 통과/편집 후 통과, 그 외는 섀도 위반 로그
-  {
-    const gateLog = issue.category === 'apt'
-      ? { gate_result: edited ? 'passed_after_edit' : 'passed_first', first_unverified: firstGate.unverified.slice(0, 20), checked: firstGate.checked }
-      : { number_shadow: { ok: numGate.ok, checked: numGate.checked, unverified: numGate.unverified.slice(0, 30), had_source_text: !!sourceText } };
-    dbw('issue-draft', 'issue_alerts.update@number_log', await (sb as any).from('issue_alerts')
-      .update({ raw_data: { ...(issue.raw_data ?? {}), ...gateLog } }).eq('id', issue.id));
-    issue.raw_data = { ...(issue.raw_data ?? {}), ...gateLog };
-  }
+  issue.raw_data = { ...(issue.raw_data ?? {}), ...gateLog };
+  dbw('issue-draft', 'issue_alerts.update@number_log', await (sb as any).from('issue_alerts')
+    .update({ raw_data: issue.raw_data }).eq('id', issue.id));
 
   article.content = enrichVisuals(article.content, issue);
 
@@ -1094,7 +923,73 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
 
 /* ═══════════ 핸들러 ═══════════ */
 
-async function handler(_req: NextRequest) {
+/**
+ * ABG X-2 — 동시 처리 풀. 건당 대부분이 LLM 대기라 직렬이면 회전당 1~2건에 갇힌다.
+ * startCutoffMs 이후에는 «새 건을 시작하지 않는다»(진행 중인 건은 끝낸다) — 300s 한도 방어.
+ */
+async function runPool<T>(items: T[], worker: (item: T) => Promise<void>, opts: { concurrency: number; startCutoffMs: number; start: number; canStart?: () => boolean }): Promise<string | null> {
+  let next = 0;
+  let stopped: string | null = null;
+  const lane = async () => {
+    while (next < items.length) {
+      const elapsed = Date.now() - opts.start;
+      if (elapsed > opts.startCutoffMs) { stopped = stopped ?? `elapsed_${Math.round(elapsed / 1000)}s_over_preempt`; return; }
+      if (opts.canStart && !opts.canStart()) { stopped = stopped ?? 'hit_published_cap'; return; }
+      const item = items[next++];
+      await worker(item);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(opts.concurrency, items.length) }, lane));
+  return stopped;
+}
+
+/**
+ * ABG X-2 — 편집 회차(?mode=edit). 생성 회차가 수치 게이트에서 넘긴 edit_pending 을 감산 편집 1회 → 재판정 → 마무리.
+ * 스케줄은 pg_cron(생성 회차와 5분 어긋나게). 기록은 cron_logs 'issue-draft-edit' — 회전당 처리 건수는 이 축으로 잰다.
+ */
+async function editHandler() {
+  return withCronLogging('issue-draft-edit', async () => {
+    const sb = getSupabaseAdmin();
+    const config = await getAutoPublishConfig(sb);
+    const start = Date.now();
+    // 편집 중 죽은 잠금(editing) 회수 — 8분 경과·6시간 이내만 edit_pending 으로 되돌린다
+    const staleBefore = new Date(Date.now() - 8 * 60_000).toISOString();
+    const windowFrom = new Date(Date.now() - 6 * 3600_000).toISOString();
+    dbw('issue-draft', 'issue_alerts.update@edit_reclaim', await (sb as any).from('issue_alerts')
+      .update({ publish_decision: 'edit_pending' })
+      .eq('publish_decision', 'editing').is('blog_post_id', null)
+      .lt('processed_at', staleBefore).gt('processed_at', windowFrom));
+    const { data: pool } = await (sb as any).from('issue_alerts')
+      .select('*').eq('publish_decision', 'edit_pending')
+      .order('processed_at', { ascending: true }).limit(6);
+    const items = (pool ?? []) as any[];
+    const results: any[] = [];
+    let published = 0;
+    const stopped = await runPool(items, async (issue) => {
+      try {
+        const r = await processEditIssue(sb, issue, config);
+        results.push(r);
+        if (r.decision === 'auto_published') published++;
+      } catch (e) {
+        console.error(`[issue-draft] edit error ${issue.id}:`, e);
+        results.push({ decision: 'error', score: issue.final_score });
+      }
+    }, { concurrency: 3, startCutoffMs: 150_000, start });
+    return {
+      processed: results.length, created: published,
+      failed: results.filter((r) => r.decision.includes('failed') || r.decision === 'error').length,
+      metadata: {
+        mode: 'edit', eligible: items.length, published,
+        stopped_reason: stopped ?? 'all_processed', elapsed_ms: Date.now() - start,
+        reasons: results.reduce((acc: Record<string, number>, r) => { acc[r.decision] = (acc[r.decision] ?? 0) + 1; return acc; }, {}),
+        results: results.map((r) => ({ decision: r.decision, title: r.title?.slice(0, 40) })),
+      },
+    };
+  });
+}
+
+async function handler(req: NextRequest) {
+  if (req.nextUrl.searchParams.get('mode') === 'edit') return NextResponse.json(await editHandler());
   const result = await withCronLogging('issue-draft', async () => {
     const sb = getSupabaseAdmin();
     const config = await getAutoPublishConfig(sb);
@@ -1158,21 +1053,13 @@ async function handler(_req: NextRequest) {
 
     const results: any[] = [];
     let published = 0;
-    let stoppedReason: string | null = null;
 
-    // 세션 138: Vercel 300s timeout 방어
-    //  - 250s 가드는 루프 시작 시점 기준 → Claude API 1건 ~60-70s 가 245s 진입 시 315s 오버슛
-    //  - 180s pre-emptive 가드 + auto_published 최대 2건으로 교체 → 최악 180s + 70s = 250s 이내
-    //  - 잔여 issues 는 다음 iteration 에서 처리 (MAX_PER_RUN=15로 큐잉 유지)
-    //  - EX-B(2026-09-15 실측) — 부동산 감산 편집 1회가 붙자 건당 최악 ~240s(생성+편집+SEO·이미지). 180s 가드면 4회차 연속 300s 타임아웃
-    //    (한 회차 1건 완료 후 다음 건 도중 강제 종료 → 잠금만 남고 판정 없음). «다음 건을 시작해도 되는가» 기준을 60s 로.
-    const PREEMPT_MS = 60_000;
+    // 세션 138 → EX-B → ABG X-2: Vercel 300s 방어.
+    //  - 편집은 편집 회차로 분리(생성 회차 건당 = 생성 ~60-120s + 마무리 ~20s).
+    //  - 3줄 동시 처리 · 130s 이후 새 건 시작 금지 → 최악 130 + 140 = 270s.
+    //  - auto_published 회차 상한 2 는 유지(시작 시점 판정).
     const MAX_PUBLISHED_PER_RUN = 2;
-
-    for (const issue of issues) {
-      const elapsed = Date.now() - _start;
-      if (elapsed > PREEMPT_MS) { stoppedReason = `elapsed_${Math.round(elapsed/1000)}s_over_preempt`; break; }
-      if (published >= MAX_PUBLISHED_PER_RUN) { stoppedReason = `hit_published_cap_${MAX_PUBLISHED_PER_RUN}`; break; }
+    const stoppedReason = await runPool(issues, async (issue) => {
       try {
         const r = await processOneIssue(sb, issue, config);
         results.push(r);
@@ -1181,7 +1068,7 @@ async function handler(_req: NextRequest) {
         console.error(`[issue-draft] error processing ${issue.id}:`, e);
         results.push({ decision: 'error', score: issue.final_score });
       }
-    }
+    }, { concurrency: 3, startCutoffMs: 130_000, start: _start, canStart: () => published < MAX_PUBLISHED_PER_RUN });
 
     return {
       processed: results.length,
