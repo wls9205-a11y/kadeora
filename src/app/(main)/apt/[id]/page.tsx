@@ -544,13 +544,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? swapLeadingName(d.site.seo_title, d.name, dn)
       : `${dn} ${tl[st] || '부동산 정보'}`;
     const units = d.site?.total_units || d.sub?.tot_supply_hshld_co;
+    const lcStageMetaEarly = (d.site as any)?.lifecycle_stage as string | null | undefined;
     const uStr = units ? `${Number(units).toLocaleString()}세대` : '';
     const builder = d.site?.builder || d.sub?.constructor_nm || '';
     // §B-5 저장된 설명은 그대로 쓰되 앞머리 지역 중복만 걷어낸다 — 실측 344건이
     // `울산 남구 울산 남구 달동 재개발` 꼴이었다. 5,521건을 통째로 갈아엎지 않는다.
+    // E-10 — 인용형 description(정의문 + 수치 + 총정리). ⚠️ «신규부터»: 저장된 설명이 없고 2026-09-14 이후 생긴 현장만.
+    //   기존 설명·기존 폴백은 건드리지 않는다(전량 재생성 금지). 문장은 AB-1 개요와 같은 판정기에서 나온다(수치는 DB 값뿐).
+    const quotable = (() => {
+      if (d.site?.seo_description || !(String((d.site as any)?.created_at ?? '') >= '2026-09-14')) return null;
+      const sp = salePeriodDisplay({
+        period: (d.site as any)?.expected_sale_period, source: (d.site as any)?.expected_sale_source,
+        asof: (d.site as any)?.expected_sale_period_asof, confidence: (d.site as any)?.confidence,
+      });
+      const ov = buildSiteOverview({
+        name: String(dn ?? d.name).split(' — ')[0], region: d.region, sigungu: d.site?.sigungu, dong: (d.site as any)?.dong,
+        builder: d.site?.builder ?? null, siteType: (d.site as any)?.site_type, stageLabel: stageLabel(lcStageMetaEarly),
+        units: Number(units) || null,
+        schedule: sp ? [{ key: 'expected', label: '분양예정 시기', text: sp.text, state: 'future', dday: null, source: sp.sourceLabel, asof: sp.asofText.replace(' 기준', ''), confidence: sp.confidence } as any] : [],
+        built: lcStageMetaEarly === 'post_move_in' || lcStageMetaEarly === 'landmark_active',
+      });
+      return ov.lead ? `${ov.lead} 분양가·청약일정·입주 정보 총정리.`.slice(0, 160) : null;
+    })();
     const desc = d.site?.seo_description
       ? stripDupRegionPrefix(d.site.seo_description, d.region, d.site?.sigungu)
-      : `${regionedName(dn, d.region, d.site?.sigungu)} ${uStr} ${builder}. 모집공고 요약, 분양가격, 청약일정, 견본주택, 실거래가까지 한눈에.`.replace(/ {2,}/g, ' ').trim();
+      : quotable ?? `${regionedName(dn, d.region, d.site?.sigungu)} ${uStr} ${builder}. 모집공고 요약, 분양가격, 청약일정, 견본주택, 실거래가까지 한눈에.`.replace(/ {2,}/g, ' ').trim();
     // ── V15 D-2 · og:image 0번은 반드시 가로 1200×630 ──
     //
     // (여기 있던 aptSiteThumb 호출을 걷어냈다. 그 체인의 최종 폴백이 /api/og-square 라
