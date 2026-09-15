@@ -31,7 +31,8 @@ describe('AB-1 단지 개요', () => {
   });
 
   it('일정이 없으면 단계로, 준공 단지는 「위치한」', () => {
-    const o = buildSiteOverview({ name: '가야역 롯데캐슬 스카이엘', region: '부산', sigungu: '부산진구', builder: '롯데건설', siteType: 'subscription', stageLabel: '입주 후', units: 725, built: true });
+    const o = buildSiteOverview({ name: '가야역 롯데캐슬 스카이엘', region: '부산', sigungu: '부산진구', builder: '롯데건설(주)', siteType: 'subscription', stageLabel: '입주 후', units: 725, built: true,
+      schedule: [row({ label: '입주예정', text: '2026년 1월', source: '청약홈 모집공고', asof: '2025-07-18' })] });
     expect(o.lead).toBe('가야역 롯데캐슬 스카이엘은(는) 부산 부산진구에 위치한 롯데건설의 분양 단지입니다. 725세대 규모로, 현재 입주 후 단계입니다.');
   });
 

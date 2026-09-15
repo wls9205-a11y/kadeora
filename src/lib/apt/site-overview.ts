@@ -58,11 +58,13 @@ export function buildSiteOverview(i: OverviewInput): SiteOverview {
 
   // ⚠️ 접두 겹침으로 거르지 않는다 — 「부산」·「부산진구」는 겹쳐 보여도 다른 층위다.
   const loc = [clean(i.region), clean(i.sigungu), clean(i.dong)].filter(Boolean).join(' ');
-  const builder = clean(i.builder);
+  // 법인 표기(「(주)」「주식회사」)는 정의문에서 뗀다 — 「롯데건설(주)의」(가야역 롯데캐슬 실측)
+  const builder = clean(i.builder).replace(/\s*\(주\)|주식회사\s*|㈜/g, '').trim();
   const typeLabel = TYPE_LABEL[clean(i.siteType)] ?? '아파트';
   const units = pos(i.units);
   const floor = pos(i.maxFloor);
-  const phase = phaseOf(i.schedule);
+  // ⚠️ 준공 단지는 일정 문장을 쓰지 않는다 — 공고 당시 「입주예정 2026년 1월」이 입주 후에도 «다음 일정» 으로 남아 있었다(가야역 롯데캐슬 실측).
+  const phase = i.built ? null : phaseOf(i.schedule);
   const stage = clean(i.stageLabel);
 
   // ① 정의문 — 위치·시공사가 없어도 문장이 서게 조립한다
