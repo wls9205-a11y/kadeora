@@ -36,6 +36,13 @@ export type DocCard = ExtractedCard & {
   lifecycleStage?: DocStage;
   /** confidence_note 에 덧붙일 한 줄 — 수치 상충 시 «이설» 보존용(최신 공적 계획 채택 규칙). */
   noteExtra?: string;
+  /**
+   * 유사명 게이트가 병합 검토로 보낸 뒤 «사람이 병합을 기각한» 판정 — 판정문 인용(누가·언제·근거).
+   * ⚠️ 이 값이 있을 때만 유사명 검색을 건너뛴다. 게이트를 끄는 스위치가 아니라 «판정의 기록» 이다.
+   */
+  nearReviewRejected?: string;
+  /** 이름에 표지가 없어 게이트가 공급유형을 못 읽는 경우의 원문 근거 유형(임대·공공). */
+  supplyTypeFromSource?: '공공' | '임대';
 };
 
 /**
@@ -364,8 +371,7 @@ export const BP70_20260914_CARDS: DocCard[] = [...BP70_20260914_SEEDABLE, ...BP7
  * ⚠️ 개선안의 「미보유 10」은 실측으로 «1곳» 이었다. 8곳은 이미 있고(동래 푸르지오 에듀포레·더샵 트리센트·
  *    구산 롯데캐슬 시그니처·쌍용 플래티넘 서면·EDC 엘가 로제비앙·e편한세상 센텀 하이베뉴·트리니뷰 구명역·
  *    창원자이 더 스카이), 「e편한세상 센텀 리버루체」는 반여4 재건축(536)의 별칭으로 이미 붙어 있다.
- * ⚠️ 이 현장은 공공지원 민간임대다. 이름에 임대 표지가 없어 게이트가 민영으로 볼 수 있으므로 시드 직후
- *    supply_type='임대'·ad_blocked 로 정정한다(원장: STATUS 2026-09-15).
+ * ⚠️ 이 현장은 공공지원 민간임대다. 이름에 임대 표지가 없어 게이트가 민영으로 본다 → supplyTypeFromSource 로 원문 유형을 싣는다(ad_blocked).
  */
 export const TC_20260915_SOURCE: PresaleSource = {
   key: 'doc:TC_20260915',
@@ -380,6 +386,8 @@ export const TC_20260915_SOURCE: PresaleSource = {
 export const TC_20260915_CARDS: DocCard[] = [
   // EBN 2025-07-22 — 전세형 공공지원 민간임대 498세대(지하2~31층 5동), 대방건설, 7/22~23 청약 · 교차 비즈한국
   card({ rawName: '부경경마공원역 디에트르 더 리버', region: '부산', sigungu: '강서구',
+    nearReviewRejected: '판정회신_EX-A_20260915 §2 — EDC 디에트르 2곳(28BL·13BL)과 병합 기각: 국제물류도시(범방동) vs 에코델타 사업지구·생활권 상이',
+    supplyTypeFromSource: '임대',
     addrRaw: '부산광역시 강서구 범방동 일원', totalUnits: 498, builderRaw: '대방건설',
     lifecycleStage: 'construction',
     noteExtra: '전세형 공공지원 민간임대(2025-07 청약) · 교차 비즈한국 https://www.bizhankook.com/bk/article/29999',

@@ -193,7 +193,8 @@ async function handler(req: NextRequest) {
     }> = [];
 
     for (const card of cards) {
-      const supplyType = judgeSupplyType(card.rawName, card.addrRaw, src.brand);
+      // 문서 카드가 원문 근거로 공급유형을 밝혔으면 그것이 우선이다(이름 표지 없는 임대·공공). 크롤 카드는 기존 판정.
+      const supplyType = (card as DocCard).supplyTypeFromSource ?? judgeSupplyType(card.rawName, card.addrRaw, src.brand);
       const { site, method } = matchSite(card, pool);
 
       let resolution: Resolution = 'queued';
@@ -220,7 +221,9 @@ async function handler(req: NextRequest) {
           // ⚠️ 울타리는 «그 카드의 지역» 이다(CV-B ②). loadPool 은 소스의 모든 카드
           //    시군구·시도를 «합친» 풀이라, 울타리가 없으면 고창(전북) 카드에 창원(경남)
           //    2건이 유사 후보로 걸린다 — CV-A 본실행에서 실제로 그랬다.
-          const near = pool.filter((s) => isSameArea(card, s) && namesOf(s).some((n) => {
+          // ⚠️ 사람이 병합을 기각한 카드만 건너뛴다(판정문이 카드에 실려 있고 note 에도 남는다).
+          const reviewed = (card as DocCard).nearReviewRejected;
+          const near = reviewed ? [] : pool.filter((s) => isSameArea(card, s) && namesOf(s).some((n) => {
             const a = normName(n), b = similarKey(card.rawName);
             return a.length >= 4 && b.length >= 4 && (a.includes(b) || b.includes(a));
           }));
@@ -235,7 +238,7 @@ async function handler(req: NextRequest) {
             const made = await seedSite(admin, src, card, supplyType);
             if (made.ok) {
               resolution = 'seeded'; seededSlug = made.slug; seeded++;
-              note = `신규 시드 — ${supplyType}${adBlockedFor(supplyType) ? ' · 광고 부적격' : ''}`;
+              note = `신규 시드 — ${supplyType}${adBlockedFor(supplyType) ? ' · 광고 부적격' : ''}${reviewed ? ` · 병합 기각 판정: ${reviewed}` : ''}`;
             } else {
               note = `시드 실패: ${made.error}`;
             }
