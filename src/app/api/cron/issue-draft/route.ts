@@ -1034,6 +1034,9 @@ async function handler(req: NextRequest) {
       .select('*')
       .eq('is_processed', false)
       .or('final_score.gte.25,source_type.eq.cvn_name_event')
+      // ABG 증분 — 쿼터 보류분 기아 방지. 쿼터로 되돌아간 행은 점수 그대로 매 회차 상위 60을 다시 채워
+      //   부동산 글감이 1시간+ 풀에 못 들었다(2026-09-15 05:10~06:20Z 회차 전부 quota_deferred 15). 60분에 한 번만 다시 본다.
+      .or(`fail_reason.is.null,fail_reason.neq.quota,processed_at.lt.${new Date(Date.now() - 60 * 60_000).toISOString()}`)
       .order('final_score', { ascending: false })
       .limit(MAX_PER_RUN * 4);
     const issues = sortForGeneration<any>((pool ?? []) as any[])
