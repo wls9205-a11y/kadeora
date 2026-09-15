@@ -360,6 +360,32 @@ const BP70_20260914_HELD: DocCard[] = [
 
 export const BP70_20260914_CARDS: DocCard[] = [...BP70_20260914_SEEDABLE, ...BP70_20260914_HELD];
 
+/* ══ TC — the-collection 36현장 대조 (개선안_TC_20260915 E-9) ═══════════════════════════
+ * ⚠️ 개선안의 「미보유 10」은 실측으로 «1곳» 이었다. 8곳은 이미 있고(동래 푸르지오 에듀포레·더샵 트리센트·
+ *    구산 롯데캐슬 시그니처·쌍용 플래티넘 서면·EDC 엘가 로제비앙·e편한세상 센텀 하이베뉴·트리니뷰 구명역·
+ *    창원자이 더 스카이), 「e편한세상 센텀 리버루체」는 반여4 재건축(536)의 별칭으로 이미 붙어 있다.
+ * ⚠️ 이 현장은 공공지원 민간임대다. 이름에 임대 표지가 없어 게이트가 민영으로 볼 수 있으므로 시드 직후
+ *    supply_type='임대'·ad_blocked 로 정정한다(원장: STATUS 2026-09-15).
+ */
+export const TC_20260915_SOURCE: PresaleSource = {
+  key: 'doc:TC_20260915',
+  builder: '',
+  brand: '',
+  label: 'TC — the-collection 대조 결측 (개선안_TC_20260915 E-9)',
+  listUrl: 'https://github.com/wls9205-a11y/kadeora/blob/main/STATUS.md',
+  kind: 'presale',
+  robotsCheckedAt: '2026-09-15',
+};
+
+export const TC_20260915_CARDS: DocCard[] = [
+  // EBN 2025-07-22 — 전세형 공공지원 민간임대 498세대(지하2~31층 5동), 대방건설, 7/22~23 청약 · 교차 비즈한국
+  card({ rawName: '부경경마공원역 디에트르 더 리버', region: '부산', sigungu: '강서구',
+    addrRaw: '부산광역시 강서구 범방동 일원', totalUnits: 498, builderRaw: '대방건설',
+    lifecycleStage: 'construction',
+    noteExtra: '전세형 공공지원 민간임대(2025-07 청약) · 교차 비즈한국 https://www.bizhankook.com/bk/article/29999',
+    sourceUrl: 'https://www.ebn.co.kr/news/articleView.html?idxno=1671471' }),
+];
+
 /**
  * 문서 소스 레지스트리 — 라우트가 key 로 알아본다.
  * ⛔ 「문이 하나여야 규칙이 하나다」. 문서 배치가 늘어도 뒤 문(matchSite·seedGate·seedSite·
@@ -369,6 +395,7 @@ export const DOC_SOURCES: Array<{ source: PresaleSource; cards: DocCard[] }> = [
   { source: BACKFILL_SOURCE, cards: BACKFILL_CARDS },
   { source: NW_20260914_SOURCE, cards: NW_20260914_CARDS },
   { source: BP70_20260914_SOURCE, cards: BP70_20260914_CARDS },
+  { source: TC_20260915_SOURCE, cards: TC_20260915_CARDS },
 ];
 
 export const docSourceFor = (key: string) =>
