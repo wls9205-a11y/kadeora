@@ -7,6 +7,9 @@ describe('extractNumbers', () => {
     const v = extractNumbers('3.8억 / 38,000만원 / 380,000,000원 / 3억 8,000만').map((t) => t.value);
     expect(v).toEqual([38000, 38000, 38000, 38000]);
   });
+  it('쉼표 있는 억 — 「3,000억」을 「000억」으로 자르지 않는다', () => {
+    expect(extractNumbers('사업비 3,000억원').map((t) => t.value)).toEqual([30000000]);
+  });
   it('연월·퍼센트 — 연도 단독은 뽑지 않는다', () => {
     const toks = extractNumbers('2026년 10월 분양, 2026-09 보도, 경쟁률 12.5%, 2026년 기준');
     expect(toks.map((t) => `${t.kind}:${t.value}`)).toEqual(['ym:202610', 'ym:202609', 'pct:12.5']);
