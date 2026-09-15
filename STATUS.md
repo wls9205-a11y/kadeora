@@ -1,3 +1,12 @@
+## 2026-09-15 (밤) — ABG v2 X-1·X-2·X-3·X-4①
+
+- **X-1 재개**: bp.hub_publish_enabled=true · 게이트 통과 3편 발행(112430·112431·112432) + 재개 회차 통과 2편(112434·112435) = 5/10. 표 가이드 «5개 이하».
+  held 10 재큐(판문 BP 는 112431 과 같은 현장 → duplicate_blog). 재큐 시 옛 block_reason 이 canAutoPublish 를 막아 2편이 초안에 머뭄 → 사유 해제·수동 발행.
+- **X-2**(79147611): 생성/편집 회차 분리·동시 3줄. 첫 회전 실측 생성 6(edit_pending 6)·편집 6(통과 2·차단 4) · 타임아웃 0 → 게이트 ≥3 ✅. 설계 docs/abg/X-2_*.md · pg_cron 180.
+- **X-3**: issue-retry-stale 수치 게이트 편입(lib/content/issue-context.ts 공용). 우회 경로 대장 3호 종결.
+- **X-4①**: total_units 되돌림 주체 = sync-apt-sites Step1 upsert(tot_supply_hshld_co=공급세대 1,153 = 일반 540+특별 613). complex_units 는 안 건드림 → 정정은 complex_units=1521 로.
+- 차단 잔존 토큰 성격: 「계약금 10%」(제외 판정 항목)·추정 분양가·예시 금액 — 게이트 정상 작동.
+
 ## 2026-09-15 (저녁) — EX-B 증분 · EX-A2 dry7 · 재공개 사고 수리
 
 - **ⓐ 역표본** 10/167 오탐 0. **ⓑ** blog_posts 에 updated_at 트리거 없음 → updated_at 축은 처분을 못 센다(원장 테이블 기준).
