@@ -805,6 +805,8 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
       (issue.detected_keywords || []).join(' ')],
     { ym: [Number(nowYm.replace('-', ''))] },
   );
+  // EX-B — 제목도 대조한다. 제목의 시기·금액은 게이트 밖이었다(편집 루프는 본문만 고치므로 제목 위반은 그대로 차단).
+  const titleGate = verifyNumbers(article.title ?? '', allow);
   let numGate = verifyNumbers(article.content, allow);
   const firstGate = numGate;
   // EX-A2 ② — 감산 전용 편집 1회. 차단 토큰이 든 문장을 지우거나 수치 없이 바꾸게만 하고, 결과는 «같은 게이트» 로 다시 판정한다.
@@ -817,6 +819,9 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
       if (second.ok) { article.content = revised; }
       numGate = second;
     }
+  }
+  if (!titleGate.ok) {
+    numGate = { ok: false, checked: numGate.checked + titleGate.checked, unverified: [...titleGate.unverified.map((t) => `제목:${t}`), ...numGate.unverified] };
   }
   if (!numGate.ok && issue.category === 'apt') {
     // ⚠️ 막힌 초안은 blog_posts 에 넣지 않는다(미발행 수문). 판독용으로 글감 행에만 남긴다 — 무엇이 막혔는지 사람이 읽을 수 있어야 규칙을 고친다.
@@ -1102,6 +1107,22 @@ async function handler(_req: NextRequest) {
     const { count: scannedTotal } = await (sb as any).from('issue_alerts')
       .select('id', { count: 'exact', head: true }).eq('is_processed', false);
 
+    /* EX-B — 타임아웃 잠금 회수. 함수가 300s 에 죽으면 CAS 잠금(is_processed=true)만 남고 판정이 비어 글감이 영구 소실된다.
+       최근 6시간 · 8분 이상 묵은 «판정 없는 잠금» 만 1회 되돌리고, 두 번째 타임아웃이면 timeout 으로 닫는다.
+       ⛔ 6시간 밖의 과거 잔존분(4/13~9/8 219건)은 건드리지 않는다 — 한꺼번에 되살리면 생산 수문이 열린다. */
+    {
+      const staleBefore = new Date(Date.now() - 8 * 60_000).toISOString();
+      const windowFrom = new Date(Date.now() - 6 * 3600_000).toISOString();
+      // ⚠️ supabase-js 는 필터를 update() «뒤» 에 건다
+      const stale = (q: any) => q
+        .eq('is_processed', true).is('publish_decision', null).is('blog_post_id', null)
+        .lt('processed_at', staleBefore).gt('processed_at', windowFrom);
+      dbw('issue-draft', 'issue_alerts.update@timeout_close',
+        await stale((sb as any).from('issue_alerts').update({ publish_decision: 'timeout', fail_reason: 'timeout' })).eq('fail_reason', 'timeout_lock'));
+      dbw('issue-draft', 'issue_alerts.update@timeout_reclaim',
+        await stale((sb as any).from('issue_alerts').update({ is_processed: false, fail_reason: 'timeout_lock' })).or('fail_reason.is.null,fail_reason.neq.timeout_lock'));
+    }
+
     const belowThreshold = await (sb as any).from('issue_alerts')
       .update({ is_processed: true, publish_decision: 'below_threshold', processed_at: new Date().toISOString() })
       .eq('is_processed', false).lt('final_score', 25).select('id');
@@ -1143,7 +1164,9 @@ async function handler(_req: NextRequest) {
     //  - 250s 가드는 루프 시작 시점 기준 → Claude API 1건 ~60-70s 가 245s 진입 시 315s 오버슛
     //  - 180s pre-emptive 가드 + auto_published 최대 2건으로 교체 → 최악 180s + 70s = 250s 이내
     //  - 잔여 issues 는 다음 iteration 에서 처리 (MAX_PER_RUN=15로 큐잉 유지)
-    const PREEMPT_MS = 180_000;
+    //  - EX-B(2026-09-15 실측) — 부동산 감산 편집 1회가 붙자 건당 최악 ~240s(생성+편집+SEO·이미지). 180s 가드면 4회차 연속 300s 타임아웃
+    //    (한 회차 1건 완료 후 다음 건 도중 강제 종료 → 잠금만 남고 판정 없음). «다음 건을 시작해도 되는가» 기준을 60s 로.
+    const PREEMPT_MS = 60_000;
     const MAX_PUBLISHED_PER_RUN = 2;
 
     for (const issue of issues) {
