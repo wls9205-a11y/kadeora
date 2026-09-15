@@ -19,6 +19,7 @@ import { sortForGeneration } from '@/lib/content/realestate-priority';
 import { stripSyntheticPrice } from '@/lib/apt/synthetic-price';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
 import { buildAllow, verifyNumbers } from '@/lib/content/number-verify';
+import { extractArticleText } from '@/lib/content/article-text';
 
 /**
  * issue-draft v2 — AI 기사 생성 + 자동 발행 + 이미지 + 피드 포스트
@@ -215,7 +216,86 @@ async function buildSiteContext(sb: any, siteId: string | null | undefined): Pro
   }
 }
 
-async function generateArticle(issue: any, bigEventContext = '', siteContext = ''): Promise<{ article: GenResult | null; failReason: DraftFailReason | null }> {
+/**
+ * EX-A2 ③ — 출처 기사 본문. 저장된 것이 있으면 그것을(재시도·재생성이 같은 원문을 보게), 없으면 한 번 받아 저장한다.
+ * ⚠️ 실패는 조용히 빈 문자열 — 원문이 없다고 글감을 버리지 않는다(허용 목록이 좁아질 뿐이다).
+ */
+async function loadSourceText(sb: any, issue: any): Promise<string> {
+  const saved = issue.raw_data?.source_text;
+  if (typeof saved === 'string' && saved.length > 0) return saved;
+  const url = (issue.source_urls || []).find((u: string) => /^https?:\/\//.test(u));
+  if (!url) return '';
+  try {
+    const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; KadeoraBot/1.0; +https://kadeora.app)' }, signal: AbortSignal.timeout(8000), redirect: 'follow' });
+    if (!res.ok) return '';
+    const text = extractArticleText(await res.text());
+    if (text.length < 80) return '';
+    issue.raw_data = { ...(issue.raw_data ?? {}), source_text: text };
+    dbw('issue-draft', 'issue_alerts.update@source_text', await (sb as any).from('issue_alerts').update({ raw_data: issue.raw_data }).eq('id', issue.id));
+    return text;
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * EX-A2 ① — 제도 상수 블록(전국 공통 · 출처 행). 확인일(verified_at) 180일 초과 행은 싣지 않고 경고를 남긴다.
+ * ⚠️ 낡은 규제 수치는 무수치보다 위험하다 — 빼는 쪽이 기본이다.
+ */
+async function loadPolicyConstants(sb: any): Promise<string> {
+  try {
+    const { data } = await (sb as any).from('policy_constants')
+      .select('key, item, value_text, condition, source_title, source_date, verified_at, status')
+      .eq('status', 'confirmed');
+    const rows = (data ?? []) as any[];
+    const cutoff = Date.now() - 180 * 86_400_000;
+    const fresh = rows.filter((r) => Date.parse(r.verified_at) >= cutoff);
+    const stale = rows.filter((r) => !(Date.parse(r.verified_at) >= cutoff));
+    if (stale.length > 0) {
+      // 크론이 10분마다 돈다 — 같은 경고는 24시간에 한 번만
+      const { count: recent } = await (sb as any).from('admin_alerts').select('id', { count: 'exact', head: true })
+        .eq('type', 'policy_constants_stale').gte('created_at', new Date(Date.now() - 86_400_000).toISOString());
+      if (!recent) await (sb as any).from('admin_alerts').insert({
+        type: 'policy_constants_stale', severity: 'warning',
+        title: `제도 상수 ${stale.length}행 확인일 180일 초과 — 글 주입에서 제외됨`,
+        message: stale.slice(0, 10).map((r) => `${r.key}(${String(r.verified_at).slice(0, 10)})`).join(', '),
+      }).then(() => null, () => null);
+    }
+    return fresh.map((r) => `- ${r.item}: ${r.value_text}${r.condition ? ` (${r.condition})` : ''} — ${r.source_title}, ${String(r.verified_at).slice(0, 10)} 기준`).join('\n');
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * EX-A2 ② — 감산 전용 편집 1회. 새 수치·표·비교를 더하지 못하게 지시하고, 결과는 호출부가 같은 게이트로 재판정한다.
+ * ⚠️ 캐시·기록 축: caller 를 'issue-draft-edit' 로 갈라 원장에서 편집 호출만 셀 수 있게 한다.
+ */
+async function editOutNumbers(content: string, tokens: string[], issue: any): Promise<string | null> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey || tokens.length === 0) return null;
+  try {
+    const res = await anthropicFetch(ANTHROPIC_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: MODEL, max_tokens: 12000,
+        system: '당신은 편집자다. 주어진 마크다운 본문에서 지정한 수치가 들어간 문장만 삭제하거나, 그 수치를 뺀 서술로 바꾼다. 새 수치·새 표·새 비교·새 문단을 추가하지 않는다. 나머지 문장은 한 글자도 바꾸지 않는다. 결과 본문만 출력한다.',
+        messages: [{ role: 'user', content: `삭제·비수치화할 수치 토큰: ${tokens.join(' | ')}\n\n본문:\n${content}` }],
+      }),
+    }, { caller: 'issue-draft-edit', category: llmCategoryOfContent(issue?.category), postId: null, metadata: { issue_id: issue?.id ?? null, tokens: tokens.length } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const text = String(data.content?.[0]?.text || '').replace(/^```(?:markdown)?\s*|```\s*$/g, '').trim();
+    // 감산이어야 한다 — 길이가 늘었으면 받지 않는다
+    if (!text || text.length > content.length * 1.02) return null;
+    return text;
+  } catch {
+    return null;
+  }
+}
+
+async function generateArticle(issue: any, bigEventContext = '', siteContext = '', sourceText = '', constantsBlock = ''): Promise<{ article: GenResult | null; failReason: DraftFailReason | null }> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) { console.error('[issue-draft] ANTHROPIC_API_KEY missing'); return { article: null, failReason: 'no_key' }; }
 
@@ -260,6 +340,9 @@ ${issue.category === 'apt' ? `
 ${siteContext ? `
 ## 이 글의 현장
 ${siteContext}` : ''}
+${constantsBlock ? `
+## 제도 상수(전국 공통 · 출처·기준일 있음 — 인용 시 기준일을 함께 쓴다)
+${constantsBlock}` : ''}
 ` : ''}
 ## 구조 가이드:
 - 도입부: 핵심 팩트 1~2줄 → 배경 설명
@@ -304,7 +387,9 @@ ${getFreshnessContext()}`;
   };
   const subLabel = (issue.sub_category && SUB_CATEGORY_LABEL[issue.sub_category]) || '';
   const regionTokens = [issue.region_sido, issue.region_sigungu].filter(Boolean).join(' ');
-  const monthLabel = `${new Date().getFullYear()}년 ${new Date().getMonth() + 1}월`;
+  // ⚠️ EX-A2 — 부동산 제목에 «이번 달» 토큰을 넣지 않는다. 「2026년 9월 분양일정」은 분양 시기로 읽히는데
+  //    원문 시기는 「3분기」·「10월」일 수 있다(BP-B 1회차 실측). 게이트는 이번 달을 허용하므로 여기서 막는다.
+  const monthLabel = issue.category === 'apt' ? '' : `${new Date().getFullYear()}년 ${new Date().getMonth() + 1}월`;
   const titleHint = [subLabel, regionTokens, monthLabel].filter(Boolean).join(' · ');
 
   const userPrompt = `다음 이슈에 대해 데이터 분석 블로그 기사를 작성하세요.
@@ -314,12 +399,15 @@ ${getFreshnessContext()}`;
 핵심 키워드: ${(issue.detected_keywords || []).join(', ')}
 관련 대상: ${(issue.related_entities || []).join(', ')}
 ${titleHint ? `타이틀 보조 토큰: ${titleHint}` : ''}
-원본 데이터: ${JSON.stringify(issue.raw_data || {}).slice(0, 2000)}
+원본 데이터: ${JSON.stringify({ ...(issue.raw_data || {}), blocked_draft: undefined, source_text: undefined, number_shadow: undefined }).slice(0, 2000)}
 출처 URL: ${(issue.source_urls || []).join(', ')}
-
+${sourceText ? `
+원문 발췌(출처 기사 본문 — 숫자는 여기와 위 데이터에 있는 것만 쓴다. 문장은 그대로 옮기지 말고 새 문장으로):
+${sourceText}
+` : ''}
 요구사항:
-1. 비교 분석 마크다운 테이블 최소 2개
-2. 3가지 시나리오 전망 (긍정/중립/부정)
+1. ${issue.category === 'apt' ? '마크다운 표는 데이터 블록에 표가 될 행이 있을 때만(없으면 표 없음)' : '비교 분석 마크다운 테이블 최소 2개'}
+2. ${issue.category === 'apt' ? '전망은 수치 없이 조건별 서술로(긍정/중립/부정) — 새 숫자·예상 금액 금지' : '3가지 시나리오 전망 (긍정/중립/부정)'}
 3. "## 자주 묻는 질문" 섹션 + Q./A. 형식 5~8개 (필수!)
 4. 관련 카더라 페이지 내부 링크 3개+ (마크다운 [텍스트](/경로) 형식)
 5. 이미지 삽입 금지 — 이미지는 자동으로 추가됩니다
@@ -680,7 +768,9 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
 
   // AI 기사 생성
   const siteContext = await buildSiteContext(sb, issue.apt_site_id);
-  const { article, failReason } = await generateArticle(issue, bigEventContext, siteContext);
+  const sourceText = await loadSourceText(sb, issue);
+  const constantsBlock = issue.category === 'apt' ? await loadPolicyConstants(sb) : '';
+  const { article, failReason } = await generateArticle(issue, bigEventContext, siteContext, sourceText, constantsBlock);
   if (!article) {
     // A3: 재시도 로직 — retry_count < 3이면 is_processed=false로 리셋
     if (failReason === 'quota') {
@@ -702,20 +792,43 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   const nowYm = new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 7);
   const allow = buildAllow(
     // ⛔ raw_data 의 blocked_draft(지난번에 막힌 초안)는 허용 목록에 넣지 않는다 — 넣으면 환각 숫자가 스스로를 허가한다.
-    [siteContext, bigEventContext, issue.title, issue.summary, JSON.stringify({ ...(issue.raw_data ?? {}), blocked_draft: undefined }), (issue.detected_keywords || []).join(' ')],
+    // EX-A2 ③ 원문 발췌(sourceText)·① 제도 상수 블록은 «입력으로 준 것» 이라 허용 소스다. 파생·환산은 여전히 막힌다.
+    [siteContext, constantsBlock, sourceText, bigEventContext, issue.title, issue.summary,
+      JSON.stringify({ ...(issue.raw_data ?? {}), blocked_draft: undefined, source_text: undefined, number_shadow: undefined }),
+      (issue.detected_keywords || []).join(' ')],
     { ym: [Number(nowYm.replace('-', ''))] },
   );
-  const numGate = verifyNumbers(article.content, allow);
+  let numGate = verifyNumbers(article.content, allow);
+  const firstGate = numGate;
+  // EX-A2 ② — 감산 전용 편집 1회. 차단 토큰이 든 문장을 지우거나 수치 없이 바꾸게만 하고, 결과는 «같은 게이트» 로 다시 판정한다.
+  let edited = false;
+  if (!numGate.ok && issue.category === 'apt') {
+    const revised = await editOutNumbers(article.content, numGate.unverified, issue);
+    if (revised) {
+      const second = verifyNumbers(revised, allow);
+      edited = true;
+      if (second.ok) { article.content = revised; }
+      numGate = second;
+    }
+  }
   if (!numGate.ok && issue.category === 'apt') {
     // ⚠️ 막힌 초안은 blog_posts 에 넣지 않는다(미발행 수문). 판독용으로 글감 행에만 남긴다 — 무엇이 막혔는지 사람이 읽을 수 있어야 규칙을 고친다.
     dbw('issue-draft', 'issue_alerts.update@number_gate', await (sb as any).from('issue_alerts').update({
       publish_decision: 'number_unverified', fail_reason: 'number_unverified',
       block_reason: `수치 출처 미확인 ${numGate.unverified.length}/${numGate.checked}: ${numGate.unverified.slice(0, 12).join(' · ')}`.slice(0, 500),
-      raw_data: { ...(issue.raw_data ?? {}), blocked_draft: { at: new Date().toISOString(), title: article.title, unverified: numGate.unverified, checked: numGate.checked, content: article.content.slice(0, 16000) } },
+      raw_data: { ...(issue.raw_data ?? {}), blocked_draft: { at: new Date().toISOString(), title: article.title, first_unverified: firstGate.unverified, edited, unverified: numGate.unverified, checked: numGate.checked, content: article.content.slice(0, 16000) } },
     }).eq('id', issue.id));
     return { decision: 'number_unverified', score: issue.final_score, title: article.title, numGate: { category: issue.category, ...numGate } };
   }
-  if (!numGate.ok) console.warn(`[issue-draft] number_gate shadow(${issue.category}) ${numGate.unverified.length}/${numGate.checked}: ${numGate.unverified.slice(0, 6).join(' · ')}`);
+  // 통과 기록(3분해 계측) — 부동산은 1차 통과/편집 후 통과, 그 외는 섀도 위반 로그
+  {
+    const gateLog = issue.category === 'apt'
+      ? { gate_result: edited ? 'passed_after_edit' : 'passed_first', first_unverified: firstGate.unverified.slice(0, 20), checked: firstGate.checked }
+      : { number_shadow: { ok: numGate.ok, checked: numGate.checked, unverified: numGate.unverified.slice(0, 30), had_source_text: !!sourceText } };
+    dbw('issue-draft', 'issue_alerts.update@number_log', await (sb as any).from('issue_alerts')
+      .update({ raw_data: { ...(issue.raw_data ?? {}), ...gateLog } }).eq('id', issue.id));
+    issue.raw_data = { ...(issue.raw_data ?? {}), ...gateLog };
+  }
 
   article.content = enrichVisuals(article.content, issue);
 
