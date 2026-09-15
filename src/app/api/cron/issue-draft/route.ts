@@ -20,6 +20,8 @@ import { stripSyntheticPrice } from '@/lib/apt/synthetic-price';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
 import { buildAllow, verifyNumbers } from '@/lib/content/number-verify';
 import { extractArticleText } from '@/lib/content/article-text';
+import { parseSalePeriod } from '@/lib/apt/sale-period';
+import { periodWindow } from '@/lib/apt/upcoming-sales';
 
 /**
  * issue-draft v2 — AI 기사 생성 + 자동 발행 + 이미지 + 피드 포스트
@@ -389,7 +391,12 @@ ${getFreshnessContext()}`;
   const regionTokens = [issue.region_sido, issue.region_sigungu].filter(Boolean).join(' ');
   // ⚠️ EX-A2 — 부동산 제목에 «이번 달» 토큰을 넣지 않는다. 「2026년 9월 분양일정」은 분양 시기로 읽히는데
   //    원문 시기는 「3분기」·「10월」일 수 있다(BP-B 1회차 실측). 게이트는 이번 달을 허용하므로 여기서 막는다.
-  const monthLabel = issue.category === 'apt' ? '' : `${new Date().getFullYear()}년 ${new Date().getMonth() + 1}월`;
+  //    EX-B ② — 대신 «데이터 유래» 시기 토큰: 이 글 현장 블록의 esp 원문 그대로의 정밀도(「2026년 3분기」). 지난 시기·esp 없음이면 넣지 않는다.
+  const espRaw = /^- 예상 분양 시기: (\S+)/m.exec(siteContext)?.[1] ?? '';
+  const espWin = espRaw ? periodWindow(espRaw) : null;
+  const nowYmKst = new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 7);
+  const espLabel = espWin && espWin.end >= nowYmKst ? (parseSalePeriod(espRaw)?.label ?? '') : '';
+  const monthLabel = issue.category === 'apt' ? espLabel : `${new Date().getFullYear()}년 ${new Date().getMonth() + 1}월`;
   const titleHint = [subLabel, regionTokens, monthLabel].filter(Boolean).join(' · ');
 
   const userPrompt = `다음 이슈에 대해 데이터 분석 블로그 기사를 작성하세요.
