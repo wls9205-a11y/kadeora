@@ -8,7 +8,7 @@ import {
 import {
   bondRatePerMille, pensionMonthly, HOUSING_BOND_SOURCE, HOUSING_PENSION_SOURCE,
   PENSION_MIN_AGE, PENSION_MAX_PRICE, brokerageBracket, BROKERAGE_SOURCE,
-  parsePolicyPack, ltvPolicyKey, dsrPolicyKey, stressDsrKey, acqTaxPolicyKey, acqTaxMidRatePct, acqSurtaxPct,
+  parsePolicyPack, ltvPolicyKey, dsrPolicyKey, stressDsrKey, acqTaxPolicyKey, acqTaxMidRatePct, acqSurtaxPct, secTaxKeys, type StockMarket,
   type LtvRegion, type LtvOwner,
 } from './gov-tables';
 
@@ -150,19 +150,53 @@ export function stockRoi(v: V): CalcResult {
   const sell = n(v.sellPrice);
   const qty = n(v.quantity);
   const fee = n(v.fee) / 100;
-  const market = v.market as string;
+  // K-9 ⓒ 3군 재분류 — 증권거래세는 «시장값이 아니라 법정값» 이라 policy_constants 에서 온다.
+  //   옛 값 0.0018(0.18%)은 2024년 화석이었고 그 사이 두 번 움직였다(2025 최저 0.15% → 2026 인상).
+  //   ⚠️ 성분으로 낸다. 총액은 2026년 한정으로 양 시장이 0.20% 로 «우연히» 같아서,
+  //      합계만 맞히면 내년 개정 때 조용히 틀린다.
+  const market = String(v.market ?? 'kospi') as StockMarket;
+  const pack = parsePolicyPack(v.__policy);
+  const keys = secTaxKeys(market);
+  const tradePct = keys.trade ? pack?.pct?.[keys.trade] : 0;
+  const farmPct = keys.farm ? (pack?.pct?.[keys.farm] ?? undefined) : 0;
+
+  if (keys.trade && typeof tradePct !== 'number') {
+    return {
+      main: { label: '세율 기준 미수신', value: '—', color: 'var(--text-tertiary)' },
+      details: [{ label: '사유', value: '증권거래세율 기준을 아직 받지 못했다. 잠시 후 다시 시도한다' }],
+    };
+  }
+  if (keys.farm && typeof farmPct !== 'number') {
+    return {
+      main: { label: '세율 기준 미수신', value: '—', color: 'var(--text-tertiary)' },
+      details: [{ label: '사유', value: '농어촌특별세율 기준을 아직 받지 못했다. 잠시 후 다시 시도한다' }],
+    };
+  }
+
+  const sellBase = sell * qty;
+  const tradeTax = Math.round(sellBase * ((tradePct ?? 0) / 100));
+  const farmTax = Math.round(sellBase * ((farmPct ?? 0) / 100));
+  const secTax = tradeTax + farmTax;
   const buyTotal = buy * qty * (1 + fee);
   const sellTotal = sell * qty * (1 - fee);
-  const secTax = market === 'kr' ? sell * qty * 0.0018 : 0; // 증권거래세 0.18% (국내)
   const profit = sellTotal - buyTotal - secTax;
   const roi = buyTotal > 0 ? profit / buyTotal : 0;
+  const m = keys.trade ? (pack?.meta?.[keys.trade] ?? {}) : {};
   return {
     main: { label: '수익률', value: pct(roi), color: profit >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' },
     details: [
       { label: '매수 총액 (수수료 포함)', value: fmt(Math.round(buyTotal)) },
       { label: '매도 총액 (수수료 차감)', value: fmt(Math.round(sellTotal)) },
-      { label: '증권거래세', value: fmt(Math.round(secTax)) },
+      // ⛔ 합계 한 줄로 뭉개지 않는다. 성분이 보여야 개정 때 어느 칸이 바뀌었는지 안다.
+      ...(keys.trade
+        // ⚠️ 법정 표기는 0.20% 다. JS 가 0.20 을 0.2 로 줄이므로 소수 2자리로 고정한다 —
+        //    「1만분의 20」의 표기 정합이다.
+        ? [{ label: `증권거래세 (${(tradePct ?? 0).toFixed(2)}%)`, value: fmt(tradeTax) }]
+        : [{ label: '증권거래세', value: '해외 주식은 증권거래세가 없다 — 양도세는 별도다' }]),
+      ...(keys.farm ? [{ label: `농어촌특별세 (${(farmPct ?? 0).toFixed(2)}%)`, value: fmt(farmTax) }] : []),
+      ...(keys.trade ? [{ label: '세금 합계', value: fmt(secTax) }] : []),
       { label: '순수익', value: fmt(Math.round(profit)) },
+      ...(m.source || m.date ? [{ label: '근거', value: [m.source, m.date].filter(Boolean).join(' · ') }] : []),
     ],
   };
 }

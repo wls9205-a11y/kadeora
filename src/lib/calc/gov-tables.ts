@@ -300,6 +300,31 @@ export function acqSurtaxPct(
   return { eduPct, farmPct };
 }
 
+/**
+ * 국내 주식 «증권거래세 + 농어촌특별세» — K-9 ⓒ 3군 재분류 (2026-09-16).
+ *
+ * ⛔ 이 값은 «시장값이 아니라 법정값» 이다. 변경 주체가 시장이 아니라 시행령(탄력세율)이고
+ *    출처가 시세 API 가 아니라 법령이다. 그래서 liveData(환율 통로)가 아니라
+ *    policy_constants(취득세와 같은 법정 파이프) 소속이다.
+ *    ⚠️ 다만 연도별 로드맵으로 계속 움직여 온 값이라 «적용시기» 가 붙는다.
+ *
+ * 옛 코드는 `0.0018`(0.18%) 한 값이었다 — 2024년 화석이다. 그 사이 두 번 움직였다:
+ *   2025년 역대 최저 0.15% → 2026-01-01 인상. 현행 총 0.20%.
+ * ⚠️ 그리고 «구성이 다르다»:
+ *   코스피 = 거래세 0.05% + 농특세 0.15%
+ *   코스닥 = 거래세 0.20% 단일(농특세 없음)
+ *   총액만 보면 2026년 한정으로 양 시장이 0.20% 로 «우연히» 같다.
+ *   합계만 맞히고 성분을 뭉개면 내년 개정 때 조용히 틀린다 —
+ *   「합계 근사가 아니라 성분별 대조가 정본」(취득세에서 세운 규율)이 여기 그대로 적용된다.
+ */
+export type StockMarket = 'kospi' | 'kosdaq' | 'us';
+
+export function secTaxKeys(market: StockMarket): { trade: string | null; farm: string | null } {
+  if (market === 'kospi') return { trade: 'sec_tax_kospi_trade', farm: 'sec_tax_kospi_farm' };
+  if (market === 'kosdaq') return { trade: 'sec_tax_kosdaq_trade', farm: null };
+  return { trade: null, farm: null };   // 해외는 증권거래세가 없다(양도세는 별도 계산기)
+}
+
 /** DSR 한도 키 — 업권으로 갈린다. */
 export function dsrPolicyKey(lender: 'bank' | 'nonbank'): string {
   return lender === 'bank' ? 'dsr_bank' : 'dsr_nonbank';

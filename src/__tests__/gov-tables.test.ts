@@ -7,7 +7,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { bondRatePerMille, pensionMonthly, PENSION_MIN_AGE, brokerageBracket, ltvPolicyKey, acqTaxPolicyKey, acqTaxMidRatePct } from '@/lib/calc/gov-tables';
-import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc, acquisitionTax } from '@/lib/calc/formulas';
+import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc, acquisitionTax, stockRoi } from '@/lib/calc/formulas';
 
 const 억 = 100_000_000;
 
@@ -450,5 +450,55 @@ describe('취득세 — 잔여 표본 2건 (분기 경계 · 12% 행)', () => {
       .toContain('100만');   // 5억 × 0.2%
     expect(buy(5 * 억, 1, false, 'under').details.find((d) => d.label === '농어촌특별세')!.value)
       .toContain('0원');
+  });
+});
+
+describe('증권거래세 — 시장값이 아니라 «법정값» 이다 (K-9 ⓒ 3군 재분류)', () => {
+  const POLICY = JSON.stringify({
+    pct: { sec_tax_kospi_trade: 0.05, sec_tax_kospi_farm: 0.15, sec_tax_kosdaq_trade: 0.20 },
+    meta: { sec_tax_kospi_trade: { source: '증권거래세법 시행령', date: '2025-12-31' } },
+  });
+  const roi = (market: string) =>
+    stockRoi({ buyPrice: 10000, sellPrice: 12000, quantity: 100, fee: 0, market, __policy: POLICY });
+
+  it('코스피는 «성분» 으로 낸다 — 거래세 0.05 + 농특세 0.15', () => {
+    const r = roi('kospi');
+    expect(r.details.find((d) => d.label.startsWith('증권거래세'))!.label).toContain('0.05%');
+    expect(r.details.find((d) => d.label.startsWith('농어촌특별세'))!.label).toContain('0.15%');
+    // 매도 120만 × 0.05% = 600원 · × 0.15% = 1,800원 · 합계 2,400원
+    expect(r.details.find((d) => d.label === '세금 합계')!.value).toBe('2,400원');
+  });
+
+  it('코스닥은 «단일» 이다 — 농특세 줄이 없다', () => {
+    const r = roi('kosdaq');
+    expect(r.details.find((d) => d.label.startsWith('증권거래세'))!.label).toContain('0.20%');
+    expect(r.details.some((d) => d.label.startsWith('농어촌특별세'))).toBe(false);
+    expect(r.details.find((d) => d.label === '세금 합계')!.value).toBe('2,400원');
+  });
+
+  it('⛔ 합계가 같다고 같은 게 아니다 — 2026년 한정 우연의 일치', () => {
+    // 두 시장의 «합계» 는 0.20% 로 같지만 구성이 다르다.
+    // 합계만 맞히고 성분을 뭉개면 다음 개정 때 조용히 틀린다.
+    expect(roi('kospi').details.find((d) => d.label === '세금 합계')!.value)
+      .toBe(roi('kosdaq').details.find((d) => d.label === '세금 합계')!.value);
+    expect(roi('kospi').details.length).not.toBe(roi('kosdaq').details.length);
+  });
+
+  it('⛔ 옛 상수 0.18% 의 오차를 고정한다 — 2024년 화석', () => {
+    const 옛 = Math.round(12000 * 100 * 0.0018);   // 2,160원
+    const 새 = 2400;
+    expect(옛).toBe(2160);
+    expect(새 - 옛).toBe(240);
+  });
+
+  it('해외는 증권거래세가 «없다» — 0원이 아니라 그렇게 말한다', () => {
+    const r = roi('us');
+    expect(r.details.find((d) => d.label === '증권거래세')!.value).toContain('없다');
+    expect(r.details.some((d) => d.label === '세금 합계')).toBe(false);
+  });
+
+  it('⛔ 주입이 없으면 세율을 지어내지 않는다', () => {
+    const r = stockRoi({ buyPrice: 10000, sellPrice: 12000, quantity: 100, fee: 0, market: 'kospi' });
+    expect(r.main.label).toBe('세율 기준 미수신');
   });
 });

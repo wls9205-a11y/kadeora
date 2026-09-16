@@ -228,7 +228,9 @@ export const CALC_REGISTRY: CalcMeta[] = [
       { id: 'sellPrice', label: '매도가 (1주)', type: 'currency', default: 65000 },
       { id: 'quantity', label: '수량 (주)', type: 'number', default: 100, min: 1 },
       { id: 'fee', label: '수수료율 (%)', type: 'percent', default: 0.015, step: 0.001 },
-      { id: 'market', label: '시장', type: 'radio', default: 'kr', options: [{ value: 'kr', label: '국내' }, { value: 'us', label: '해외' }] },
+      // K-9 ⓒ — 코스피·코스닥은 «구성이 다르다»(코스피 거래세0.05+농특0.15 / 코스닥 거래세0.20 단일).
+      //   총액은 2026년 한정 우연히 같지만 성분을 내려면 시장을 갈라야 한다.
+      { id: 'market', label: '시장', type: 'radio', default: 'kospi', options: [{ value: 'kospi', label: '코스피' }, { value: 'kosdaq', label: '코스닥' }, { value: 'us', label: '해외' }] },
     ],
     faqs: [
       { q: '주식 수익률 계산기에서 세금은 반영되나요?', a: '국내 주식 거래세(0.18%)와 수수료를 반영합니다. 해외주식은 양도세(22%, 250만원 공제) 별도입니다.' },
