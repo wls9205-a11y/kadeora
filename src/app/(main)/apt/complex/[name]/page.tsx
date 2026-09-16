@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import LoginGate from '@/components/LoginGate';
 import { priceChangeSentence } from '@/lib/apt/price-change';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
@@ -33,12 +34,39 @@ export const dynamicParams = true;
 
 interface Props { params: Promise<{ name: string }> }
 
-async function getProfile(decoded: string) {
+/**
+ * K-10 ② — 렌더 감량 (2026-09-16).
+ *
+ * ⛔ `select('*')` 를 쓰지 않는다. 이 표에는 «죽은 백업 jsonb 5열» 이 있고,
+ *    실측 평균 1,028 bytes — 행 평균 2,830 의 «36%» 가 아무도 안 읽는 백업이다.
+ *    (그중 images_backup_sd1 9,699행은 오늘 내가 만든 것이다. 내 백업이 내 렌더를 무겁게 했다.)
+ *    이 표면은 39,673 페이지가 전량 on-demand 로 렌더되므로 한 행의 무게가 그대로 큐에 쌓인다.
+ *
+ * ⚠️ 새 열을 추가하면 여기에도 «적어야» 한다. `*` 로 되돌리지 말 것 —
+ *    편해지는 대신 백업 열이 다시 딸려 온다.
+ */
+const PROFILE_COLS = [
+  'id', 'apt_name', 'sigungu', 'region_nm', 'dong', 'built_year', 'age_group',
+  'total_households', 'latest_sale_price', 'latest_sale_date', 'avg_sale_price_pyeong',
+  'latest_jeonse_price', 'latest_monthly_deposit', 'latest_monthly_rent', 'jeonse_ratio',
+  'sale_count_1y', 'rent_count_1y', 'price_change_1y', 'blog_post_count', 'review_count',
+  'avg_rating', 'seo_title', 'seo_description', 'latitude', 'longitude',
+  'created_at', 'updated_at', 'images', 'og_image_url', 'narrative_text',
+  'narrative_generated_at', 'faqs', 'faqs_generated_at', 'metadata', 'cover_image_url',
+  'price_change_area', 'price_change_n_recent', 'price_change_n_past',
+].join(',');
+
+/**
+ * ⚠️ `cache()` 로 감싼 이유: 이 함수는 «한 렌더에 두 번» 불린다 —
+ *    generateMetadata 에서 한 번, 페이지 본문에서 한 번. React cache 가 같은 렌더 안의
+ *    두 번째 호출을 메모한다. 뚱뚱한 행을 두 번 끌어오던 것을 한 번으로 줄인다.
+ */
+const getProfile = cache(async function getProfile(decoded: string) {
   try {
     // s238 P0: cookie-free admin client — force-static SSG 호환
     const sb = getSupabaseAdmin();
     const { data } = await (sb as any).from('apt_complex_profiles')
-      .select('*')
+      .select(PROFILE_COLS)
       .eq('apt_name', decoded)
       .limit(1)
       .maybeSingle();
@@ -46,7 +74,7 @@ async function getProfile(decoded: string) {
   } catch {
     return null;
   }
-}
+});
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { name } = await params;
