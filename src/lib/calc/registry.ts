@@ -539,7 +539,9 @@ export const CALC_REGISTRY: CalcMeta[] = [
       { id: 'price', label: '취득가액', type: 'currency', default: 500000000 },
       { id: 'type', label: '취득 유형', type: 'radio', default: 'purchase', options: [{ value: 'purchase', label: '매매' }, { value: 'gift', label: '증여' }, { value: 'inherit', label: '상속' }] },
       { id: 'houseCount', label: '보유 주택수 (취득 후)', type: 'stepper', default: 1, min: 1, max: 5 },
-      { id: 'regulated', label: '조정대상지역', type: 'radio', default: 'no', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }] },
+      // ⚠️ 목록을 코드에 두지 «않는다». 대신 «기준일을 박은» 안내만 붙인다 —
+      //    스테일돼도 거짓말은 안 하는 구조다(목록을 박으면 개정 때마다 거짓이 된다).
+      { id: 'regulated', label: '조정대상지역', type: 'radio', default: 'no', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }], hint: '2025-10-16 기준 서울 전역·경기 12곳. 최신 지정 현황은 국토교통부 공고를 확인한다.' },
       // K-9 ⓒ ③ — 농어촌특별세는 «전용면적 85㎡ 초과» 에만 붙는다. 가액이 아니라 면적이 기준이라
       //   묻지 않으면 합계가 갈린다(옛 코드는 「6억 초과」라는 엉뚱한 조건을 쓰고 있었다).
       { id: 'area85', label: '전용면적', type: 'radio', default: 'under', options: [{ value: 'under', label: '85㎡ 이하' }, { value: 'over', label: '85㎡ 초과' }], hint: '농어촌특별세는 85㎡ 초과에만 부과된다.' },

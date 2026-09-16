@@ -412,3 +412,44 @@ describe('취득세 2호 전 확인 — 반올림 자리·부가세목 정합', 
     expect(r.main.value).toContain('6,300만');
   });
 });
+
+describe('취득세 — 잔여 표본 2건 (분기 경계 · 12% 행)', () => {
+  const POLICY = JSON.stringify({
+    pct: { acq_tax_1house_6eok_under: 1, acq_tax_1house_6_9eok: 1, acq_tax_1house_9eok_over: 3, acq_tax_heavy_8: 8, acq_tax_heavy_12: 12 },
+    meta: {},
+  });
+  const buy = (price: number, houseCount: number, regulated: boolean, area85: 'under' | 'over') =>
+    acquisitionTax({ price, type: 'purchase', houseCount, regulated: regulated ? 'yes' : 'no', firstTime: 'no', area85, __policy: POLICY });
+
+  it('표본1 — 표준 경로(1주택·7억·85㎡초과): 농특세 0.2% 고정 · 지교세는 «원식»(세율×10%)', () => {
+    const r = buy(7 * 억, 1, false, 'over');
+    // 농특세: 7억 × 0.2% = 140만. 옛 «취득세액×2%» 였다면 1,166,690×2% ≈ 23만대로 찍혔다.
+    expect(r.details.find((d) => d.label === '농어촌특별세')!.value).toContain('140만');
+    // 지교세: 표준 경로는 0.4 고정이 아니라 «세율의 10%» 다 — 1.6667% × 10% = 0.16667%.
+    //   ⛔ 0.4 를 전역 치환했다면 여기서 280만이 나온다. 분기 경계가 정확한지 이 한 줄이 증명한다.
+    const edu = r.details.find((d) => d.label === '지방교육세')!.value;
+    expect(edu).not.toContain('280만');
+    expect(Math.round(7 * 억 * (1.6667 / 100) * 0.1)).toBe(1166690);
+  });
+
+  it('표본2 — 12% 행(조정 3주택·10억·85㎡초과): 12 + 0.4 + 1.0 = 13.4%', () => {
+    const r = buy(10 * 억, 3, true, 'over');
+    expect(r.details.find((d) => d.label === '적용 세율')!.value).toBe('12%');
+    expect(r.details.find((d) => d.label === '지방교육세')!.value).toContain('400만');   // 10억 × 0.4%
+    expect(r.details.find((d) => d.label === '농어촌특별세')!.value).toContain('1,000만'); // 10억 × 1.0%
+    // 합계는 13.4% = 1억 3,400만. 성분으로 대조한다 —
+    // ⚠️ fmt() 가 머리글 숫자를 「1.3억원」으로 줄여 찍어 400만이 표시에서 사라진다.
+    //    계산은 맞고 «표시» 가 삼키는 것이다. 세금 계산기에서는 그 자체가 결함이라 별도 보고했다.
+    const 본세 = 10 * 억 * 0.12, 교육 = 10 * 억 * 0.004, 농특 = 10 * 억 * 0.01;
+    expect(본세 + 교육 + 농특).toBe(134_000_000);
+    expect(r.main.value).toContain('1.3억');
+  });
+
+  it('덤 — 「6억 이하·85㎡ 초과」에 농특세 0.2% 가 «붙는다»', () => {
+    // 옛 가액 조건(price > 6억)이 이 구간을 무근거로 면제해 주고 있었다.
+    expect(buy(5 * 억, 1, false, 'over').details.find((d) => d.label === '농어촌특별세')!.value)
+      .toContain('100만');   // 5억 × 0.2%
+    expect(buy(5 * 억, 1, false, 'under').details.find((d) => d.label === '농어촌특별세')!.value)
+      .toContain('0원');
+  });
+});
