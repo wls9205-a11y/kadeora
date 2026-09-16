@@ -31,7 +31,10 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
   const url = `${SITE_URL}${path}`;
   const canonicalOverride = CANONICAL_OVERRIDES[`${category}/${slug}`];
   const canonicalUrl = canonicalOverride ? `${SITE_URL}${canonicalOverride}` : url;
-  const ogTitle = `${calc.emoji} ${calc.title} — 무료 온라인 계산기`;
+  // K-2 ③: seoTitle 이 있으면 그것을 쓴다(구절 단절·「계산기」 중복 수리). 없으면 기존 조립.
+  const ogTitle = calc.seoTitle
+    ? `${calc.emoji} ${calc.seoTitle}`
+    : `${calc.emoji} ${calc.title} — 무료 온라인 계산기`;
   const metaDesc = `${calc.description} 2026년 최신 기준 반영. 무료·회원가입 불필요.`;
   // s224 T1B: 5개 timestamp 모두 calc.lastUpdated 기준으로 통일.
   // 빌드 시점 new Date() 와 hardcoded '2026-01-15' 박혀있던 부분 제거.

@@ -5,6 +5,10 @@ import {
   BROKERAGE_RATES, JEONSE_CONVERSION_RATE, PROPERTY_TAX_RATES,
   calcProgressiveTax, formatKRW,
 } from './tax-tables';
+import {
+  bondRatePerMille, pensionMonthly, HOUSING_BOND_SOURCE, HOUSING_PENSION_SOURCE,
+  PENSION_MIN_AGE, PENSION_MAX_PRICE,
+} from './gov-tables';
 
 type V = Record<string, number | string>;
 
@@ -1172,11 +1176,35 @@ export function prepaymentFee(v: V): CalcResult {
   const fee = Math.round(amount * rate * remain / total);
   return { main: { label: '중도상환수수료', value: fmt(fee) }, details: [{ label: '잔여비율 적용', value: `${remain}/${total}개월` }] };
 }
+/**
+ * K-2 ② — 지어낸 비율식을 걷어내고 «공사 예시표 보간» 으로 바꿨다 (2026-09-16).
+ *
+ * 예전: `ratio = 0.02 + (age-55)*0.002` → 70세·5억에서 월 208만원.
+ * 공사 표: 같은 조건 153.9만원. 약 35% 과대였다.
+ * 그 식에는 근거가 없었고, 결과 화면의 「정확한 수령액은 공사 시뮬레이터 확인」이
+ * 그 사실을 이미 자백하고 있었다.
+ */
 export function housingPension(v: V): CalcResult {
-  const price = Math.min(n(v.housePrice), 1200000000); const age = n(v.age);
-  const ratio = 0.02 + (age - 55) * 0.002;
-  const monthly = Math.round(price * ratio / 12);
-  return { main: { label: '예상 월 수령액', value: fmt(monthly) }, details: [{ label: '인정 주택가격', value: fmt(price) }, { label: '참고', value: '실제 수령액은 한국주택금융공사 시뮬레이터 확인' }] };
+  const rawPrice = n(v.housePrice);
+  const age = n(v.age);
+  const monthly = pensionMonthly(rawPrice, age);
+  if (monthly === null) {
+    // ⛔ 0 을 돌려주지 않는다 — 「못 받는다」와 「0원 받는다」는 다른 말이다.
+    return {
+      main: { label: '가입 대상 아님', value: `만 ${PENSION_MIN_AGE}세부터`, color: 'var(--text-tertiary)' },
+      details: [{ label: '기준', value: `부부 중 연소자 만 ${PENSION_MIN_AGE}세 이상` }],
+    };
+  }
+  const capped = rawPrice > PENSION_MAX_PRICE;
+  return {
+    main: { label: '예상 월 수령액', value: fmt(monthly) },
+    details: [
+      { label: '인정 주택가격', value: fmt(Math.min(rawPrice, PENSION_MAX_PRICE)) + (capped ? ' (표 상한)' : '') },
+      { label: '조건', value: HOUSING_PENSION_SOURCE.conditions },
+      { label: '기준', value: `${HOUSING_PENSION_SOURCE.issuer} · ${HOUSING_PENSION_SOURCE.effectiveFrom} 적용분` },
+      { label: '참고', value: '예시표를 보간한 값이다. 확정액은 한국주택금융공사 시뮬레이터에서 확인' },
+    ],
+  };
 }
 export function retirementPensionSim(v: V): CalcResult {
   const total = n(v.totalAmount); const years = n(v.years); const pensionYears = n(v.pensionYears);
@@ -1451,13 +1479,52 @@ export function ltvCalc(v: V): CalcResult {
   const maxLoan = Math.max(0, Math.round(price * ltv - existing));
   return { main: { label: '대출 가능액', value: fmt(maxLoan) }, details: [{ label: 'LTV', value: pct(ltv) }, { label: '기존 대출 차감', value: fmt(existing) }] };
 }
+/**
+ * K-2 ① — 단일 매입률(수도권 5% / 그 외 3%)을 «구간별 누진표» 로 바꾸고,
+ *          고정 할인율 상수(0.04)를 «입력» 으로 바꿨다 (2026-09-16).
+ *
+ * 예전 값의 오차: 5억·특별시에서 5.0% vs 법정 2.6% — 약 2배 과대였다.
+ * 할인율을 상수로 박은 것은 거짓 신선도였다 — 시장금리를 따라 «매일» 고시되는 값이다.
+ *
+ * 구조: 법으로 «확정되는» 매입금액이 주인공이고, 시장에서 «변하는» 실부담은
+ *       오늘의 숫자를 받았을 때만 낸다. 모르는 값을 지어내서 채우지 않는다.
+ */
 export function housingBond(v: V): CalcResult {
   const price = n(v.housePrice);
-  const rate = v.region === 'metro' ? 0.05 : 0.03;
-  const bondAmount = Math.round(price * rate);
-  const discountRate = 0.04; // 채권 할인율 약 4%
-  const actualCost = Math.round(bondAmount * discountRate);
-  return { main: { label: '채권 매입 비용', value: fmt(actualCost) }, details: [{ label: '채권 매입액', value: fmt(bondAmount) }, { label: '할인율', value: pct(discountRate) }] };
+  const metro = v.region === 'metro';
+  const perMille = bondRatePerMille(price, metro);
+
+  if (perMille === null) {
+    return {
+      main: { label: '매입률 미확인', value: '—', color: 'var(--text-tertiary)' },
+      details: [{ label: '사유', value: '이 구간·지역의 매입률이 상수표에 없다. 값을 채운 뒤 다시 계산한다' }],
+    };
+  }
+  if (perMille === 0) {
+    return {
+      main: { label: '채권 매입금액', value: fmt(0) },
+      details: [{ label: '사유', value: '시가표준액 2,000만원 미만은 매입 대상이 아니다' }],
+    };
+  }
+
+  const bondAmount = Math.round(price * perMille / 1000);
+  const discountPct = n(v.discountRate);   // 당일 고시 할인율(%). 0 = 미입력
+  const details: { label: string; value: string }[] = [
+    { label: '적용 매입률', value: `${perMille}/1,000 (${(perMille / 10).toFixed(1)}%)` },
+    { label: '지역 구분', value: metro ? '특별시·광역시' : '그 밖의 지역' },
+    { label: '전제', value: '매매로 인한 소유권 이전등기 · 주택' },
+    { label: '기준', value: `${HOUSING_BOND_SOURCE.law} · ${HOUSING_BOND_SOURCE.transcribedAt} 기준` },
+  ];
+
+  if (discountPct > 0) {
+    const actualCost = Math.round(bondAmount * discountPct / 100);
+    details.unshift({ label: '즉시매도 시 실부담', value: `${fmt(actualCost)} (할인율 ${discountPct}%)` });
+  } else {
+    // ⛔ 기본값으로 아무 숫자나 채우지 않는다. 모르면 어디서 보는지 알려 준다.
+    details.unshift({ label: '즉시매도 실부담', value: '당일 고시 할인율을 입력하면 계산된다 (주택도시기금 홈페이지)' });
+  }
+
+  return { main: { label: '채권 매입금액', value: fmt(bondAmount) }, details };
 }
 export function farBcr(v: V): CalcResult {
   const land = n(v.landArea); const building = n(v.buildingArea); const total = n(v.totalFloorArea);

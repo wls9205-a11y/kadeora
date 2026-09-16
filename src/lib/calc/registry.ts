@@ -25,6 +25,19 @@ export interface CalcMeta {
   categoryLabel: string;
   title: string;
   titleShort: string;
+  /**
+   * K-2 ③ — 검색 결과 <title> 전용 덮어쓰기. 없으면 기존 조립식을 그대로 쓴다.
+   *
+   * 왜 필요한가: 기본 조립은 `{emoji} {title} — 무료 온라인 계산기` 인데, 이것이
+   * 두 가지를 동시에 망가뜨리는 표적이 있었다.
+   *   ① 구절 단절 — 사람들은 「국민주택채권 계산기」를 치는데 우리 제목은
+   *      「국민주택채권 «매입금액» 계산기」라 정확 구절이 끊긴다.
+   *   ② 「계산기」 중복 — 접미사가 또 「계산기」라 제목 길이만 먹는다.
+   * 실측: 이 두 표적이 90일 노출 2.2만인데 CTR 0.3% 였다.
+   *
+   * ⛔ 전역 템플릿을 바꾸지 않는다 — 나머지 137종은 손대지 않는 것이 이 필드의 존재 이유다.
+   */
+  seoTitle?: string;
   description: string;
   keywords: string[];
   legalBasis: string;
@@ -226,6 +239,7 @@ export const CALC_REGISTRY: CalcMeta[] = [
   {
     slug: 'avg-down', emoji: '⬇️', category: 'investment', categoryLabel: '주식/투자',
     title: '물타기(평단가) 계산기', titleShort: '물타기 계산기',
+    seoTitle: '주식 물타기 계산기 — 평단가·추가매수 계산',
     description: '추가 매수 시 평균 매수단가를 계산. 목표가까지 필요한 추가 매수량도 확인.',
     keywords: ['물타기 계산기','평균 매수단가','평단가 계산','추가 매수','주식 물타기'],
     legalBasis: '', version: '2026.04', lastUpdated: '2026-04-05',
@@ -1532,7 +1546,7 @@ export const CALC_REGISTRY: CalcMeta[] = [
 
 
   // 추가 연금
-  { slug: 'housing-pension', emoji: '🏡', category: 'pension', categoryLabel: '연금/은퇴', title: '주택연금 수령액 계산기', titleShort: '주택연금 계산기', description: '주택가격·나이로 주택연금 예상 월 수령액을 계산.', keywords: ['주택연금 계산기','주택연금 수령액','역모기지','노후 주거'], legalBasis: '한국주택금융공사법', version: '2026.04', lastUpdated: '2026-04-05', pattern: 'simple', formula: 'housingPension', resultLabel: '예상 월 수령액', resultUnit: '원', inputs: [{ id: 'housePrice', label: '주택 시가', type: 'currency', default: 500000000 }, { id: 'age', label: '가입 나이', type: 'number', default: 65, min: 55, max: 90 }], faqs: [
+  { slug: 'housing-pension', emoji: '🏡', category: 'pension', categoryLabel: '연금/은퇴', title: '주택연금 수령액 계산기', titleShort: '주택연금 계산기', seoTitle: '주택연금 계산기 — 나이·집값별 월 수령액', description: '주택가격·나이로 주택연금 예상 월 수령액을 한국주택금융공사 월지급금 예시표 기준으로 계산.', keywords: ['주택연금 계산기','주택연금 수령액','주택연금 월지급금','역모기지','노후 주거'], legalBasis: '한국주택금융공사 월지급금 예시(2026-03-01 적용)', version: '2026.09', lastUpdated: '2026-09-16', pattern: 'simple', formula: 'housingPension', resultLabel: '예상 월 수령액', resultUnit: '원', inputs: [{ id: 'housePrice', label: '주택 시가', type: 'currency', default: 500000000, hint: '표는 12억원까지 다룬다. 넘으면 상한에서 계산한다.' }, { id: 'age', label: '가입 나이', type: 'number', default: 65, min: 55, max: 90, hint: '부부 중 연소자 기준. 만 55세부터 가입 대상이다.' }], faqs: [
       { q: '주택연금 계산기 결과는 정확한가요?', a: '2026년 최신 기준 반영이지만, 개인 상황에 따라 차이가 있습니다. 한국주택금융공사법를 기준으로 계산합니다. 전문가 상담을 권장합니다.' },
       { q: '주택연금 계산기에서 가장 중요한 입력값은?', a: '주택가격·나이로 주택연금 예상 월 수령액을 계산. 정확한 수치를 입력할수록 결과 신뢰도가 높아집니다.' },
       { q: '주택연금 계산기는 무료인가요?', a: '네, 카더라 주택연금 계산기는 완전 무료이며 회원가입 없이 무제한 이용 가능합니다.' },
@@ -1809,7 +1823,7 @@ export const CALC_REGISTRY: CalcMeta[] = [
       { q: '관련 계산기가 더 있나요?', a: '카더라는 부동산 포함 142종의 무료 계산기를 제공합니다.' },
     ], seoContent: '<h2>LTV 대출한도 계산기 완벽 가이드</h2><p>주택담보대출 LTV 비율로 대출 가능 금액을 추정. 카더라 LTV 계산기는 2026년 최신 기준을 반영합니다.</p><p>본 계산기는 <strong>은행업감독규정</strong>를 기준으로 계산합니다. 규정은 매년 개정될 수 있으므로 전문가 확인을 권장합니다.</p><h2>부동산 거래 핵심 정보</h2><p>부동산 거래 시 중개수수료(0.4~0.9%), 등기비용, 취득세, 대출이자 등 다양한 비용이 발생합니다. 사전에 총 비용을 정확히 계산하면 예상치 못한 지출을 방지할 수 있습니다. 등기부등본·건축물대장·토지이용계획확인서는 반드시 확인하세요.</p><h2>이런 분들에게 추천</h2><p>주택 매매·전세·월세를 계획 중인 분, 부동산 투자 수익률을 분석하고 싶은 분, 대출 가능 금액을 확인하고 싶은 분에게 유용합니다.</p>', relatedCalcs: ['dsr-calc', 'loan-repayment'] },
 
-  { slug: 'housing-bond', emoji: '📋', category: 'real-estate', categoryLabel: '부동산', title: '국민주택채권 매입금액 계산기', titleShort: '주택채권 계산기', description: '부동산 등기 시 매입해야 하는 국민주택채권 금액을 계산.', keywords: ['국민주택채권','채권매입','등기 채권','할인율'], legalBasis: '주택도시기금법', version: '2026.04', lastUpdated: '2026-04-05', pattern: 'simple', formula: 'housingBond', resultLabel: '채권 매입 비용', resultUnit: '원', inputs: [{ id: 'housePrice', label: '부동산 시가표준액', type: 'currency', default: 500000000 }, { id: 'region', label: '지역', type: 'radio', default: 'metro', options: [{ value: 'metro', label: '특별시/광역시' }, { value: 'other', label: '기타 지역' }] }], faqs: [
+  { slug: 'housing-bond', emoji: '📋', category: 'real-estate', categoryLabel: '부동산', title: '국민주택채권 매입금액 계산기', titleShort: '주택채권 계산기', seoTitle: '국민주택채권 계산기 — 매입금액·할인율 즉시 계산', description: '부동산 등기 시 매입해야 하는 국민주택채권 금액을 시가표준액 구간별 법정 매입률로 계산.', keywords: ['국민주택채권','국민주택채권 계산기','채권매입','등기 채권','할인율','매입률'], legalBasis: '주택도시기금법 시행령 별표', version: '2026.09', lastUpdated: '2026-09-16', pattern: 'tax-bracket', formula: 'housingBond', resultLabel: '채권 매입금액', resultUnit: '원', inputs: [{ id: 'housePrice', label: '부동산 시가표준액', type: 'currency', default: 500000000 }, { id: 'region', label: '지역', type: 'radio', default: 'metro', options: [{ value: 'metro', label: '특별시/광역시' }, { value: 'other', label: '기타 지역' }] }, { id: 'discountRate', label: '당일 고시 할인율 (%)', type: 'number', default: 0, min: 0, max: 30, step: 0.01, unit: '%', hint: '즉시매도 시에만 필요. 매일 바뀌므로 주택도시기금 홈페이지의 당일 고시값을 넣는다. 비워 두면 법정 매입금액만 계산한다.' }], faqs: [
       { q: '주택채권 계산기 결과는 실제와 같나요?', a: '참고용이며, 지역·물건 특성에 따라 차이가 있을 수 있습니다. 주택도시기금법를 기준으로 계산합니다.' },
       { q: '부동산 거래 시 꼭 확인할 것은?', a: '등기부등본, 건축물대장, 토지이용계획확인서를 반드시 확인하세요.' },
       { q: '주택채권 계산기는 무료인가요?', a: '네, 카더라 주택채권 계산기는 완전 무료이며 회원가입 없이 무제한 이용 가능합니다.' },
