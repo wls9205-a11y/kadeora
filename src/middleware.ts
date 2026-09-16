@@ -108,6 +108,30 @@ export async function middleware(request: NextRequest) {
     return new NextResponse(null, { status: 404 });
   }
 
+  // ── SD-2: /apt/complex/{JSON…} 오염 URL → 410 Gone ──
+  //
+  // 정체: 단지명 자리에 «이미지 수집 객체가 통째로» 들어간 URL이다.
+  //   ⓐ {"url":…,"source":…,"caption":…,"thumbnail":…(,"collected_at":…)}
+  //   ⓑ {"type":…,"thumb":…}
+  // 네이버 soft-404 1.1만의 81%(≈8,900)가 이 계열이다 — 2026-09-16 CSV 2,000행 전수 분류.
+  // 이 URL 들이 200 을 받은 이유는 `[name]` 이 «무엇이든 한 세그먼트» 로 받아 빈 껍데기를
+  // 렌더했기 때문이다. 그래서 네이버가 404 가 아니라 «소프트» 404 로 적었다.
+  //
+  // ⛔ 리다이렉트가 아니라 410 이다. 가리킬 대상이 «없는» URL 이라 301 은 「옮겨 갔다」는
+  //    거짓말이 되고, 404 는 크롤러가 재방문한다. 가치 0 인 URL 엔 확정 소멸 신호가 정답이다.
+  // ⛔ 정상 단지명 계열(백천이스트하임 등 ~990건)은 «건드리지 않는다» — 이미 404 로 정상
+  //    거동하며 자연 소진 대기다. 여기서 가르는 자는 오직 「여는 중괄호로 시작하나」 하나다.
+  if (pathname.startsWith('/apt/complex/')) {
+    const tail = pathname.slice('/apt/complex/'.length);
+    // 인코딩·원문 양쪽을 본다. 크롤러는 %7B 로 오고 사람은 { 로 올 수 있다.
+    // ⚠️ 한글 slug 가 있는 사이트다 — 디코드를 건너뛰고 판정하면 %7B 형태를 통째로 놓친다.
+    let tailDecoded = tail;
+    try { tailDecoded = decodeURIComponent(tail); } catch { /* 위 XSS 블록이 이미 걸렀다 */ }
+    if (tailDecoded.trimStart().startsWith('{')) {
+      return new NextResponse(null, { status: 410 });
+    }
+  }
+
   // s235 W4: legacy /apt/sites/* → /apt/* 308 redirect.
   if (pathname.startsWith('/apt/sites/')) {
     const url = request.nextUrl.clone();

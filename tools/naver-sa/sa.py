@@ -150,6 +150,10 @@ SELECT slug, name, region, sigungu, total_units, content_score, builder, builder
        ELSE ARRAY[]::text[] END AS variants
 FROM apt_sites
 WHERE is_active
+  -- ⚠️ PL-A 정합 감사(2026-09-15): 컬럼 계약은 「ad_blocked=true 면 sa-sync 가 등록하지 않는다」
+  --    (cv2_presale_candidates 마이그레이션 주석)인데 이 SQL 에 그 줄이 «없었다».
+  --    실측 11현장(주촌 선지리·청량 덕하리 등)이 적격 집합에 들어와 있었다 — 등록분은 아직 0.
+  AND NOT coalesce(ad_blocked, false)
   AND content_score >= 40
   AND name NOT LIKE '%%미분양'
   AND name !~ '임대|행복주택|사전청약|모집|공공분양|희망타운|분양전환|리츠|^[0-9]'
@@ -1006,12 +1010,58 @@ def cmd_relink(args):
     print("다음: sa.py verify 로 전수 대조")
 
 
+# ad-stats-sync 의 slugFromLanding() · import_csv.py 와 «같은 규칙» 이다. 갈리면 안 된다.
+APT_HUB_SEGMENTS = frozenset(["unsold", "pipeline", "busan", "search", "region"])
+
+
+def fetch_slug_index():
+    """apt_sites 전체(적격 여부 무관)의 {slug: is_active} 와 병합 원장 {dead: survivor}.
+
+    ⚠️ verify 가 «광고 적격 집합» 하나로만 대조하던 것이 오탐의 뿌리였다 — 적격 집합은
+       「새로 등록할 현장」 의 문이지 「페이지가 살아 있나」 의 문이 아니다.
+    """
+    import psycopg2
+    with psycopg2.connect(DB_URL) as conn, conn.cursor() as cur:
+        cur.execute("SELECT slug, is_active FROM apt_sites")
+        sites = {s: bool(a) for s, a in cur.fetchall()}
+        cur.execute("SELECT DISTINCT ON (dead_slug) dead_slug, survivor_slug "
+                    "FROM apt_site_merges ORDER BY dead_slug, merged_at DESC")
+        merges = dict(cur.fetchall())
+    return sites, merges
+
+
+def resolve_survivor(slug, merges):
+    """병합 사슬 끝까지 따라간다(A→B→C). 순환이면 None."""
+    seen = set()
+    while slug in merges:
+        if slug in seen:
+            return None
+        seen.add(slug)
+        slug = merges[slug]
+    return slug
+
+
 def cmd_verify(args):
+    """등록분 착지 전수 대조 — «3분류» (PL-A 정합 감사 · 2026-09-15).
+
+    ⛔ 예전 판정은 「광고 적격 집합에 없으면 깨짐」 하나였다. 9/15 실측 «깨짐 521» 을 DB 로 분해하니
+       진짜로 튕기는 키워드는 «0» 이었다:
+         허브 착지(/apt/region/부산 등)            158  — 정상. 슬러그가 아니다
+         [A] 활성 현장이나 광고 적격 밖(cs<40 등)   202  — 페이지 200. 신규 등록 문에만 걸린다
+         [B] 병합된 dead 슬러그                     161  — 301 한 번 거쳐 착지. relink 대상
+       오탐 360건이 섞이면 진짜 결함 161건이 안 보인다. 그래서 가른다.
+    분류:
+      [A] 적격 밖 활성  — 조치 불요(참고). 광고를 끌지는 사람 판단
+      [B] 병합됨        — relink 대상. out/relink_map_<날짜>.csv 로 떨군다(예행 입력 그대로)
+      [C] 진짜 깨짐     — 비활성·미병합 또는 DB 부재. /apt/search 로 튕기거나 404
+    """
     if not API_KEY: sys.exit("NAVER_SA_* 환경변수가 필요합니다.")
     valid = {s["slug"] for s in fetch_sites()}
+    sites, merges = fetch_slug_index()
     st = json.load(open(STATE, encoding="utf-8")) if os.path.exists(STATE) else {"adgroups": {}}
     targets = dict(EXISTING_GROUPS); targets.update(st["adgroups"])
-    total = nourl = bad = 0
+    total = nourl = hub = ok = 0
+    cls_a, cls_b, cls_c = [], [], []
     for name, gidv in targets.items():
         try:
             for k in call("GET", "/ncc/keywords", params={"nccAdgroupId": gidv}) or []:
@@ -1019,14 +1069,47 @@ def cmd_verify(args):
                 u = ((k.get("links") or {}).get("pc") or {}).get("final") or ""
                 if not u: nourl += 1; continue
                 if "/apt/" not in u: continue
-                slug = unquote(u.split("/apt/", 1)[1])
-                if slug not in valid:
-                    bad += 1
-                    print("깨짐  %-24s %-30s %s" % (name, k.get("keyword"), slug))
+                slug = unquote(u.split("/apt/", 1)[1]).split("?", 1)[0].rstrip("/")
+                if not slug or "/" in slug or slug in APT_HUB_SEGMENTS:
+                    hub += 1; continue
+                row = (name, k.get("keyword") or "", slug)
+                if slug in valid:
+                    ok += 1
+                elif slug in merges:
+                    cls_b.append(row + (resolve_survivor(slug, merges),))
+                elif sites.get(slug):
+                    cls_a.append(row)
+                else:
+                    cls_c.append(row + ("비활성·미병합" if slug in sites else "DB 부재",))
         except Exception as e:
             print("조회실패 %s %s" % (name, str(e)[:100]))
-    print("\n총 %d · URL없음 %d · DB에 없는 슬러그 %d" % (total, nourl, bad))
-    print("전수 통과." if bad == 0 and nourl == 0 else "!! 위 키워드는 /apt/search 로 튕깁니다.")
+
+    for g, kw, slug in cls_a:
+        print("[A] 적격밖  %-22s %-28s %s" % (g, kw[:28], slug))
+    for g, kw, slug, sv in cls_b:
+        print("[B] 병합됨  %-22s %-28s %s → %s" % (g, kw[:28], slug, sv or "(사슬 순환!)"))
+    for g, kw, slug, why in cls_c:
+        print("[C] 깨짐    %-22s %-28s %s  (%s)" % (g, kw[:28], slug, why))
+
+    if cls_b:
+        pairs = Counter((slug, sv) for _, _, slug, sv in cls_b)
+        os.makedirs(OUT, exist_ok=True)
+        path = os.path.join(OUT, "relink_map_%s.csv" % datetime.date.today().strftime("%Y%m%d"))
+        with open(path, "w", newline="", encoding="utf-8-sig") as f:
+            w = csv.writer(f)
+            w.writerow(["old", "new", "keywords", "new_eligible"])
+            for (old, new), n in sorted(pairs.items(), key=lambda x: -x[1]):
+                w.writerow([old, new or "", n, "Y" if new in valid else "N"])
+        print("\nrelink 맵: %s (%d쌍)" % (path, len(pairs)))
+        if any(new not in valid for (_, new) in pairs):
+            print("  ⚠️ new_eligible=N 쌍이 있다 — relink 가 사전 검사에서 멈춘다. 그 쌍은 빼고 판정받을 것.")
+
+    print("\n총 %d · URL없음 %d · 허브 %d · 정상 %d · [A]적격밖 %d · [B]병합 %d · [C]깨짐 %d"
+          % (total, nourl, hub, ok, len(cls_a), len(cls_b), len(cls_c)))
+    if not cls_b and not cls_c:
+        print("전수 통과. (URL없음은 그룹 기본 URL 을 쓰는 행 — README «함정» 참조)")
+    else:
+        print("!! [B] 는 301 경유 착지, [C] 는 튕긴다. [A] 는 결함이 아니다.")
 
 
 def rollback_gate(gidv):
@@ -1068,6 +1151,242 @@ def rollback_gate(gidv):
     if imp > 0:
         return "14일 노출 %d — 실제로 나가고 있는 그룹이다 (키워드 %d)" % (imp, len(ids))
     return None
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# IN-0ⓐ — 월간 검색량 (RelKwdStat / 키워드도구)
+#
+# 왜 광고 API 로 검색량을 재나: 네이버는 검색량을 «검색광고» 쪽에서만 숫자로 준다.
+# 서치어드바이저는 우리 사이트의 노출·클릭만 주지 «시장 전체 수요» 는 주지 않는다.
+# Tier 판정(IN-2)의 「검색량 0」은 후자여야 한다 — 우리가 안 떠서 노출이 0인 것과
+# 애초에 아무도 안 찾는 것은 «완전히 다른 처분» 이기 때문이다.
+# ─────────────────────────────────────────────────────────────────────────────
+
+VOLUME_CHUNK = 5       # /keywordstool 의 hintKeywords 상한
+VOLUME_SLEEP = 0.4     # 초당 호출 상한 회피. 429 는 call() 이 지수백오프로 또 한 겹 막는다
+
+
+def _vol_num(x):
+    """RelKwdStat 의 한 칸을 (수치, 10미만여부) 로 읽는다.
+
+    ⚠️ 이 API 는 10 미만을 «"< 10"» 이라는 «문자열» 로 준다. int() 로 바로 던지면 죽고,
+       0 으로 뭉개면 「검색량 0」과 「검색량 1~9」가 같은 값이 된다.
+       T-γ 경계가 정확히 그 둘 사이에 있으므로 «깃발로» 갈라 둔다.
+    """
+    if isinstance(x, bool):
+        return None, False
+    if isinstance(x, (int, float)):
+        return int(x), False
+    s = str(x or "").strip().replace(",", "")
+    if not s:
+        return None, False
+    if s.startswith("<"):
+        return 0, True
+    try:
+        return int(s), False
+    except ValueError:
+        return None, False
+
+
+def _norm_kw(k):
+    """계정에 넣는 규칙과 «같게» — 공백 제거. API 도 공백 없는 형태로 돌려준다."""
+    return re.sub(r"\s+", "", str(k or ""))
+
+
+# ── 조회 «부적격» 문자 — 실측으로 좁힌 집합 (2026-09-16 첫 회차 사후분석) ──
+#
+#   ·  (U+00B7) 죽은 청크(151~155)의 «유일한» 특수문자였다 — id=120 「광안동 부흥·부광
+#               소규모재건축」. 정범이다.
+#   ,           문자 자체보다 hintKeywords 의 «구분자» 라는 것이 문제다. 키워드 안의
+#               쉼표가 힌트를 쪼개 5개 상한을 넘긴다. 사유가 다르므로 따로 적어 둔다.
+#
+# ⛔ 하이픈·괄호는 «넣지 않는다». 통과가 실측으로 확인됐다 — 하이픈은 rn 101,
+#    괄호는 rn 135 에서 «죽은 청크보다 앞» 에 조회에 성공했다. 「특수문자」로 뭉쳐서
+#    막았으면 잴 수 있는 표적 56개를 근거 없이 버렸을 것이다.
+#    새 문자를 여기 넣기 전에 «그 문자 때문에 죽었다» 는 실측을 먼저 확보할 것.
+VOLUME_BAD_CHARS = "·,"
+
+
+def _api_kw(kw):
+    """(조회용 키워드, 정규화 사유). 원문 keyword 열은 «절대» 건드리지 않는다.
+
+    부적격 문자를 지우고 물어본다 — 지운 채로 물어도 검색 수요는 거의 같은 말이고,
+    아예 못 재는 것보다 낫다. 다만 «지웠다는 사실» 을 원장에 남겨 나중에 값이 이상할 때
+    이 정규화를 의심할 수 있게 한다.
+    """
+    norm = _norm_kw(kw)
+    if not norm:
+        return None, "빈 키워드"
+    bad = sorted({c for c in norm if c in VOLUME_BAD_CHARS})
+    if not bad:
+        return norm, None
+    cleaned = "".join(c for c in norm if c not in VOLUME_BAD_CHARS)
+    if not cleaned:
+        return None, "정규화 후 빈 문자열"
+    return cleaned, "특수문자 제거(%s)" % "".join(bad)
+
+
+def _vol_absorb(res, by_api_kw, hits, cands):
+    """응답 한 덩어리를 표적/후보군으로 가른다."""
+    for row in (res.get("keywordList") or []):
+        kw = _norm_kw(row.get("relKeyword"))
+        if not kw:
+            continue
+        pc, pc_lt = _vol_num(row.get("monthlyPcQcCnt"))
+        mo, mo_lt = _vol_num(row.get("monthlyMobileQcCnt"))
+        rec = {
+            "keyword": kw,
+            "pc": pc, "mobile": mo,
+            "total": None if (pc is None and mo is None) else (pc or 0) + (mo or 0),
+            "lt10": bool(pc_lt or mo_lt),
+            "comp": row.get("compIdx"),
+        }
+        tid = by_api_kw.get(kw)
+        if tid is not None:
+            hits[tid] = rec
+        else:
+            cands[kw] = rec
+
+
+def fetch_volumes(rows):
+    """[(id, keyword)] → (hits{id:rec}, cands{kw:rec}, missing[(id,kw)], invalid[(id,kw,why)])
+
+    /keywordstool 은 힌트 키워드 «자신» 과 «연관어» 를 섞어서 준다. 둘을 가르지 않으면
+    표적 수십 종을 재려다 수백 개 연관어를 표적으로 적재하게 된다.
+
+    ⛔ 한 청크가 죽어도 회전을 죽이지 않는다.
+       9/16 첫 회차가 정확히 그렇게 죽었다 — 151~155 청크의 «가운뎃점 하나» 때문에
+       앞서 조회한 150개가 통째로 날아갔다. 반복 결함형 ⑤
+       「한 콜의 실패가 회전 전체를 죽인다」가 여기 그대로 재현됐다.
+       실패한 청크는 «1건씩» 다시 물어 진짜 범인만 격리한다 — 5건 중 4건은 살아 돌아온다.
+    """
+    hits, cands, invalid = {}, {}, []
+    by_api_kw, queue = {}, []
+    seen = set()
+    for tid, kw in rows:
+        api_kw, why = _api_kw(kw)
+        if api_kw is None:
+            invalid.append((tid, kw, why))
+            continue
+        if why:
+            invalid.append((tid, kw, why))   # 원장에는 남기되 조회는 «한다»
+        if api_kw in seen:
+            continue                          # 정규화 후 중복 — 앞의 것이 대표한다
+        seen.add(api_kw)
+        by_api_kw[api_kw] = tid
+        queue.append(api_kw)
+
+    for i in range(0, len(queue), VOLUME_CHUNK):
+        chunk = queue[i:i + VOLUME_CHUNK]
+        try:
+            _vol_absorb(call("GET", "/keywordstool",
+                             params={"hintKeywords": ",".join(chunk), "showDetail": "1"}) or {},
+                        by_api_kw, hits, cands)
+        except Exception as e:
+            print("  [!] 청크 %d~%d 실패 — 1건씩 격리 (%s)"
+                  % (i + 1, i + len(chunk), str(e)[:100]))
+            for one in chunk:
+                try:
+                    _vol_absorb(call("GET", "/keywordstool",
+                                     params={"hintKeywords": one, "showDetail": "1"}) or {},
+                                by_api_kw, hits, cands)
+                except Exception as e1:
+                    invalid.append((by_api_kw[one], one, "API 거부: %s" % str(e1)[:120]))
+                    print("      범인 격리: %s" % one)
+                time.sleep(VOLUME_SLEEP)
+        print("  조회 %d/%d" % (min(i + VOLUME_CHUNK, len(queue)), len(queue)))
+        time.sleep(VOLUME_SLEEP)
+
+    bad_ids = {t for t, _, _ in invalid}
+    missing = [(t, k) for t, k in rows if t not in hits and t not in bad_ids]
+    return hits, cands, missing, invalid
+
+
+def cmd_volume(args):
+    """표적 검색량을 재서 keyword_rank_targets 에 적재한다.
+
+    예행(기본)은 «아무것도 쓰지 않는다» — 표와 합계만 찍는다. --live 가 있어야 DB 에 쓴다.
+    후보군(연관어)은 DB 에 넣지 않고 out/volume_candidates_<날짜>.csv 로 떨군다.
+    표적 승격은 사람이 본 뒤에 한다 — 자동 승격은 P1 상한(70)을 하루만에 태운다.
+    """
+    # 사전 스캔은 API 를 안 쓴다 — 자격증명 없이도 대장을 훑을 수 있어야 한다.
+    if not API_KEY and not args.scan_only:
+        sys.exit("NAVER_SA_* 환경변수가 필요합니다.")
+    if not DB_URL:
+        sys.exit("SUPABASE_DB_URL 이 필요합니다.")
+    import psycopg2
+
+    where = "tracked" if args.scope == "tracked" else (
+            "active" if args.scope == "active" else "TRUE")
+    with psycopg2.connect(DB_URL) as conn, conn.cursor() as cur:
+        cur.execute("SELECT id, keyword FROM keyword_rank_targets WHERE %s ORDER BY priority, id"
+                    % where)
+        rows = cur.fetchall()
+    if args.limit:
+        rows = rows[:args.limit]
+    if not rows:
+        sys.exit("표적이 없다 — scope=%s 로 0행. 적재할 것이 없으니 멈춘다." % args.scope)
+    print("표적 %d (scope=%s)" % (len(rows), args.scope))
+
+    # ── 사전 스캔 — 물어보기 «전에» 대장을 훑는다. 첫 회차가 죽고 나서야 안 것을 앞으로 옮긴다.
+    pre = [(t, k, _api_kw(k)[1]) for t, k in rows]
+    flagged = [(t, k, w) for t, k, w in pre if w]
+    if flagged:
+        print("사전 스캔: 조회 부적격·정규화 대상 %d" % len(flagged))
+        for t, k, w in flagged[:args.show]:
+            print("   #%-5s %-30s → %s" % (t, k[:30], w))
+    if args.scan_only:
+        print("사전 스캔만 하고 멈춘다(--scan-only). API 호출 0건.")
+        return
+
+    hits, cands, missing, invalid = fetch_volumes(rows)
+
+    # ⚠️ 긍정형 확인 — 「실패가 없다」가 아니라 「값이 들어왔다」를 센다.
+    got = [(t, k) for t, k in rows if t in hits]
+    print("\n조회됨 %d · 미응답 %d · 부적격/정규화 %d · 후보군(연관어) %d"
+          % (len(got), len(missing), len(invalid), len(cands)))
+    for t, k in sorted(got, key=lambda r: -(hits[r[0]]["total"] or 0))[:args.show]:
+        r = hits[t]
+        print("  %-28s pc %-7s mo %-7s 합 %-7s %s%s"
+              % (k[:28], r["pc"], r["mobile"], r["total"],
+                 r["comp"] or "", " «10미만»" if r["lt10"] else ""))
+    if missing:
+        print("  [!] 미응답 %d: %s" % (len(missing), ", ".join(k for _, k in missing[:8])))
+    for t, k, w in invalid:
+        print("  [원장] #%-5s %-30s %s" % (t, str(k)[:30], w))
+
+    os.makedirs(OUT, exist_ok=True)
+    cpath = os.path.join(OUT, "volume_candidates_%s.csv" % datetime.date.today().isoformat())
+    with open(cpath, "w", encoding="utf-8-sig", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["keyword", "pc", "mobile", "total", "lt10", "compIdx"])
+        for r in sorted(cands.values(), key=lambda r: -(r["total"] or 0)):
+            w.writerow([r["keyword"], r["pc"], r["mobile"], r["total"], r["lt10"], r["comp"]])
+    print("후보군 → %s (%d행)" % (cpath, len(cands)))
+
+    if not args.live:
+        print("\n예행이다. DB 에 아무것도 쓰지 않았다. 맞으면 같은 줄 끝에 --live")
+        return
+
+    with psycopg2.connect(DB_URL) as conn, conn.cursor() as cur:
+        for t, _ in got:
+            r = hits[t]
+            cur.execute(
+                "UPDATE keyword_rank_targets SET volume_pc=%s, volume_mobile=%s, volume_total=%s,"
+                " volume_is_lt10=%s, volume_comp_idx=%s, volume_checked_at=now(),"
+                " volume_invalid=NULL WHERE id=%s",
+                (r["pc"], r["mobile"], r["total"], r["lt10"], r["comp"], t))
+        # 원장. ⛔ 부적격 행에 volume_checked_at 을 찍지 않는다 — 찍으면 「쟀는데 0」이 되고
+        #    그건 거짓 신선도다. 「못 쟀다」는 사실이 그대로 남아야 T-γ 판정에서 빠진다.
+        for t, _, why in invalid:
+            cur.execute("UPDATE keyword_rank_targets SET volume_invalid=%s WHERE id=%s", (why, t))
+        conn.commit()
+        # 결과가 좋다는 «긍정형» 확인. 「오류 없음」으로 통과시키지 않는다.
+        cur.execute("SELECT count(*) FROM keyword_rank_targets WHERE volume_checked_at >= now() - interval '10 minutes'")
+        fresh = cur.fetchone()[0]
+    print("적재 %d행 · 10분 내 측정표시 %d행" % (len(got), fresh))
+    if fresh < len(got):
+        print("  [!] 적재 의도 %d 보다 확인 %d 이 적다 — 다시 본다" % (len(got), fresh))
 
 
 def cmd_rollback(args):
@@ -1398,6 +1717,15 @@ def main():
     sc = s.add_parser("scan", help="계정에 나가 있는 키워드를 조각·법인명·slug형으로 훑는다(읽기 전용)")
     sc.add_argument("--csv", default=SCAN_CSV, help="산출 CSV 경로 (off 가 그대로 먹는 양식)")
     sc.set_defaults(fn=cmd_scan)
+    vl = s.add_parser("volume", help="IN-0ⓐ 표적 월간 검색량을 재서 keyword_rank_targets 에 적재")
+    vl.add_argument("--live", action="store_true", help="없으면 표만 찍고 DB 에 아무것도 쓰지 않는다")
+    vl.add_argument("--scope", default="tracked", choices=["tracked", "active", "all"],
+                    help="표적 집합. 기본 tracked")
+    vl.add_argument("--limit", type=int, help="앞에서부터 N개만 (첫 회차 소량 확인용)")
+    vl.add_argument("--show", type=int, default=25, help="화면에 찍을 상위 행 수")
+    vl.add_argument("--scan-only", action="store_true", dest="scan_only",
+                    help="대장 사전 스캔만 하고 멈춘다 — API 호출 0건")
+    vl.set_defaults(fn=cmd_volume)
     for x in (a, o, r):
         x.add_argument("--ignore-lockout", action="store_true", dest="ignore_lockout",
                        help="록아웃 창 안에서도 실행한다 — 실행 사실이 로그에 남는다")
