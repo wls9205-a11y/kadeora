@@ -113,16 +113,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ],
     },
     twitter: { card: 'summary_large_image', title: `${decoded} 실거래가·시세·전세가율`, description: metaParts || ogSubtitle },
+    // ⛔ K-5 — 거짓 신선도 제거 (2026-09-16 · 기판정).
+    //    예전에는 값이 없으면 `new Date()` 를 뱉었다. 그러면 «한 번도 안 바뀐 페이지» 가
+    //    렌더할 때마다 「방금 수정됨」으로 나간다 — 39,673 페이지 전부가 매일 새 글이었다.
+    //    「7일 전」·「30일 전」을 계산해 넣던 자리도 같은 병이다: 그런 날짜는 «일어난 적이 없다».
+    //    없으면 «내보내지 않는다». 신선도 신호는 있는 것만 말한다(ABG 증분1 dateModified 규율).
     other: {
-      'naver:written_time': p?.created_at || new Date(Date.now() - 86400000 * 7).toISOString(),
-      'naver:updated_time': p?.updated_at || new Date().toISOString(),
+      ...(p?.created_at ? { 'naver:written_time': p.created_at } : {}),
+      ...(p?.updated_at ? { 'naver:updated_time': p.updated_at } : {}),
       'naver:author': '카더라',
       'naver:site_name': '카더라',
-      'og:updated_time': p?.updated_at || new Date().toISOString(),
+      ...(p?.updated_at ? { 'og:updated_time': p.updated_at } : {}),
       'article:section': '부동산',
       'article:tag': keywords.join(','),
-      'article:published_time': p?.created_at || new Date(Date.now() - 86400000 * 30).toISOString(),
-      'article:modified_time': p?.updated_at || new Date().toISOString(),
+      ...(p?.created_at ? { 'article:published_time': p.created_at } : {}),
+      ...(p?.updated_at ? { 'article:modified_time': p.updated_at } : {}),
       ...(canonicalPath ? { 'dg:plink': canonicalPath } : {}),
     },
   };
