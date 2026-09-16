@@ -349,9 +349,12 @@ export const CALC_REGISTRY: CalcMeta[] = [
   {
     slug: 'currency-convert', emoji: '💱', category: 'investment', categoryLabel: '주식/투자',
     title: '환율 환산 계산기', titleShort: '환율 계산기',
-    description: '원/달러/엔/유로 환율 실시간 변환.',
-    keywords: ['환율 계산기','달러 환율','엔 환율','유로 환율','원달러'],
-    legalBasis: '', version: '2026.04', lastUpdated: '2026-04-05',
+    seoTitle: '환율 계산기 — 달러·엔·유로 오늘 환율 환산',
+    // ⚠️ 「실시간」이라 쓰지 않는다. 매일 갱신되는 고시 환율이고, 화면이 기준 시각을 함께 적는다.
+    //    예전 표기는 「실시간 변환」이었는데 실제로는 «상수» 였다 — 표기와 실물이 정반대였다.
+    description: '달러·엔·유로·위안 환율을 매일 갱신되는 고시 환율로 환산. 적용 환율과 기준 시각을 함께 표시.',
+    keywords: ['환율 계산기','달러 환율','엔 환율','유로 환율','원달러','오늘 환율'],
+    legalBasis: '', version: '2026.09', lastUpdated: '2026-09-16',
     pattern: 'simple', formula: 'currencyConvert', resultLabel: '변환 결과', resultUnit: '',
     inputs: [
       { id: 'amount', label: '금액', type: 'number', default: 1000, min: 0 },
@@ -359,7 +362,10 @@ export const CALC_REGISTRY: CalcMeta[] = [
       { id: 'to', label: '변환 통화', type: 'select', default: 'KRW', options: [{ value: 'USD', label: '달러 (USD)' }, { value: 'KRW', label: '원 (KRW)' }, { value: 'JPY', label: '엔 (JPY)' }, { value: 'EUR', label: '유로 (EUR)' }, { value: 'CNY', label: '위안 (CNY)' }] },
     ],
     faqs: [
-      { q: '환율 계산기에서 세금은 반영되나요?', a: '국내 주식 거래세(0.18%)와 수수료를 반영합니다. 해외주식은 양도세(22%, 250만원 공제) 별도입니다.' },
+      // ⛔ 여기 있던 「국내 주식 거래세(0.18%)…」는 주식 계산기 FAQ 를 복사해 온 것이었다.
+      //    환율 계산기와 «아무 상관이 없다». 붙여넣기로 태어난 오답이다.
+      { q: '이 환율은 언제 기준인가요?', a: '매일 갱신되는 고시 환율이며, 결과 화면에 적용 환율과 기준 시각을 함께 표시합니다. 은행 창구의 매매기준율·현찰 살 때 값과는 수수료만큼 차이가 납니다.' },
+      { q: '실제 환전 금액과 다른 이유는?', a: '고시 환율은 기준값이고, 실제 환전에는 은행별 스프레드와 수수료가 붙습니다. 우대율에 따라서도 달라집니다.' },
       { q: '투자 수익 과세 기준은?', a: '국내 상장주식은 대주주만 양도세, 해외주식은 250만원 초과 시 22%, 배당은 15.4% 원천징수입니다.' },
       { q: '환율 계산기는 무료인가요?', a: '네, 카더라 환율 계산기는 무료이며 회원가입 없이 무제한 이용 가능합니다.' },
       { q: '환율 계산기는 모바일에서도 되나요?', a: '네, 모든 기기에서 최적화되어 있습니다.' },

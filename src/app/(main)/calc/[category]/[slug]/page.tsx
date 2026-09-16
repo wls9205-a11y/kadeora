@@ -10,6 +10,7 @@ import LoginGate from '@/components/LoginGate';
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/constants';
 import { buildAlternates } from '@/lib/seo';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { notFound } from 'next/navigation';
 import JsonLd from '@/components/seo/JsonLd';
 
@@ -22,6 +23,34 @@ export async function generateStaticParams() {
 const CANONICAL_OVERRIDES: Record<string, string> = {
   'real-estate/subscription-score': '/apt/diagnose',
 };
+
+/**
+ * K-9 ⓒ — 「매일 바뀌는 값」을 서버가 읽어 공식에 넘긴다 (2026-09-16).
+ *
+ * 공식(formulas.ts)은 클라이언트에서 도는 순수 함수라 DB 를 못 본다. 그래서 환율 같은
+ * 시장값을 상수로 박아 두고 있었고, 그게 계산기 140종 중 검색량 1위(월 154만) 페이지를
+ * 몇 %씩 틀리게 만들었다. 신설할 것은 없었다 — exchange_rates 표와 크론이 이미 있었다.
+ *
+ * ⛔ 실패해도 «지어내지 않는다». undefined 를 넘기면 공식이 「환율 미수신」이라고 말한다.
+ *    옛 상수로 조용히 되돌아가는 길은 만들지 않았다.
+ * ⚠️ 이 페이지는 ISR 이라 환율의 신선도는 revalidate 주기만큼이다. 그래서 값과 «기준 시각» 을
+ *    함께 넘기고 화면이 그 시각을 적는다 — 날짜 없는 환율은 거짓 신선도다.
+ */
+async function getLiveData(slug: string): Promise<Record<string, string> | undefined> {
+  if (slug !== 'currency-convert') return undefined;
+  try {
+    const sb = getSupabaseAdmin();
+    const { data } = await (sb as any)
+      .from('exchange_rates')
+      .select('rates, updated_at')
+      .eq('base_currency', 'USD')
+      .maybeSingle();
+    if (!data?.rates) return undefined;
+    return { __fx: JSON.stringify({ rates: data.rates, updatedAt: data.updated_at }) };
+  } catch {
+    return undefined;
+  }
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ category: string; slug: string }> }): Promise<Metadata> {
   const { slug, category } = await params;
@@ -136,7 +165,7 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
       </div>
 
       {/* 계산기 엔진 */}
-      {calc.inputs.length > 0 && <CalcEngine calc={calc} />}
+      {calc.inputs.length > 0 && <CalcEngine calc={calc} liveData={await getLiveData(calc.slug)} />}
 
       {/* 결과 공유 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 16, marginBottom: 8 }}>

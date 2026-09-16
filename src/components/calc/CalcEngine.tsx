@@ -108,7 +108,13 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
   }
 }
 
-export default function CalcEngine({ calc }: { calc: CalcMeta }) {
+/**
+ * liveData — 서버가 읽어 넘기는 «오늘의 값». (K-9 ⓒ · 2026-09-16)
+ *   공식은 클라이언트에서 도는 순수 함수라 DB 를 못 본다. 매일 바뀌는 값(환율 등)을
+ *   상수로 박지 않으려면 서버가 읽어 주입하는 길밖에 없다.
+ * ⚠️ 사용자 입력과 «섞지» 않는다 — 입력보다 «먼저» 깔고 덮어쓰이지 않게 뒤에 둔다.
+ */
+export default function CalcEngine({ calc, liveData }: { calc: CalcMeta; liveData?: Record<string, string> }) {
   const { userId } = useAuth();
   const [values, setValues] = useState<Record<string, number | string>>(() => {
     const init: Record<string, number | string> = {};
@@ -123,8 +129,8 @@ export default function CalcEngine({ calc }: { calc: CalcMeta }) {
   const result = useMemo<CalcResult | null>(() => {
     const fn = FORMULAS[calc.formula];
     if (!fn) return null;
-    try { return fn(values); } catch { return null; }
-  }, [values, calc.formula]);
+    try { return fn({ ...values, ...(liveData ?? {}) }); } catch { return null; }
+  }, [values, calc.formula, liveData]);
 
   return (
     <div>

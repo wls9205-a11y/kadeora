@@ -7,7 +7,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { bondRatePerMille, pensionMonthly, PENSION_MIN_AGE, brokerageBracket } from '@/lib/calc/gov-tables';
-import { housingBond, housingPension, brokerageFee } from '@/lib/calc/formulas';
+import { housingBond, housingPension, brokerageFee, currencyConvert } from '@/lib/calc/formulas';
 
 const 억 = 100_000_000;
 
@@ -187,5 +187,39 @@ describe('중개보수 — 2021년 개정 요율표 (K-3)', () => {
     const r = brokerageFee({ price: 5 * 억, monthlyRent: 0, dealType: 'trade' });
     expect(r.main.label).toBe('중개수수료 상한');
     expect(r.details.some((d) => d.value.includes('협의'))).toBe(true);
+  });
+});
+
+describe('환율 계산기 — 상수를 버리고 주입값을 쓴다 (K-9 ⓒ 1호)', () => {
+  const FX = JSON.stringify({
+    rates: { USD: 1, KRW: 1347.199701, JPY: 154.389032, EUR: 0.865688, CNY: 6.725199 },
+    updatedAt: '2026-09-15T23:29:00.638Z',
+  });
+
+  it('주입된 라이브 환율로 환산한다', () => {
+    const r = currencyConvert({ amount: 100, from: 'USD', to: 'KRW', __fx: FX });
+    expect(r.main.value).toBe('134,719.97 KRW');   // 100 × 1347.199701
+  });
+
+  it('기준 시각을 «반드시» 함께 낸다 — 날짜 없는 환율은 거짓 신선도다', () => {
+    const r = currencyConvert({ amount: 1, from: 'USD', to: 'KRW', __fx: FX });
+    expect(r.details.some((d) => d.label === '기준' && d.value.includes('2026-09-15'))).toBe(true);
+  });
+
+  it('⛔ 주입이 없으면 «지어내지 않는다» — 옛 상수로 조용히 되돌아가지 않는다', () => {
+    const r = currencyConvert({ amount: 100, from: 'USD', to: 'KRW' });
+    expect(r.main.label).toBe('환율 미수신');
+    expect(r.main.value).toBe('—');
+  });
+
+  it('표에 없는 통화도 「미수신」으로 말한다', () => {
+    const r = currencyConvert({ amount: 1, from: 'USD', to: 'XXX', __fx: FX });
+    expect(r.main.label).toBe('환율 미수신');
+  });
+
+  it('옛 상수의 오차를 고정한다 — EUR 6.2% · CNY 7.8%', () => {
+    const live = { EUR: 0.865688, CNY: 6.725199 };
+    expect((0.92 / live.EUR - 1) * 100).toBeGreaterThan(6);
+    expect((7.25 / live.CNY - 1) * 100).toBeGreaterThan(7);
   });
 });

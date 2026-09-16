@@ -229,17 +229,56 @@ export function perPbrValue(v: V): CalcResult {
   }
 }
 
+/**
+ * K-9 ⓒ 1호 — 고정 환율 상수 축출 (2026-09-16).
+ *
+ * 검색량 실측 «월 1,541,200» 으로 계산기 140종 중 압도적 1위인데, 환율이 «상수» 였다:
+ *   `{ USD:1, KRW:1380, JPY:150, EUR:0.92, CNY:7.25 }`
+ * 라이브 대비 오차 — KRW 2.4% · JPY 2.9% · EUR 6.2% · CNY 7.8%.
+ * ⛔ 환율은 «매일» 바뀐다. 상수로 박으면 코드가 안 바뀌는 한 영원히 같은 값을
+ *    「오늘의 환율」처럼 보인다 — 채권 할인율 0.04 와 정확히 같은 병이다.
+ *
+ * 그리고 신설할 것이 없었다 — `exchange_rates` 표와 이를 채우는 크론이 «이미 있었다».
+ * 라이브 값이 DB 에 있는데 계산기가 그걸 안 보고 있었을 뿐이다.
+ *
+ * ⚠️ 이 함수는 클라이언트에서 도는 «순수 함수» 라 DB 를 못 본다. 그래서 서버(페이지)가
+ *    읽어 `__fx` 로 주입한다. V 가 number|string 만 받으므로 JSON 문자열로 넘긴다.
+ * ⛔ 주입이 없으면 «지어내지 않는다» — 옛 상수로 조용히 되돌아가지 않고 못 잰다고 말한다.
+ */
 export function currencyConvert(v: V): CalcResult {
-  // 고정 환율 (실시간은 API 연동 필요)
-  const rates: Record<string, number> = { USD: 1, KRW: 1380, JPY: 150, EUR: 0.92, CNY: 7.25 };
+  let rates: Record<string, number> | null = null;
+  let asof = '';
+  try {
+    const fx = JSON.parse(String(v.__fx ?? '')) as { rates?: Record<string, number>; updatedAt?: string };
+    if (fx?.rates && typeof fx.rates === 'object') rates = fx.rates;
+    asof = String(fx?.updatedAt ?? '');
+  } catch { /* 주입 없음 */ }
+
+  const from = String(v.from ?? '');
+  const to = String(v.to ?? '');
+  const rFrom = rates?.[from];
+  const rTo = rates?.[to];
+  if (!rFrom || !rTo) {
+    return {
+      main: { label: '환율 미수신', value: '—', color: 'var(--text-tertiary)' },
+      details: [{ label: '사유', value: '오늘의 고시 환율을 아직 받지 못했다. 잠시 후 다시 시도한다' }],
+    };
+  }
+
   const amount = n(v.amount);
-  const from = v.from as string;
-  const to = v.to as string;
-  const inUsd = amount / (rates[from] || 1);
-  const result = inUsd * (rates[to] || 1);
+  const result = (amount / rFrom) * rTo;
+  const pair = rTo / rFrom;
   return {
-    main: { label: `${to} 변환 결과`, value: `${result.toLocaleString('ko-KR', { maximumFractionDigits: 2 })} ${to}` },
-    details: [{ label: '적용 환율', value: `1 ${from} = ${(rates[to] / rates[from]).toFixed(4)} ${to}` }, { label: '참고', value: '고시환율 기준 (실시간 아님)' }],
+    main: {
+      label: `${to} 변환 결과`,
+      value: `${result.toLocaleString('ko-KR', { maximumFractionDigits: 2 })} ${to}`,
+    },
+    details: [
+      { label: '적용 환율', value: `1 ${from} = ${pair.toLocaleString('ko-KR', { maximumFractionDigits: 4 })} ${to}` },
+      // ⚠️ 기준 시각을 «반드시» 함께 낸다. 날짜 없는 환율은 거짓 신선도다.
+      ...(asof ? [{ label: '기준', value: `${asof.slice(0, 16).replace('T', ' ')} 고시` }] : []),
+      { label: '참고', value: '매일 갱신되는 고시 환율이다. 실제 매매기준율·수수료는 은행마다 다르다' },
+    ],
   };
 }
 
