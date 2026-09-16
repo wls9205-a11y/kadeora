@@ -182,6 +182,44 @@ export function formatKRW(n: number): string {
   return `${Math.round(n).toLocaleString()}원`;
 }
 
+/**
+ * 계산기 «산출액» 전용 무손실 표기 — K-9 ⓒ (2026-09-16).
+ *
+ * ⛔ formatKRW 를 in-place 로 고치지 «않았다». 그 함수는 1억 이상을 toFixed(1) 로 줄여
+ *    1억 3,400만을 「1.3억원」으로 찍는다 — 최대 500만이 표시에서 사라진다.
+ *    카드·차트축·목록처럼 «압축 표기가 정답인» 표면도 있으므로 전역 치환은 하지 않는다.
+ *    대신 명시 변형을 신설하고 계산기 표면만 opt-in 한다.
+ *
+ * 계산기의 산출액은 제품의 «약속 그 자체» 다. 계산이 맞아도 표시가 400만을 먹으면
+ * 사용자에게는 틀린 답이다. 그래서 이 표면만큼은 무손실이어야 한다.
+ *
+ * 무손실의 «조작적 정의»: 역산이 된다 — parseKRWExact(formatKRWExact(x)) === x.
+ * 그 왕복을 테스트가 지킨다(반올림 자릿수 규정과 같은 결로, 정의를 말이 아니라 식으로 박는다).
+ */
+export function formatKRWExact(n: number): string {
+  const neg = n < 0;
+  let v = Math.round(Math.abs(n));
+  if (v === 0) return '0원';
+  const 억 = Math.floor(v / 100000000); v %= 100000000;
+  const 만 = Math.floor(v / 10000); v %= 10000;
+  const parts: string[] = [];
+  if (억) parts.push(`${억.toLocaleString()}억`);
+  if (만) parts.push(`${만.toLocaleString()}만`);
+  if (v) parts.push(v.toLocaleString());
+  return `${neg ? '-' : ''}${parts.join(' ')}원`;
+}
+
+/** formatKRWExact 의 역산. 무손실 정의를 식으로 검증하기 위한 짝이다. */
+export function parseKRWExact(s: string): number {
+  const t = String(s).replace(/\s|,|원/g, '');
+  const neg = t.startsWith('-');
+  const body = neg ? t.slice(1) : t;
+  const m = body.match(/^(?:(\d+)억)?(?:(\d+)만)?(\d+)?$/);
+  if (!m) return NaN;
+  const v = Number(m[1] ?? 0) * 100000000 + Number(m[2] ?? 0) * 10000 + Number(m[3] ?? 0);
+  return neg ? -v : v;
+}
+
 export function formatPercent(n: number, digits = 1): string {
   return `${(n * 100).toFixed(digits)}%`;
 }

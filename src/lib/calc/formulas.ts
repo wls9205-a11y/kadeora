@@ -3,7 +3,7 @@ import {
   INCOME_TAX_BRACKETS, ACQUISITION_TAX_RATES, CAPITAL_GAINS_TAX,
   GIFT_TAX_BRACKETS, GIFT_EXEMPTIONS, SOCIAL_INSURANCE_RATES,
   JEONSE_CONVERSION_RATE, PROPERTY_TAX_RATES,
-  calcProgressiveTax, formatKRW,
+  calcProgressiveTax, formatKRWExact,
 } from './tax-tables';
 import {
   bondRatePerMille, pensionMonthly, HOUSING_BOND_SOURCE, HOUSING_PENSION_SOURCE,
@@ -22,7 +22,9 @@ export interface CalcResult {
 
 // ── 공통 유틸 ──
 const n = (v: unknown) => Number(v) || 0;
-const fmt = (v: number) => formatKRW(v);
+// ⛔ 계산기 산출액은 «무손실» 로 찍는다. formatKRW(압축 표기)는 이 표면에 쓰지 않는다 —
+//    1억 3,400만을 「1.3억원」으로 줄여 400만을 삼켰다(K-9 ⓒ 실측).
+const fmt = (v: number) => formatKRWExact(v);
 const pct = (v: number, d = 1) => `${(v * 100).toFixed(d)}%`;
 
 // ═══ 부동산 ═══

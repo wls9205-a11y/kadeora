@@ -253,7 +253,7 @@ describe('LTV·DSR — 규제 상수는 DB 가 정본, 코드는 «어느 행인
 
   it('규제지역 무주택 6억 → LTV 40% = 2.4억', () => {
     const r = ltvCalc({ housePrice: 6 * 억, region: 'regulated', owner: 'none', existingLoan: 0, __policy: POLICY });
-    expect(r.main.value).toContain('2.4억');   // fmt() 표기
+    expect(r.main.value).toBe('2억 4,000만원');   // 무손실 표기(formatKRWExact)
     expect(r.details.some((d) => d.label === '적용 LTV' && d.value === '40%')).toBe(true);
   });
 
@@ -437,12 +437,11 @@ describe('취득세 — 잔여 표본 2건 (분기 경계 · 12% 행)', () => {
     expect(r.details.find((d) => d.label === '적용 세율')!.value).toBe('12%');
     expect(r.details.find((d) => d.label === '지방교육세')!.value).toContain('400만');   // 10억 × 0.4%
     expect(r.details.find((d) => d.label === '농어촌특별세')!.value).toContain('1,000만'); // 10억 × 1.0%
-    // 합계는 13.4% = 1억 3,400만. 성분으로 대조한다 —
-    // ⚠️ fmt() 가 머리글 숫자를 「1.3억원」으로 줄여 찍어 400만이 표시에서 사라진다.
-    //    계산은 맞고 «표시» 가 삼키는 것이다. 세금 계산기에서는 그 자체가 결함이라 별도 보고했다.
+    // 합계 13.4% = 1억 3,400만. 무손실 표기로 바뀐 뒤에는 머리글 숫자가 «그대로» 보인다.
+    //   옛 formatKRW 는 여기서 「1.3억원」을 찍어 400만을 삼켰다(K-9 ⓒ 표시 결함).
     const 본세 = 10 * 억 * 0.12, 교육 = 10 * 억 * 0.004, 농특 = 10 * 억 * 0.01;
     expect(본세 + 교육 + 농특).toBe(134_000_000);
-    expect(r.main.value).toContain('1.3억');
+    expect(r.main.value).toBe('1억 3,400만원');
   });
 
   it('덤 — 「6억 이하·85㎡ 초과」에 농특세 0.2% 가 «붙는다»', () => {
