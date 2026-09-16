@@ -45,15 +45,17 @@ export const HOUSING_BOND_SOURCE = {
   transcribedAt: '2026-09-16',
   verification: {
     /** 'secondary' = 2차 출처 교차까지. 'primary' = 법령 별표 원문 전수 대조 완료. */
-    level: 'secondary' as 'secondary' | 'primary',
-    /** 독립 확인된 구간(1-based). 나머지는 단일 2차 출처 전사다. */
-    bracketsIndependentlyConfirmed: [4, 5] as readonly number[],
+    level: 'primary' as 'secondary' | 'primary',
+    /** 독립 확인된 구간(1-based). 원문 대조로 전 구간이 닫혔다. */
+    bracketsIndependentlyConfirmed: [1, 2, 3, 4, 5, 6] as readonly number[],
+    /** ⚠️ 정본은 맨 앞 — 나머지는 대조에 쓴 2차 출처다. */
     sources: [
+      'https://www.law.go.kr/flDownload.do?flSeq=113100233',   // 별지 부표 원문(2021.1.5 개정)
       'https://kbthink.com/house/housing-bond.html',
       'https://easylaw.go.kr/CSP/CnpClsMain.laf?csmSeq=649',
     ] as readonly string[],
-    /** primary 로 올리는 조건. 이 줄이 남아 있는 한 아직 안 된 것이다. */
-    pendingForPrimary: '별지 부표 원문 6구간 전수 대조 1회',
+    /** 원문 전수 대조 완료일(2026-09-16). null 이 아니면 primary 다. */
+    primaryCheckedAt: '2026-09-16',
   },
 } as const;
 
@@ -70,9 +72,11 @@ export interface BondRateBracket {
 
 /** 시가표준액 2,000만원 미만은 매입 대상이 아니다(이 표에 구간이 없다). */
 export const HOUSING_BOND_RATES: readonly BondRateBracket[] = [
-  // ⚠️ 최저 구간의 「그 밖의 지역」은 2차 출처에서 공란으로 나왔다.
-  //    「0」으로 채우지 않는다 — 모르는 것과 없는 것은 다르다. 세션 A 교차 대상.
-  { min: 20_000_000, max: 50_000_000, metro: 13, other: null },
+  // ⚠️ 이 최저 구간은 «원문상 지역 구분이 없다» — 단일 13/1,000 이다.
+  //    2차 출처에서 「그 밖의 지역」 칸이 공란으로 보였던 것은 «값이 없어서» 가 아니라
+  //    «구분 자체가 없어서» 였다. 한동안 null 로 비워 두었고, 원문 대조(2026-09-16)로 닫혔다.
+  //    ⛔ 「빈 칸」을 보면 0 으로도 null 로도 단정하지 말 것 — 원문에서 그 칸의 «뜻» 을 본다.
+  { min: 20_000_000, max: 50_000_000, metro: 13, other: 13 },
   { min: 50_000_000, max: 100_000_000, metro: 19, other: 14 },
   { min: 100_000_000, max: 160_000_000, metro: 21, other: 16 },
   { min: 160_000_000, max: 260_000_000, metro: 23, other: 18 },

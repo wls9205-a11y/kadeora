@@ -36,9 +36,12 @@ describe('국민주택채권 — 매입률은 단일값이 아니라 구간별 �
     expect(bondRatePerMille(19_000_000, true)).toBe(0);
   });
 
-  it('⛔ 원문 미확인 칸은 null 이다 — 0 으로 때우지 않는다', () => {
-    // 최저 구간의 「그 밖의 지역」은 2차 출처에서 공란이었다. 세션 A 교차 대상.
-    expect(bondRatePerMille(3_000_000_0, false)).toBeNull();
+  it('최저 구간은 «지역 구분이 없다» — 그 밖의 지역도 13/1,000 (원문 대조로 닫힘)', () => {
+    // 2차 출처에서 이 칸이 공란으로 보였던 것은 «값이 없어서» 가 아니라 «구분이 없어서» 였다.
+    // 한동안 null 로 비워 두었고 2026-09-16 별지 부표 원문 대조로 13 임이 확정됐다.
+    // ⛔ 빈 칸을 0 으로도 null 로도 «단정하지 않은» 것이 옳았다는 기록으로 남긴다.
+    expect(bondRatePerMille(3_000_000_0, false)).toBe(13);
+    expect(bondRatePerMille(3_000_000_0, true)).toBe(13);
   });
 });
 
@@ -70,9 +73,15 @@ describe('housingBond — 옛 단일률의 오차를 고정한다', () => {
     expect(line?.value).toContain('할인율 10%');
   });
 
-  it('매입률을 모르는 칸은 계산하지 않고 그렇게 말한다', () => {
-    const r = housingBond({ housePrice: 3_000_000_0, region: 'other', discountRate: 0 });
-    expect(r.main.label).toBe('매입률 미확인');
+  it('원문 대조 후 «미확인 칸이 없다» — 실입력에서 미확인 분기가 뜨지 않는다', () => {
+    // 미확인 분기 자체는 남겨 둔다(표에 구멍이 다시 생기면 계산 대신 그렇게 말해야 한다).
+    // 다만 지금은 전 구간이 닫혀 있어 어떤 실입력도 그 분기로 가지 않는다.
+    for (const p of [3_000_000_0, 0.7 * 억, 1.2 * 억, 2 * 억, 5 * 억, 10 * 억]) {
+      for (const region of ['metro', 'other'] as const) {
+        expect(housingBond({ housePrice: p, region, discountRate: 0 }).main.label)
+          .toBe('채권 매입금액');
+      }
+    }
   });
 });
 
