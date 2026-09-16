@@ -45,10 +45,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title, description: desc,
     alternates: { canonical: `${SITE_URL}/apt/compare/${encodeURIComponent(slugs)}` },
-    robots: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' as const },
+    // ⛔ K-10 ③ — 이 표면은 «색인하지 않는다» (2026-09-16 실측 판정).
+    //   단가가 잔인하다: 30일 네이버 유입 «11회»(8페이지 산발) 대 하루 수백 건의 504.
+    //   [slugs] 가 아무 쌍이나 받는 «조합 폭발» 표면이라, 사이트맵 200 을 훨씬 넘겨
+    //   크롤러가 훑고 그것이 봇 대면 5xx 상위 3위 경로를 만들었다.
+    //   ⚠️ 라우트는 «존치» 한다 — 내부 링크로 들어오는 사람 동선은 그대로다.
+    //      색인 예산에서만 뺀다. follow:true 라 링크 자산도 흐른다.
+    //   ⚠️ 사이트맵 등재도 «같은 커밋에서» 뺐다(sitemap/[id]/route.ts) —
+    //      갈리면 「차단된 URL 제출」 경고가 난다(K-5 에서 닫은 그 자기모순).
+    robots: { index: false, follow: true },
     openGraph: { title, description: desc, url: `${SITE_URL}/apt/compare/${encodeURIComponent(slugs)}`, siteName: '카더라', locale: 'ko_KR', type: 'website',
       images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(`${a.apt_name} vs ${b.apt_name}`)}&design=2&subtitle=${encodeURIComponent('아파트 비교 분석')}&author=${encodeURIComponent('카더라')}`, width: 1200, height: 630 }] },
-    other: { 'naver:author': '카더라', 'naver:updated_time': new Date().toISOString(), 'article:section': '부동산', 'article:tag': `${a.apt_name},${b.apt_name},비교,실거래가,아파트`, 'dg:plink': `${SITE_URL}/apt/compare/${encodeURIComponent(slugs)}` },
+    // ⛔ 거짓 신선도 제거 — naver:updated_time 이 «렌더할 때마다» new Date() 를 뱉고 있었다.
+    //    비교 페이지는 원본 두 단지가 바뀔 때만 바뀌는데 매번 「방금 수정됨」으로 나갔다.
+    //    이 페이지에는 «자기 자신의» 수정 시각이 없다 — 없으면 내보내지 않는다.
+    other: { 'naver:author': '카더라', 'article:section': '부동산', 'article:tag': `${a.apt_name},${b.apt_name},비교,실거래가,아파트`, 'dg:plink': `${SITE_URL}/apt/compare/${encodeURIComponent(slugs)}` },
   };
 }
 

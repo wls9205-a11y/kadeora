@@ -379,25 +379,14 @@ ${complexXml}
         for (const b of (r.builder_normalized ?? [])) bMap.set(b, (bMap.get(b) || 0) + 1);
       }
       for (const [b, c] of bMap) { if (c < 3) continue; entries.push({ url: `${BASE}/apt/builder/${encodeURIComponent(b)}`, lastModified: null, changeFrequency: 'monthly', priority: c > 20 ? 0.75 : 0.6 }); }
-      // 비교 페이지 — 인기 시군구 상위 단지 조합 (스팸 방지: 최대 200개)
-      try {
-        const { data: topComplexes } = await (sb as any).from('apt_complex_profiles')
-          .select('apt_name, sigungu').not('age_group', 'is', null).gt('sale_count_1y', 20).gt('latest_sale_price', 0)
-          .order('sale_count_1y', { ascending: false }).limit(100);
-        if (topComplexes) {
-          const bySg = new Map<string, string[]>();
-          for (const c of topComplexes) { if (!c.sigungu) continue; const arr = bySg.get(c.sigungu) || []; if (arr.length < 4) arr.push(c.apt_name); bySg.set(c.sigungu, arr); }
-          let compareCount = 0;
-          for (const [, names] of bySg) {
-            for (let i = 0; i < names.length && compareCount < 200; i++) {
-              for (let j = i + 1; j < names.length && compareCount < 200; j++) {
-                entries.push({ url: `${BASE}/apt/compare/${encodeURIComponent(names[i])}-vs-${encodeURIComponent(names[j])}`, lastModified: null, changeFrequency: 'monthly', priority: 0.55 });
-                compareCount++;
-              }
-            }
-          }
-        }
-      } catch {}
+      // ⛔ K-10 ③ — 비교 페이지(/apt/compare/…)는 «사이트맵에서 뺀다» (2026-09-16 실측 판정).
+      //   여기 있던 「인기 시군구 상위 단지 조합 최대 200개」 생성기를 걷어냈다.
+      //   단가: 30일 네이버 유입 «11회»(8페이지 산발) 대 하루 수백 건의 504.
+      //   [slugs] 가 아무 쌍이나 받는 조합 폭발 표면이라 크롤러는 이 200 을 훨씬 넘겨 훑고,
+      //   그것이 봇 대면 5xx 상위 3위 경로를 만들었다.
+      //   ⚠️ 페이지 메타도 «같은 커밋에서» noindex 로 바꿨다(apt/compare/[slugs]/page.tsx).
+      //      제출과 색인 방침이 갈리면 「차단된 URL 제출」 경고가 난다 — K-5 에서 닫은 그 자기모순.
+      //   ⚠️ 라우트는 존치한다. 내부 링크로 들어오는 사람 동선은 그대로다.
       return xmlResponse(entries);
     } catch { return xmlResponse([]); }
   }
