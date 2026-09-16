@@ -72,6 +72,7 @@ import SiteRow from '@/components/apt/SiteRow';
 import JsonLd from '@/components/seo/JsonLd';
 import { buildSiteOverview } from '@/lib/apt/site-overview';
 import { E10_TARGET_SLUGS } from '@/lib/apt/e10-targets';
+import { buildSiteFaqs } from '@/lib/apt/site-faqs';
 const RegulationBadges = dynamic(() => import('@/components/RegulationBadges'));
 const CostSimulator = dynamic(() => import('@/components/CostSimulator'));
 // C3: ContentLock 제거
@@ -889,8 +890,36 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
 
   const isSynPrice = (site as any)?.price_source === 'synthetic';
   const dbFaq = dropAmountFaqs(Array.isArray(site?.faq_items) ? site.faq_items as { q: string; a: string }[] : [], isSynPrice);
+
+  // K-1 ② — AB-2 조립 FAQ. 표적 현장에 한해 «저장 FAQ보다 앞선다».
+  //
+  // 왜 앞서는가: 조립기는 매 렌더 DB 현재값에서 문장을 짠다 — 늙지 않는다.
+  // 저장 FAQ 는 늙는다. 실제로 엄궁역 트라비스의 저장 문구가 「총 1,670세대」인데 DB 는
+  // 1,061 이었다(2026-09-16 실측). 저장본이 우선하면 그 어긋남이 화면에 그대로 남는다.
+  // ⛔ 표적 «밖» 에서는 저장 FAQ 가 그대로 이긴다 — 6,314 현장의 기존 문구를 말없이
+  //    갈아엎지 않는다. 넓히려면 그건 별도 판정이다.
+  const isAbTarget = E10_TARGET_SLUGS.has(String((site as any)?.slug ?? ''));
+  const abFaq = isAbTarget
+    ? buildSiteFaqs({
+        name, slug: String((site as any)?.slug ?? ''),
+        region, sigungu: site?.sigungu, dong: (site as any)?.dong,
+        builder: builderName, siteType: (site as any)?.site_type,
+        stageLabel: stageLabel((site as any)?.lifecycle_stage),
+        totalUnits: units.complex, generalUnits: (site as any)?.general_units ?? units.supply,
+        // ⛔ 합성가는 넘기지 않는다 — 넘기면 조립기가 «지어낸 값으로» 금액 문항을 만든다.
+        priceText: !isSynPrice && (site?.price_min || site?.price_max)
+          ? `${site?.price_min ? fmtAmount(site.price_min) : ''}${site?.price_min && site?.price_max ? ' ~ ' : ''}${site?.price_max ? fmtAmount(site.price_max) : ''}`
+          : null,
+        schedule: (site as any)?.expected_sale_period
+          ? { label: '분양예정 시기', text: String((site as any).expected_sale_period),
+              source: (site as any)?.expected_sale_source, asof: (site as any)?.expected_sale_period_asof }
+          : null,
+        built: (site as any)?.lifecycle_stage === 'post_move_in' || (site as any)?.lifecycle_stage === 'landmark_active',
+      })
+    : [];
+
   // DB FAQ가 없으면 자동 생성 (네이버 FAQ 리치스니펫 확보)
-  const faq: { q: string; a: string }[] = dbFaq.length > 0 ? dbFaq : [
+  const faq: { q: string; a: string }[] = abFaq.length >= 3 ? abFaq : dbFaq.length > 0 ? dbFaq : [
     { q: `${name} 위치가 어디인가요?`, a: `${name}은(는) ${region} ${site?.sigungu || ''} ${site?.dong || site?.address || ''}에 위치해 있습니다. ${site?.nearby_station || sub?.nearest_station ? `최근접 역은 ${site?.nearby_station || sub?.nearest_station}입니다.` : ''}` },
     ...(sub?.rcept_bgnde ? [{ q: `${name} 청약 일정은 언제인가요?`, a: `${name}의 청약 접수 기간은 ${sub.rcept_bgnde} ~ ${sub.rcept_endde || ''}입니다. ${sub.przwner_presnatn_de ? `당첨자 발표일은 ${sub.przwner_presnatn_de}입니다.` : ''} ${sub.mvn_prearnge_ym ? `입주 예정은 ${fmtYM(sub.mvn_prearnge_ym)}입니다.` : ''}` }] : []),
     { q: `${name} 시공사(건설사)는 어디인가요?`, a: `${name}의 시공사는 ${builderName || '미정'}입니다. ${site?.developer || sub?.developer_nm ? `시행사는 ${site?.developer || sub?.developer_nm}입니다.` : ''} ${units.complex ? `총 ${units.complex.toLocaleString()}세대 규모이며, ` : ''}이번 분양 공급은 ${units.supply ? `${units.supply.toLocaleString()}세대` : '미확인'}입니다.` },
