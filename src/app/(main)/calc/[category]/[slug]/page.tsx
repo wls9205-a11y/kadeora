@@ -37,16 +37,48 @@ const CANONICAL_OVERRIDES: Record<string, string> = {
  *    함께 넘기고 화면이 그 시각을 적는다 — 날짜 없는 환율은 거짓 신선도다.
  */
 async function getLiveData(slug: string): Promise<Record<string, string> | undefined> {
-  if (slug !== 'currency-convert') return undefined;
   try {
     const sb = getSupabaseAdmin();
-    const { data } = await (sb as any)
-      .from('exchange_rates')
-      .select('rates, updated_at')
-      .eq('base_currency', 'USD')
-      .maybeSingle();
-    if (!data?.rates) return undefined;
-    return { __fx: JSON.stringify({ rates: data.rates, updatedAt: data.updated_at }) };
+
+    if (slug === 'currency-convert') {
+      const { data } = await (sb as any)
+        .from('exchange_rates')
+        .select('rates, updated_at')
+        .eq('base_currency', 'USD')
+        .maybeSingle();
+      if (!data?.rates) return undefined;
+      return { __fx: JSON.stringify({ rates: data.rates, updatedAt: data.updated_at }) };
+    }
+
+    // LTV·DSR — 규제 상수의 정본은 policy_constants 다. 코드에 퍼센트를 적지 않는다.
+    //   대출 규제는 대책 발표마다 바뀌므로, 표가 갱신되면 계산기도 «자동으로» 따라간다.
+    if (slug === 'ltv-calc' || slug === 'dsr-calc') {
+      const { data } = await (sb as any)
+        .from('policy_constants')
+        .select('key, item, numbers, source_title, source_date, status')
+        .or('key.like.ltv_%,key.like.dsr_%,key.like.stress_dsr_%');
+      if (!Array.isArray(data) || !data.length) return undefined;
+      const pct: Record<string, number> = {};
+      const meta: Record<string, unknown> = {};
+      for (const row of data as any[]) {
+        // ⚠️ numbers 의 «첫» 항목이 그 행의 비율이다(예: ["70%","6개월"]).
+        //    퍼센트가 아닌 행(처분기한 「6개월」 등)은 비율 표에 넣지 않는다 — 0 으로 때우면
+        //    「LTV 0%」라는 전혀 다른 뜻이 된다.
+        const first = Array.isArray(row?.numbers) ? String(row.numbers[0] ?? '') : '';
+        const m = first.match(/^(-?\d+(?:\.\d+)?)\s*%/);
+        if (m) pct[row.key] = Number(m[1]);
+        meta[row.key] = {
+          item: row.item ?? undefined,
+          source: row.source_title ?? undefined,
+          date: row.source_date ?? undefined,
+          status: row.status ?? undefined,
+        };
+      }
+      if (!Object.keys(pct).length) return undefined;
+      return { __policy: JSON.stringify({ pct, meta }) };
+    }
+
+    return undefined;
   } catch {
     return undefined;
   }

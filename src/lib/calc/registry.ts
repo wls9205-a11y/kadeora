@@ -1205,19 +1205,25 @@ export const CALC_REGISTRY: CalcMeta[] = [
   {
     slug: 'dsr-calc', emoji: '📊', category: 'real-estate', categoryLabel: '부동산',
     title: 'DSR 계산기', titleShort: 'DSR 계산기',
-    description: '총부채원리금상환비율(DSR)을 계산. 대출 가능 금액 추정.',
-    keywords: ['DSR 계산기','총부채원리금상환비율','대출한도','DSR 40%','주택담보대출'],
-    legalBasis: '은행업감독규정', version: '2026.04', lastUpdated: '2026-04-05',
-    pattern: 'simple', formula: 'dsrCalc', resultLabel: 'DSR', resultUnit: '%',
+    seoTitle: 'DSR 계산기 — 스트레스 DSR 반영 한도 대조',
+    description: '총부채원리금상환비율(DSR)을 업권별 한도·스트레스 금리까지 반영해 계산. 적용 근거와 발표일을 함께 표시.',
+    keywords: ['DSR 계산기','총부채원리금상환비율','대출한도','스트레스 DSR','DSR 40%','주택담보대출'],
+    legalBasis: '금융위원회 가계부채 관리방안(차주단위 DSR·스트레스 DSR)', version: '2026.09', lastUpdated: '2026-09-16',
+    pattern: 'conditional', formula: 'dsrCalc', resultLabel: 'DSR', resultUnit: '%',
     inputs: [
       { id: 'annualIncome', label: '연소득', type: 'currency', default: 60000000 },
       { id: 'newLoan', label: '신규 대출 원금', type: 'currency', default: 300000000 },
       { id: 'newRate', label: '신규 대출 금리 (%)', type: 'percent', default: 4.5, step: 0.1 },
       { id: 'newYears', label: '신규 대출 기간 (년)', type: 'number', default: 30, min: 1, max: 40 },
       { id: 'existingAnnualRepay', label: '기존 대출 연간 상환액', type: 'currency', default: 0 },
+      // K-9 ⓒ ② — 한도는 업권으로, 스트레스 금리는 지역으로 갈린다. 둘 다 물어야 답이 맞는다.
+      { id: 'lender', label: '대출 기관', type: 'radio', default: 'bank', options: [{ value: 'bank', label: '은행권' }, { value: 'nonbank', label: '제2금융권' }] },
+      { id: 'region', label: '지역', type: 'select', default: 'regulated', options: [{ value: 'regulated', label: '규제지역' }, { value: 'capital_nonreg', label: '수도권 비규제' }, { value: 'local_nonreg', label: '수도권 외 비규제' }], hint: '스트레스 DSR 가산금리가 지역에 따라 달라진다.' },
     ],
     faqs: [
-      { q: 'DSR 계산기 결과는 실제와 같나요?', a: '참고용이며, 지역·물건 특성에 따라 차이가 있을 수 있습니다. 은행업감독규정를 기준으로 계산합니다.' },
+      { q: '왜 입력 금리보다 높은 금리로 계산되나요?', a: '스트레스 DSR 때문입니다. 실제 심사는 금리 상승 위험을 반영해 가산금리를 얹은 금리로 상환액을 잡습니다. 이를 빼고 계산하면 「통과」라고 나와도 창구에서 거절될 수 있습니다.' },
+      { q: 'DSR 한도는 40%인가요?', a: '업권에 따라 다릅니다. 은행권 40%, 제2금융권 50%가 차주단위 DSR 한도이며, 결과 화면에 적용 한도와 근거·발표일을 함께 표시합니다.' },
+      { q: 'DSR 계산기 결과는 실제와 같나요?', a: '한도 대조 결과이며 승인 결과가 아닙니다. 실제 승인은 은행 심사·담보·소득 인정 방식에 따라 달라집니다.' },
       { q: '부동산 거래 시 꼭 확인할 것은?', a: '등기부등본, 건축물대장, 토지이용계획확인서를 반드시 확인하세요.' },
       { q: 'DSR 계산기는 무료인가요?', a: '네, 카더라 DSR 계산기는 완전 무료이며 회원가입 없이 무제한 이용 가능합니다.' },
       { q: 'DSR 계산기는 모바일에서도 되나요?', a: '네, 모든 기기에서 최적화되어 있습니다.' },
@@ -1824,7 +1830,10 @@ export const CALC_REGISTRY: CalcMeta[] = [
       { q: '관련 계산기가 더 있나요?', a: '카더라는 사업자 세금 포함 142종의 무료 계산기를 제공합니다.' },
     ], seoContent: '<h2>간편장부 소득금액 계산기 완벽 가이드</h2><p>간편장부로 사업소득금액을 계산. 카더라 간편장부 계산기는 2026년 최신 기준을 반영하여 정확한 결과를 제공합니다.</p><p>본 계산기는 <strong>소득세법 시행령 제131조</strong>를 기준으로 계산합니다. 규정은 매년 개정될 수 있으므로 전문가 확인을 권장합니다.</p><h2>사업자 세금 핵심 정보</h2><p>일반과세자는 매출의 10% 부가세를 징수·납부하고, 간이과세자는 업종별 부가가치율(1.5~4%) 적용. 법인세는 2억 이하 9%, 200억 이하 19%, 3000억 이하 21%, 초과 24%입니다.</p><h2>이런 분들에게 추천</h2><p>정확한 사업자 세금 계산이 필요한 분에게 유용합니다. 카더라는 사업자 세금 포함 142종의 무료 계산기를 제공하며, 계산 결과를 카카오톡으로 공유할 수 있습니다. 본 계산기는 참고용이며 전문가 상담을 권장합니다.</p>', relatedCalcs: ['comprehensive-income-tax', 'expense-rate-lookup'] },
   // 부동산 +4
-  { slug: 'ltv-calc', emoji: '📊', category: 'real-estate', categoryLabel: '부동산', title: 'LTV 대출한도 계산기', titleShort: 'LTV 계산기', description: '주택담보대출 LTV 비율로 대출 가능 금액을 추정.', keywords: ['LTV 계산기','주택담보대출','대출한도','담보비율'], legalBasis: '은행업감독규정', version: '2026.04', lastUpdated: '2026-04-05', pattern: 'simple', formula: 'ltvCalc', resultLabel: '대출 가능액', resultUnit: '원', inputs: [{ id: 'housePrice', label: '주택 시가', type: 'currency', default: 600000000 }, { id: 'ltv', label: 'LTV 비율 (%)', type: 'select', default: '70', options: [{ value: '70', label: '70% (일반)' }, { value: '60', label: '60% (조정지역)' }, { value: '50', label: '50% (투기지역)' }, { value: '80', label: '80% (생초)' }] }, { id: 'existingLoan', label: '기존 담보대출', type: 'currency', default: 0 }], faqs: [
+  // K-9 ⓒ ② — LTV 를 «사용자가 %를 고르는» 곱셈기에서 «조건으로 정해지는» 계산기로.
+  //   예전 옵션(70 일반 / 60 조정 / 50 투기 / 80 생초)은 현행 규제와도 맞지 않았다.
+  //   이제 지역·보유 상태를 고르면 policy_constants 의 confirmed 값이 적용된다.
+  { slug: 'ltv-calc', emoji: '📊', category: 'real-estate', categoryLabel: '부동산', title: 'LTV 대출한도 계산기', titleShort: 'LTV 계산기', seoTitle: 'LTV 계산기 — 지역·주택수별 대출한도', description: '지역과 주택 보유 상태를 고르면 현행 규제 기준 LTV 한도와 대출 가능액을 계산. 적용 근거와 발표일을 함께 표시.', keywords: ['LTV 계산기','주택담보대출','대출한도','담보비율','규제지역 LTV','생애최초 LTV'], legalBasis: '금융위원회 가계부채 관리방안·국토교통부 규제지역 지정', version: '2026.09', lastUpdated: '2026-09-16', pattern: 'conditional', formula: 'ltvCalc', resultLabel: '대출 가능액', resultUnit: '원', inputs: [{ id: 'housePrice', label: '주택 시가', type: 'currency', default: 600000000 }, { id: 'region', label: '지역', type: 'select', default: 'regulated', options: [{ value: 'regulated', label: '규제지역(투기과열·조정대상)' }, { value: 'capital_nonreg', label: '수도권 비규제' }, { value: 'local_nonreg', label: '수도권 외 비규제' }] }, { id: 'owner', label: '주택 보유', type: 'select', default: 'none', options: [{ value: 'none', label: '무주택' }, { value: 'first_home', label: '생애최초' }, { value: 'disposal', label: '처분조건부 1주택' }, { value: 'owner', label: '1주택 보유(미처분)' }, { value: 'multi', label: '2주택 이상' }] }, { id: 'existingLoan', label: '기존 담보대출', type: 'currency', default: 0 }], faqs: [
       { q: 'LTV 계산기 결과는 실제와 같나요?', a: '참고용이며, 지역·물건 특성에 따라 차이가 있을 수 있습니다. 은행업감독규정를 기준으로 계산합니다.' },
       { q: '부동산 거래 시 꼭 확인할 것은?', a: '등기부등본, 건축물대장, 토지이용계획확인서를 반드시 확인하세요.' },
       { q: 'LTV 계산기는 무료인가요?', a: '네, 카더라 LTV 계산기는 완전 무료이며 회원가입 없이 무제한 이용 가능합니다.' },

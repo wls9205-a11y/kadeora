@@ -8,6 +8,8 @@ import {
 import {
   bondRatePerMille, pensionMonthly, HOUSING_BOND_SOURCE, HOUSING_PENSION_SOURCE,
   PENSION_MIN_AGE, PENSION_MAX_PRICE, brokerageBracket, BROKERAGE_SOURCE,
+  parsePolicyPack, ltvPolicyKey, dsrPolicyKey, stressDsrKey,
+  type LtvRegion, type LtvOwner,
 } from './gov-tables';
 
 type V = Record<string, number | string>;
@@ -960,15 +962,68 @@ export function registrationCost(v: V): CalcResult {
   const stampTax = price > 1000000000 ? 350000 : price > 500000000 ? 150000 : price > 100000000 ? 70000 : 0;
   return { main: { label: '등기비용 합계', value: fmt(regTax + eduTax + acqTotal + lawyerFee + stampTax) }, details: [{ label: '등록면허세', value: fmt(regTax) }, { label: '지방교육세', value: fmt(eduTax) }, { label: '취득세 (별도)', value: fmt(acqTotal) }, { label: '법무사 수수료 (추정)', value: fmt(lawyerFee) }, { label: '인지세', value: fmt(stampTax) }] };
 }
+/**
+ * K-9 ⓒ ② — DSR 한도 40% 하드코딩을 걷어내고 «업권별 한도 + 스트레스 금리» 로 (2026-09-16).
+ *
+ * 예전에는 `ok = dsr <= 40` 하나였다. 두 가지가 틀렸다:
+ *   ① 한도는 업권으로 갈린다 — 은행권 40% · 제2금융권 50%(policy_constants confirmed).
+ *   ② 스트레스 DSR 을 아예 안 봤다. 실제 심사는 «가산금리를 얹은» 금리로 상환액을 잡는다 —
+ *      수도권·규제지역 3.0%p, 지방 비규제 0.75%p. 이걸 빼면 «통과» 라고 말해 놓고
+ *      창구에서 거절당한다. 계산기가 낙관을 파는 꼴이다.
+ * ⛔ 「대출 가능」이라 단정하지 않는다. 이건 한도 대조지 심사 결과가 아니다.
+ */
 export function dsrCalc(v: V): CalcResult {
+  const pack = parsePolicyPack(v.__policy);
+  const region = (String(v.region ?? 'regulated') as LtvRegion);
+  const lender = (String(v.lender ?? 'bank') as 'bank' | 'nonbank');
+  const capPct = pack?.pct?.[dsrPolicyKey(lender)];
+  const stressPct = pack?.pct?.[stressDsrKey(region)];
+
+  if (typeof capPct !== 'number') {
+    return {
+      main: { label: '규제 기준 미수신', value: '—', color: 'var(--text-tertiary)' },
+      details: [{ label: '사유', value: 'DSR 한도 기준을 아직 받지 못했다. 잠시 후 다시 시도한다' }],
+    };
+  }
+
   const income = n(v.annualIncome);
-  const loan = n(v.newLoan); const rate = n(v.newRate)/100/12; const years = n(v.newYears);
+  const loan = n(v.newLoan);
+  const years = n(v.newYears);
   const months = years * 12;
-  const monthlyRepay = rate > 0 ? loan * rate * Math.pow(1+rate, months) / (Math.pow(1+rate, months)-1) : loan / months;
+  const baseRate = n(v.newRate);
+  // ⚠️ 스트레스 금리를 «얹은» 금리로 상환액을 잡는다. 못 받았으면 0 이 아니라 «미적용» 으로 말한다.
+  const applied = baseRate + (typeof stressPct === 'number' ? stressPct : 0);
+  const r = applied / 100 / 12;
+  const monthlyRepay = months <= 0 ? 0
+    : r > 0 ? loan * r * Math.pow(1 + r, months) / (Math.pow(1 + r, months) - 1)
+    : loan / months;
   const annualRepay = monthlyRepay * 12 + n(v.existingAnnualRepay);
   const dsr = income > 0 ? (annualRepay / income) * 100 : 0;
-  const ok = dsr <= 40;
-  return { main: { label: 'DSR', value: `${dsr.toFixed(1)}%`, color: ok ? 'var(--accent-green)' : 'var(--accent-red)' }, details: [{ label: '연간 원리금 상환액', value: fmt(Math.round(annualRepay)) }, { label: '판정', value: ok ? '대출 가능 (40% 이하)' : '대출 초과 (40% 초과)' }] };
+  const within = dsr <= capPct;
+
+  const cm = pack?.meta?.[dsrPolicyKey(lender)] ?? {};
+  const sm = pack?.meta?.[stressDsrKey(region)] ?? {};
+  return {
+    main: {
+      label: 'DSR',
+      value: `${dsr.toFixed(1)}%`,
+      color: within ? 'var(--accent-green)' : 'var(--accent-red)',
+    },
+    details: [
+      // ⛔ 「대출 가능」이 아니라 «한도 대조» 다. 심사 결과를 약속하지 않는다.
+      { label: '한도 대조', value: `${lender === 'bank' ? '은행권' : '제2금융권'} 한도 ${capPct}% ${within ? '이내' : '초과'}` },
+      { label: '연간 원리금 상환액', value: fmt(Math.round(annualRepay)) },
+      { label: '월 상환액', value: fmt(Math.round(monthlyRepay)) },
+      typeof stressPct === 'number'
+        ? { label: '적용 금리', value: `${applied.toFixed(2)}% (입력 ${baseRate}% + 스트레스 ${stressPct}%p)` }
+        : { label: '적용 금리', value: `${baseRate}% — ⚠️ 스트레스 금리 «미적용». 실제 심사는 더 엄격하다` },
+      ...(sm.item ? [{ label: '스트레스 기준', value: sm.item }] : []),
+      ...(cm.source || cm.date ? [{ label: '근거', value: [cm.source, cm.date].filter(Boolean).join(' · ') }] : []),
+      ...(sm.status && sm.status !== 'confirmed'
+        ? [{ label: '⚠️ 상태', value: `스트레스 기준이 «${sm.status}» 다 — 최신 여부를 확인할 것` }] : []),
+      { label: '참고', value: '한도 대조 결과이며 실제 승인은 은행 심사·담보·소득 인정 방식에 따라 달라진다' },
+    ],
+  };
 }
 export function jeonseVsWolse(v: V): CalcResult {
   const js = n(v.jeonse); const jRate = n(v.jeonseRate)/100;
@@ -1525,10 +1580,55 @@ export function simpleBookkeeping(v: V): CalcResult {
   const income = n(v.revenue) - n(v.expenses);
   return { main: { label: '소득금액', value: fmt(Math.max(0, income)) }, details: [{ label: '총수입', value: fmt(n(v.revenue)) }, { label: '필요경비', value: fmt(n(v.expenses)) }] };
 }
+/**
+ * K-9 ⓒ ② — LTV 를 «사용자가 입력하는 곱셈기» 에서 «조건으로 정해지는 계산기» 로 (2026-09-16).
+ *
+ * 예전에는 LTV 퍼센트를 사람이 직접 넣었다. 그러면 정작 사람들이 알고 싶은 것
+ * — 「내 조건에서 LTV 가 몇 %인가」 — 은 답하지 않는 곱셈기였다.
+ * 검색량 실측 38,200(중간 경쟁). 규제 상수는 policy_constants 에 confirmed 로 이미 있었다.
+ *
+ * ⛔ 퍼센트를 여기 적지 않는다. 대출 규제는 대책마다 바뀐다 — 서버가 표를 읽어 주입한다.
+ * ⛔ 주입이 없거나 해당 조건의 행이 없으면 «지어내지 않는다».
+ */
 export function ltvCalc(v: V): CalcResult {
-  const price = n(v.housePrice); const ltv = Number(v.ltv) / 100; const existing = n(v.existingLoan);
-  const maxLoan = Math.max(0, Math.round(price * ltv - existing));
-  return { main: { label: '대출 가능액', value: fmt(maxLoan) }, details: [{ label: 'LTV', value: pct(ltv) }, { label: '기존 대출 차감', value: fmt(existing) }] };
+  const pack = parsePolicyPack(v.__policy);
+  const region = (String(v.region ?? 'regulated') as LtvRegion);
+  const owner = (String(v.owner ?? 'none') as LtvOwner);
+  const key = ltvPolicyKey(region, owner);
+  const ratePct = pack?.pct?.[key];
+
+  if (typeof ratePct !== 'number') {
+    return {
+      main: { label: '규제 기준 미수신', value: '—', color: 'var(--text-tertiary)' },
+      details: [{ label: '사유', value: '이 조건의 LTV 기준을 아직 받지 못했다. 잠시 후 다시 시도한다' }],
+    };
+  }
+
+  const price = n(v.housePrice);
+  const existing = n(v.existingLoan);
+  const maxLoan = Math.max(0, Math.round(price * (ratePct / 100) - existing));
+  const m = pack?.meta?.[key] ?? {};
+  const details: { label: string; value: string }[] = [
+    { label: '적용 LTV', value: `${ratePct}%` },
+    ...(m.item ? [{ label: '적용 기준', value: m.item }] : []),
+    { label: '기존 대출 차감', value: fmt(existing) },
+  ];
+  if (ratePct === 0) {
+    details.unshift({ label: '판단', value: '이 조건은 주택구입목적 주택담보대출이 «허용되지 않는다»' });
+  }
+  if (owner === 'disposal') {
+    details.push({ label: '조건', value: '처분조건부는 기한 내 기존주택을 처분해야 무주택과 같은 한도가 유지된다' });
+  }
+  // ⚠️ 기준일·출처를 함께 낸다. 날짜 없는 규제 수치는 거짓 신선도다.
+  if (m.source || m.date) {
+    details.push({ label: '근거', value: [m.source, m.date].filter(Boolean).join(' · ') });
+  }
+  if (m.status && m.status !== 'confirmed') {
+    details.push({ label: '⚠️ 상태', value: `이 값은 «${m.status}» 다 — 최신 여부를 확인할 것` });
+  }
+  details.push({ label: '참고', value: 'LTV 한도이며 실제 대출은 DSR·소득·은행 심사에 따라 더 낮을 수 있다' });
+
+  return { main: { label: '대출 가능액(LTV 한도)', value: fmt(maxLoan) }, details };
 }
 /**
  * K-2 ① — 단일 매입률(수도권 5% / 그 외 3%)을 «구간별 누진표» 로 바꾸고,

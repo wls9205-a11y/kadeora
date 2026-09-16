@@ -190,6 +190,81 @@ export function brokerageBracket(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 1-3. LTV · DSR — 규제 상수는 «DB(policy_constants)» 가 정본이다
+//
+// ⛔ 여기에 숫자를 옮겨 적지 «않는다». 대출 규제는 대책 발표마다 바뀌고, 그때마다
+//    코드를 고치는 구조면 반드시 늙는다(오늘 잡은 환율·할인율과 같은 병).
+//    policy_constants 에 출처·발표일·조건·status 까지 갖춘 행이 이미 있으므로
+//    «그 표를 읽어» 주입한다. 이 파일은 «어느 행을 고를 것인가» 만 안다.
+//
+// 실측(2026-09-16): confirmed 12행 — dsr_bank 40 · dsr_nonbank 50 ·
+//   stress_dsr_capital_regulated 3.0 · stress_dsr_local 0.75p(unverified_current) ·
+//   ltv_regulated_nonowner 40 · ltv_regulated_owner 0 · ltv_capital_multi_owner 0 ·
+//   ltv_nonregulated_nonowner 70 · ltv_nonregulated_noncapital_owner 60 ·
+//   ltv_first_home_capital_regulated 70 · ltv_first_home_other 80 ·
+//   ltv_disposal_condition_period 6개월
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** 지역 구분 — policy_constants 의 condition 문구를 그대로 따른다. */
+export type LtvRegion = 'regulated' | 'capital_nonreg' | 'local_nonreg';
+/** 보유 상태. disposal = 처분조건부 1주택(6개월 내 처분 시 무주택과 동일). */
+export type LtvOwner = 'none' | 'first_home' | 'disposal' | 'owner' | 'multi';
+
+/**
+ * 조건 → policy_constants.key. 표를 «고르는» 규칙이지 값이 아니다.
+ *
+ * ⚠️ 매핑 근거는 각 행의 condition 원문이다:
+ *   · 생애최초 + 수도권·규제지역           → 70%(6개월 전입의무)
+ *   · 생애최초 + 그 외                     → 80%
+ *   · 무주택/처분조건부 + 규제지역          → 40%   (「처분조건부 1주택 포함」)
+ *   · 무주택/처분조건부 + 비규제           → 70%   (「처분조건부 1주택 포함」)
+ *   · 유주택·2주택+ + 규제지역             → 0%    (주택구입목적 주담대 금지)
+ *   · 유주택·2주택+ + 수도권(비규제 포함)   → 0%    (미처분 1주택 추가구입 포함)
+ *   · 유주택·2주택+ + 수도권 외 비규제      → 60%
+ */
+export function ltvPolicyKey(region: LtvRegion, owner: LtvOwner): string {
+  if (owner === 'first_home') {
+    return region === 'local_nonreg' ? 'ltv_first_home_other' : 'ltv_first_home_capital_regulated';
+  }
+  if (owner === 'none' || owner === 'disposal') {
+    return region === 'regulated' ? 'ltv_regulated_nonowner' : 'ltv_nonregulated_nonowner';
+  }
+  // owner | multi
+  if (region === 'regulated') return 'ltv_regulated_owner';
+  if (region === 'capital_nonreg') return 'ltv_capital_multi_owner';
+  return 'ltv_nonregulated_noncapital_owner';
+}
+
+/** DSR 한도 키 — 업권으로 갈린다. */
+export function dsrPolicyKey(lender: 'bank' | 'nonbank'): string {
+  return lender === 'bank' ? 'dsr_bank' : 'dsr_nonbank';
+}
+
+/** 스트레스 금리 키 — 지역으로 갈린다. */
+export function stressDsrKey(region: LtvRegion): string {
+  return region === 'local_nonreg' ? 'stress_dsr_local' : 'stress_dsr_capital_regulated';
+}
+
+/**
+ * 주입된 정책 상수 꾸러미. 서버가 policy_constants 를 읽어 이 모양으로 넘긴다.
+ * ⛔ 없는 키를 «기본값으로 때우지 않는다» — 모르면 계산하지 않고 그렇게 말한다.
+ */
+export interface PolicyPack {
+  /** key → 퍼센트 수치(40, 70, 0 …). */
+  pct: Record<string, number>;
+  /** key → 사람이 읽을 조건·출처. 화면이 근거를 말할 수 있게. */
+  meta: Record<string, { item?: string; source?: string; date?: string; status?: string }>;
+}
+
+export function parsePolicyPack(raw: unknown): PolicyPack | null {
+  try {
+    const p = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (p && typeof p === 'object' && (p as any).pct) return p as PolicyPack;
+  } catch { /* 주입 없음 */ }
+  return null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // 2. 주택연금 월지급금 — 일반주택 · 종신지급방식 · 정액형
 // ─────────────────────────────────────────────────────────────────────────────
 

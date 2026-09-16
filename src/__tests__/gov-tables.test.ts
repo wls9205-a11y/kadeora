@@ -6,8 +6,8 @@
  *   ② 옛 값이 «얼마나 틀렸는가» (반증형) — 회귀로 되돌아가면 바로 잡히도록 숫자를 박아 둔다
  */
 import { describe, it, expect } from 'vitest';
-import { bondRatePerMille, pensionMonthly, PENSION_MIN_AGE, brokerageBracket } from '@/lib/calc/gov-tables';
-import { housingBond, housingPension, brokerageFee, currencyConvert } from '@/lib/calc/formulas';
+import { bondRatePerMille, pensionMonthly, PENSION_MIN_AGE, brokerageBracket, ltvPolicyKey } from '@/lib/calc/gov-tables';
+import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc } from '@/lib/calc/formulas';
 
 const 억 = 100_000_000;
 
@@ -221,5 +221,83 @@ describe('환율 계산기 — 상수를 버리고 주입값을 쓴다 (K-9 ⓒ 
     const live = { EUR: 0.865688, CNY: 6.725199 };
     expect((0.92 / live.EUR - 1) * 100).toBeGreaterThan(6);
     expect((7.25 / live.CNY - 1) * 100).toBeGreaterThan(7);
+  });
+});
+
+describe('LTV·DSR — 규제 상수는 DB 가 정본, 코드는 «어느 행인가» 만 안다 (K-9 ⓒ ②)', () => {
+  // policy_constants 실측값(2026-09-16 confirmed)을 주입 형태로 재현.
+  const POLICY = JSON.stringify({
+    pct: {
+      ltv_regulated_nonowner: 40, ltv_regulated_owner: 0, ltv_capital_multi_owner: 0,
+      ltv_nonregulated_nonowner: 70, ltv_nonregulated_noncapital_owner: 60,
+      ltv_first_home_capital_regulated: 70, ltv_first_home_other: 80,
+      dsr_bank: 40, dsr_nonbank: 50,
+      stress_dsr_capital_regulated: 3.0, stress_dsr_local: 0.75,
+    },
+    meta: {
+      ltv_regulated_nonowner: { item: 'LTV 규제지역 무주택자', source: '금융위', date: '2026-08-13', status: 'confirmed' },
+      stress_dsr_local: { item: '지방 2단계', status: 'unverified_current' },
+      dsr_bank: { source: '금융위', date: '2026-08-13', status: 'confirmed' },
+    },
+  });
+
+  it('조건 → 정책 키 매핑이 condition 원문과 맞는다', () => {
+    expect(ltvPolicyKey('regulated', 'none')).toBe('ltv_regulated_nonowner');
+    expect(ltvPolicyKey('regulated', 'disposal')).toBe('ltv_regulated_nonowner');   // 처분조건부 포함
+    expect(ltvPolicyKey('regulated', 'owner')).toBe('ltv_regulated_owner');
+    expect(ltvPolicyKey('capital_nonreg', 'multi')).toBe('ltv_capital_multi_owner');
+    expect(ltvPolicyKey('local_nonreg', 'owner')).toBe('ltv_nonregulated_noncapital_owner');
+    expect(ltvPolicyKey('local_nonreg', 'first_home')).toBe('ltv_first_home_other');
+    expect(ltvPolicyKey('regulated', 'first_home')).toBe('ltv_first_home_capital_regulated');
+  });
+
+  it('규제지역 무주택 6억 → LTV 40% = 2.4억', () => {
+    const r = ltvCalc({ housePrice: 6 * 억, region: 'regulated', owner: 'none', existingLoan: 0, __policy: POLICY });
+    expect(r.main.value).toContain('2.4억');   // fmt() 표기
+    expect(r.details.some((d) => d.label === '적용 LTV' && d.value === '40%')).toBe(true);
+  });
+
+  it('0% 조건은 「금액」이 아니라 «허용되지 않는다» 고 말한다', () => {
+    const r = ltvCalc({ housePrice: 6 * 억, region: 'regulated', owner: 'owner', existingLoan: 0, __policy: POLICY });
+    expect(r.details[0].value).toContain('허용되지 않는다');
+  });
+
+  it('근거(출처·발표일)를 함께 낸다 — 날짜 없는 규제 수치는 거짓 신선도다', () => {
+    const r = ltvCalc({ housePrice: 6 * 억, region: 'regulated', owner: 'none', existingLoan: 0, __policy: POLICY });
+    expect(r.details.some((d) => d.label === '근거' && d.value.includes('2026-08-13'))).toBe(true);
+  });
+
+  it('⛔ 주입이 없으면 계산하지 않는다 — 퍼센트를 지어내지 않는다', () => {
+    expect(ltvCalc({ housePrice: 6 * 억, region: 'regulated', owner: 'none' }).main.label)
+      .toBe('규제 기준 미수신');
+    expect(dsrCalc({ annualIncome: 6000_0000, newLoan: 3 * 억, newRate: 4.5, newYears: 30 }).main.label)
+      .toBe('규제 기준 미수신');
+  });
+
+  it('DSR 한도가 업권으로 갈린다 — 은행 40 · 2금융 50', () => {
+    const base = { annualIncome: 60_000_000, newLoan: 3 * 억, newRate: 4.5, newYears: 30, existingAnnualRepay: 0, region: 'regulated', __policy: POLICY };
+    expect(dsrCalc({ ...base, lender: 'bank' }).details[0].value).toContain('한도 40%');
+    expect(dsrCalc({ ...base, lender: 'nonbank' }).details[0].value).toContain('한도 50%');
+  });
+
+  it('⛔ 스트레스 금리를 «얹어» 계산한다 — 빼면 낙관을 파는 꼴이다', () => {
+    const base = { annualIncome: 60_000_000, newLoan: 3 * 억, newRate: 4.5, newYears: 30, existingAnnualRepay: 0, lender: 'bank' as const, __policy: POLICY };
+    const capital = dsrCalc({ ...base, region: 'regulated' });
+    const local = dsrCalc({ ...base, region: 'local_nonreg' });
+    expect(capital.details.find((d) => d.label === '적용 금리')?.value).toContain('7.50%');  // 4.5 + 3.0
+    expect(local.details.find((d) => d.label === '적용 금리')?.value).toContain('5.25%');    // 4.5 + 0.75
+    // 가산이 클수록 DSR 도 커진다.
+    expect(parseFloat(capital.main.value)).toBeGreaterThan(parseFloat(local.main.value));
+  });
+
+  it('⛔ 「대출 가능」이라 단정하지 않는다 — 한도 대조지 심사 결과가 아니다', () => {
+    const r = dsrCalc({ annualIncome: 200_000_000, newLoan: 1 * 억, newRate: 4, newYears: 30, existingAnnualRepay: 0, lender: 'bank', region: 'regulated', __policy: POLICY });
+    expect(r.details[0].label).toBe('한도 대조');
+    expect(JSON.stringify(r)).not.toContain('대출 가능 (');
+  });
+
+  it('confirmed 가 아닌 상수는 화면이 그 사실을 말한다', () => {
+    const r = dsrCalc({ annualIncome: 60_000_000, newLoan: 3 * 억, newRate: 4.5, newYears: 30, existingAnnualRepay: 0, lender: 'bank', region: 'local_nonreg', __policy: POLICY });
+    expect(r.details.some((d) => d.value.includes('unverified_current'))).toBe(true);
   });
 });
