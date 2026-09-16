@@ -6,8 +6,8 @@
  *   ② 옛 값이 «얼마나 틀렸는가» (반증형) — 회귀로 되돌아가면 바로 잡히도록 숫자를 박아 둔다
  */
 import { describe, it, expect } from 'vitest';
-import { bondRatePerMille, pensionMonthly, PENSION_MIN_AGE, brokerageBracket, ltvPolicyKey } from '@/lib/calc/gov-tables';
-import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc } from '@/lib/calc/formulas';
+import { bondRatePerMille, pensionMonthly, PENSION_MIN_AGE, brokerageBracket, ltvPolicyKey, acqTaxPolicyKey, acqTaxMidRatePct } from '@/lib/calc/gov-tables';
+import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc, acquisitionTax } from '@/lib/calc/formulas';
 
 const 억 = 100_000_000;
 
@@ -299,5 +299,70 @@ describe('LTV·DSR — 규제 상수는 DB 가 정본, 코드는 «어느 행인
   it('confirmed 가 아닌 상수는 화면이 그 사실을 말한다', () => {
     const r = dsrCalc({ annualIncome: 60_000_000, newLoan: 3 * 억, newRate: 4.5, newYears: 30, existingAnnualRepay: 0, lender: 'bank', region: 'local_nonreg', __policy: POLICY });
     expect(r.details.some((d) => d.value.includes('unverified_current'))).toBe(true);
+  });
+});
+
+describe('취득세 — 이중 진실 해소 + 중과 매핑 3건 오류 고정 (K-9 ⓒ ③)', () => {
+  const POLICY = JSON.stringify({
+    pct: {
+      acq_tax_1house_6eok_under: 1, acq_tax_1house_6_9eok: 1, acq_tax_1house_9eok_over: 3,
+      acq_tax_heavy_8: 8, acq_tax_heavy_12: 12,
+    },
+    meta: {
+      acq_tax_heavy_8: { item: '주택 취득세 중과 — 8%', source: '지방세법', date: '2026-07-01', status: 'confirmed' },
+      acq_tax_1house_6_9eok: { item: '6억 초과 9억 이하', status: 'confirmed' },
+    },
+  });
+  const buy = (price: number, houseCount: number, regulated: boolean) =>
+    acquisitionTax({ price, type: 'purchase', houseCount, regulated: regulated ? 'yes' : 'no', firstTime: 'no', __policy: POLICY });
+
+  it('⛔ 옛 코드가 틀렸던 세 자리 — 비조정 2·3·4주택', () => {
+    // 비조정 2주택: 옛 1% 고정 → 실제 «표준세율»(7억이면 사잇세율)
+    expect(acqTaxPolicyKey(2, false, 7 * 억)).toBe('acq_tax_1house_6_9eok');
+    // 비조정 3주택: 옛 4% → 실제 8%
+    expect(acqTaxPolicyKey(3, false, 7 * 억)).toBe('acq_tax_heavy_8');
+    // 비조정 4주택 이상: 옛 4% → 실제 12%
+    expect(acqTaxPolicyKey(4, false, 7 * 억)).toBe('acq_tax_heavy_12');
+    // (4% 는 주택이 아닌 부동산의 표준세율이다 — 주택에 쓰면 안 되는 숫자였다)
+  });
+
+  it('조정지역 매핑은 그대로 맞다 — 2주택 8 · 3주택+ 12', () => {
+    expect(acqTaxPolicyKey(2, true, 7 * 억)).toBe('acq_tax_heavy_8');
+    expect(acqTaxPolicyKey(3, true, 7 * 억)).toBe('acq_tax_heavy_12');
+  });
+
+  it('사잇세율 산식이 경계에서 정확히 1%·3% 로 닫힌다', () => {
+    expect(acqTaxMidRatePct(6 * 억)).toBeCloseTo(1, 5);
+    expect(acqTaxMidRatePct(9 * 억)).toBeCloseTo(3, 5);
+    expect(acqTaxMidRatePct(7.5 * 억)).toBeCloseTo(2, 5);
+  });
+
+  it('⛔ 6~9억을 «2% 고정» 으로 두지 않는다 — 표와 산식이 갈리던 자리', () => {
+    // tax-tables 의 ACQUISITION_TAX_RATES 는 이 구간을 0.02 로 적어 두고 있었다.
+    expect(acqTaxMidRatePct(6.5 * 억)).toBeLessThan(2);
+    expect(acqTaxMidRatePct(8.5 * 억)).toBeGreaterThan(2);
+  });
+
+  it('비조정 3주택 7억: 8% 가 적용된다(옛 4%의 2배)', () => {
+    const r = buy(7 * 억, 3, false);
+    expect(r.details.find((d) => d.label === '적용 세율')?.value).toBe('8%');
+    expect(r.details.some((d) => d.label === '적용 구간' && d.value.includes('중과'))).toBe(true);
+  });
+
+  it('조정 2주택에는 «일시적 2주택 제외» 단서를 말한다', () => {
+    const r = buy(7 * 억, 2, true);
+    expect(r.details.some((d) => d.value.includes('일시적 2주택'))).toBe(true);
+  });
+
+  it('⛔ 주입이 없으면 세율을 지어내지 않는다', () => {
+    const r = acquisitionTax({ price: 7 * 억, type: 'purchase', houseCount: 1, regulated: 'no', firstTime: 'no' });
+    expect(r.main.label).toBe('세율 기준 미수신');
+  });
+
+  it('상수표 밖의 값(증여·상속)을 쓰면 «그렇게 말한다»', () => {
+    const g = acquisitionTax({ price: 5 * 억, type: 'gift', houseCount: 1, regulated: 'no', firstTime: 'no', __policy: POLICY });
+    expect(g.details.some((d) => d.label === '⚠️ 출처')).toBe(true);
+    // 유상취득은 표 안이므로 그 경고가 붙지 않는다.
+    expect(buy(5 * 억, 1, false).details.some((d) => d.label === '⚠️ 출처')).toBe(false);
   });
 });

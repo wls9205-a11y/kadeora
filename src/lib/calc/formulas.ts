@@ -8,7 +8,7 @@ import {
 import {
   bondRatePerMille, pensionMonthly, HOUSING_BOND_SOURCE, HOUSING_PENSION_SOURCE,
   PENSION_MIN_AGE, PENSION_MAX_PRICE, brokerageBracket, BROKERAGE_SOURCE,
-  parsePolicyPack, ltvPolicyKey, dsrPolicyKey, stressDsrKey,
+  parsePolicyPack, ltvPolicyKey, dsrPolicyKey, stressDsrKey, acqTaxPolicyKey, acqTaxMidRatePct,
   type LtvRegion, type LtvOwner,
 } from './gov-tables';
 
@@ -437,18 +437,42 @@ export function acquisitionTax(v: V): CalcResult {
   const regulated = v.regulated === 'yes';
   const firstTime = v.firstTime === 'yes';
   let rate = 0.01;
+  const pack = parsePolicyPack(v.__policy);
+  const notes: { label: string; value: string }[] = [];
+  let pendingSource = false;
+
   if (type === 'purchase') {
-    if (houseCount >= 3) rate = regulated ? 0.12 : 0.04;
-    else if (houseCount === 2) rate = regulated ? 0.08 : 0.01;
-    else {
-      if (price <= 600000000) rate = 0.01;
-      else if (price <= 900000000) rate = 0.01 + (price - 600000000) / 300000000 * 0.02;
-      else rate = 0.03;
+    // K-9 ⓒ ③ — 이중 진실 해소: 세율의 정본은 policy_constants 다.
+    //   ⛔ ACQUISITION_TAX_RATES 를 import «만» 하고 쓰지 않으면서 함수 안에 따로 박아 두었고,
+    //      그 표의 6~9억 칸(2% 고정)과 함수의 보간이 «서로 다른 답» 을 냈다.
+    const key = acqTaxPolicyKey(houseCount, regulated, price);
+    const pctFromDb = pack?.pct?.[key];
+    if (typeof pctFromDb !== 'number') {
+      return {
+        main: { label: '세율 기준 미수신', value: '—', color: 'var(--text-tertiary)' },
+        details: [{ label: '사유', value: '이 조건의 취득세율 기준을 아직 받지 못했다. 잠시 후 다시 시도한다' }],
+      };
     }
+    // 6~9억 구간만 «산식» 이다. 나머지는 표의 단일 세율.
+    const pct = key === 'acq_tax_1house_6_9eok' ? acqTaxMidRatePct(price) : pctFromDb;
+    rate = pct / 100;
+    const m = pack?.meta?.[key] ?? {};
+    if (m.item) notes.push({ label: '적용 구간', value: m.item });
+    if (key === 'acq_tax_1house_6_9eok') {
+      notes.push({ label: '사잇세율', value: '(취득가액×2/3억−3)×1/100 — 6억 1%에서 9억 3%로 연속' });
+    }
+    if (key === 'acq_tax_heavy_8' && regulated && houseCount === 2) {
+      // ⚠️ 원문 단서를 흘리지 않는다. 일시적 2주택은 중과 대상이 아니다.
+      notes.push({ label: '⚠️ 단서', value: '일시적 2주택은 중과 제외다 — 해당하면 표준세율을 본다' });
+    }
+    if (m.source || m.date) notes.push({ label: '근거', value: [m.source, m.date].filter(Boolean).join(' · ') });
   } else if (type === 'gift') {
+    // ⚠️ 증여·상속 세율은 아직 policy_constants 에 «행이 없다». 옮겨 적은 값이 아니라
+    //    기존 코드 값을 그대로 쓰는 중이므로, 화면이 그 사실을 말한다.
+    pendingSource = true;
     rate = 0.035;
     if (houseCount >= 2 && regulated) rate = 0.12;
-  } else { rate = 0.028; } // 상속
+  } else { pendingSource = true; rate = 0.028; } // 상속 — 위와 같이 상수표 밖이다
   const acqTax = Math.round(price * rate);
   const eduTax = Math.round(acqTax * 0.1); // 지방교육세
   const farmTax = type === 'purchase' && price > 600000000 ? Math.round(acqTax * 0.02) : 0; // 농특세
@@ -462,10 +486,17 @@ export function acquisitionTax(v: V): CalcResult {
     main: { label: '취득세 합계', value: fmt(total) },
     details: [
       { label: '취득세', value: fmt(acqTax) },
-      { label: '적용 세율', value: pct(rate) },
+      { label: '적용 세율', value: `${(rate * 100).toFixed(rate * 100 % 1 === 0 ? 0 : 3)}%` },
+      ...notes,
       { label: '지방교육세', value: fmt(eduTax) },
       { label: '농어촌특별세', value: fmt(farmTax) },
       ...(discount > 0 ? [{ label: '생애최초 감면', value: `-${fmt(discount)}` }] : []),
+      // ⛔ 상수표 밖의 값을 썼으면 «그렇게 말한다». 조용히 쓰지 않는다.
+      ...(pendingSource
+        ? [{ label: '⚠️ 출처', value: '증여·상속 세율은 아직 상수표에 등재되지 않았다 — 확인 후 쓸 것' }]
+        : []),
+      // 부가세목·감면도 아직 상수표 밖이다. 같은 규율로 밝힌다.
+      { label: '참고', value: '지방교육세·농어촌특별세·생애최초 감면은 상수표 등재 전이며, 실제 고지는 지자체 산정에 따른다' },
     ],
   };
 }

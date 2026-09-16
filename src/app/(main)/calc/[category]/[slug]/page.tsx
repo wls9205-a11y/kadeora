@@ -52,11 +52,11 @@ async function getLiveData(slug: string): Promise<Record<string, string> | undef
 
     // LTV·DSR — 규제 상수의 정본은 policy_constants 다. 코드에 퍼센트를 적지 않는다.
     //   대출 규제는 대책 발표마다 바뀌므로, 표가 갱신되면 계산기도 «자동으로» 따라간다.
-    if (slug === 'ltv-calc' || slug === 'dsr-calc') {
+    if (slug === 'ltv-calc' || slug === 'dsr-calc' || slug === 'acquisition-tax') {
       const { data } = await (sb as any)
         .from('policy_constants')
         .select('key, item, numbers, source_title, source_date, status')
-        .or('key.like.ltv_%,key.like.dsr_%,key.like.stress_dsr_%');
+        .or('key.like.ltv_%,key.like.dsr_%,key.like.stress_dsr_%,key.like.acq_tax_%');
       if (!Array.isArray(data) || !data.length) return undefined;
       const pct: Record<string, number> = {};
       const meta: Record<string, unknown> = {};

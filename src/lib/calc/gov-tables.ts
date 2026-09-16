@@ -235,6 +235,47 @@ export function ltvPolicyKey(region: LtvRegion, owner: LtvOwner): string {
   return 'ltv_nonregulated_noncapital_owner';
 }
 
+/**
+ * 주택 유상취득 취득세 — 조건 → policy_constants.key.
+ *
+ * ⚠️ 중과 판정은 «조정대상지역 여부 × 주택 수» 로 갈리고, 둘의 조합이 비대칭이다.
+ *    옛 코드는 이걸 `houseCount>=3 ? (regulated?0.12:0.04) : ...` 로 뭉갰고 세 군데가 틀렸다:
+ *      · 비조정 2주택 → 1% 고정이었다. 실제는 «표준세율»(가액 구간 1~3%)이다
+ *      · 비조정 3주택 → 4% 였다. 실제 8%
+ *      · 비조정 4주택 이상 → 4% 였다. 실제 12%
+ *    (4% 는 주택이 «아닌» 부동산의 표준세율이다. 주택에 쓰면 안 되는 숫자였다.)
+ * ⚠️ 조정 2주택 8% 에는 「일시적 2주택 제외」가 붙는다 — 화면이 그 단서를 말해야 한다.
+ */
+export function acqTaxPolicyKey(
+  houseCount: number,
+  regulated: boolean,
+  price: number,
+): string {
+  const heavy12 = regulated ? houseCount >= 3 : houseCount >= 4;
+  if (heavy12) return 'acq_tax_heavy_12';
+  const heavy8 = regulated ? houseCount === 2 : houseCount === 3;
+  if (heavy8) return 'acq_tax_heavy_8';
+  // 중과 비대상 — 취득당시가액 구간
+  if (price <= 600_000_000) return 'acq_tax_1house_6eok_under';
+  if (price <= 900_000_000) return 'acq_tax_1house_6_9eok';
+  return 'acq_tax_1house_9eok_over';
+}
+
+/**
+ * 6억 초과 9억 이하 «사잇세율» — (취득가액 × 2 / 3억 − 3) × 1/100.
+ *
+ * ⛔ 이 구간을 «2% 고정» 으로 두면 안 된다. tax-tables 의 ACQUISITION_TAX_RATES 가 그렇게
+ *    적혀 있었고, 함수는 선형보간을 하고 있어 «표와 함수가 서로 다른 답» 을 냈다.
+ *    policy_constants 원문이 산식이므로 산식이 이긴다.
+ * 경계 확인: 6억 → 1%, 9억 → 3%.
+ */
+export function acqTaxMidRatePct(price: number): number {
+  const 억 = 100_000_000;
+  const raw = (price * 2) / (3 * 억) - 3;
+  // 지방세법은 소수점 다섯째 자리에서 반올림한 «백분율» 을 쓴다.
+  return Math.round(raw * 100000) / 100000;
+}
+
 /** DSR 한도 키 — 업권으로 갈린다. */
 export function dsrPolicyKey(lender: 'bank' | 'nonbank'): string {
   return lender === 'bank' ? 'dsr_bank' : 'dsr_nonbank';
