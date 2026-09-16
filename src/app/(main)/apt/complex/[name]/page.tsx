@@ -140,9 +140,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     (meta.other as any)['ICBM'] = `${p.latitude}, ${p.longitude}`;
   }
 
-  // s235 W9b: 저품질 단지(quality_score < 30) 자동 noindex
-  const qualityScore = (p as any)?.data_quality_score ?? (p as any)?.quality_score ?? null;
-  if (qualityScore !== null && qualityScore < 30) {
+  // K-5 — 저품질 단지 noindex. «실존하는» 신호로 판정한다 (2026-09-16).
+  //
+  // ⛔ 예전 게이트는 `data_quality_score ?? quality_score` 를 읽었는데, 그 두 열은
+  //    apt_complex_profiles 에 «존재하지 않는다». 항상 null 이라 조건이 한 번도 참이 된 적이
+  //    없고, 39,673 페이지가 전부 색인 요청을 내고 있었다
+  //    (반복 결함형 ②「컬럼은 있는데 읽는 자가 없다」의 거울상 — 읽는 자는 있는데 컬럼이 없었다).
+  //
+  // 실측(30일)으로 고른 대체 신호: 서술(narrative_text) 유무.
+  //   서술 없음 12,698 페이지 → 네이버 유입 «6회» (서로 다른 6페이지에 1회씩·집중 없음)
+  //   서술 있음 26,975 페이지 → 네이버 유입 66회
+  //   잘라도 잃는 것이 6 이고, 색인 시도 대상이 32% 줄어 크롤 예산이 돌아온다.
+  // ⚠️ 사이트맵 필터와 «같은 조건» 이다(sitemap/[id]/route.ts). 갈리면 클로킹이다.
+  if (!(p as any)?.narrative_text) {
     return { ...meta, robots: { index: false, follow: true } };
   }
 

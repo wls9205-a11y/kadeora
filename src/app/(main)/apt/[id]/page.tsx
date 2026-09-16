@@ -73,6 +73,7 @@ import JsonLd from '@/components/seo/JsonLd';
 import { buildSiteOverview } from '@/lib/apt/site-overview';
 import { E10_TARGET_SLUGS } from '@/lib/apt/e10-targets';
 import { buildSiteFaqs } from '@/lib/apt/site-faqs';
+import { isSiteIndexable } from '@/lib/apt/site-indexable';
 const RegulationBadges = dynamic(() => import('@/components/RegulationBadges'));
 const CostSimulator = dynamic(() => import('@/components/CostSimulator'));
 // C3: ContentLock 제거
@@ -704,7 +705,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         })()),
       },
     };
-    if (((d.site as any)?.data_quality_score ?? 0) < 30) {
+    // K-5 — 색인 게이트를 «본문과 같은 열·같은 값» 으로 맞춘다.
+    //   예전에는 여기만 data_quality_score < 30 을 봤다. 다른 «열» 이라 268 현장이
+    //   「사이트맵엔 실리는데 메타로는 거부되는」 자기모순이었고, 그중 67 곳은
+    //   네이버 실유입처였다(30일 291회). 색인 게이트가 유입을 죽이고 있었다.
+    if (!isSiteIndexable((d.site as any)?.content_score)) {
       return { ...metadata, robots: { index: false, follow: true } };
     }
     return metadata;
@@ -930,7 +935,8 @@ export default async function AptUnifiedPage({ params, searchParams }: Props) {
   ].filter(f => f.a.trim().length > 10);
   const redevStage = (site?.source_ids as Record<string, string>)?.redev_stage || redev?.stage;
 
-  const noindex = site ? (site.content_score ?? 0) < 40 : false;
+  // K-5 — 사이트맵·메타와 «같은 자» 를 쓴다(site-indexable.ts). 숫자를 여기 다시 적지 않는다.
+  const noindex = site ? !isSiteIndexable(site.content_score) : false;
 
   const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const subSt = sub ? (!sub.rcept_bgnde ? 'upcoming' : today >= sub.rcept_bgnde && today <= sub.rcept_endde ? 'open' : today < sub.rcept_bgnde ? 'upcoming' : 'closed') : null;

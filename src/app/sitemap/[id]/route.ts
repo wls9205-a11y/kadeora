@@ -4,6 +4,7 @@ import { SITE_URL as BASE } from '@/lib/constants';
 import { fetchBatched, POSTGREST_BATCH } from '@/lib/db/fetchBatched';
 // r4-P5-4: 신규 경로는 sitemap.xml 인덱스를 건드리지 않도록 id=0 에 싣는다.
 import { fetchIndexableStagePairs } from '@/lib/apt/stage';
+import { SITE_INDEX_MIN_SCORE } from '@/lib/apt/site-indexable';
 import { listArchiveMonths } from '@/lib/blog/archive';
 
 export const revalidate = 3600;
@@ -203,7 +204,9 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
       const data = await fetchBatched<any>((off, lim) =>
         sb.from('apt_sites')
           .select('slug, updated_at, site_type, interest_count')
-          .eq('is_active', true).gte('content_score', 25)
+          // K-5 — 본문·메타 noindex 와 «같은 값» 이다(site-indexable.ts). 숫자를 여기 적지 않는다.
+          //   예전엔 25 라서, 25~39 구간이 「사이트맵엔 실리는데 본문은 noindex」였다.
+          .eq('is_active', true).gte('content_score', SITE_INDEX_MIN_SCORE)
           .order('interest_count', { ascending: false })
           .range(off, off + lim - 1),
         10000,
@@ -295,6 +298,14 @@ export async function GET(_req: Request, props: { params: Promise<{ id: string }
         (sb as any).from('apt_complex_profiles')
           .select('apt_name, region_nm, sigungu, updated_at, sale_count_1y, rent_count_1y')
           .not('age_group', 'is', null)
+          // K-5 — 서술 없는 단지백과는 색인 대상이 아니다.
+          //   `age_group IS NOT NULL` 은 39,673 «전부» 를 통과시켜 필터 구실을 못 했다.
+          //   품질 게이트로 쓰이던 data_quality_score/quality_score 는 «이 표에 없는 열» 이라
+          //   한 번도 걸린 적이 없다(complex/[name]/page.tsx 의 사문 게이트). 실존 신호로 바꾼다.
+          //   실측(30일): 서술 없는 12,698 페이지의 네이버 유입은 «6회» 이고 서로 다른 6페이지에
+          //   1회씩 흩어져 있었다 — 집중이 없어 예외 화이트리스트를 두지 않는다.
+          //   ⚠️ narrative_text IS NOT NULL 은 length>=50 과 «정확히 동치» 다(짧은 비-NULL 0건 실측).
+          .not('narrative_text', 'is', null)
           .order('sale_count_1y', { ascending: false })
           .range(baseOffset + off, baseOffset + off + lim - 1),
         COMPLEX_PER_SITEMAP,
