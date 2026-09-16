@@ -887,6 +887,30 @@ def cmd_apply(args):
     if live: print("전 그룹 OFF 상태입니다. 검수 통과 후 켜세요. 다음: sa.py verify")
 
 
+def _pairs_from_csv(path):
+    """verify 가 떨군 relink 맵을 그대로 먹는다 — 열 이름은 verify 의 writer 와 «같은 것» 이다
+    (old · new · keywords · new_eligible, utf-8-sig).
+
+    왜 필요했나: 예행 입력을 만들려고 tail/awk 파이프를 쓰라고 안내했는데 Node 터미널이
+    PowerShell 이라 그 한 줄이 «안 돈다». 도구가 떨군 파일을 도구가 먹게 하는 것이 맞다.
+
+    ⛔ new_eligible=N 인 쌍은 «건너뛴다». 그대로 넣으면 cmd_relink 의 사전 검사가
+       회전 전체를 죽인다 — 한 쌍 때문에 나머지 160쌍이 날아가는 형태다(반복 결함형 ⑤).
+       건너뛴 쌍은 «조용히» 버리지 않고 사유와 함께 찍는다.
+    """
+    rows, skipped = [], []
+    with open(path, encoding="utf-8-sig", newline="") as f:
+        for r in csv.DictReader(f):
+            old = (r.get("old") or "").strip()
+            new = (r.get("new") or "").strip()
+            if not old or not new:
+                skipped.append((old, new, "new 가 비어 있다")); continue
+            if (r.get("new_eligible") or "").strip().upper() == "N":
+                skipped.append((old, new, "new_eligible=N — 광고 적격 밖")); continue
+            rows.append((old, new))
+    return rows, skipped
+
+
 def cmd_relink(args):
     """착지 URL 교체 — 키워드는 그대로 두고 «어디로 보내는가» 만 바꾼다 (CV-N N-0 · 2026-09-08).
 
@@ -902,11 +926,19 @@ def cmd_relink(args):
     """
     if not API_KEY: sys.exit("NAVER_SA_* 환경변수가 필요합니다.")
     pairs = []
+    if getattr(args, "from_csv", None):
+        got, skipped = _pairs_from_csv(args.from_csv)
+        print("CSV %s → %d쌍" % (args.from_csv, len(got)))
+        for old, new, why in skipped:
+            print("  [건너뜀] %-28s → %-28s (%s)" % (old[:28], new[:28], why))
+        pairs.extend(got)
     for m in (args.map or []):
         if "=" not in m: sys.exit("--map 은 «구슬러그=새슬러그» 형태입니다: %s" % m)
         a, b = m.split("=", 1)
         pairs.append((a.strip(), b.strip()))
-    if not pairs: sys.exit("--map 을 하나 이상 주십시오.")
+    # 같은 쌍이 두 번 들어와도 한 번만 만진다(CSV + --map 을 섞어 줄 수 있다).
+    pairs = list(OrderedDict.fromkeys(pairs))
+    if not pairs: sys.exit("--map 또는 --from-csv 로 쌍을 하나 이상 주십시오.")
 
     valid = {x["slug"] for x in fetch_sites()}
     for _, new in pairs:
@@ -1707,6 +1739,9 @@ def main():
     s.add_parser("verify").set_defaults(fn=cmd_verify)
     rl = common(s.add_parser("relink", help="착지 URL 교체 — 열거한 «구슬러그=새슬러그» 쌍만 만진다"))
     rl.add_argument("--map", action="append", help="구슬러그=새슬러그 (여러 번 지정 가능)")
+    rl.add_argument("--from-csv", dest="from_csv",
+                    help="verify 가 떨군 relink 맵 CSV 를 그대로 먹는다 "
+                         "(예: out\\relink_map_20260916.csv). --map 과 섞어 써도 된다")
     rl.add_argument("--live", action="store_true")
     rl.set_defaults(fn=cmd_relink)
     r = s.add_parser("rollback"); r.add_argument("--live", action="store_true"); r.set_defaults(fn=cmd_rollback)
