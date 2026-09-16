@@ -45,7 +45,9 @@ async function refreshAccessToken(clientId: string, clientSecret: string, refres
 }
 
 async function handler(req: NextRequest) {
-  if (!verifyCronAuth(req as any)) return new NextResponse('ok', { status: 200 });
+  // ⛔ 사유 없는 200 을 주지 않는다 (2026-09-16). 예전에는 본문이 «'ok'» 한 글자였다 —
+  //    나머지 분기가 전부 skipped 로 사유를 명시하는데 여기만 계보 밖이었다.
+  if (!verifyCronAuth(req as any)) return NextResponse.json({ ok: true, skipped: 'unauthorized' });
 
   const sb = getSupabaseAdmin();
   // 세션 153 컬럼명 + 154: access_token + expires + client creds 전부 조회
@@ -254,6 +256,20 @@ async function handler(req: NextRequest) {
       property: usedProperty,
       // 0행일 때만 채워진다. 어떤 속성이 열려 있는지 보이면 원인이 바로 잡힌다.
       ...(availableProperties ? { available_properties: availableProperties } : {}),
+      // ⚠️ 우리가 «보낸» 문자열과 구글이 «갖고 있는» 문자열은 다를 수 있다.
+      //    실측: 우리는 'https://kadeora.app'(슬래시 없음), 목록의 실물은 'https://kadeora.app/'.
+      //    구글이 정규화해 받아 주므로 지금은 무해하지만, 둘이 다르다는 사실을 남겨 둔다 —
+      //    다음 사람이 「속성이 틀렸나」로 시간을 쓰지 않게.
+      ...(availableProperties
+        ? {
+            property_exact:
+              availableProperties.find(
+                (p) =>
+                  p.replace(/^sc-domain:/, '').replace(/^https?:\/\//, '').replace(/\/$/, '') ===
+                  usedProperty.replace(/^sc-domain:/, '').replace(/^https?:\/\//, '').replace(/\/$/, ''),
+              ) ?? null,
+          }
+        : {}),
       rows: rows.length,
       // 재적재 전에 비운 행 수. rows 보다 «크면» 그만큼 과거의 중복이 걷힌 것이다.
       cleared,
@@ -265,5 +281,50 @@ async function handler(req: NextRequest) {
   }
 }
 
-export const GET = handler;
-export const POST = handler;
+/**
+ * 라우트 «자신» 이 산출을 남긴다 (2026-09-16).
+ *
+ * 왜: 「크론의 성공과 산출은 다른 사실」인데 cron_logs 에는 디스패처 행(pg_cron_gsc-sync)만
+ * 있었다. 그 행은 «발사됐다» 만 말하고 rows·inserted 를 말하지 않는다.
+ * 2026-09-16 부검에서 답을 찾은 건 순전히 pg_net 이 응답을 6시간 보관한 «운» 덕이었다 —
+ * 창이 지났으면 「왜 0행인가」를 영영 몰랐다. 운에 기대지 않게 라우트가 직접 적는다.
+ *
+ * ⚠️ 반환 지점이 여덟 곳이라 각각에 손대지 않고 «한 자리» 에서 감싼다.
+ *    분기가 늘어도 자동으로 기록된다 — 빠뜨릴 자리를 만들지 않는 것이 요점이다.
+ * ⛔ 로깅 실패로 응답을 깨지 않는다. 계기가 본체를 죽이면 안 된다.
+ * ⚠️ available_properties 는 117개까지 나온다. 통째로 넣지 않고 «개수 + 우리 호스트 일치분» 만
+ *    남긴다 — 로그가 데이터 덤프가 되면 아무도 안 읽는다.
+ */
+function withRunLog(fn: (req: NextRequest) => Promise<NextResponse>) {
+  return async (req: NextRequest) => {
+    const t0 = Date.now();
+    const res = await fn(req);
+    try {
+      const body = await res.clone().json();
+      const props: unknown = body?.available_properties;
+      const propList = Array.isArray(props) ? (props as string[]) : null;
+      await (getSupabaseAdmin() as any).from('cron_logs').insert({
+        cron_name: 'gsc-sync',
+        status: body?.skipped ? 'skipped' : 'success',
+        started_at: new Date(t0).toISOString(),
+        finished_at: new Date().toISOString(),
+        duration_ms: Date.now() - t0,
+        records_processed: typeof body?.rows === 'number' ? body.rows : null,
+        records_created: typeof body?.inserted === 'number' ? body.inserted : null,
+        records_failed: typeof body?.failed_batches === 'number' ? body.failed_batches : null,
+        error_message: body?.skipped ?? body?.err ?? null,
+        metadata: {
+          ...body,
+          available_properties: undefined,
+          properties_count: propList ? propList.length : undefined,
+          // 우리 호스트로 열려 있는 속성의 «실제 철자». 슬래시 유무까지 그대로 남긴다.
+          properties_ours: propList ? propList.filter((p) => p.includes('kadeora')) : undefined,
+        },
+      });
+    } catch { /* 계기가 본체를 죽이면 안 된다 */ }
+    return res;
+  };
+}
+
+export const GET = withRunLog(handler);
+export const POST = withRunLog(handler);
