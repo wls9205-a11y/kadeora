@@ -24,13 +24,37 @@
  *    상속·증여·소유권 보존등기, 토지·주택 외 건물은 «다른 표» 를 쓴다.
  *    계산기가 지역·시가표준액만 묻고 있으므로 그 전제를 화면에도 적는다.
  */
+/**
+ * ⚠️ 검증 수준을 «불리언으로 적지 않는다» (2026-09-16 정정).
+ *
+ * 처음에 `crossChecked: boolean` 을 뒀는데, 그 한 칸은 「무엇이 어디까지 확인됐나」를
+ * 담지 못한다. 실제로 이 표는 세 갈래의 «서로 다른» 확인을 받았고, 그중 하나는
+ * 아직 «안 받았다»:
+ *   · 전 6구간 수치 — 2차 출처(KB)에서 옮겨 적었다. 법령 별표 «원문» 은 아니다.
+ *   · 4번째 구간(1.6억~2.6억 특별시 23/1,000) — 정부 생활법령정보로 독립 확인
+ *   · 5번째 구간(2.6억~6억 특별시 26/1,000) — KB 로 독립 확인
+ *   · ⛔ 법령 별표 «원문» 전수 대조 — «아직 아무도 하지 않았다».
+ *        law.go.kr 본문에는 구간 수치가 없고 「별지 부표」에 있는데, 그 부표를 아직 못 받았다.
+ * 「2차 출처 삼각 정합」과 「원문 전수 대조」는 다른 말이다. 섞어 적으면 나중에
+ * 무엇을 더 해야 하는지 아무도 모른다.
+ */
 export const HOUSING_BOND_SOURCE = {
-  law: '주택도시기금법 시행령 [별표] 제1종국민주택채권 매입대상자 및 매입기준(제8조제2항 관련)',
+  law: '주택도시기금법 시행령 [별표] 제1종국민주택채권 매입대상자 및 매입기준(제8조제2항 관련) 별지 부표',
   url: 'https://www.law.go.kr/법령/주택도시기금법시행령',
   /** 값을 옮겨 적은 날. 「거짓 신선도」를 막으려고 렌더 시각이 아니라 이 날짜를 쓴다. */
   transcribedAt: '2026-09-16',
-  /** ⚠️ 원문 별표 직접 대조는 세션 A 몫이다. 지금은 2차 출처 2곳 교차까지만 됐다. */
-  crossChecked: false as boolean,
+  verification: {
+    /** 'secondary' = 2차 출처 교차까지. 'primary' = 법령 별표 원문 전수 대조 완료. */
+    level: 'secondary' as 'secondary' | 'primary',
+    /** 독립 확인된 구간(1-based). 나머지는 단일 2차 출처 전사다. */
+    bracketsIndependentlyConfirmed: [4, 5] as readonly number[],
+    sources: [
+      'https://kbthink.com/house/housing-bond.html',
+      'https://easylaw.go.kr/CSP/CnpClsMain.laf?csmSeq=649',
+    ] as readonly string[],
+    /** primary 로 올리는 조건. 이 줄이 남아 있는 한 아직 안 된 것이다. */
+    pendingForPrimary: '별지 부표 원문 6구간 전수 대조 1회',
+  },
 } as const;
 
 export interface BondRateBracket {
@@ -78,6 +102,88 @@ export function bondRatePerMille(price: number, metro: boolean): number | null {
  */
 export const BOND_DISCOUNT_LOOKUP_URL =
   'https://nhuf.molit.go.kr/FP/FP07/FP0705/FP070509.jsp';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1-2. 주택 중개보수(중개수수료) 상한요율 — 2021년 개정판
+//
+// ⛔ 왜 여기로 옮겼나: tax-tables.ts 의 BROKERAGE_RATES 가 «2021년 개정 이전» 값이었다.
+//    registry 는 「2021년 개정 요율 적용」이라 적어 두고 있었으므로 표기와 실물이 갈렸다.
+//    실측 결함 넷:
+//      ① 매매 3번째 구간 상한이 6억(법정 9억) — 6~9억이 0.4% 대신 0.5% 로 계산됐다
+//      ② 매매 최고 0.9% — 개정 «전» 값이다. 12억·15억 구간이 통째로 없다.
+//         10억 매매에서 0.9%(900만) vs 법정 0.5%(500만) — 1.8배 과대.
+//      ③ 임대차 구간 «순서 역전» — 6억 칸이 3억 칸보다 앞에 있어 3억 칸이 도달 불가(사문)
+//      ④ 임대차 최고 0.8% — 법정 0.6%. 6억 초과 전세에서 2배 과대.
+//    ⑤ 게다가 조회가 `base <= max` 라 「미만」이어야 할 경계가 «이하» 로 잡혔다
+//       (정확히 2억인 매매가 0.4% 가 아니라 0.5% 로 갔다).
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const BROKERAGE_SOURCE = {
+  law: '공인중개사법 시행규칙 제20조 [별표 1] 주택 중개보수 상한요율(2021년 개정)',
+  url: 'https://www.easylaw.go.kr/CSP/CnpClsMain.laf?csmSeq=649&ccfNo=2&cciNo=2&cnpClsNo=2',
+  transcribedAt: '2026-09-16',
+  verification: {
+    level: 'secondary' as 'secondary' | 'primary',
+    sources: ['https://www.easylaw.go.kr/CSP/CnpClsMain.laf?csmSeq=649&ccfNo=2&cciNo=2&cnpClsNo=2'] as readonly string[],
+    pendingForPrimary: '시행규칙 별표1 원문 대조 1회',
+  },
+  /**
+   * ⚠️ 이 값은 «상한» 이다. 실제 보수는 시·도 조례가 정한 한도 안에서 의뢰인과 협의로 정한다.
+   *    화면에 반드시 그렇게 적는다 — 「이 금액을 내야 한다」가 아니다.
+   */
+  note: '상한요율이며 실제 보수는 조례 한도 내 협의로 정한다',
+} as const;
+
+export interface BrokerageBracket {
+  /** 거래금액 하한 (원, 이상) */
+  min: number;
+  /** 거래금액 상한 (원, «미만»). null = 상한 없음 */
+  max: number | null;
+  /** 상한요율 */
+  rate: number;
+  /** 한도액(원). null = 한도 없음 */
+  maxFee: number | null;
+}
+
+export const BROKERAGE_RATES_2021: {
+  trade: readonly BrokerageBracket[];
+  lease: readonly BrokerageBracket[];
+} = {
+  // 매매·교환
+  trade: [
+    { min: 0, max: 50_000_000, rate: 0.006, maxFee: 250_000 },
+    { min: 50_000_000, max: 200_000_000, rate: 0.005, maxFee: 800_000 },
+    { min: 200_000_000, max: 900_000_000, rate: 0.004, maxFee: null },
+    { min: 900_000_000, max: 1_200_000_000, rate: 0.005, maxFee: null },
+    { min: 1_200_000_000, max: 1_500_000_000, rate: 0.006, maxFee: null },
+    { min: 1_500_000_000, max: null, rate: 0.007, maxFee: null },
+  ],
+  // 임대차 등
+  lease: [
+    { min: 0, max: 50_000_000, rate: 0.005, maxFee: 200_000 },
+    { min: 50_000_000, max: 100_000_000, rate: 0.004, maxFee: 300_000 },
+    { min: 100_000_000, max: 600_000_000, rate: 0.003, maxFee: null },
+    { min: 600_000_000, max: 1_200_000_000, rate: 0.004, maxFee: null },
+    { min: 1_200_000_000, max: 1_500_000_000, rate: 0.005, maxFee: null },
+    { min: 1_500_000_000, max: null, rate: 0.006, maxFee: null },
+  ],
+};
+
+/**
+ * 거래금액 → 구간. 경계는 «이상/미만» 이다 — 정확히 2억인 매매는 0.4% 구간이다.
+ * ⛔ 순서에 기대지 않고 min·max 를 «둘 다» 본다. 표가 어긋나게 정렬돼도 사문 구간이 생기지 않는다
+ *    (앞 판이 정확히 그 병으로 임대차 3억 칸을 잃었다).
+ */
+export function brokerageBracket(
+  kind: 'trade' | 'lease',
+  amount: number,
+): BrokerageBracket | null {
+  if (!Number.isFinite(amount) || amount < 0) return null;
+  for (const b of BROKERAGE_RATES_2021[kind]) {
+    if (amount >= b.min && (b.max === null || amount < b.max)) return b;
+  }
+  return null;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. 주택연금 월지급금 — 일반주택 · 종신지급방식 · 정액형

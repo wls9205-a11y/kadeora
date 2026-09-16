@@ -2,12 +2,12 @@
 import {
   INCOME_TAX_BRACKETS, ACQUISITION_TAX_RATES, CAPITAL_GAINS_TAX,
   GIFT_TAX_BRACKETS, GIFT_EXEMPTIONS, SOCIAL_INSURANCE_RATES,
-  BROKERAGE_RATES, JEONSE_CONVERSION_RATE, PROPERTY_TAX_RATES,
+  JEONSE_CONVERSION_RATE, PROPERTY_TAX_RATES,
   calcProgressiveTax, formatKRW,
 } from './tax-tables';
 import {
   bondRatePerMille, pensionMonthly, HOUSING_BOND_SOURCE, HOUSING_PENSION_SOURCE,
-  PENSION_MIN_AGE, PENSION_MAX_PRICE,
+  PENSION_MIN_AGE, PENSION_MAX_PRICE, brokerageBracket, BROKERAGE_SOURCE,
 } from './gov-tables';
 
 type V = Record<string, number | string>;
@@ -32,16 +32,28 @@ export function brokerageFee(v: V): CalcResult {
   let base = price;
   if (type === 'monthly') base = price + (monthlyRent * 100); // 보증금+월세×100
   if (type === 'monthly' && base < price) base = price;
-  const table = type === 'trade' ? BROKERAGE_RATES.trade : BROKERAGE_RATES.lease;
-  let rate = 0, maxFee: number | null = null;
-  for (const r of table) { if (base <= r.max) { rate = r.rate; maxFee = r.maxFee; break; } }
+  // K-3 — 2021년 개정 요율표로 교체. 옛 상수는 개정 «전» 값이었고, 구간 순서까지 어긋나
+  //        임대차 3억 칸이 사문이었다. 경계는 «이상/미만» 이다(옛 코드는 `<=` 로 이하였다).
+  const bracket = brokerageBracket(type === 'trade' ? 'trade' : 'lease', base);
+  if (!bracket) {
+    return {
+      main: { label: '요율 미확인', value: '—', color: 'var(--text-tertiary)' },
+      details: [{ label: '사유', value: '거래금액이 요율표 범위를 벗어났다' }],
+    };
+  }
+  const rate = bracket.rate;
+  const maxFee = bracket.maxFee;
   let fee = Math.round(base * rate);
   if (maxFee && fee > maxFee) fee = maxFee;
   return {
-    main: { label: '중개수수료', value: fmt(fee) },
+    main: { label: '중개수수료 상한', value: fmt(fee) },
     details: [
       { label: '거래금액', value: fmt(base) },
-      { label: '적용 요율', value: pct(rate) },
+      { label: '상한요율', value: pct(rate) },
+      ...(maxFee ? [{ label: '한도액', value: fmt(maxFee) }] : []),
+      // ⚠️ 「내야 하는 금액」이 아니다. 상한 안에서 «협의» 로 정한다 — 화면이 그렇게 말해야 한다.
+      { label: '성격', value: BROKERAGE_SOURCE.note },
+      { label: '기준', value: `${BROKERAGE_SOURCE.law} · ${BROKERAGE_SOURCE.transcribedAt} 기준` },
       { label: '부가세 (법인 시)', value: fmt(Math.round(fee * 0.1)) },
       { label: '수수료+부가세', value: fmt(Math.round(fee * 1.1)) },
     ],

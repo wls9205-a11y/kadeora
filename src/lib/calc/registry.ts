@@ -108,17 +108,19 @@ export const CALC_REGISTRY: CalcMeta[] = [
   {
     slug: 'brokerage-fee', emoji: '🤝', category: 'real-estate', categoryLabel: '부동산',
     title: '2026 부동산 중개수수료 계산기', titleShort: '중개수수료 계산기',
-    description: '매매·전세·월세 거래금액별 부동산 중개수수료(복비)를 자동 계산합니다. 2021년 개정 요율 적용.',
-    keywords: ['중개수수료 계산기','부동산 복비','중개보수','매매 수수료','전세 수수료','월세 수수료'],
-    legalBasis: '공인중개사법 시행규칙 별표', version: '2026.04', lastUpdated: '2026-04-05',
-    pattern: 'simple', formula: 'brokerageFee', resultLabel: '중개수수료', resultUnit: '원',
+    seoTitle: '중개수수료 계산기 — 매매·전세 복비 상한 계산',
+    description: '매매·전세·월세 거래금액별 부동산 중개보수(복비) 상한을 2021년 개정 요율표로 계산합니다.',
+    keywords: ['중개수수료 계산기','부동산 복비','중개보수','중개보수 요율','매매 수수료','전세 수수료','월세 수수료'],
+    legalBasis: '공인중개사법 시행규칙 제20조 별표1(2021년 개정)', version: '2026.09', lastUpdated: '2026-09-16',
+    pattern: 'tax-bracket', formula: 'brokerageFee', resultLabel: '중개수수료 상한', resultUnit: '원',
     inputs: [
       { id: 'dealType', label: '거래 유형', type: 'radio', default: 'trade', options: [{ value: 'trade', label: '매매' }, { value: 'lease', label: '전세' }, { value: 'monthly', label: '월세' }] },
       { id: 'price', label: '거래금액', type: 'currency', default: 500000000, unit: '원' },
       { id: 'monthlyRent', label: '월세', type: 'currency', default: 500000, unit: '원', condition: 'dealType=monthly' },
     ],
     faqs: [
-      { q: '중개수수료 상한은?', a: '거래금액에 따라 0.4~0.9%. 2021년 개정으로 상한 인하.' },
+      { q: '중개수수료 상한은?', a: '2021년 개정 기준으로 매매는 0.4~0.7%, 임대차는 0.3~0.6%입니다. 거래금액 구간별로 갈리며, 5천만원 미만 등 소액 구간에는 한도액이 따로 있습니다.' },
+      { q: '이 금액을 그대로 내야 하나요?', a: '아닙니다. 요율표의 값은 «상한»이고, 실제 보수는 시·도 조례가 정한 한도 안에서 의뢰인과 개업공인중개사가 협의해 정합니다.' },
       { q: '부가세 별도?', a: '개인 중개사는 부가세 면세, 법인 중개사는 10% 부가세 별도.' },
     ],
     seoContent: '<h2>2026 부동산 중개수수료 계산기 완벽 가이드</h2><p>매매·전세·월세 거래금액별 부동산 중개수수료(복비)를 자동 계산합니다. 2021년 개정 요율 적용. 카더라 중개수수료 계산기는 2026년 최신 기준을 반영합니다.</p><p>본 계산기는 <strong>공인중개사법 시행규칙 별표</strong>를 기준으로 계산합니다. 규정은 매년 개정될 수 있으므로 전문가 확인을 권장합니다.</p><h2>부동산 거래 핵심 정보</h2><p>부동산 거래 시 중개수수료(0.4~0.9%), 등기비용, 취득세, 대출이자 등 다양한 비용이 발생합니다. 사전에 총 비용을 정확히 계산하면 예상치 못한 지출을 방지할 수 있습니다. 등기부등본·건축물대장·토지이용계획확인서는 반드시 확인하세요.</p><h2>이런 분들에게 추천</h2><p>주택 매매·전세·월세를 계획 중인 분, 부동산 투자 수익률을 분석하고 싶은 분, 대출 가능 금액을 확인하고 싶은 분에게 유용합니다.</p>', relatedCalcs: ['acquisition-tax', 'registration-cost', 'jeonse-wolse'],
@@ -522,6 +524,7 @@ export const CALC_REGISTRY: CalcMeta[] = [
   {
     slug: 'acquisition-tax', emoji: '🏠', category: 'property-tax', categoryLabel: '부동산 세금',
     title: '2026 취득세 계산기', titleShort: '취득세 계산기',
+    seoTitle: '취득세 계산기 — 주택 취득세·지방교육세 계산',
     description: '부동산 매매·증여·상속 시 취득세를 자동 계산. 다주택 중과세율, 생애최초 감면 반영.',
     keywords: ['취득세 계산기','부동산 취득세','취득세율','다주택 중과','생애최초 감면','2026 취득세'],
     legalBasis: '지방세법 제11조, 제13조', version: '2026.04', lastUpdated: '2026-04-05',

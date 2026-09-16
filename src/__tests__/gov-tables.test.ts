@@ -6,8 +6,8 @@
  *   ② 옛 값이 «얼마나 틀렸는가» (반증형) — 회귀로 되돌아가면 바로 잡히도록 숫자를 박아 둔다
  */
 import { describe, it, expect } from 'vitest';
-import { bondRatePerMille, pensionMonthly, PENSION_MIN_AGE } from '@/lib/calc/gov-tables';
-import { housingBond, housingPension } from '@/lib/calc/formulas';
+import { bondRatePerMille, pensionMonthly, PENSION_MIN_AGE, brokerageBracket } from '@/lib/calc/gov-tables';
+import { housingBond, housingPension, brokerageFee } from '@/lib/calc/formulas';
 
 const 억 = 100_000_000;
 
@@ -118,5 +118,65 @@ describe('주택연금 — 공사 예시표(2026-03-01 적용, 단위 천원)와
     const r = housingPension({ housePrice: 5 * 억, age: 70 });
     expect(r.details.some((d) => d.value.includes('2026-03-01'))).toBe(true);
     expect(r.details.some((d) => d.value.includes('종신지급'))).toBe(true);
+  });
+});
+
+describe('중개보수 — 2021년 개정 요율표 (K-3)', () => {
+  it('매매 구간이 법정과 일치한다', () => {
+    expect(brokerageBracket('trade', 30_000_000)?.rate).toBe(0.006);
+    expect(brokerageBracket('trade', 1 * 억)?.rate).toBe(0.005);
+    expect(brokerageBracket('trade', 5 * 억)?.rate).toBe(0.004);
+    expect(brokerageBracket('trade', 10 * 억)?.rate).toBe(0.005);
+    expect(brokerageBracket('trade', 13 * 억)?.rate).toBe(0.006);
+    expect(brokerageBracket('trade', 20 * 억)?.rate).toBe(0.007);
+  });
+
+  it('임대차 구간이 법정과 일치한다', () => {
+    expect(brokerageBracket('lease', 30_000_000)?.rate).toBe(0.005);
+    expect(brokerageBracket('lease', 0.7 * 억)?.rate).toBe(0.004);
+    expect(brokerageBracket('lease', 3 * 억)?.rate).toBe(0.003);
+    expect(brokerageBracket('lease', 8 * 억)?.rate).toBe(0.004);
+    expect(brokerageBracket('lease', 13 * 억)?.rate).toBe(0.005);
+    expect(brokerageBracket('lease', 20 * 억)?.rate).toBe(0.006);
+  });
+
+  it('⛔ 경계는 «이상/미만» 이다 — 정확히 2억인 매매는 0.4% 구간', () => {
+    // 옛 코드는 `base <= max` 라 2억을 0.5% 로 보냈다.
+    expect(brokerageBracket('trade', 2 * 억)?.rate).toBe(0.004);
+    expect(brokerageBracket('trade', 2 * 억 - 1)?.rate).toBe(0.005);
+  });
+
+  it('⛔ 임대차 3억 구간이 «도달 가능» 하다 — 옛 표는 순서 역전으로 사문이었다', () => {
+    const b = brokerageBracket('lease', 3 * 억);
+    expect(b).not.toBeNull();
+    expect(b!.min).toBe(1 * 억);
+    expect(b!.max).toBe(6 * 억);
+  });
+
+  it('옛 값의 과대분을 고정한다 — 10억 매매 0.9% vs 법정 0.5%', () => {
+    const 옛값 = Math.round(10 * 억 * 0.009);
+    const 새값 = Math.round(10 * 억 * brokerageBracket('trade', 10 * 억)!.rate);
+    expect(옛값).toBe(9_000_000);
+    expect(새값).toBe(5_000_000);
+    expect(옛값 / 새값).toBeCloseTo(1.8, 1);
+  });
+
+  it('옛 값의 과대분을 고정한다 — 8억 전세 0.8% vs 법정 0.4%', () => {
+    const 새 = brokerageBracket('lease', 8 * 억)!.rate;
+    expect(0.008 / 새).toBe(2);
+  });
+
+  it('한도액이 걸리는 소액 구간은 한도로 잘린다', () => {
+    const r = brokerageFee({ price: 40_000_000, monthlyRent: 0, dealType: 'trade' });
+    // 4,000만 × 0.6% = 24만 → 한도 25만 미만이므로 그대로
+    expect(r.main.value).toContain('24만');
+    const r2 = brokerageFee({ price: 49_000_000, monthlyRent: 0, dealType: 'trade' });
+    expect(r2.details.some((d) => d.label === '한도액')).toBe(true);
+  });
+
+  it('「내야 하는 금액」이 아니라 «상한» 임을 화면이 말한다', () => {
+    const r = brokerageFee({ price: 5 * 억, monthlyRent: 0, dealType: 'trade' });
+    expect(r.main.label).toBe('중개수수료 상한');
+    expect(r.details.some((d) => d.value.includes('협의'))).toBe(true);
   });
 });
