@@ -100,11 +100,20 @@ export async function POST(req: NextRequest) {
   const lines = parseBody(raw).slice(0, MAX_LINES);
   const rows: Record<string, unknown>[] = [];
   const seen = new Set<string>();
+  let sawUa = 0;
 
   for (const e of lines) {
     const proxy = (e?.proxy ?? {}) as Record<string, any>;
-    const ua: string | null = proxy.userAgent ?? e?.userAgent ?? null;
-    const bot = classifyBot(Array.isArray(ua) ? ua[0] : ua);
+    // ⚠️ UA 가 어느 칸에 오는지는 Drain 소스(edge/serverless/external)마다 다르다.
+    //    한 곳만 보다가 «전 행이 human 으로 걸러져 0건» 이 되는 사고를 실제로 겪었다.
+    //    후보를 넓게 보되 «찾은 적이 있는지»(sawUa)를 세어, 0건일 때 원인을 가를 수 있게 한다.
+    const uaRaw =
+      proxy.userAgent ?? proxy.user_agent ?? proxy['user-agent'] ??
+      e?.userAgent ?? e?.user_agent ??
+      (e?.requestHeaders ?? e?.headers ?? {})['user-agent'] ?? null;
+    const ua: string | null = Array.isArray(uaRaw) ? uaRaw[0] : uaRaw;
+    if (ua) sawUa++;
+    const bot = classifyBot(ua);
     // ⛔ 사람은 버린다. 이 표는 봇 계기다.
     if (bot === 'human') continue;
 
@@ -123,9 +132,21 @@ export async function POST(req: NextRequest) {
       host: String(proxy.host ?? e?.host ?? '').slice(0, 128) || null,
       region: String(proxy.region ?? e?.region ?? '').slice(0, 32) || null,
       cache: String(proxy.cacheId ? 'HIT' : (proxy.cache ?? '')).slice(0, 16) || null,
-      ua: (Array.isArray(ua) ? ua[0] : ua)?.slice(0, 300) ?? null,
+      ua: ua?.slice(0, 300) ?? null,
       request_id: requestId,
     });
+  }
+
+  // 진단 1줄 — 「받았는데 왜 0건인가」를 가르는 자.
+  //   received>0 · sawUa=0 이면 «UA 칸을 못 찾은 것»(소스 설정 또는 필드명 문제)
+  //   sawUa>0  · stored=0 이면 «전부 사람»(정상. 봇이 아직 안 왔다)
+  // ⚠️ 표본 키만 찍는다. 본문·IP·UA 값은 로그에 남기지 않는다.
+  if (lines.length && !rows.length) {
+    const s = lines[0] ?? {};
+    console.log('[log-drain] received=%d sawUa=%d stored=0 topKeys=%s proxyKeys=%s',
+      lines.length, sawUa,
+      Object.keys(s).slice(0, 12).join('|'),
+      Object.keys((s as any).proxy ?? {}).slice(0, 12).join('|'));
   }
 
   if (rows.length) {
