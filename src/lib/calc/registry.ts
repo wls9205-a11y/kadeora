@@ -540,6 +540,9 @@ export const CALC_REGISTRY: CalcMeta[] = [
       { id: 'type', label: '취득 유형', type: 'radio', default: 'purchase', options: [{ value: 'purchase', label: '매매' }, { value: 'gift', label: '증여' }, { value: 'inherit', label: '상속' }] },
       { id: 'houseCount', label: '보유 주택수 (취득 후)', type: 'stepper', default: 1, min: 1, max: 5 },
       { id: 'regulated', label: '조정대상지역', type: 'radio', default: 'no', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }] },
+      // K-9 ⓒ ③ — 농어촌특별세는 «전용면적 85㎡ 초과» 에만 붙는다. 가액이 아니라 면적이 기준이라
+      //   묻지 않으면 합계가 갈린다(옛 코드는 「6억 초과」라는 엉뚱한 조건을 쓰고 있었다).
+      { id: 'area85', label: '전용면적', type: 'radio', default: 'under', options: [{ value: 'under', label: '85㎡ 이하' }, { value: 'over', label: '85㎡ 초과' }], hint: '농어촌특별세는 85㎡ 초과에만 부과된다.' },
       { id: 'firstTime', label: '생애최초 주택', type: 'radio', default: 'no', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }] },
     ],
     faqs: [

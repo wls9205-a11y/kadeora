@@ -8,7 +8,7 @@ import {
 import {
   bondRatePerMille, pensionMonthly, HOUSING_BOND_SOURCE, HOUSING_PENSION_SOURCE,
   PENSION_MIN_AGE, PENSION_MAX_PRICE, brokerageBracket, BROKERAGE_SOURCE,
-  parsePolicyPack, ltvPolicyKey, dsrPolicyKey, stressDsrKey, acqTaxPolicyKey, acqTaxMidRatePct,
+  parsePolicyPack, ltvPolicyKey, dsrPolicyKey, stressDsrKey, acqTaxPolicyKey, acqTaxMidRatePct, acqSurtaxPct,
   type LtvRegion, type LtvOwner,
 } from './gov-tables';
 
@@ -440,6 +440,8 @@ export function acquisitionTax(v: V): CalcResult {
   const pack = parsePolicyPack(v.__policy);
   const notes: { label: string; value: string }[] = [];
   let pendingSource = false;
+  let heavy: 'none' | 'heavy8' | 'heavy12' = 'none';
+  const over85 = v.area85 === 'over';
 
   if (type === 'purchase') {
     // K-9 ⓒ ③ — 이중 진실 해소: 세율의 정본은 policy_constants 다.
@@ -456,6 +458,7 @@ export function acquisitionTax(v: V): CalcResult {
     // 6~9억 구간만 «산식» 이다. 나머지는 표의 단일 세율.
     const pct = key === 'acq_tax_1house_6_9eok' ? acqTaxMidRatePct(price) : pctFromDb;
     rate = pct / 100;
+    heavy = key === 'acq_tax_heavy_12' ? 'heavy12' : key === 'acq_tax_heavy_8' ? 'heavy8' : 'none';
     const m = pack?.meta?.[key] ?? {};
     if (m.item) notes.push({ label: '적용 구간', value: m.item });
     if (key === 'acq_tax_1house_6_9eok') {
@@ -474,8 +477,22 @@ export function acquisitionTax(v: V): CalcResult {
     if (houseCount >= 2 && regulated) rate = 0.12;
   } else { pendingSource = true; rate = 0.028; } // 상속 — 위와 같이 상수표 밖이다
   const acqTax = Math.round(price * rate);
-  const eduTax = Math.round(acqTax * 0.1); // 지방교육세
-  const farmTax = type === 'purchase' && price > 600000000 ? Math.round(acqTax * 0.02) : 0; // 농특세
+  // ⛔ 본세만 고치고 부가세목을 두면 합계가 다시 틀린다 — 실제로 그랬다.
+  //    옛 코드: eduTax = 취득세액×10% 를 «중과에도» 적용 → 8% 중과에서 0.8%(실제 0.4%, 2배 과대).
+  //             farmTax = 취득세액×2% + 「6억 초과」 조건 → 8% 중과에서 0.16%(실제 0.6%, 1/4 과소).
+  //    두 오차가 상쇄돼 «합계만 비슷해 보이던» 구간이 있어 더 위험했다.
+  //    ⚠️ 농특세는 «전용면적 85㎡ 초과» 에만 붙는다. 가액이 아니라 면적이 기준이다.
+  let eduTax: number;
+  let farmTax: number;
+  if (type === 'purchase') {
+    const s = acqSurtaxPct(rate * 100, heavy, over85);
+    eduTax = Math.round(price * (s.eduPct / 100));
+    farmTax = Math.round(price * (s.farmPct / 100));
+  } else {
+    // 증여·상속은 부가세목까지 상수표 밖이다. 기존 계산을 유지하되 아래에서 그 사실을 밝힌다.
+    eduTax = Math.round(acqTax * 0.1);
+    farmTax = 0;
+  }
   let total = acqTax + eduTax + farmTax;
   let discount = 0;
   if (firstTime && houseCount === 1 && price <= 1200000000) {

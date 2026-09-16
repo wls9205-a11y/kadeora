@@ -272,8 +272,32 @@ export function acqTaxPolicyKey(
 export function acqTaxMidRatePct(price: number): number {
   const 억 = 100_000_000;
   const raw = (price * 2) / (3 * 억) - 3;
-  // 지방세법은 소수점 다섯째 자리에서 반올림한 «백분율» 을 쓴다.
-  return Math.round(raw * 100000) / 100000;
+  // ⚠️ 지방세법 §11①8 후단: 「소수점 다섯째 자리에서 반올림하여 «넷째 자리까지»」.
+  //    처음에 1e5 로 나눠 다섯째 자리까지 남겼는데(7억 → 1.66667) 그건 한 자리 더 간 것이다.
+  //    법정 표기는 1.6667% 다. 반올림 «자리» 도 법이 정한 값이라 임의로 늘리지 않는다.
+  return Math.round(raw * 10000) / 10000;
+}
+
+/**
+ * 주택 취득 시 «부가세목» — 지방교육세·농어촌특별세 (과세표준 대비 %).
+ *
+ * ⛔ 본세만 고치고 부가세목을 그대로 두면 합계가 다시 틀린다. 실제로 그랬다:
+ *    옛 코드는 `eduTax = 취득세액 × 10%` 를 «중과에도» 적용해 8% 중과에서 0.8% 가 됐다.
+ *    중과주택 지방교육세는 «0.4% 고정» 이다(표준세율 4%의 1/2 × 20%) — 2배 과대였다.
+ *    농특세도 `취득세액 × 2%` 라 8% 중과에서 0.16% 였다. 실제 0.6% — 약 1/4 로 과소였다.
+ *    두 오차가 우연히 상쇄돼 합계가 비슷해 보이던 구간이 있어 더 위험했다.
+ *
+ * ⚠️ 농어촌특별세는 «전용면적 85㎡ 초과» 에만 붙는다. 면적을 묻지 않으면 답이 갈린다.
+ * ⚠️ 이 수치들은 아직 policy_constants 에 «행이 없다» — 화면이 그 사실을 밝힌다.
+ */
+export function acqSurtaxPct(
+  baseRatePct: number,
+  heavy: 'none' | 'heavy8' | 'heavy12',
+  over85: boolean,
+): { eduPct: number; farmPct: number } {
+  const eduPct = heavy === 'none' ? baseRatePct * 0.1 : 0.4;
+  const farmPct = !over85 ? 0 : heavy === 'heavy12' ? 1.0 : heavy === 'heavy8' ? 0.6 : 0.2;
+  return { eduPct, farmPct };
 }
 
 /** DSR 한도 키 — 업권으로 갈린다. */

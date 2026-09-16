@@ -366,3 +366,49 @@ describe('취득세 — 이중 진실 해소 + 중과 매핑 3건 오류 고정 
     expect(buy(5 * 억, 1, false).details.some((d) => d.label === '⚠️ 출처')).toBe(false);
   });
 });
+
+describe('취득세 2호 전 확인 — 반올림 자리·부가세목 정합', () => {
+  const POLICY = JSON.stringify({
+    pct: { acq_tax_1house_6eok_under: 1, acq_tax_1house_6_9eok: 1, acq_tax_1house_9eok_over: 3, acq_tax_heavy_8: 8, acq_tax_heavy_12: 12 },
+    meta: {},
+  });
+  const buy = (price: number, houseCount: number, regulated: boolean, area85: 'under' | 'over') =>
+    acquisitionTax({ price, type: 'purchase', houseCount, regulated: regulated ? 'yes' : 'no', firstTime: 'no', area85, __policy: POLICY });
+
+  it('①「소수점 다섯째 자리에서 반올림 → 넷째 자리까지」 — 7억은 1.6667%', () => {
+    expect(acqTaxMidRatePct(7 * 억)).toBe(1.6667);
+    expect(acqTaxMidRatePct(8.3 * 억)).toBe(2.5333);
+    // ⛔ 다섯째 자리까지 남기면 1.66667 이 된다. 반올림 «자리» 도 법이 정한 값이다.
+    expect(String(acqTaxMidRatePct(7 * 억))).not.toBe('1.66667');
+  });
+
+  it('② 중과 지방교육세는 «0.4% 고정» — 취득세액의 10% 가 아니다', () => {
+    // 7억·비조정 3주택 → 8% 중과. 옛 코드는 5,600만 × 10% = 560만(0.8%) 을 냈다.
+    const r = buy(7 * 억, 3, false, 'under');
+    const edu = r.details.find((d) => d.label === '지방교육세')!.value;
+    expect(edu).toContain('280만');            // 7억 × 0.4%
+    expect(edu).not.toContain('560만');        // 옛 값
+  });
+
+  it('② 농특세는 «85㎡ 초과» 에만 — 가액 조건이 아니다', () => {
+    expect(buy(7 * 억, 3, false, 'under').details.find((d) => d.label === '농어촌특별세')!.value).toContain('0원');
+    // 8% 중과 · 85㎡ 초과 → 0.6% = 420만. 옛 코드는 취득세액×2% = 112만(0.16%) 이었다.
+    const over = buy(7 * 억, 3, false, 'over').details.find((d) => d.label === '농어촌특별세')!.value;
+    expect(over).toContain('420만');
+  });
+
+  it('② 12% 중과 85㎡ 초과 농특세는 1.0%', () => {
+    expect(buy(7 * 억, 4, false, 'over').details.find((d) => d.label === '농어촌특별세')!.value).toContain('700만');
+  });
+
+  it('② 표준세율 주택의 지방교육세는 세율의 10% 로 유지된다', () => {
+    // 5억 · 무주택 → 1%. 지방교육세 0.1% = 50만.
+    expect(buy(5 * 억, 1, false, 'under').details.find((d) => d.label === '지방교육세')!.value).toContain('50만');
+  });
+
+  it('② 중과 표본 합계가 본세+부가세와 «맞는다»', () => {
+    const r = buy(7 * 억, 3, false, 'over');
+    // 본세 5,600만 + 교육 280만 + 농특 420만 = 6,300만
+    expect(r.main.value).toContain('6,300만');
+  });
+});
