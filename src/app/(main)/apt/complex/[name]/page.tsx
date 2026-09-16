@@ -9,6 +9,7 @@ import { ImageLightbox } from '@/components/ui/ImageLightbox';
 import type { Metadata } from 'next';
 import { fmtAmount } from '@/lib/format';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
+import { isSafeImg } from '@/lib/image-sanitize';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 import nextDynamic from 'next/dynamic';
 import ShareButtons from '@/components/ShareButtons';
@@ -83,15 +84,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const keywords = [decoded, '실거래가', '시세', '아파트', region, sigungu, ageGroup, '전세', '월세', '매매', '평당가', '전세가율', '시세조회', '학군', '재건축', '분양가', '입주', '조감도', '평면도'].filter(Boolean);
 
   // s238 P0: legacy metadata.noindex 게이트 제거 — data_quality_score < 30 (s235 W9b) 만 noindex 의 유일한 정당한 이유
+  //
+  // ⛔ SD-1 증폭기 차단 (2026-09-16).
+  //    canonical·og:url·dg:plink 를 «원본 route param» 으로 만들면, 크롤러가 쓰레기 URL 을
+  //    하나 물었을 때 그 페이지가 «스스로를 canonical 로 선언하며» 색인을 요청한다.
+  //    씨앗 몇 개가 8,900 으로 불어난 경로가 바로 이것이다.
+  //    그래서 URL 은 «DB 에 실재하는 이름» 으로만 만들고, 실재하지 않으면 색인을 요청하지 않는다.
+  const canonicalPath = p?.apt_name
+    ? `${SITE_URL}/apt/complex/${encodeURIComponent(p.apt_name)}`
+    : null;
   const meta: Metadata = {
     title,
     description,
-    alternates: { canonical: `${SITE_URL}/apt/complex/${name}` },
-    robots: { index: true, follow: true, 'max-snippet': -1 as const, 'max-image-preview': 'large' as const },
+    ...(canonicalPath ? { alternates: { canonical: canonicalPath } } : {}),
+    robots: canonicalPath
+      ? { index: true, follow: true, 'max-snippet': -1 as const, 'max-image-preview': 'large' as const }
+      : { index: false, follow: false },
     openGraph: {
       title: `${decoded} 실거래가·시세·평당가 — ${region} ${sigungu}`,
       description: metaParts ? `${metaParts} — ${region} ${sigungu}` : `실거래가·시세 분석 — ${region} ${sigungu}`,
-      url: `${SITE_URL}/apt/complex/${name}`,
+      ...(canonicalPath ? { url: canonicalPath } : {}),
       siteName: '카더라',
       locale: 'ko_KR',
       type: 'article',
@@ -111,7 +123,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       'article:tag': keywords.join(','),
       'article:published_time': p?.created_at || new Date(Date.now() - 86400000 * 30).toISOString(),
       'article:modified_time': p?.updated_at || new Date().toISOString(),
-      'dg:plink': `${SITE_URL}/apt/complex/${name}`,
+      ...(canonicalPath ? { 'dg:plink': canonicalPath } : {}),
     },
   };
 
@@ -193,10 +205,15 @@ export default async function ComplexDetailPage({ params }: Props) {
   if (siteR.status === 'fulfilled' && siteR.value?.data) {
     const site = siteR.value.data;
     if (site?.images && Array.isArray(site.images)) {
+      // ⛔ SD-1: 문자열 원소를 «검사 없이» src 로 내보내면 안 된다.
+      //    images 원소가 이미지 객체의 «JSON 텍스트» 인 행이 실재하고(단지백과 9,699행),
+      //    그 문자열이 상대 URL 로 해석돼 `/apt/complex/{JSON}` 쓰레기 URL 약 8,900개를
+      //    만들었다(네이버 soft-404 1.1만의 81%). isSafeImg 가 따옴표·비절대 URL 을 막는다.
+      //    ⚠️ 폴백으로 바꾸지 않고 «버린다» — 갤러리는 한 장 줄어도 되지만 쓰레기 src 는 안 된다.
       siteImages = site.images.filter((img: any) => typeof img === 'string' || img?.url).map((img: any) => ({
         url: typeof img === 'string' ? img : img.url,
         caption: typeof img === 'string' ? undefined : img?.caption,
-      })).slice(0, 7);
+      })).filter((x: any) => isSafeImg(x.url)).slice(0, 7);
     }
     if (site?.slug) siteSlug = site.slug;
   }
@@ -416,7 +433,9 @@ export default async function ComplexDetailPage({ params }: Props) {
             };
             return null;
           })
-          .filter((x: any): x is { url: string; caption: string | null; alt: string | null } => !!x);
+          // ⛔ SD-1 — 위 siteImages 와 같은 문. 여기가 변종ⓐ(url·source·caption·thumbnail·
+          //    collected_at)의 유출구였다. 검사 없이 통과시키면 JSON 텍스트가 src 로 나간다.
+          .filter((x: any): x is { url: string; caption: string | null; alt: string | null } => !!x && isSafeImg(x.url));
         if (complexImages.length === 0) return null;
         return (
           <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
@@ -431,9 +450,11 @@ export default async function ComplexDetailPage({ params }: Props) {
       {/* 세션 158 B: hero 이미지 실사진 우선, 없으면 OG + "실사진 준비 중" 라벨 */}
       {(() => {
         const profileImages = Array.isArray(profile?.images) ? (profile.images as any[]) : [];
+        // ⛔ SD-1 — 길이·og 검사만으로는 «절대 URL 인가» 를 못 본다. JSON 텍스트는 길고
+        //    /api/og 도 아니라 이 두 검사를 통과해 hero <img src> 로 나갔다. isSafeImg 를 더한다.
         const realHero = profileImages
           .map((im) => typeof im === 'string' ? im : im?.url)
-          .find((u) => typeof u === 'string' && u.length > 10 && !u.includes('/api/og'));
+          .find((u) => typeof u === 'string' && u.length > 10 && !u.includes('/api/og') && isSafeImg(u));
         const ogHeroUrl = `/api/og?title=${encodeURIComponent(decoded)}&design=2&category=apt&subtitle=${encodeURIComponent(latestPrice > 0 ? `매매 ${fmtAmount(latestPrice)}${latestJeonse ? ` · 전세 ${fmtAmount(latestJeonse.deposit)}` : ''}` : '실거래가 시세')}&author=${encodeURIComponent('카더라')}`;
         const heroSrc = realHero
           ? (typeof realHero === 'string' ? realHero : '').replace(/^http:\/\//, 'https://')
