@@ -77,8 +77,23 @@ export async function POST(req: NextRequest) {
   if (!raw.trim()) {
     return new NextResponse(null, { status: 200, headers: verifyHeader() });
   }
-  if (!signatureOk(raw, req.headers.get('x-vercel-signature'))) {
-    // ⛔ 401 을 주되 이유를 자세히 적지 않는다. 공개 엔드포인트다.
+  const sig = req.headers.get('x-vercel-signature');
+
+  // ⚠️ 서명이 «아예 없는» 요청과 «틀린» 요청을 가른다 (2026-09-16 · Drain Test 401 사후).
+  //   대시보드의 Test 버튼은 서명 없이 쏘기 때문에, 없는 것까지 401 로 막으면
+  //   Node 가 설정을 확인할 방법이 사라지고 — 더 나쁘게는 Vercel 이 «반복 401 을 보고
+  //   Drain 을 비활성화» 할 수 있다. 계기가 스스로 꺼지는 사고다.
+  //   그래서 서명 없는 요청은 200 을 주되 «한 줄도 적재하지 않는다». 주입 위험은 0 이고,
+  //   응답 본문의 note 가 「시크릿이 안 붙었다」는 사실을 그대로 말해 준다.
+  // ⛔ 서명이 «붙어 있는데 틀린» 것은 위조 시도다. 그건 그대로 401.
+  if (!sig) {
+    return NextResponse.json(
+      { ok: true, stored: 0, note: 'unsigned — 저장하지 않음. Drain 에 시크릿이 설정됐는지 확인할 것' },
+      { headers: verifyHeader() },
+    );
+  }
+  if (!signatureOk(raw, sig)) {
+    // ⛔ 이유를 자세히 적지 않는다. 공개 엔드포인트다.
     return NextResponse.json({ ok: false }, { status: 401, headers: verifyHeader() });
   }
 
