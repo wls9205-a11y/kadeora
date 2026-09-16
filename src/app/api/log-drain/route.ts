@@ -111,6 +111,13 @@ export async function POST(req: NextRequest) {
       proxy.userAgent ?? proxy.user_agent ?? proxy['user-agent'] ??
       e?.userAgent ?? e?.user_agent ??
       (e?.requestHeaders ?? e?.headers ?? {})['user-agent'] ?? null;
+    // ⛔ 되먹임 고리 차단 (2026-09-16 실측 사고).
+    //    Drain 이 배달한 로그를 처리하면서 우리가 로그를 남기면, 그 로그가 «새 이벤트» 가 되어
+    //    다시 배달된다. 실제로 초당 여러 번 재귀했다(received=1 이 끝없이 반복).
+    //    자기 경로는 «세지도 말고 적재하지도 않는다». 계기가 스스로를 관측하면 안 된다.
+    const rawPath = String(proxy.path ?? e?.path ?? '');
+    if (rawPath.startsWith('/api/log-drain')) continue;
+
     const ua: string | null = Array.isArray(uaRaw) ? uaRaw[0] : uaRaw;
     if (ua) sawUa++;
     const bot = classifyBot(ua);
@@ -141,12 +148,13 @@ export async function POST(req: NextRequest) {
   //   received>0 · sawUa=0 이면 «UA 칸을 못 찾은 것»(소스 설정 또는 필드명 문제)
   //   sawUa>0  · stored=0 이면 «전부 사람»(정상. 봇이 아직 안 왔다)
   // ⚠️ 표본 키만 찍는다. 본문·IP·UA 값은 로그에 남기지 않는다.
-  if (lines.length && !rows.length) {
+  // ⛔ 여기서 console.log 를 하면 그 줄이 «새 드레인 이벤트» 가 되어 다시 돌아온다.
+  //    진단이 필요하면 1% 표본만, 그리고 자기 경로를 이미 걸러낸 뒤에만 찍는다.
+  //    (첫 판에 무조건 찍었다가 초당 여러 번 재귀했다 — 계기가 스스로를 관측한 사고다.)
+  if (lines.length && !rows.length && sawUa === 0 && Math.random() < 0.01) {
     const s = lines[0] ?? {};
-    console.log('[log-drain] received=%d sawUa=%d stored=0 topKeys=%s proxyKeys=%s',
-      lines.length, sawUa,
-      Object.keys(s).slice(0, 12).join('|'),
-      Object.keys((s as any).proxy ?? {}).slice(0, 12).join('|'));
+    console.log('[log-drain] received=%d sawUa=0 stored=0 proxyKeys=%s',
+      lines.length, Object.keys((s as any).proxy ?? {}).slice(0, 12).join('|'));
   }
 
   if (rows.length) {
