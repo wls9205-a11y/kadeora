@@ -176,6 +176,15 @@ export function calcProgressiveTax(amount: number, brackets: {min:number;max:num
   return amount * last.rate - last.deduction;
 }
 
+/**
+ * ⚠️ 현재 «사용처 0» 이다 (2026-09-16 실측). 예비 존치.
+ *
+ * 압축 표기 전용 — 카드·차트축·목록처럼 「1.3억원」이 정답인 표면을 위해 남긴다.
+ * ⛔ 계산기 산출액에는 «쓰지 말 것». 1억 이상을 toFixed(1) 로 줄여 1억 3,400만을
+ *    「1.3억원」으로 찍는다 — 최대 500만이 표시에서 사라진다. 그 표면은 formatKRWExact 다.
+ * ⚠️ 말없는 고아는 오늘 여러 번 잡은 사문 결함형이라, 「왜 남아 있는지」를 여기 적어 둔다.
+ *    쓰는 곳이 생기면 이 주석을 지우고, 끝내 안 생기면 지우는 쪽이 맞다.
+ */
 export function formatKRW(n: number): string {
   if (n >= 100000000) return `${(n / 100000000).toFixed(n % 100000000 === 0 ? 0 : 1)}억원`;
   if (n >= 10000) return `${Math.round(n / 10000).toLocaleString()}만원`;
