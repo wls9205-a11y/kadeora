@@ -1350,6 +1350,9 @@ def cmd_volume(args):
 
     where = "tracked" if args.scope == "tracked" else (
             "active" if args.scope == "active" else "TRUE")
+    # 이미 잰 것과 «못 잰다고 판정된 것» 은 다시 묻지 않는다 — 회차를 거듭해도 호출이 안 늘어난다.
+    if getattr(args, "only_unmeasured", False):
+        where += " AND volume_checked_at IS NULL AND volume_invalid IS NULL"
     with psycopg2.connect(DB_URL) as conn, conn.cursor() as cur:
         cur.execute("SELECT id, keyword FROM keyword_rank_targets WHERE %s ORDER BY priority, id"
                     % where)
@@ -1419,6 +1422,115 @@ def cmd_volume(args):
     print("적재 %d행 · 10분 내 측정표시 %d행" % (len(got), fresh))
     if fresh < len(got):
         print("  [!] 적재 의도 %d 보다 확인 %d 이 적다 — 다시 본다" % (len(got), fresh))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# K-9 ⓑ / KW-0 — 검색량 «표적» 시딩
+#
+# 두 갈래를 한 문으로 넣는다:
+#   --calc        계산기 140종(registry.ts 의 titleShort) — 검색량을 «모르는» 것들
+#   --candidates  volume 이 떨군 후보군 CSV — 검색량을 «이미 아는» 것들(재조회 불요)
+#
+# ⛔ tracked=false 로 넣는다. keyword_rank_targets 는 «순위» 측정 예산(일 80)을 tracked 로
+#    고르는데, 여기에 2,800여 행을 tracked 로 넣으면 매일 재는 대상이 잘려 나가고
+#    「새 예정명이 측정되지 않는」 역전이 생긴다(rank-targets.ts 가 경고한 바로 그 사고).
+#    밤 정리(fn_nv5_rank_target_lifecycle)는 tracked AND priority=1 만 만지고 삭제하지
+#    않으므로, tracked=false · priority=9 는 그 회전과 «무간섭» 이다.
+# ─────────────────────────────────────────────────────────────────────────────
+
+CALC_REGISTRY_TS = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                "..", "..", "src", "lib", "calc", "registry.ts")
+
+
+def _calc_keywords():
+    """registry.ts 에서 titleShort 를 뽑는다. TS 를 실행하지 않고 «읽기만» 한다.
+
+    ⚠️ titleShort 를 쓰는 이유: title 은 「2026 부동산 중개수수료 계산기」처럼 연도·수식이
+       붙어 있어 사람이 치는 말이 아니다. titleShort 가 검색어에 가깝다.
+    """
+    src = open(CALC_REGISTRY_TS, encoding="utf-8").read()
+    seen = OrderedDict()
+    for m in re.finditer(r"titleShort:\s*'([^']+)'", src):
+        k = m.group(1).strip()
+        if k:
+            seen.setdefault(k, None)
+    return list(seen.keys())
+
+
+def _candidate_rows(path):
+    """volume 이 떨군 후보군 CSV — 열은 그 writer 와 «같은 것» 이다
+    (keyword · pc · mobile · total · lt10 · compIdx)."""
+    out = []
+    with open(path, encoding="utf-8-sig", newline="") as f:
+        for r in csv.DictReader(f):
+            kw = (r.get("keyword") or "").strip()
+            if not kw:
+                continue
+            def num(x):
+                x = (x or "").strip()
+                return int(x) if x.lstrip("-").isdigit() else None
+            out.append({
+                "keyword": kw,
+                "pc": num(r.get("pc")), "mobile": num(r.get("mobile")),
+                "total": num(r.get("total")),
+                "lt10": (r.get("lt10") or "").strip().lower() in ("true", "1", "y", "yes"),
+                "comp": (r.get("compIdx") or "").strip() or None,
+            })
+    return out
+
+
+def cmd_seed(args):
+    """표적 시딩. 예행(기본)은 «아무것도 쓰지 않는다» — 수와 표본만 찍는다."""
+    if not DB_URL:
+        sys.exit("SUPABASE_DB_URL 이 필요합니다.")
+    if not args.calc and not args.candidates:
+        sys.exit("--calc 또는 --candidates 중 하나 이상을 주십시오.")
+    import psycopg2
+
+    calc = _calc_keywords() if args.calc else []
+    cands = _candidate_rows(args.candidates) if args.candidates else []
+    if args.calc:
+        print("계산기 표적 %d종 (registry.ts titleShort)" % len(calc))
+        for k in calc[:args.show]:
+            print("   %s" % k)
+    if args.candidates:
+        print("후보군 %d행 (%s) — 검색량 «이미 있음», 재조회하지 않는다" % (len(cands), args.candidates))
+        for r in sorted(cands, key=lambda r: -(r["total"] or 0))[:args.show]:
+            print("   %-28s 합 %s" % (r["keyword"][:28], r["total"]))
+
+    if not args.live:
+        print("\n예행이다. DB 에 아무것도 쓰지 않았다. 맞으면 같은 줄 끝에 --live")
+        return
+
+    ins_calc = ins_cand = 0
+    with psycopg2.connect(DB_URL) as conn, conn.cursor() as cur:
+        for k in calc:
+            cur.execute(
+                "INSERT INTO keyword_rank_targets (keyword, priority, tracked, active, note) "
+                "SELECT %s, 9, false, false, 'K9-calc' "
+                "WHERE NOT EXISTS (SELECT 1 FROM keyword_rank_targets WHERE keyword = %s)",
+                (k, k))
+            ins_calc += cur.rowcount
+        for r in cands:
+            # 검색량을 «함께» 적는다 — 이미 API 가 준 값이라 다시 물을 이유가 없다.
+            cur.execute(
+                "INSERT INTO keyword_rank_targets "
+                "  (keyword, priority, tracked, active, note, volume_pc, volume_mobile, "
+                "   volume_total, volume_is_lt10, volume_comp_idx, volume_checked_at) "
+                "SELECT %s, 9, false, false, 'KW0-cand', %s, %s, %s, %s, %s, now() "
+                "WHERE NOT EXISTS (SELECT 1 FROM keyword_rank_targets WHERE keyword = %s)",
+                (r["keyword"], r["pc"], r["mobile"], r["total"], r["lt10"], r["comp"], r["keyword"]))
+            ins_cand += cur.rowcount
+        conn.commit()
+        # 긍정형 확인 — 「오류 없음」이 아니라 「행이 생겼다」를 센다.
+        cur.execute("SELECT count(*) FROM keyword_rank_targets WHERE note = 'K9-calc'")
+        have_calc = cur.fetchone()[0]
+        cur.execute("SELECT count(*) FROM keyword_rank_targets WHERE note = 'KW0-cand'")
+        have_cand = cur.fetchone()[0]
+    print("적재 — 계산기 신규 %d(누적 %d) · 후보군 신규 %d(누적 %d)"
+          % (ins_calc, have_calc, ins_cand, have_cand))
+    if args.calc and have_calc < len(calc):
+        print("  [!] 계산기 표적 %d 중 %d 만 있다 — 다시 본다" % (len(calc), have_calc))
 
 
 def cmd_rollback(args):
@@ -1760,7 +1872,15 @@ def main():
     vl.add_argument("--show", type=int, default=25, help="화면에 찍을 상위 행 수")
     vl.add_argument("--scan-only", action="store_true", dest="scan_only",
                     help="대장 사전 스캔만 하고 멈춘다 — API 호출 0건")
+    vl.add_argument("--only-unmeasured", action="store_true", dest="only_unmeasured",
+                    help="아직 안 잰 표적만 — 재실행해도 호출이 늘지 않는다")
     vl.set_defaults(fn=cmd_volume)
+    sd = s.add_parser("seed", help="K-9ⓑ/KW-0 — 검색량 표적 시딩(계산기 140종 · 후보군 CSV)")
+    sd.add_argument("--calc", action="store_true", help="registry.ts 의 계산기 titleShort 를 표적으로")
+    sd.add_argument("--candidates", help="volume 이 떨군 후보군 CSV 경로(검색량 포함 적재)")
+    sd.add_argument("--live", action="store_true", help="없으면 수와 표본만 찍고 DB 에 쓰지 않는다")
+    sd.add_argument("--show", type=int, default=10, help="화면에 찍을 표본 수")
+    sd.set_defaults(fn=cmd_seed)
     for x in (a, o, r):
         x.add_argument("--ignore-lockout", action="store_true", dest="ignore_lockout",
                        help="록아웃 창 안에서도 실행한다 — 실행 사실이 로그에 남는다")
