@@ -1053,3 +1053,9 @@ Next 데이터 캐시(`unstable_cache`·`revalidateTag`) 사용처 0. 정정 반
 재스캔이 없었으면 공개 상태로 남았다. 앞층 수리: 추정 표현 사전(ABG 증분 5 처방 1단) · 의미 축 매칭(2단 설계).
 
 ---
+
+### RULES#150 — 공개 RPC 는 GRANT 동봉 (2026-09-17 신설 · B3)
+
+**Rule** — 이후 공개 RPC 는 생성 커밋에 GRANT EXECUTE 를 동봉한다 — 기본권한은 닫혀 있다(2026-09-17). 근거·대장: `docs/security/rpc_public_allowlist_2026-09-17.md`
+
+---
