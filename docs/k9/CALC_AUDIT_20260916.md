@@ -153,3 +153,24 @@
 | A″ 감사 대기 21종 (calc-registry-coverage.test.ts PENDING) | — | 미반영 — 감사 통과 시 개별 |
 
 구조 차단: `calc-registry-coverage.test.ts`(양방향) · `calc-live-policy.test.ts`(FORMULAS 경유 + 실 DB 행).
+
+
+---
+
+## 결함형 대장 — 계산기 층 (2026-09-17 세션 A 등재 판정)
+
+| 층 | 결함형 | 사례 | 구조 봉인 |
+|---|---|---|---|
+| 수치층 (K-9) | 원문과 다른 제도 수치·공식 | 법인세 개정 전 세율 · 적금 ×개월 결락 · 중도상환 분모 10배 | policy_constants + DRF eflaw 원문 대조 · 옛값/새값 회귀 |
+| 표기층 | 산출액 압축 표기 | formatKRW → formatKRWExact | 왕복 property |
+| 콘텐츠층 (B2) | 본문·FAQ 가 실제 계산을 주장하지 않음 | 반영 주장 76종 · 「142종」 73곳 | calc-content.test.ts |
+| 성능층 (B1) | 핫패스 대형 표 exact count | social-proof 7발 → 워커 슬롯 기아 | no-exact-count-hotpath.test.ts |
+| **타입층 (신규)** | **타입 초록 ≠ 전수 — `Record<string, …>` 는 키 전수성을 강제하지 않는다** | 4/5 `d7904c93` 이 공식 39종·registry 40항목을 추가하고 FORMULAS 맵은 한 줄도 안 건드림 → «TS 0에러» 인 채 5.5개월 라이브 무결과(최대 44종) | calc-registry-coverage.test.ts(양방향 · PENDING 단조 감소 · 뮤테이션 실증) |
+| **검증층 (신규)** | **검증이 정본을 안 거침 — 사본 픽스처·직접 호출** | 손 픽스처(stress 0.75 vs DB 1.5) → DSR 지방 가산 2배 · 함수 직접 호출 테스트 1,570 초록이 맵 갭을 못 봄 | policyPackFromRows 공유 파서 · 실 DB 행 스냅샷 · FORMULAS 경유 회귀 |
+
+규율: **「검증은 정본을 거친다, 사본 금지」** — 테스트는 라이브와 같은 경로(FORMULAS[calc.formula])·같은 데이터 모양(DB 행 → 공유 파서)으로 본다.
+
+## 백로그
+
+- A1 car-insurance-est — 보험개발원 「2025년 개인용 자동차보험 가입현황 분석」 1대당 68만원은 «코드 상수»(CAR_INSURANCE_SOURCE)이고 원문 PDF 대조 전(언론 보도 인용). 코드 상수도 G4 공개 대상 — 원문 대조 후 verification 'primary' 로.
+- 공유 누진표(INCOME_TAX_BRACKETS)·장특 표 상수의 policy_constants 이관(cgt/inh 중복 해소).
