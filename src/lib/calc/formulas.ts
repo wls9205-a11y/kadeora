@@ -9,6 +9,7 @@ import {
   bondRatePerMille, pensionMonthly, HOUSING_BOND_SOURCE, HOUSING_PENSION_SOURCE,
   PENSION_MIN_AGE, PENSION_MAX_PRICE, brokerageBracket, BROKERAGE_SOURCE,
   parsePolicyPack, ltvPolicyKey, dsrPolicyKey, stressDsrKey, acqTaxPolicyKey, acqTaxMidRatePct, acqSurtaxPct, secTaxKeys, type StockMarket,
+  depositTaxRow, type DepositTaxType,
   type LtvRegion, type LtvOwner,
 } from './gov-tables';
 
@@ -439,29 +440,117 @@ export function loanRepayment(v: V): CalcResult {
   };
 }
 
+/**
+ * 이자를 «특례 한도 안» 과 «밖» 으로 가른다. 한도는 원금 기준이다.
+ *   예금: 이자가 원금에 비례하므로 비율로 정확히 갈린다.
+ *   적금: 회차마다 예치 기간이 달라 비율로 가르면 틀린다 — 앞 회차부터 한도를 채운다.
+ */
+function splitInterestByLimit(
+  type: 'deposit' | 'savings', amount: number, rate: number, months: number, limit: number | null,
+): { total: number; inLimit: number } {
+  if (type === 'deposit') {
+    const total = amount * rate * (months / 12);
+    const ratio = limit === null || amount <= 0 ? 1 : Math.min(1, limit / amount);
+    return { total, inLimit: total * ratio };
+  }
+  let total = 0;
+  let inLimit = 0;
+  for (let k = 1; k <= months; k++) {
+    const i = amount * rate * (months - k + 1) / 12;
+    const within = limit === null || amount <= 0 ? 1 : Math.max(0, Math.min(1, (limit - amount * (k - 1)) / amount));
+    total += i;
+    inLimit += i * within;
+  }
+  return { total, inLimit };
+}
+
 export function depositInterest(v: V): CalcResult {
   const amount = n(v.amount);
   const rate = n(v.rate) / 100;
   const months = n(v.months);
-  const taxType = v.taxType as string;
-  const taxRate = taxType === 'general' ? 0.154 : taxType === 'preferential' ? 0.095 : 0;
-  let interest = 0;
-  if (v.type === 'deposit') {
-    interest = amount * rate * (months / 12);
-  } else { // savings (적금)
-    interest = amount * rate * (months + 1) / 2 / 12;
+  const kind: 'deposit' | 'savings' = v.type === 'deposit' ? 'deposit' : 'savings';
+  const taxType = (['general', 'mutual', 'taxFreeSavings'].includes(String(v.taxType)) ? v.taxType : 'general') as DepositTaxType;
+  const joinYear = n(v.joinYear) || 2026;
+  const eligible = v.eligible !== 'no';
+  const farmExempt = v.farmExempt === 'yes';
+
+  // K-9 ⓒ — 세율·한도의 정본은 policy_constants(조특법 §89의3·§88의2 · 소득세법 §129 · 지방세법 §103의13 · 농특세법 §5).
+  //   ⛔ 옛 「세금우대 9.5%」는 세금우대종합저축 화석이었다. 선택지에서 뺐다.
+  const pack = parsePolicyPack(v.__policy);
+  const row = depositTaxRow(taxType, joinYear, eligible);
+  const P = pack?.pct ?? {};
+  const need = ['int_tax_income', 'int_tax_local', 'farm_int_base', 'farm_int_rate', ...(row.incomeKey ? [row.incomeKey] : [])];
+  const missing = need.filter((k) => typeof P[k] !== 'number');
+  const limit = row.limitKey ? pack?.amt?.[row.limitKey] : null;
+  if (missing.length || (row.limitKey && typeof limit !== 'number')) {
+    return {
+      main: { label: '세율 기준 미수신', value: '—', color: 'var(--text-tertiary)' },
+      details: [{ label: '사유', value: '이자 과세 기준을 아직 받지 못했다. 잠시 후 다시 시도한다' }],
+    };
   }
-  const tax = interest * taxRate;
+
+  // ⛔ 옛 적금 공식은 `amount*rate*(months+1)/2/12` — «× months» 가 빠져 있었다.
+  //    월 100만·연 3.5%·12개월: 옛 18,958원 vs 실제 227,500원 — 기본 입력에서 12배 과소.
+  const { total: interest, inLimit } = splitInterestByLimit(kind, amount, rate, months, limit ?? null);
+  const over = interest - inLimit;
+
+  const incomePct = P.int_tax_income;           // 14 — 소득세법 §129①1라
+  const localPct = P.int_tax_local;             // 10 — 원천징수 소득세의 10%
+  const farmBase = P.farm_int_base;             // 14 — 농특세법 §5④1가
+  const farmRate = P.farm_int_rate;             // 10 — 감면세액의 10%
+
+  // 한도 밖(또는 일반 과세 전체) — 일반 원천징수
+  const genBase = row.limitKey ? over : interest;
+  const genIncome = Math.round(genBase * incomePct / 100);
+  const genLocal = Math.round(genIncome * localPct / 100);
+
+  // 한도 안 — 특례
+  const spBase = row.limitKey ? inLimit : 0;
+  const spPct = row.incomeKey && row.limitKey ? P[row.incomeKey] : 0;
+  const spIncome = Math.round(spBase * spPct / 100);
+  const spFarm = row.farm && !farmExempt ? Math.round(spBase * (farmBase - spPct) / 100 * farmRate / 100) : 0;
+
+  const tax = genIncome + genLocal + spIncome + spFarm;
   const net = interest - tax;
-  const total = (v.type === 'deposit' ? amount : amount * months) + net;
-  return {
-    main: { label: '세후 수령액', value: fmt(Math.round(total)) },
-    details: [
-      { label: '세전 이자', value: fmt(Math.round(interest)) },
-      { label: '이자소득세', value: fmt(Math.round(tax)) },
-      { label: '세후 이자', value: fmt(Math.round(net)) },
-    ],
-  };
+  const principal = kind === 'deposit' ? amount : amount * months;
+  const total = principal + net;
+
+  const details: { label: string; value: string }[] = [
+    { label: '세전 이자', value: fmt(Math.round(interest)) },
+    { label: '적용 구분', value: row.label },
+  ];
+  if (row.limitKey) {
+    details.push({ label: `특례 한도 (${fmt(limit as number)})`, value: `한도 안 이자 ${fmt(Math.round(inLimit))}` });
+    if (over > 0) details.push({ label: '⚠️ 한도 초과분', value: `${fmt(Math.round(over))} — 특례 밖이라 일반 원천징수로 계산했다(조합에 확인)` });
+  }
+  if (genBase > 0) {
+    details.push({ label: `소득세 (${incomePct}%)`, value: fmt(genIncome) });
+    details.push({ label: `지방소득세 (소득세의 ${localPct}%)`, value: fmt(genLocal) });
+  }
+  if (row.limitKey) {
+    // ⛔ 「없다 ≠ 0원」 — 비과세여도 농특세가 붙는 칸이 있다. 무엇이 없는지 말로 적는다.
+    details.push(spPct > 0
+      ? { label: `특례 소득세 (${spPct}% 분리과세)`, value: fmt(spIncome) }
+      : { label: '특례 소득세', value: '비과세' });
+    if (taxType === 'mutual') {
+      details.push({ label: '특례 지방소득세', value: '부과하지 않는다 — 조특법 §89의3' });
+      details.push(farmExempt
+        ? { label: '농어촌특별세', value: '면제 — 농어민·임업인·저소득 근로자(농특세령 §4⑦3)' }
+        : { label: `농어촌특별세 (${((farmBase - spPct) * farmRate / 100).toFixed(1)}%)`, value: fmt(spFarm) });
+    } else {
+      details.push({ label: '농어촌특별세', value: '없음 — 농특세법 §4 비과세 목록(§88의2)' });
+    }
+  }
+  details.push({ label: '세금 합계', value: fmt(tax) });
+  details.push({ label: '세후 이자', value: fmt(Math.round(net)) });
+  if (taxType === 'mutual') {
+    details.push({ label: '⚠️ 판정 기준', value: '가입 «당시» 요건으로 갈린다(이자 발생 시점 아님). 한도 3천만원은 모든 조합 합산' });
+    details.push({ label: '⚠️ 확인 필요', value: '만기 재예치·자동연장을 새 가입으로 보는지는 법령에 정의가 없다 — 조합에 확인한다' });
+  }
+  const src = pack?.meta?.[row.incomeKey ?? row.limitKey ?? 'int_tax_income'];
+  if (src?.source || src?.date) details.push({ label: '근거', value: [src.source, src.date].filter(Boolean).join(' · ') });
+
+  return { main: { label: '세후 수령액', value: fmt(Math.round(total)) }, details };
 }
 
 // ═══ 세금 ═══

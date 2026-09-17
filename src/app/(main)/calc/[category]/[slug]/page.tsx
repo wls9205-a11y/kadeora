@@ -55,13 +55,15 @@ async function getLiveData(slug: string): Promise<Record<string, string> | undef
     // ⚠️ auction-profit 도 취득세 «같은» 파이프를 탄다 — 경매 취득도 같은 법정 세율이다.
     //    여기 빠뜨리면 계산기가 「세율 기준 미수신」만 띄우고 아무것도 못 한다.
     if (slug === 'ltv-calc' || slug === 'dsr-calc' || slug === 'acquisition-tax' || slug === 'stock-roi'
-        || slug === 'auction-profit') {
+        || slug === 'auction-profit' || slug === 'deposit-interest') {
       const { data } = await (sb as any)
         .from('policy_constants')
         .select('key, item, numbers, source_title, source_date, status')
-        .or('key.like.ltv_%,key.like.dsr_%,key.like.stress_dsr_%,key.like.acq_tax_%,key.like.sec_tax_%');
+        .or('key.like.ltv_%,key.like.dsr_%,key.like.stress_dsr_%,key.like.acq_tax_%,key.like.sec_tax_%,'
+          + 'key.like.int_tax%,key.like.mutual_dep%,key.like.taxfree_sav%,key.like.farm_int%');
       if (!Array.isArray(data) || !data.length) return undefined;
       const pct: Record<string, number> = {};
+      const amt: Record<string, number> = {};
       const meta: Record<string, unknown> = {};
       for (const row of data as any[]) {
         // ⚠️ numbers 의 «첫» 항목이 그 행의 비율이다(예: ["70%","6개월"]).
@@ -70,6 +72,9 @@ async function getLiveData(slug: string): Promise<Record<string, string> | undef
         const first = Array.isArray(row?.numbers) ? String(row.numbers[0] ?? '') : '';
         const m = first.match(/^(-?\d+(?:\.\d+)?)\s*%/);
         if (m) pct[row.key] = Number(m[1]);
+        // 한도 행(「3,000만원」)은 금액 표로 따로 — 퍼센트 표에 섞으면 「3,000%」가 된다.
+        const w = first.match(/^([\d,]+)\s*만원$/);
+        if (w) amt[row.key] = Number(w[1].replace(/,/g, '')) * 10_000;
         meta[row.key] = {
           item: row.item ?? undefined,
           source: row.source_title ?? undefined,
@@ -78,7 +83,7 @@ async function getLiveData(slug: string): Promise<Record<string, string> | undef
         };
       }
       if (!Object.keys(pct).length) return undefined;
-      return { __policy: JSON.stringify({ pct, meta }) };
+      return { __policy: JSON.stringify({ pct, amt, meta }) };
     }
 
     return undefined;

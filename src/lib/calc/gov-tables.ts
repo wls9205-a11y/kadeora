@@ -325,6 +325,63 @@ export function secTaxKeys(market: StockMarket): { trade: string | null; farm: s
   return { trade: null, farm: null };   // 해외는 증권거래세가 없다(양도세는 별도 계산기)
 }
 
+/**
+ * 예적금 이자 과세 — 「어느 행인가」만 안다. 세율·한도의 정본은 policy_constants.
+ *
+ * 옛 코드의 「세금우대 9.5%」는 세금우대종합저축(조특법 §89, 소득세 9 + 농특세 0.5) 화석이었다.
+ * 신규 가입 길이 닫힌 상품이라 2026년 계산기의 선택지가 아니다.
+ *
+ * 상호금융(조합등예탁금, 조특법 §89의3 — 법률 제21223호 전문개정, 2026-01-01 시행)은
+ * «가입 시점» × «요건» 의 2차원 함수다. 이자 «발생» 시점이 아니다 — 본문이 「…까지 가입한 … 발생하는」이다.
+ *
+ *   가입 시기        | 요건 충족(②)        | 요건 밖(①)
+ *   ~2025-12-31     | 비과세              | 비과세
+ *   2026            | 비과세              | 5%
+ *   2027~2028       | 비과세              | 9%
+ *   2029            | 5%                  | 9%
+ *   2030~           | 9%                  | 9%
+ *
+ * ⚠️ 「요건 충족」은 소득요건«만» 이 아니다 — §88의5②1호 가목(농협·수협·산림조합 조합원)«또는»
+ *    나목(총급여 7천만 이하 / 종합소득금액 6천만 이하). 조합원은 소득과 무관하게 ②항이다.
+ * ⚠️ 5%·9% 분은 개인지방소득세를 «부과하지 아니한다»(§89의3 ①·② 명문). 일반 15.4% 의 1.4 가 없다.
+ * ⚠️ 농특세는 붙는다(농특세법 §4 비과세 목록에 §89의3 없음). 액수는 «감면세액의 10%» —
+ *    (14% − 납부 소득세율) × 10% → 비과세 1.4 · 5% 분 0.9 · 9% 분 0.5. 「비과세 ≠ 0원」.
+ */
+export type DepositTaxType = 'general' | 'mutual' | 'taxFreeSavings';
+
+export interface DepositTaxRow {
+  /** 특례 한도 키(원). null = 한도 없음(일반 과세). */
+  limitKey: string | null;
+  /** 한도 내 소득세율 키. null = 소득세 비과세. */
+  incomeKey: string | null;
+  /** 한도 내 개인지방소득세 부과 여부. */
+  local: boolean;
+  /** 한도 내 농특세 부과 여부(감면세액 기준). */
+  farm: boolean;
+  /** 사람이 읽을 적용 구분. */
+  label: string;
+}
+
+export function depositTaxRow(type: DepositTaxType, joinYear: number, eligible: boolean): DepositTaxRow {
+  if (type === 'taxFreeSavings') {
+    // 비과세종합저축(조특법 §88의2) — 농특세법 §4 4호 목록에 있어 농특세도 없다. 지방소득세는 소득세 0 이라 0.
+    return { limitKey: 'taxfree_sav_limit', incomeKey: null, local: false, farm: false,
+      label: '비과세종합저축 — 소득세·농특세 모두 없음' };
+  }
+  if (type === 'mutual') {
+    const base = { limitKey: 'mutual_dep_limit', local: false, farm: true };
+    if (joinYear <= 2025) return { ...base, incomeKey: null, label: '2025년 이전 가입 — 소득세 비과세(이후 발생 이자도)' };
+    if (eligible) {
+      if (joinYear <= 2028) return { ...base, incomeKey: null, label: `${joinYear}년 가입 · 요건 충족 — 소득세 비과세` };
+      if (joinYear === 2029) return { ...base, incomeKey: 'mutual_dep_rate_5', label: '2029년 가입 · 요건 충족 — 저율 분리과세' };
+      return { ...base, incomeKey: 'mutual_dep_rate_9', label: '2030년 이후 가입 — 저율 분리과세' };
+    }
+    if (joinYear === 2026) return { ...base, incomeKey: 'mutual_dep_rate_5', label: '2026년 가입 · 요건 밖 — 저율 분리과세' };
+    return { ...base, incomeKey: 'mutual_dep_rate_9', label: `${joinYear >= 2030 ? '2030년 이후' : `${joinYear}년`} 가입 · 요건 밖 — 저율 분리과세` };
+  }
+  return { limitKey: null, incomeKey: 'int_tax_income', local: true, farm: false, label: '일반 과세 — 소득세법 §129' };
+}
+
 /** DSR 한도 키 — 업권으로 갈린다. */
 export function dsrPolicyKey(lender: 'bank' | 'nonbank'): string {
   return lender === 'bank' ? 'dsr_bank' : 'dsr_nonbank';
@@ -342,6 +399,8 @@ export function stressDsrKey(region: LtvRegion): string {
 export interface PolicyPack {
   /** key → 퍼센트 수치(40, 70, 0 …). */
   pct: Record<string, number>;
+  /** key → 금액(원). 「3,000만원」 같은 한도 행. 퍼센트 표와 섞지 않는다. */
+  amt?: Record<string, number>;
   /** key → 사람이 읽을 조건·출처. 화면이 근거를 말할 수 있게. */
   meta: Record<string, { item?: string; source?: string; date?: string; status?: string }>;
 }

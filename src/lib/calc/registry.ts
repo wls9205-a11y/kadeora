@@ -507,14 +507,18 @@ export const CALC_REGISTRY: CalcMeta[] = [
     title: '예적금 이자 계산기', titleShort: '예적금 이자 계산기',
     description: '예금·적금 만기 시 세전/세후 이자와 수령액을 계산. 단리/복리, 일반/비과세.',
     keywords: ['예적금 이자 계산기','예금 이자','적금 만기','세후 이자','비과세 예금'],
-    legalBasis: '', version: '2026.04', lastUpdated: '2026-04-05',
+    legalBasis: '소득세법 제129조 · 조세특례제한법 제89조의3·제88조의2 · 농어촌특별세법 제5조', version: '2026.09', lastUpdated: '2026-09-17',
     pattern: 'simple', formula: 'depositInterest', resultLabel: '세후 수령액', resultUnit: '원',
     inputs: [
       { id: 'type', label: '상품 유형', type: 'radio', default: 'savings', options: [{ value: 'deposit', label: '예금 (거치)' }, { value: 'savings', label: '적금 (적립)' }] },
       { id: 'amount', label: '예금액 / 월 적립액', type: 'currency', default: 1000000 },
       { id: 'rate', label: '연 이율 (%)', type: 'percent', default: 3.5, min: 0, max: 15, step: 0.1 },
       { id: 'months', label: '기간 (개월)', type: 'number', default: 12, min: 1, max: 60 },
-      { id: 'taxType', label: '과세 유형', type: 'radio', default: 'general', options: [{ value: 'general', label: '일반 (15.4%)' }, { value: 'preferential', label: '세금우대 (9.5%)' }, { value: 'taxFree', label: '비과세' }] },
+      // K-9 ⓒ — 옛 「세금우대 9.5%」(세금우대종합저축 화석) 제거. 세율 숫자는 라벨에 적지 않는다 — 정본은 policy_constants.
+      { id: 'taxType', label: '과세 유형', type: 'radio', default: 'general', options: [{ value: 'general', label: '일반 과세 (은행 등)' }, { value: 'mutual', label: '상호금융 예탁금 (농협·수협·신협·새마을금고 등)' }, { value: 'taxFreeSavings', label: '비과세종합저축 (65세 이상 기초연금 수급자·장애인 등)' }] },
+      { id: 'joinYear', label: '가입 연도', type: 'select', default: '2026', condition: 'taxType=mutual', options: [{ value: '2025', label: '2025년 이전' }, { value: '2026', label: '2026년' }, { value: '2027', label: '2027년' }, { value: '2028', label: '2028년' }, { value: '2029', label: '2029년' }, { value: '2030', label: '2030년 이후' }], hint: '이자가 생긴 해가 아니라 «가입한 해» 로 갈린다' },
+      { id: 'eligible', label: '가입 당시 요건', type: 'radio', default: 'yes', condition: 'taxType=mutual', options: [{ value: 'yes', label: '충족' }, { value: 'no', label: '해당 없음' }], hint: '농협·수협·산림조합 조합원이거나, 직전 연도 총급여 7천만원 이하(또는 종합소득금액 6천만원 이하)' },
+      { id: 'farmExempt', label: '농어촌특별세 면제 대상', type: 'radio', default: 'no', condition: 'taxType=mutual', options: [{ value: 'no', label: '아니오' }, { value: 'yes', label: '예' }], hint: '농어민·임업인(5ha 이상 산림 소유자 제외)·연 총소득 2,500만원 이하 근로자' },
     ],
     faqs: [
       { q: '어떤 상환방식이 유리한가요?', a: '원금균등이 총 이자가 적지만 초기 부담이 큽니다. 원리금균등은 매월 동일 금액으로 예산 관리가 쉽습니다.' },

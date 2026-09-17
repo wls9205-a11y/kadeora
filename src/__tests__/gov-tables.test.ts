@@ -7,7 +7,8 @@
  */
 import { describe, it, expect } from 'vitest';
 import { bondRatePerMille, pensionMonthly, PENSION_MIN_AGE, brokerageBracket, ltvPolicyKey, acqTaxPolicyKey, acqTaxMidRatePct } from '@/lib/calc/gov-tables';
-import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc, acquisitionTax, stockRoi, auctionProfit } from '@/lib/calc/formulas';
+import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc, acquisitionTax, stockRoi, auctionProfit, depositInterest } from '@/lib/calc/formulas';
+import { formatKRWExact } from '@/lib/calc/tax-tables';
 
 const 억 = 100_000_000;
 
@@ -574,5 +575,89 @@ describe('경매 수익률 — 「등 5%」 분해 (K-9 ⓒ)', () => {
     // ⚠️ 인수 권리는 앞의 셋과 «성질이 다르다» — 취득 이후 비용이 아니라 취득가격 가산분이라
     //    있으면 세금과 총투자비가 둘 다 커진다. 그 사실을 따로 한 줄 쓴다.
     expect(row(r, '⚠️ 인수 권리')).toContain('둘 다');
+  });
+});
+
+describe('예적금 이자 — 세금우대 9.5% 화석 제거 · 상호금융 가입연도×요건 2차원 (K-9 ⓒ)', () => {
+  // 법령 원문(DRF) 대조 2026-09-17 — 조특법 §89의3 · §88의2 · 소득세법 §129 · 지방세법 §103의13 · 농특세법 §5
+  const POLICY = JSON.stringify({
+    pct: { int_tax_income: 14, int_tax_local: 10, mutual_dep_rate_5: 5, mutual_dep_rate_9: 9, farm_int_base: 14, farm_int_rate: 10 },
+    amt: { mutual_dep_limit: 30_000_000, taxfree_sav_limit: 50_000_000 },
+    meta: { int_tax_income: { source: '소득세법 제129조', date: '2026-01-01' } },
+  });
+  const W = (x: number) => formatKRWExact(x);
+  const run = (o: Record<string, unknown>) =>
+    depositInterest({ type: 'deposit', amount: 10_000_000, rate: 3.5, months: 12, taxType: 'general', __policy: POLICY, ...o } as any);
+  const row = (r: ReturnType<typeof depositInterest>, label: string) =>
+    r.details.find((d) => d.label.startsWith(label))?.value;
+
+  it('일반 과세는 «성분» 으로 — 소득세 14% + 지방소득세(소득세의 10%) = 15.4%', () => {
+    const r = run({});
+    // 1,000만 × 3.5% × 12/12 = 35만 → 49,000 + 4,900
+    expect(row(r, '소득세 (14%)')).toBe(W(49_000));
+    expect(row(r, '지방소득세')).toBe(W(4_900));
+    expect(row(r, '세금 합계')).toBe(W(53_900));
+    expect(r.main.value).toBe(W(10_296_100));
+  });
+
+  it('⛔ 옛 적금 공식은 «× 개월» 이 빠져 12배 과소였다', () => {
+    const 옛 = Math.round(1_000_000 * 0.035 * 13 / 2 / 12);   // 18,958
+    const r = run({ type: 'savings', amount: 1_000_000 });
+    expect(옛).toBe(18_958);
+    expect(row(r, '세전 이자')).toBe(W(227_500));             // 100만 × 3.5% × 12·13/2 / 12
+  });
+
+  it('상호금융 2025년 이전 가입 — 소득세 비과세지만 농특세 1.4% 는 붙는다 («비과세 ≠ 0원»)', () => {
+    const r = run({ taxType: 'mutual', joinYear: '2025' });
+    expect(row(r, '특례 소득세')).toBe('비과세');
+    expect(r.details.find((d) => d.label.startsWith('농어촌특별세'))!.label).toContain('1.4%');
+    expect(row(r, '세금 합계')).toBe(W(4_900));
+  });
+
+  it('요건 밖 2026 가입 5% · 2027 가입 9% — 지방소득세 없음, 농특세 0.9 / 0.5', () => {
+    const a = run({ taxType: 'mutual', joinYear: '2026', eligible: 'no' });
+    expect(row(a, '세금 합계')).toBe(W(17_500 + 3_150));
+    expect(row(a, '특례 지방소득세')).toContain('부과하지 않는다');
+    const b = run({ taxType: 'mutual', joinYear: '2027', eligible: 'no' });
+    expect(row(b, '세금 합계')).toBe(W(31_500 + 1_750));
+  });
+
+  it('요건 충족은 2028 가입까지 비과세, 2029 가입 5%, 2030 이후 9%', () => {
+    expect(row(run({ taxType: 'mutual', joinYear: '2028' }), '세금 합계')).toBe(W(4_900));
+    expect(row(run({ taxType: 'mutual', joinYear: '2029' }), '세금 합계')).toBe(W(20_650));
+    expect(row(run({ taxType: 'mutual', joinYear: '2030' }), '세금 합계')).toBe(W(33_250));
+  });
+
+  it('농특세 면제 대상은 0 — 그리고 «면제» 라고 말한다', () => {
+    const r = run({ taxType: 'mutual', joinYear: '2025', farmExempt: 'yes' });
+    expect(row(r, '농어촌특별세')).toContain('면제');
+    expect(row(r, '세금 합계')).toBe(W(0));
+  });
+
+  it('한도 3천만 초과분은 일반 원천징수 — 예금은 비율로 갈린다', () => {
+    const r = run({ taxType: 'mutual', joinYear: '2025', amount: 50_000_000 });
+    // 이자 175만 → 한도 안 105만(농특 14,700) · 밖 70만(98,000 + 9,800)
+    expect(row(r, '⚠️ 한도 초과분')).toContain(W(700_000));
+    expect(row(r, '세금 합계')).toBe(W(122_500));
+  });
+
+  it('⛔ 적금 한도는 비율로 가르면 틀린다 — 앞 회차부터 채운다', () => {
+    // 월 300만 × 12 = 3,600만. 1~10회차가 한도 안, 11·12회차가 밖.
+    // 회차 k 이자 = 300만 × 3.6% × (13−k)/12 = 9,000 × (13−k) → 밖 = 18,000 + 9,000 = 27,000
+    // 비율(1/6)로 갈랐다면 117,000 — 4배 넘게 틀린다.
+    const r = run({ type: 'savings', amount: 3_000_000, rate: 3.6, taxType: 'mutual', joinYear: '2025' });
+    expect(row(r, '세전 이자')).toBe(W(702_000));
+    expect(row(r, '⚠️ 한도 초과분')).toContain(W(27_000));
+  });
+
+  it('비과세종합저축 — 소득세·농특세 모두 «없음» (농특세법 §4 목록)', () => {
+    const r = run({ taxType: 'taxFreeSavings', amount: 20_000_000 });
+    expect(row(r, '농어촌특별세')).toContain('없음');
+    expect(row(r, '세금 합계')).toBe(W(0));
+  });
+
+  it('⛔ 주입이 없으면 세율을 지어내지 않는다', () => {
+    const r = depositInterest({ type: 'deposit', amount: 10_000_000, rate: 3.5, months: 12, taxType: 'general' });
+    expect(r.main.label).toBe('세율 기준 미수신');
   });
 });
