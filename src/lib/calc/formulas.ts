@@ -598,96 +598,15 @@ export function bmi(v: V): CalcResult {
   };
 }
 
-export function dueDate(v: V): CalcResult {
-  const lmp = v.lastPeriod as string;
-  if (!lmp) return { main: { label: '출산 예정일', value: '날짜를 입력하세요' }, details: [] };
-  const cycle = n(v.cycleLength) || 28;
-  const date = new Date(lmp);
-  date.setDate(date.getDate() + 280 + (cycle - 28));
-  const today = new Date();
-  const weeks = Math.floor((today.getTime() - new Date(lmp).getTime()) / (7 * 86400000));
-  return {
-    main: { label: '출산 예정일', value: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` },
-    details: [{ label: '현재 임신 주수', value: weeks > 0 ? `${weeks}주` : '임신 전' }, { label: 'D-Day', value: `${Math.ceil((date.getTime() - today.getTime()) / 86400000)}일` }],
-  };
-}
+import { dueDate } from './k9/misc'; export { dueDate };
 
-export function electricityBill(v: V): CalcResult {
-  const usage = n(v.usage);
-  // 주택용 누진세 (2026년 기준)
-  const tiers = [
-    { max: 200, rate: 120.0 }, { max: 400, rate: 214.6 }, { max: Infinity, rate: 307.3 },
-  ];
-  let charge = 0;
-  const base = 910; // 기본요금
-  let remaining = usage;
-  let prev = 0;
-  for (const t of tiers) {
-    const tierUsage = Math.min(remaining, t.max - prev);
-    charge += tierUsage * t.rate;
-    remaining -= tierUsage;
-    prev = t.max;
-    if (remaining <= 0) break;
-  }
-  const subtotal = base + charge;
-  const climateFund = Math.round(usage * 9); // 기후환경요금
-  const fuelAdj = Math.round(usage * 5); // 연료비조정
-  const vat = Math.round((subtotal + climateFund + fuelAdj) * 0.1);
-  const fundTax = Math.round((subtotal + climateFund + fuelAdj) * 0.037);
-  const total = Math.round(subtotal + climateFund + fuelAdj + vat + fundTax);
-  return {
-    main: { label: '전기요금 (부가세 포함)', value: fmt(total) },
-    details: [
-      { label: '전력량요금', value: fmt(Math.round(charge)) },
-      { label: '기본요금', value: fmt(base) },
-      { label: '부가세 (10%)', value: fmt(vat) },
-    ],
-  };
-}
+import { electricityBill } from './k9/misc'; export { electricityBill };
 
-export function dischargeDate(v: V): CalcResult {
-  const dateStr = v.enlistDate as string;
-  if (!dateStr) return { main: { label: '전역 예정일', value: '입대일을 입력하세요' }, details: [] };
-  const months: Record<string, number> = { army: 18, marine: 18, navy: 20, airforce: 21, social: 21 };
-  const branch = v.branch as string;
-  const m = months[branch] || 18;
-  const date = new Date(dateStr);
-  date.setMonth(date.getMonth() + m);
-  date.setDate(date.getDate() - 1);
-  const today = new Date();
-  const dday = Math.ceil((date.getTime() - today.getTime()) / 86400000);
-  const totalDays = m * 30;
-  const served = totalDays - Math.max(0, dday);
-  const pct2 = Math.min(100, Math.round(served / totalDays * 100));
-  return {
-    main: { label: '전역 예정일', value: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` },
-    details: [
-      { label: 'D-Day', value: dday > 0 ? `D-${dday}` : '전역 완료!' },
-      { label: '복무 진행률', value: `${pct2}%` },
-      { label: '복무기간', value: `${m}개월` },
-    ],
-  };
-}
+import { dischargeDate } from './k9/misc'; export { dischargeDate };
 
 // ═══ 연금/은퇴 ═══
 
-export function nationalPension(v: V): CalcResult {
-  const salary = Math.min(n(v.monthlySalary), 5900000);
-  const years = n(v.years);
-  // 국민연금 예상 수령액 간이 공식 (A값 기준)
-  const aValue = 2989000; // 2026년 A값 (전체 가입자 평균 소득월액)
-  const bValue = salary;
-  const basicAmount = (aValue + bValue) * 0.012 * Math.min(years, 20) +
-                      (aValue + bValue) * 0.01 * Math.max(0, years - 20);
-  return {
-    main: { label: '예상 월 수령액', value: fmt(Math.round(basicAmount)) },
-    details: [
-      { label: '월 납부액', value: fmt(Math.round(salary * 0.045)) },
-      { label: '총 납부액', value: fmt(Math.round(salary * 0.045 * years * 12)) },
-      { label: '가입기간', value: `${years}년` },
-    ],
-  };
-}
+import { nationalPension } from './k9/misc'; export { nationalPension };
 
 export function fireCalc(v: V): CalcResult {
   const expense = n(v.monthlyExpense);
@@ -712,22 +631,7 @@ export function fireCalc(v: V): CalcResult {
   };
 }
 
-export function irpDeduction(v: V): CalcResult {
-  const salary = n(v.annualSalary);
-  const pension = Math.min(n(v.pensionSavings), 6000000);
-  const irp = Math.min(n(v.irp), 9000000 - pension);
-  const total = pension + irp;
-  const rate = salary <= 55000000 ? 0.165 : 0.132;
-  const deduction = Math.round(total * rate);
-  return {
-    main: { label: '세액공제 환급액', value: fmt(deduction) },
-    details: [
-      { label: '연금저축', value: fmt(pension) },
-      { label: 'IRP', value: fmt(irp) },
-      { label: '공제율', value: pct(rate) },
-    ],
-  };
-}
+import { irpDeduction } from './k9/misc'; export { irpDeduction };
 
 // ── 공식 매핑 ──
 export const FORMULAS: Record<string, (v: V) => CalcResult> = {
@@ -847,30 +751,14 @@ export function calorie(v: V): CalcResult {
   const tdee = Math.round(bmrVal * act);
   return { main: { label: '일일 권장 칼로리', value: `${tdee} kcal` }, details: [{ label: '기초대사량 (BMR)', value: `${Math.round(bmrVal)} kcal` }, { label: '다이어트 목표', value: `${Math.round(tdee * 0.8)} kcal (-20%)` }] };
 }
-export function bodyFat(v: V): CalcResult {
-  const g = v.gender as string; const a = n(v.age); const h = n(v.height)/100; const w = n(v.weight);
-  const bmiVal = w/(h*h);
-  const bf = g === 'male' ? 1.20*bmiVal + 0.23*a - 16.2 : 1.20*bmiVal + 0.23*a - 5.4;
-  const grade = g === 'male' ? (bf < 14 ? '마른 체형' : bf < 20 ? '정상' : bf < 25 ? '약간 과체중' : '비만') : (bf < 21 ? '마른 체형' : bf < 28 ? '정상' : bf < 32 ? '약간 과체중' : '비만');
-  return { main: { label: `체지방률 ${bf.toFixed(1)}%`, value: grade }, details: [{ label: 'BMI', value: bmiVal.toFixed(1) }] };
-}
+import { bodyFat } from './k9/misc'; export { bodyFat };
 export function bmr(v: V): CalcResult {
   const g = v.gender as string; const a = n(v.age); const h = n(v.height); const w = n(v.weight);
   const val = g === 'male' ? 10*w + 6.25*h - 5*a + 5 : 10*w + 6.25*h - 5*a - 161;
   return { main: { label: '기초대사량', value: `${Math.round(val)} kcal/일` }, details: [{ label: '공식', value: 'Mifflin-St Jeor' }] };
 }
-export function ageCalc(v: V): CalcResult {
-  const bd = new Date(v.birthDate as string); const today = new Date();
-  let age = today.getFullYear() - bd.getFullYear();
-  if (today.getMonth() < bd.getMonth() || (today.getMonth() === bd.getMonth() && today.getDate() < bd.getDate())) age--;
-  return { main: { label: '만 나이', value: `${age}세` }, details: [{ label: '다음 생일까지', value: (() => { const next = new Date(bd); next.setFullYear(today.getFullYear()); if (next <= today) next.setFullYear(today.getFullYear()+1); return `${Math.ceil((next.getTime()-today.getTime())/86400000)}일`; })() }] };
-}
-export function dDay(v: V): CalcResult {
-  const s = v.startDate as string; const e = v.endDate as string;
-  if (!s || !e) return { main: { label: 'D-Day', value: '날짜를 입력하세요' }, details: [] };
-  const diff = Math.ceil((new Date(e).getTime() - new Date(s).getTime()) / 86400000);
-  return { main: { label: 'D-Day', value: diff > 0 ? `D-${diff}` : diff === 0 ? 'D-Day!' : `D+${Math.abs(diff)}` }, details: [{ label: '일수 차이', value: `${Math.abs(diff)}일` }] };
-}
+import { ageCalc } from './k9/misc'; export { ageCalc };
+import { dDay } from './k9/misc'; export { dDay };
 export function ovulation(v: V): CalcResult {
   const lmp = v.lastPeriod as string; const cycle = n(v.cycleLength) || 28;
   if (!lmp) return { main: { label: '배란 예정일', value: '날짜를 입력하세요' }, details: [] };
@@ -908,16 +796,7 @@ export function installmentInterest(v: V): CalcResult {
   const interest = Math.round(amount * r * (m + 1) / 24);
   return { main: { label: '총 이자', value: fmt(interest) }, details: [{ label: '월 납입금', value: fmt(Math.round((amount + interest) / m)) }, { label: '실질 부담액', value: fmt(amount + interest) }] };
 }
-export function customsDuty(v: V): CalcResult {
-  const price = n(v.price); const ship = n(v.shipping);
-  const rates: Record<string, number> = { general: 0.08, clothing: 0.13, electronics: 0.04, food: 0.08, cosmetics: 0.065 };
-  const total = price + ship;
-  if (total <= 150000) return { main: { label: '관세', value: '0원 (면세)' }, details: [{ label: '과세가격', value: fmt(total) }, { label: '면세 한도', value: '15만원 이하 면세' }] };
-  const rate = rates[v.category as string] || 0.08;
-  const duty = Math.round(total * rate);
-  const vat = Math.round((total + duty) * 0.1);
-  return { main: { label: '관세+부가세', value: fmt(duty + vat) }, details: [{ label: '관세', value: fmt(duty) }, { label: '부가세 (10%)', value: fmt(vat) }, { label: '적용 세율', value: pct(rate) }] };
-}
+import { customsDuty } from './k9/misc'; export { customsDuty };
 export function subscriptionTotal(v: V): CalcResult {
   const subs = [n(v.sub1), n(v.sub2), n(v.sub3), n(v.sub4), n(v.sub5)].filter(s => s > 0);
   const monthly = subs.reduce((a,b) => a+b, 0);
@@ -1019,36 +898,9 @@ export function jeonseVsWolse(v: V): CalcResult {
   const better = diff < 0 ? '전세 유리' : '월세 유리';
   return { main: { label: better, value: `연 ${fmt(Math.abs(diff))} 차이` }, details: [{ label: '전세 연간 비용', value: fmt(Math.round(jCost)) }, { label: '월세 연간 비용', value: fmt(Math.round(wCost)) }] };
 }
-export function yearEndRefund(v: V): CalcResult {
-  const salary = n(v.annualSalary);
-  const taxBase = Math.max(0, salary - n(v.incomeDeduction) - Math.min(salary * 0.7, salary <= 5000000 ? salary * 0.7 : 15000000 + (salary - 5000000) * 0.15)); // 근로소득공제 근사
-  const determined = Math.max(0, Math.round(calcProgressiveTax(taxBase, INCOME_TAX_BRACKETS)) - n(v.taxCredit));
-  const paid = n(v.alreadyPaid);
-  const refund = paid - determined;
-  return { main: { label: refund >= 0 ? '예상 환급액' : '추가 납부액', value: fmt(Math.abs(Math.round(refund))), color: refund >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }, details: [{ label: '결정세액', value: fmt(Math.round(determined)) }, { label: '기납부세액', value: fmt(paid) }] };
-}
-export function creditCardDeduction(v: V): CalcResult {
-  const salary = n(v.annualSalary);
-  const threshold = salary * 0.25;
-  const credit = n(v.credit); const debit = n(v.debit); const trad = n(v.traditional);
-  const totalSpend = credit + debit + trad;
-  if (totalSpend <= threshold) return { main: { label: '소득공제', value: '0원' }, details: [{ label: '사유', value: `총급여 25% (${fmt(threshold)}) 미달` }] };
-  const excess = totalSpend - threshold;
-  const creditExcess = Math.max(0, Math.min(credit, excess));
-  const debitExcess = Math.max(0, Math.min(debit, excess - creditExcess));
-  const tradExcess = Math.max(0, Math.min(trad, excess - creditExcess - debitExcess));
-  const deduction = Math.round(creditExcess * 0.15 + debitExcess * 0.30 + tradExcess * 0.40);
-  const maxDeduction = salary <= 70000000 ? 3000000 : salary <= 120000000 ? 2500000 : 2000000;
-  const final = Math.min(deduction, maxDeduction);
-  return { main: { label: '소득공제 금액', value: fmt(final) }, details: [{ label: '25% 문턱 초과분', value: fmt(excess) }, { label: '공제 한도', value: fmt(maxDeduction) }] };
-}
-export function monthlyRentDeduction(v: V): CalcResult {
-  const salary = n(v.annualSalary); const rent = n(v.annualRent);
-  if (salary > 80000000) return { main: { label: '세액공제', value: '0원' }, details: [{ label: '사유', value: '총급여 8천만원 초과 → 공제 불가' }] };
-  const base = Math.min(rent, 10000000);
-  const rate = salary <= 55000000 ? 0.17 : 0.15;
-  return { main: { label: '월세 세액공제', value: fmt(Math.round(base * rate)) }, details: [{ label: '공제 대상', value: fmt(base) }, { label: '공제율', value: pct(rate) }] };
-}
+import { yearEndRefund } from './k9/misc'; export { yearEndRefund };
+import { creditCardDeduction } from './k9/misc'; export { creditCardDeduction };
+import { monthlyRentDeduction } from './k9/misc'; export { monthlyRentDeduction };
 import { inheritanceTax } from './k9/inh'; export { inheritanceTax }; // K-9 inh — 본문은 k9/inh.ts
 export function vatCalc(v: V): CalcResult {
   const amount = n(v.amount);
@@ -1139,12 +991,7 @@ export function localIncomeTax(v: V): CalcResult {
   const tax = n(v.incomeTax);
   return { main: { label: '지방소득세', value: fmt(Math.round(tax * 0.1)) }, details: [{ label: '소득세', value: fmt(tax) }, { label: '합계 (소득세+지방소득세)', value: fmt(Math.round(tax * 1.1)) }] };
 }
-export function simplifiedVat(v: V): CalcResult {
-  const rev = n(v.revenue); const rate = Number(v.industryRate); const purchase = n(v.purchaseVat);
-  const vat = Math.max(0, Math.round(rev * rate * 0.1 - purchase * 0.5));
-  if (rev <= 48000000) return { main: { label: '납부 부가세', value: '0원 (면제)' }, details: [{ label: '사유', value: '매출 4,800만원 이하 납부 면제' }] };
-  return { main: { label: '납부 부가세', value: fmt(vat) }, details: [{ label: '매출세액', value: fmt(Math.round(rev * rate * 0.1)) }, { label: '매입세액 공제', value: fmt(Math.round(purchase * 0.5)) }] };
-}
+import { simplifiedVat } from './k9/misc'; export { simplifiedVat };
 import { corporateTax } from './k9/corp'; export { corporateTax }; // K-9 inh — 본문은 k9/corp.ts
 import { penaltyTax } from './k9/fin'; export { penaltyTax };
 export function expenseRateLookup(v: V): CalcResult {
@@ -1152,30 +999,10 @@ export function expenseRateLookup(v: V): CalcResult {
   const income = Math.round(rev * (1 - rate));
   return { main: { label: '추정 소득금액', value: fmt(income) }, details: [{ label: '총 수입', value: fmt(rev) }, { label: '경비율', value: pct(rate) }, { label: '추정 필요경비', value: fmt(Math.round(rev * rate)) }] };
 }
-export function medicalDeduction(v: V): CalcResult {
-  const salary = n(v.annualSalary); const total = n(v.totalMedical); const senior = n(v.seniorMedical);
-  const threshold = salary * 0.03;
-  const generalDeductible = Math.min(Math.max(0, total - senior - threshold), 7000000);
-  const seniorDeductible = Math.max(0, senior);
-  const deduction = Math.round((generalDeductible + seniorDeductible) * 0.15);
-  return { main: { label: '의료비 세액공제', value: fmt(deduction) }, details: [{ label: '3% 문턱', value: fmt(Math.round(threshold)) }, { label: '공제 대상', value: fmt(generalDeductible + seniorDeductible) }] };
-}
-export function educationDeduction(v: V): CalcResult {
-  const self2 = n(v.selfEdu); const child = Math.min(n(v.childEdu), 3000000 * n(v.childCount));
-  const deduction = Math.round((self2 + child) * 0.15);
-  return { main: { label: '교육비 세액공제', value: fmt(deduction) }, details: [{ label: '본인 교육비', value: fmt(self2) }, { label: '자녀 교육비', value: fmt(child) }] };
-}
-export function donationDeduction(v: V): CalcResult {
-  const legal = n(v.legalDonation); const designated = n(v.designatedDonation); const religious = n(v.religiousDonation);
-  const total = legal + designated + religious;
-  const deduction = Math.round(total <= 10000000 ? total * 0.15 : 10000000 * 0.15 + (total - 10000000) * 0.30);
-  return { main: { label: '기부금 세액공제', value: fmt(deduction) }, details: [{ label: '기부금 합계', value: fmt(total) }] };
-}
-export function insuranceDeduction(v: V): CalcResult {
-  const premium = Math.min(n(v.premium), 1000000);
-  const disability = Math.min(n(v.disabilityPremium), 1000000);
-  return { main: { label: '보험료 세액공제', value: fmt(Math.round((premium + disability) * 0.12)) }, details: [{ label: '보장성보험', value: fmt(premium) }, { label: '장애인전용', value: fmt(disability) }] };
-}
+import { medicalDeduction } from './k9/misc'; export { medicalDeduction };
+import { educationDeduction } from './k9/misc'; export { educationDeduction };
+import { donationDeduction } from './k9/misc'; export { donationDeduction };
+import { insuranceDeduction } from './k9/misc'; export { insuranceDeduction };
 export function childCredit(v: V): CalcResult {
   const count = n(v.childCount); const newborn = n(v.newborn);
   let credit = 0;
@@ -1207,15 +1034,7 @@ export function childSupport(v: V): CalcResult {
   const monthly = Math.round(baseAmount * ageMultiplier * count * (fIncome / total));
   return { main: { label: '월 양육비 (추정)', value: fmt(monthly) }, details: [{ label: '부모 합산 소득', value: fmt(total) }, { label: '부담 비율', value: pct(fIncome / total) }] };
 }
-export function accidentCompensation(v: V): CalcResult {
-  const treat = n(v.treatmentCost); const days = n(v.treatmentDays);
-  const wage = n(v.dailyWage); const disGrade = Number(v.disability);
-  const consolation = days <= 14 ? 500000 : days <= 30 ? 1000000 : days <= 90 ? 2000000 : 5000000;
-  const lostWage = wage * days;
-  const disCompensation = disGrade > 0 ? wage * 365 * (15 - disGrade) * 0.05 : 0;
-  const total = treat + consolation + lostWage + Math.round(disCompensation);
-  return { main: { label: '추정 합의금', value: fmt(total) }, details: [{ label: '치료비', value: fmt(treat) }, { label: '위자료', value: fmt(consolation) }, { label: '휴업손해', value: fmt(lostWage) }, { label: '장해보상', value: fmt(Math.round(disCompensation)) }] };
-}
+import { accidentCompensation } from './k9/misc'; export { accidentCompensation };
 export function prepaymentFee(v: V): CalcResult {
   const amount = n(v.repayAmount);
   const loanMonths = n(v.loanMonths) || 360;
@@ -1293,18 +1112,7 @@ export function housingPension(v: V): CalcResult {
   };
 }
 import { retirementPensionSim } from './k9/fin'; export { retirementPensionSim };
-export function alcoholCalc(v: V): CalcResult {
-  const gender = v.gender as string; const w = n(v.weight); const drinks = n(v.drinks);
-  const drinkType = v.drinkType as string; const hours = n(v.hours);
-  const alcPercent: Record<string, number> = { soju: 0.17, beer: 0.05, wine: 0.13, whiskey: 0.40 };
-  const mlPerDrink: Record<string, number> = { soju: 50, beer: 355, wine: 150, whiskey: 30 };
-  const totalAlcGrams = drinks * mlPerDrink[drinkType] * alcPercent[drinkType] * 0.789;
-  const r = gender === 'male' ? 0.68 : 0.55;
-  const bac = Math.max(0, (totalAlcGrams / (w * r * 1000)) * 100 - hours * 0.015);
-  const status = bac >= 0.08 ? '면허취소 (0.08%+)' : bac >= 0.03 ? '면허정지 (0.03%+)' : '정상';
-  const color = bac >= 0.08 ? 'var(--accent-red)' : bac >= 0.03 ? 'var(--accent-yellow)' : 'var(--accent-green)';
-  return { main: { label: `BAC ${bac.toFixed(3)}%`, value: status, color }, details: [{ label: '섭취 알코올', value: `${totalAlcGrams.toFixed(1)}g` }, { label: '경과시간', value: `${hours}시간` }] };
-}
+import { alcoholCalc } from './k9/misc'; export { alcoholCalc };
 export function unitConvert(v: V): CalcResult {
   const val = n(v.value); const cat = v.category as string; const dir = v.direction as string;
   const conversions: Record<string, { aName: string; bName: string; aToB: (x: number) => number; bToA: (x: number) => number }> = {
@@ -1447,13 +1255,30 @@ export function ltvCalc(v: V): CalcResult {
 
   const price = n(v.housePrice);
   const existing = n(v.existingLoan);
-  const maxLoan = Math.max(0, Math.round(price * (ratePct / 100) - existing));
+  const ltvLoan = Math.max(0, Math.round(price * (ratePct / 100) - existing));
+  // A2 (2026-09-17) — 수도권·규제지역 주택구입목적 주담대는 «가격별 최대 한도» 가 LTV 와 «별도로» 걸린다
+  //   (policy_constants mortgage_cap_*: 15억 이하 6억 / 15억 초과~25억 이하 4억 / 25억 초과 2억, 2025-10-16~).
+  //   ⛔ 옛 코드는 이 행을 읽지 않았다 — 규제지역 무주택 시가 20억 → 8억(실제 4억).
+  const capKey = region === 'local_nonreg' ? null
+    : price <= 1_500_000_000 ? 'mortgage_cap_15eok_under'
+    : price <= 2_500_000_000 ? 'mortgage_cap_15_25eok'
+    : 'mortgage_cap_25eok_over';
+  const capAmt = capKey ? pack?.amt?.[capKey] : undefined;
+  const maxLoan = typeof capAmt === 'number' ? Math.min(ltvLoan, capAmt) : ltvLoan;
   const m = pack?.meta?.[key] ?? {};
   const details: { label: string; value: string }[] = [
     { label: '적용 LTV', value: `${ratePct}%` },
     ...(m.item ? [{ label: '적용 기준', value: m.item }] : []),
     { label: '기존 대출 차감', value: fmt(existing) },
   ];
+  if (capKey && ratePct > 0) {
+    if (typeof capAmt === 'number') {
+      const cm = pack?.meta?.[capKey] ?? {};
+      details.push({ label: '가격별 최대 한도', value: `${fmt(capAmt)}${cm.item ? ` — ${cm.item}` : ''}${maxLoan < ltvLoan ? ` · LTV 금액 ${fmt(ltvLoan)}보다 작아 이 한도가 적용됐다` : ''}` });
+    } else {
+      details.push({ label: '⚠️ 가격별 한도', value: '수도권·규제지역 가격별 주담대 최대 한도 기준을 받지 못했다 — 아래 금액은 LTV 만 반영했다' });
+    }
+  }
   if (ratePct === 0) {
     details.unshift({ label: '판단', value: '이 조건은 주택구입목적 주택담보대출이 «허용되지 않는다»' });
   }
@@ -1791,23 +1616,12 @@ export function inflationCalc(v: V): CalcResult {
   const realValue = Math.round(amount / Math.pow(1 + inf, years));
   return { main: { label: `${years}년 후 실질 가치`, value: fmt(realValue) }, details: [{ label: '명목 금액', value: fmt(amount) }, { label: '구매력 감소', value: fmt(amount - realValue) }] };
 }
-export function consolationMoney(v: V): CalcResult {
-  const years = n(v.marriageYears); const income = n(v.income);
-  const base: Record<string, number> = { low: 10000000, medium: 30000000, high: 50000000 };
-  const amount = Math.round((base[v.faultDegree as string] || 30000000) * (1 + years * 0.05) * Math.min(2, income / 50000000));
-  return { main: { label: '예상 위자료', value: fmt(amount) }, details: [{ label: '참고', value: '법원 판례 기반 추정치, 실제와 다를 수 있음' }] };
-}
+import { consolationMoney } from './k9/misc'; export { consolationMoney };
 export function propertyDivision(v: V): CalcResult {
   const total = n(v.totalAssets); const ratio = n(v.ratio) / 100;
   return { main: { label: '분할 금액', value: fmt(Math.round(total * ratio)) }, details: [{ label: '공동재산', value: fmt(total) }, { label: '분할 비율', value: pct(ratio) }] };
 }
-export function statuteOfLimitations(v: V): CalcResult {
-  const start = v.startDate as string; const years = Number(v.type);
-  if (!start) return { main: { label: '소멸시효', value: '날짜 입력 필요' }, details: [] };
-  const d = new Date(start); d.setFullYear(d.getFullYear() + years);
-  const today = new Date(); const remain = Math.ceil((d.getTime() - today.getTime()) / 86400000);
-  return { main: { label: '소멸시효 만료', value: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }, details: [{ label: '시효 기간', value: `${years}년` }, { label: '잔여', value: remain > 0 ? `${remain}일` : '만료됨' }] };
-}
+import { statuteOfLimitations } from './k9/misc'; export { statuteOfLimitations };
 export function industrialAccident(v: V): CalcResult {
   const wage = n(v.dailyWage); const days = n(v.restDays); const grade = Number(v.disabilityGrade);
   const restPay = Math.round(wage * 0.7 * days);
