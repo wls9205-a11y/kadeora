@@ -414,6 +414,65 @@ export function parsePolicyPack(raw: unknown): PolicyPack | null {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 1-4. 중도상환수수료 — 법정 틀 + 시장값 공개형(대표값·범위·기준일)
+//
+// ⛔ 요율은 법정값이 아니다. 은행이 «매년» 실비용으로 산정해 1월에 공시하고, «계약일» 기준으로 적용된다.
+//    그래서 단일 상수도, 기준일 하나도 부족하다 — 계약 연도가 입력이다.
+// 법정인 것은 틀뿐이다:
+//   · 금융소비자보호법 §20①4호나목1) — 대출계약 성립일부터 «3년 이내» 상환일 때만 부과(그 뒤 부과는 불공정영업행위)
+//   · 금융소비자 보호에 관한 감독규정 §14⑥9호나목(고시 제2024-36호, 2025-01-13 시행) — 실비용(기회비용·행정비용) 이내
+//   · 같은 호 가목 — 사실상 동일한 대환·갱신은 기존 기간을 합산
+// 산식은 법령이 아니라 은행연합회 표준: 상환금액 × 요율 × 잔여일수 / 대출기간
+//   (대출기간보다 적용기간이 짧으면 적용기간을 대출기간으로 «간주»). 상품별 상이 단서 있음.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const PREPAY_SOURCE = {
+  statute: '금융소비자보호법 제20조제1항제4호나목 · 금융소비자 보호에 관한 감독규정 제14조제6항제9호',
+  statuteUrl: 'https://www.law.go.kr/법령/금융소비자보호법/제20조',
+  reform: '금융위원회 보도자료 「1월 13일(월) 신규 대출부터 중도상환수수료율이 인하됩니다」(2025-01-09)',
+  reformUrl: 'https://www.fsc.go.kr/no010101/83833',
+  disclosure: '은행연합회 소비자포털 「대출관련 중도상환수수료율」 비교공시',
+  disclosureUrl: 'https://portal.kfb.or.kr/compare/commission_loan_search.php',
+  /** 공시를 옮겨 적은 날. 렌더 시각이 아니다(거짓 신선도 금지). */
+  transcribedAt: '2026-09-17',
+  /** 법정 부과 상한 기간(개월). */
+  statutoryMonths: 36,
+} as const;
+
+export type PrepayContract = 'pre2025' | 'y2025' | 'y2026';
+export type PrepayLoan = 'secured' | 'otherSecured' | 'credit';
+export type PrepayRateType = 'fixed' | 'variable';
+
+export interface PrepayRate { median: number; min: number; max: number; basis: string }
+
+/**
+ * 5대 은행(KB국민·신한·하나·우리·NH농협) 가계대출 — 값은 5행의 «중앙값» 과 최저~최고(%).
+ *   pre2025 · y2025 = 금융위 보도자료 2025-01-09 비교표(개편 전 → 2025 계약분)
+ *   y2026           = 은행연합회 공시 기준연도 2026(NH 26.1.13·우리 26.1.1 적용), 조회 2026-09-17
+ * ⚠️ 공시 분류는 「부동산·동산 담보 / 보증서·기타 / 신용」 — 「주택담보」 칸은 따로 없다.
+ * ⚠️ y2026 변동이 고정보다 높은 은행(NH·우리·하나)이 있다 — 공시값 그대로 옮겼다.
+ * ⚠️ 2025 공시는 연중 변경분으로 덮어써져 보도자료와 일부 다르다(KB 기타담보 0.79 vs 0.77) — 여기는 보도자료값.
+ * ⚠️ 은행 표다. 저축은행·보험·상호금융은 수준이 다르다(개편 후 저축은행 주담대 평균 1.24/1.20).
+ */
+export const PREPAY_RATES: Record<PrepayContract, Record<PrepayLoan, Record<PrepayRateType, PrepayRate>>> = {
+  pre2025: {
+    secured:      { fixed: { median: 1.40, min: 1.40, max: 1.40, basis: '개편 전' }, variable: { median: 1.20, min: 1.20, max: 1.20, basis: '개편 전' } },
+    otherSecured: { fixed: { median: 0.70, min: 0.70, max: 0.80, basis: '개편 전' }, variable: { median: 0.60, min: 0.60, max: 0.70, basis: '개편 전' } },
+    credit:       { fixed: { median: 0.70, min: 0.70, max: 0.80, basis: '개편 전' }, variable: { median: 0.60, min: 0.60, max: 0.70, basis: '개편 전' } },
+  },
+  y2025: {
+    secured:      { fixed: { median: 0.65, min: 0.58, max: 0.74, basis: '2025-01-13 이후 계약' }, variable: { median: 0.65, min: 0.58, max: 0.74, basis: '2025-01-13 이후 계약' } },
+    otherSecured: { fixed: { median: 0.61, min: 0.52, max: 0.79, basis: '2025-01-13 이후 계약' }, variable: { median: 0.59, min: 0.37, max: 0.72, basis: '2025-01-13 이후 계약' } },
+    credit:       { fixed: { median: 0.03, min: 0.01, max: 0.04, basis: '2025-01-13 이후 계약' }, variable: { median: 0.03, min: 0.01, max: 0.04, basis: '2025-01-13 이후 계약' } },
+  },
+  y2026: {
+    secured:      { fixed: { median: 0.65, min: 0.59, max: 0.75, basis: '2026 공시' }, variable: { median: 0.78, min: 0.55, max: 0.95, basis: '2026 공시' } },
+    otherSecured: { fixed: { median: 0.85, min: 0.59, max: 0.96, basis: '2026 공시' }, variable: { median: 0.52, min: 0.35, max: 0.59, basis: '2026 공시' } },
+    credit:       { fixed: { median: 0.17, min: 0.01, max: 0.20, basis: '2026 공시' }, variable: { median: 0.05, min: 0.01, max: 0.13, basis: '2026 공시' } },
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // 2. 주택연금 월지급금 — 일반주택 · 종신지급방식 · 정액형
 // ─────────────────────────────────────────────────────────────────────────────
 

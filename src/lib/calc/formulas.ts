@@ -10,6 +10,7 @@ import {
   PENSION_MIN_AGE, PENSION_MAX_PRICE, brokerageBracket, BROKERAGE_SOURCE,
   parsePolicyPack, ltvPolicyKey, dsrPolicyKey, stressDsrKey, acqTaxPolicyKey, acqTaxMidRatePct, acqSurtaxPct, secTaxKeys, type StockMarket,
   depositTaxRow, type DepositTaxType,
+  PREPAY_SOURCE, PREPAY_RATES, type PrepayContract, type PrepayLoan, type PrepayRateType,
   type LtvRegion, type LtvOwner,
 } from './gov-tables';
 
@@ -1450,10 +1451,50 @@ export function accidentCompensation(v: V): CalcResult {
   return { main: { label: '추정 합의금', value: fmt(total) }, details: [{ label: '치료비', value: fmt(treat) }, { label: '위자료', value: fmt(consolation) }, { label: '휴업손해', value: fmt(lostWage) }, { label: '장해보상', value: fmt(Math.round(disCompensation)) }] };
 }
 export function prepaymentFee(v: V): CalcResult {
-  const amount = n(v.repayAmount); const rate = n(v.feeRate) / 100;
-  const remain = n(v.remainMonths); const total = n(v.totalMonths);
-  const fee = Math.round(amount * rate * remain / total);
-  return { main: { label: '중도상환수수료', value: fmt(fee) }, details: [{ label: '잔여비율 적용', value: `${remain}/${total}개월` }] };
+  const amount = n(v.repayAmount);
+  const loanMonths = n(v.loanMonths) || 360;
+  const elapsed = Math.max(0, n(v.elapsedMonths));
+  const periodIn = n(v.feePeriodMonths) || PREPAY_SOURCE.statutoryMonths;
+  // 적용기간은 약정이지만 «3년» 이 법정 상한이다 — 약정이 더 길어도 36개월로 자른다.
+  const period = Math.min(periodIn, PREPAY_SOURCE.statutoryMonths);
+  // ⛔ 옛 공식은 `amount × rate × remain / total` 에 total = 대출기간 전체(기본 360)를 넣었다.
+  //    표준 산식은 «대출기간과 적용기간 중 짧은 쪽» 이 분모다 — 기본 입력에서 10배 과소였다.
+  const denom = Math.min(loanMonths, period);
+  const remaining = Math.max(0, denom - elapsed);
+
+  const contract = (['pre2025', 'y2025', 'y2026'].includes(String(v.contract)) ? v.contract : 'y2026') as PrepayContract;
+  const loan = (['secured', 'otherSecured', 'credit'].includes(String(v.loanType)) ? v.loanType : 'secured') as PrepayLoan;
+  const rateType = (v.rateType === 'variable' ? 'variable' : 'fixed') as PrepayRateType;
+  const table = PREPAY_RATES[contract][loan][rateType];
+  const custom = v.rateMode === 'custom';
+  const ratePct = custom ? n(v.feeRate) : table.median;
+
+  const details: { label: string; value: string }[] = [];
+  if (elapsed >= PREPAY_SOURCE.statutoryMonths) {
+    return {
+      main: { label: '중도상환수수료', value: '부과 불가' },
+      details: [
+        { label: '근거', value: '대출계약 성립일부터 3년이 지났다 — 그 뒤 부과는 불공정영업행위다(금융소비자보호법 §20①4나)' },
+        { label: '⚠️ 대환·갱신', value: '사실상 같은 계약으로 갈아탔다면 기존 기간을 합산해 3년을 센다' },
+      ],
+    };
+  }
+  const fee = Math.round(amount * (ratePct / 100) * remaining / denom);
+  details.push({ label: '적용 요율', value: custom
+    ? `${ratePct}% (직접 입력)`
+    : `${table.median.toFixed(2)}% — 5대 은행 중앙값 (범위 ${table.min.toFixed(2)}~${table.max.toFixed(2)}%, ${table.basis})` });
+  details.push({ label: '잔여 비율', value: `${remaining} / ${denom}개월 (분모 = 대출기간과 적용기간 중 짧은 쪽)` });
+  if (!custom) {
+    details.push({ label: '요율 범위로 본 수수료', value: `${fmt(Math.round(amount * table.min / 100 * remaining / denom))} ~ ${fmt(Math.round(amount * table.max / 100 * remaining / denom))}` });
+  }
+  if (periodIn > PREPAY_SOURCE.statutoryMonths) {
+    details.push({ label: '⚠️ 적용기간', value: '3년을 넘는 약정은 법정 상한(3년)으로 계산했다' });
+  }
+  details.push({ label: '⚠️ 요율의 성격', value: '법정값이 아니다 — 은행이 매년 실비용으로 산정해 공시하고 «계약일» 기준으로 적용된다. 약정서 요율이 정본이다' });
+  details.push({ label: '⚠️ 은행 기준', value: '저축은행·보험·상호금융은 수준이 다르다 — 그 경우 약정 요율을 직접 넣는다' });
+  details.push({ label: '⚠️ 근사', value: '표준 산식은 «일수» 기준이다. 여기서는 개월로 근사했다' });
+  details.push({ label: '근거', value: `${PREPAY_SOURCE.disclosure} · 옮겨 적은 날 ${PREPAY_SOURCE.transcribedAt}` });
+  return { main: { label: '중도상환수수료', value: fmt(fee) }, details };
 }
 /**
  * K-2 ② — 지어낸 비율식을 걷어내고 «공사 예시표 보간» 으로 바꿨다 (2026-09-16).

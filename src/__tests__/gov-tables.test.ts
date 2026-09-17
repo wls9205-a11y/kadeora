@@ -7,8 +7,9 @@
  */
 import { describe, it, expect } from 'vitest';
 import { bondRatePerMille, pensionMonthly, PENSION_MIN_AGE, brokerageBracket, ltvPolicyKey, acqTaxPolicyKey, acqTaxMidRatePct } from '@/lib/calc/gov-tables';
-import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc, acquisitionTax, stockRoi, auctionProfit, depositInterest, shortSelling } from '@/lib/calc/formulas';
+import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc, acquisitionTax, stockRoi, auctionProfit, depositInterest, shortSelling, prepaymentFee } from '@/lib/calc/formulas';
 import { formatKRWExact } from '@/lib/calc/tax-tables';
+import { PREPAY_RATES } from '@/lib/calc/gov-tables';
 
 const 억 = 100_000_000;
 
@@ -702,5 +703,60 @@ describe('공매도 — 수수료는 시장값 입력 · 증권거래세는 법�
   it('⛔ 주입이 없으면 세율을 지어내지 않는다', () => {
     const r = shortSelling({ sellPrice: 100000, buyPrice: 80000, quantity: 100, borrowFee: 3, days: 30, market: 'kospi' } as any);
     expect(r.main.label).toBe('세율 기준 미수신');
+  });
+});
+
+describe('중도상환수수료 — 분모 10배 과소 수리 · 법정 3년 · 요율은 계약연도별 시장값 공개형 (K-9 ⓒ)', () => {
+  const W = (x: number) => formatKRWExact(x);
+  const run = (o: Record<string, unknown>) =>
+    prepaymentFee({ repayAmount: 100_000_000, contract: 'y2026', loanType: 'secured', rateType: 'fixed', rateMode: 'representative', elapsedMonths: 12, loanMonths: 360, feePeriodMonths: 36, ...o } as any);
+  const row = (r: ReturnType<typeof prepaymentFee>, label: string) => r.details.find((d) => d.label.startsWith(label))?.value;
+
+  it('⛔ 옛 공식은 분모가 대출기간 전체(360)라 10배 과소였다', () => {
+    const 옛 = Math.round(100_000_000 * 0.012 * 24 / 360);            // 80,000
+    const 같은요율_새산식 = Math.round(100_000_000 * 0.012 * 24 / 36); // 800,000
+    expect(옛).toBe(80_000);
+    expect(같은요율_새산식 / 옛).toBe(10);
+    expect(run({ rateMode: 'custom', feeRate: 1.2 }).main.value).toBe(W(800_000));
+  });
+
+  it('대표값은 2026 공시 5대 은행 중앙값 — 담보 고정 0.65% → 1억·잔여 24/36 = 433,333원', () => {
+    expect(run({}).main.value).toBe(W(433_333));
+    expect(row(run({}), '적용 요율')).toContain('범위 0.59~0.75%');
+  });
+
+  it('중앙값·범위는 5행에서 다시 계산해도 같다 (옮겨 적기 검산)', () => {
+    const med = (xs: number[]) => [...xs].sort((a, b) => a - b)[2];
+    // 2026 공시 NH·신한·우리·하나·KB
+    expect(med([0.63, 0.59, 0.71, 0.65, 0.75])).toBe(PREPAY_RATES.y2026.secured.fixed.median);
+    expect(med([0.93, 0.69, 0.95, 0.78, 0.55])).toBe(PREPAY_RATES.y2026.secured.variable.median);
+    expect(med([0.93, 0.85, 0.76, 0.59, 0.96])).toBe(PREPAY_RATES.y2026.otherSecured.fixed.median);
+    expect(med([0.52, 0.43, 0.35, 0.59, 0.54])).toBe(PREPAY_RATES.y2026.otherSecured.variable.median);
+    expect(med([0.01, 0.17, 0.03, 0.20, 0.18])).toBe(PREPAY_RATES.y2026.credit.fixed.median);
+    expect(med([0.01, 0.13, 0.03, 0.05, 0.11])).toBe(PREPAY_RATES.y2026.credit.variable.median);
+    // 2025 보도자료 국민·농협·신한·우리·하나
+    expect(med([0.58, 0.65, 0.61, 0.74, 0.66])).toBe(PREPAY_RATES.y2025.secured.fixed.median);
+    expect(med([0.79, 0.53, 0.76, 0.52, 0.61])).toBe(PREPAY_RATES.y2025.otherSecured.fixed.median);
+    expect(med([0.59, 0.53, 0.72, 0.37, 0.61])).toBe(PREPAY_RATES.y2025.otherSecured.variable.median);
+  });
+
+  it('⛔ 계약 3년 경과면 «부과 불가» — 0원이 아니라 법정 금지라고 말한다', () => {
+    const r = run({ elapsedMonths: 36 });
+    expect(r.main.value).toBe('부과 불가');
+    expect(row(r, '근거')).toContain('§20');
+  });
+
+  it('적용기간 약정이 3년을 넘으면 법정 상한 36개월로 자른다', () => {
+    const r = run({ feePeriodMonths: 60 });
+    expect(r.main.value).toBe(run({}).main.value);
+  });
+
+  it('대출기간이 적용기간보다 짧으면 대출기간이 분모다', () => {
+    // 24개월 대출 · 12개월 경과 → 12/24
+    expect(run({ loanMonths: 24, rateMode: 'custom', feeRate: 1 }).main.value).toBe(W(500_000));
+  });
+
+  it('요율은 계약일 기준 — 같은 조건도 개편 전 계약이면 1.40%', () => {
+    expect(run({ contract: 'pre2025' }).main.value).toBe(W(Math.round(100_000_000 * 0.014 * 24 / 36)));
   });
 });
