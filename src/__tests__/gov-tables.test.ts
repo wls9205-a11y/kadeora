@@ -7,7 +7,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { bondRatePerMille, pensionMonthly, PENSION_MIN_AGE, brokerageBracket, ltvPolicyKey, acqTaxPolicyKey, acqTaxMidRatePct } from '@/lib/calc/gov-tables';
-import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc, acquisitionTax, stockRoi, auctionProfit, depositInterest, shortSelling, prepaymentFee, interestTax } from '@/lib/calc/formulas';
+import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc, acquisitionTax, stockRoi, auctionProfit, depositInterest, shortSelling, prepaymentFee, interestTax, carInsuranceEst } from '@/lib/calc/formulas';
 import { formatKRWExact } from '@/lib/calc/tax-tables';
 import { PREPAY_RATES } from '@/lib/calc/gov-tables';
 
@@ -786,5 +786,17 @@ describe('이자소득세 — deposit-interest 와 같은 모델·같은 계산 
 
   it('특례는 한도 가정을 말한다', () => {
     expect(run({ taxType: 'mutual', joinYear: '2025' }).details.some((d) => d.label === '⚠️ 한도 가정')).toBe(true);
+  });
+});
+
+describe('자동차 보험료 — 시장값 공개형: 추정·예시임을 말한다 (A1)', () => {
+  const r = carInsuranceEst({ carAge: 3, driverAge: 35, carPrice: 30_000_000, accidentFree: 3 } as any);
+  it('계산은 그대로 — 3천만 × 3.5% × 1.0 × 0.85 × 0.85', () => {
+    expect(r.main.value).toBe(formatKRWExact(Math.round(30_000_000 * 0.035 * 0.85 * 0.85)));
+  });
+  it('⛔ 가정 계수가 보험사 요율이 아니라고 말한다 · 평균의 출처 단계를 말한다', () => {
+    expect(r.main.label).toContain('예시');
+    expect(r.details.find((d) => d.label === '가정 계수')!.value).toContain('보험사 요율 아님');
+    expect(r.details.find((d) => d.label === '참고: 전국 평균')!.value).toContain('원문 대조 전');
   });
 });

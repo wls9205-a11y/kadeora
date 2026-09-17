@@ -10,7 +10,7 @@ import {
   PENSION_MIN_AGE, PENSION_MAX_PRICE, brokerageBracket, BROKERAGE_SOURCE,
   parsePolicyPack, ltvPolicyKey, dsrPolicyKey, stressDsrKey, acqTaxPolicyKey, acqTaxMidRatePct, acqSurtaxPct, secTaxKeys, type StockMarket,
   depositTaxRow, type DepositTaxType,
-  PREPAY_SOURCE, PREPAY_RATES, type PrepayContract, type PrepayLoan, type PrepayRateType,
+  PREPAY_SOURCE, PREPAY_RATES, CAR_INSURANCE_SOURCE, type PrepayContract, type PrepayLoan, type PrepayRateType,
   type LtvRegion, type LtvOwner,
 } from './gov-tables';
 
@@ -2184,12 +2184,22 @@ export function isaConversion(v: V): CalcResult {
 }
 export function carInsuranceEst(v: V): CalcResult {
   const carAge = n(v.carAge); const age = n(v.driverAge); const price = n(v.carPrice); const safe = n(v.accidentFree);
+  // A1 — 시장값 공개형. 아래 계수는 «카더라 가정» 이다(보험사 요율 아님). 옛 화면은 이 사실을 말하지 않았다.
   const base = price * 0.035;
   const ageFactor = age < 26 ? 1.5 : age < 30 ? 1.2 : age > 65 ? 1.3 : 1.0;
   const carFactor = Math.max(0.5, 1 - carAge * 0.05);
   const safeFactor = Math.max(0.7, 1 - safe * 0.05);
   const est = Math.round(base * ageFactor * carFactor * safeFactor);
-  return { main: { label: '추정 보험료', value: fmt(est) }, details: [{ label: '참고', value: '실제 보험료는 보험사 견적 참조' }] };
+  const src = CAR_INSURANCE_SOURCE;
+  return {
+    main: { label: '추정 보험료 (예시)', value: fmt(est) },
+    details: [
+      { label: '⚠️ 성격', value: '추정·예시값이다. 실제 보험료는 보험사 언더라이팅(사고 이력·특약·담보·지역 등)으로 정해진다' },
+      { label: '가정 계수', value: `차량가의 3.5% × 연령 ${ageFactor} × 연식 ${carFactor.toFixed(2)} × 무사고 ${safeFactor.toFixed(2)} — 카더라 가정, 보험사 요율 아님` },
+      { label: '참고: 전국 평균', value: `1대당 ${fmt(src.avgPremium)} — ${src.basis}(원문 대조 전, ${src.reportedAt} 보도 인용)` },
+      { label: '실제 견적', value: `${src.quoteName} ${src.quoteUrl}` },
+    ],
+  };
 }
 export function fuelSaving(v: V): CalcResult {
   const dist = n(v.distance); const eff1 = n(v.eff1); const eff2 = n(v.eff2); const price = n(v.fuelPrice);
