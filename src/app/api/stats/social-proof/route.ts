@@ -30,48 +30,34 @@ export async function GET() {
   try {
     const sb = getSupabaseAdmin();
 
-    const [
-      blogStats,
-      stockCount,
-      complexCount,
-      subscriptionCount,
-      tradeCount,
-      rentCount,
-      priceHistoryCount,
-      userCount,
-      dauStats,
-    ] = await Promise.all([
+    /**
+     * ⛔ K-10 ② (2026-09-17) — 여기 있던 «exact count 7발» 이 2026-09-16 장애의 발화원이었다.
+     *
+     * apt_rent_transactions 240만 · apt_transactions 80만 행에 대한 exact count 는 전체 스캔이라
+     * 플래너가 parallel worker 2개를 붙인다. max_worker_processes=6 인 인스턴스에서 그 워커들이
+     * 슬롯을 먹자 pg_cron 이 background worker 를 fork 하지 못했고 —
+     *   job startup timeout 연쇄 → kill-slow-queries(방어) 붕괴 → 느린 질의 누적
+     *   → statement timeout 폭증 → 프로덕션 504
+     * 로 이어졌다. 실패는 전부 「실행 후 실패」가 아니라 «시작조차 못 함» 이었다 — 잡은 피해자다.
+     *
+     * ⚠️ 소셜프루프는 «정의상 정밀이 필요 없다». 「240만+」를 보여주는 자리에 240만 행을
+     *    매 요청 정확히 세는 것은 근거가 없었다. reltuples 추정으로 충분하고, RPC 한 번이라
+     *    왕복도 7회 → 1회로 준다.
+     * ⛔ 정확한 수가 필요해지면 이 자리에 exact 를 되돌리지 말고 «크론 캐시» 를 쓴다.
+     *    핫패스에서 대형 표를 세는 구조 자체가 재발 경로다.
+     */
+    const [blogStats, counts, dauStats] = await Promise.all([
       // 블로그: RPC로 정확한 count + sum (Supabase 1000행 limit 회피)
       (sb as any).rpc('get_blog_stats'),
-      // 주식 종목 수
-      (sb as any).from('stock_quotes')
-        .select('symbol', { count: 'exact', head: true }),
-      // 아파트 단지
-      (sb as any).from('apt_complex_profiles')
-        .select('id', { count: 'exact', head: true }),
-      // 분양 단지
-      (sb as any).from('apt_subscriptions')
-        .select('id', { count: 'exact', head: true }),
-      // 실거래
-      (sb as any).from('apt_transactions')
-        .select('id', { count: 'exact', head: true }),
-      // 전세
-      (sb as any).from('apt_rent_transactions')
-        .select('id', { count: 'exact', head: true }),
-      // 주가 데이터
-      (sb as any).from('stock_price_history')
-        .select('id', { count: 'exact', head: true }),
-      // 실유저
-      sb.from('profiles')
-        .select('id', { count: 'exact', head: true })
-        .neq('is_seed', true)
-        .neq('is_deleted', true),
+      // 규모 카운트: reltuples 추정 + profiles 만 exact (작은 표·조건부·의미상 정확 필요)
+      (sb as any).rpc('get_social_proof_counts'),
       // DAU 통계 (최근 14일)
       (sb as any).from('daily_stats')
         .select('dau, stat_date')
         .order('stat_date', { ascending: false })
         .limit(14),
     ]);
+    const c = counts?.data?.[0] ?? {};
 
     // 블로그 집계 (RPC 결과: [{blog_count, total_views}])
     const blogRow = blogStats.data?.[0] || { blog_count: 0, total_views: 0 };
@@ -87,14 +73,15 @@ export async function GET() {
       ? Math.round(recentDau.reduce((a: number, b: number) => a + b, 0) / recentDau.length)
       : 0;
 
-    // 카운트 집계
-    const stocks = stockCount.count || 0;
-    const complexes = complexCount.count || 0;
-    const subscriptions = subscriptionCount.count || 0;
-    const trades = tradeCount.count || 0;
-    const rents = rentCount.count || 0;
-    const prices = priceHistoryCount.count || 0;
-    const users = userCount.count || 0;
+    // 카운트 집계 — 추정값이라 NULL 이면 0 이 아니라 «모름» 이지만, 소셜프루프 표시상 0 으로 접는다.
+    //   ⚠️ reltuples 가 -1(미분석)이면 RPC 가 NULL 을 준다. 그때 큰 수를 지어내지 않는 쪽이 맞다.
+    const stocks = Number(c.stock_count) || 0;
+    const complexes = Number(c.complex_count) || 0;
+    const subscriptions = Number(c.subscription_count) || 0;
+    const trades = Number(c.trade_count) || 0;
+    const rents = Number(c.rent_count) || 0;
+    const prices = Number(c.price_history_count) || 0;
+    const users = Number(c.user_count) || 0;
 
     const tradeDataCount = trades + rents;
     const totalDataPoints = trades + rents + prices + totalViews;
