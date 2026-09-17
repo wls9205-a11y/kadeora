@@ -1,4 +1,5 @@
 import { sanitizeHtml } from '@/lib/sanitize-html';
+import { policyPackFromRows, type PolicyRow } from '@/lib/calc/gov-tables';
 import Link from 'next/link';
 import { CALC_REGISTRY, CATEGORIES, findCalc, getCategoryLabel } from '@/lib/calc/registry';
 import CalcEngine from '@/components/calc/CalcEngine';
@@ -58,30 +59,8 @@ async function getLiveData(slug: string): Promise<Record<string, string> | undef
       .from('policy_constants')
       .select('key, item, numbers, source_title, source_url, source_date, effective_from, status');
     if (!Array.isArray(data) || !data.length) return undefined;
-    const pct: Record<string, number> = {};
-    const amt: Record<string, number> = {};
-    const meta: Record<string, unknown> = {};
-    for (const row of data as any[]) {
-      // ⚠️ numbers 의 «첫» 항목이 그 행의 값이다(예: ["70%","6개월"]).
-      //    퍼센트가 아닌 행(처분기한 「6개월」 등)은 비율 표에 넣지 않는다 — 0 으로 때우면 전혀 다른 뜻이 된다.
-      const first = Array.isArray(row?.numbers) ? String(row.numbers[0] ?? '').trim() : '';
-      const m = first.match(/^(-?\d+(?:\.\d+)?)\s*%/);
-      if (m) pct[row.key] = Number(m[1]);
-      // 금액 행은 금액 표로 따로 — 퍼센트 표에 섞으면 「3,000%」가 된다. 「N억원」·「N만원」·「N원」.
-      const w = first.match(/^([\d,]+(?:\.\d+)?)\s*(억원|만원|원)$/);
-      if (w) {
-        const x = Number(w[1].replace(/,/g, ''));
-        amt[row.key] = Math.round(x * (w[2] === '억원' ? 100_000_000 : w[2] === '만원' ? 10_000 : 1));
-      }
-      meta[row.key] = {
-        item: row.item ?? undefined,
-        source: row.source_title ?? undefined,
-        url: row.source_url ?? undefined,
-        date: row.source_date ?? undefined,
-        from: row.effective_from ?? undefined,
-        status: row.status ?? undefined,
-      };
-    }
+    // 행 → pack 변환은 테스트와 «같은» 함수(policyPackFromRows)로 — 픽스처와 라이브의 모양이 갈리지 않게.
+    const { pct, amt, meta } = policyPackFromRows(data as PolicyRow[]);
     return { __policy: JSON.stringify({ pct, amt, meta }) };
   } catch {
     return undefined;

@@ -1,0 +1,5 @@
+-- 스트레스 DSR 적용비율 분리 (적용: MCP apply_migration stress_dsr_ratio_rows_2026_09_17)
+-- 결함(K-9 misc 워커 발견, 본선 확인): dsrCalc 가 stress_dsr_local 첫 원소 1.5% 만 얹어 지방 가산을 2배로 잡았다(실제 1.5% × 50% = 0.75%p).
+-- 원인의 뿌리: 테스트 픽스처가 실효값 0.75 를 «손으로» 적어 DB 행 모양과 달랐다 → policyPackFromRows 로 통일.
+-- 행: stress_dsr_capital_regulated_ratio 100% · stress_dsr_local_ratio 50% (원행의 condition·출처·status 상속).
+-- 말미 단언: 2행 존재 · 지방 1.5×50/100 = 0.75 · 수도권 3.0×100/100 = 3.0.

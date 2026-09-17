@@ -840,7 +840,12 @@ export function dsrCalc(v: V): CalcResult {
   const region = (String(v.region ?? 'regulated') as LtvRegion);
   const lender = (String(v.lender ?? 'bank') as 'bank' | 'nonbank');
   const capPct = pack?.pct?.[dsrPolicyKey(lender)];
-  const stressPct = pack?.pct?.[stressDsrKey(region)];
+  // ⛔ 2026-09-17 수리 — 스트레스 가산 = 스트레스 금리 × 적용비율. 지방 2단계는 1.5% × 50% = 0.75%p.
+  //    옛 코드는 행의 첫 원소(1.5)만 얹어 지방 가산을 2배로 잡았다. 비율 행이 없으면 100% 로 «가정하지 않고» 미적용으로 말한다.
+  const stressRate = pack?.pct?.[stressDsrKey(region)];
+  const stressRatio = pack?.pct?.[`${stressDsrKey(region)}_ratio`];
+  const stressPct = typeof stressRate === 'number' && typeof stressRatio === 'number'
+    ? Math.round(stressRate * stressRatio) / 100 : undefined;
 
   if (typeof capPct !== 'number') {
     return {
@@ -878,7 +883,7 @@ export function dsrCalc(v: V): CalcResult {
       { label: '연간 원리금 상환액', value: fmt(Math.round(annualRepay)) },
       { label: '월 상환액', value: fmt(Math.round(monthlyRepay)) },
       typeof stressPct === 'number'
-        ? { label: '적용 금리', value: `${applied.toFixed(2)}% (입력 ${baseRate}% + 스트레스 ${stressPct}%p)` }
+        ? { label: '적용 금리', value: `${applied.toFixed(2)}% (입력 ${baseRate}% + 스트레스 ${stressRate}% × 적용비율 ${stressRatio}% = ${stressPct}%p)` }
         : { label: '적용 금리', value: `${baseRate}% — ⚠️ 스트레스 금리 «미적용». 실제 심사는 더 엄격하다` },
       ...(sm.item ? [{ label: '스트레스 기준', value: sm.item }] : []),
       ...(cm.source || cm.date ? [{ label: '근거', value: [cm.source, cm.date].filter(Boolean).join(' · ') }] : []),

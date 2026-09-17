@@ -405,6 +405,47 @@ export interface PolicyPack {
   meta: Record<string, { item?: string; source?: string; date?: string; status?: string }>;
 }
 
+/**
+ * policy_constants 행 → PolicyPack. 페이지 주입과 «테스트» 가 같은 함수를 쓴다(2026-09-17).
+ *
+ * ⛔ 왜 여기로 옮겼나: 테스트가 pct 를 «손으로» 적은 픽스처를 썼고, DB 행의 실제 모양과 달랐다.
+ *    stress_dsr_local 은 DB 첫 원소가 「1.5%」(스트레스 금리)인데 픽스처는 실효값 0.75 를 적어
+ *    테스트는 통과하고 라이브 dsr-calc 는 지방 가산을 2배로 얹었다. acq_tax_1house_6_9eok(첫 원소 「6억원」)도
+ *    같은 병으로 라이브 「미수신」이었다. 이제 테스트 픽스처는 «행 모양» 으로 적고 이 함수로 변환한다.
+ */
+export interface PolicyRow {
+  key: string; item?: string | null; numbers?: string[] | null;
+  source_title?: string | null; source_url?: string | null; source_date?: string | null;
+  effective_from?: string | null; status?: string | null;
+}
+
+export function policyPackFromRows(rows: PolicyRow[]): PolicyPack {
+  const pct: Record<string, number> = {};
+  const amt: Record<string, number> = {};
+  const meta: PolicyPack['meta'] = {};
+  for (const row of rows) {
+    // ⚠️ numbers 의 «첫» 항목이 그 행의 값이다. 퍼센트가 아닌 행은 비율 표에 넣지 않는다 — 0 으로 때우면 전혀 다른 뜻이 된다.
+    const first = Array.isArray(row?.numbers) ? String(row.numbers[0] ?? '').trim() : '';
+    const m = first.match(/^(-?\d+(?:\.\d+)?)\s*%/);
+    if (m) pct[row.key] = Number(m[1]);
+    // 금액 행은 금액 표로 따로. 「N억원」·「N만원」·「N원」.
+    const w = first.match(/^([\d,]+(?:\.\d+)?)\s*(억원|만원|원)$/);
+    if (w) {
+      const x = Number(w[1].replace(/,/g, ''));
+      amt[row.key] = Math.round(x * (w[2] === '억원' ? 100_000_000 : w[2] === '만원' ? 10_000 : 1));
+    }
+    meta[row.key] = {
+      item: row.item ?? undefined,
+      source: row.source_title ?? undefined,
+      date: row.source_date ?? undefined,
+      status: row.status ?? undefined,
+      ...(row.source_url ? { url: row.source_url } : {}),
+      ...(row.effective_from ? { from: row.effective_from } : {}),
+    } as PolicyPack['meta'][string];
+  }
+  return { pct, amt, meta };
+}
+
 export function parsePolicyPack(raw: unknown): PolicyPack | null {
   try {
     const p = typeof raw === 'string' ? JSON.parse(raw) : raw;

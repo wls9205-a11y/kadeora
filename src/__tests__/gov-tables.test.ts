@@ -6,7 +6,7 @@
  *   ② 옛 값이 «얼마나 틀렸는가» (반증형) — 회귀로 되돌아가면 바로 잡히도록 숫자를 박아 둔다
  */
 import { describe, it, expect } from 'vitest';
-import { bondRatePerMille, pensionMonthly, PENSION_MIN_AGE, brokerageBracket, ltvPolicyKey, acqTaxPolicyKey, acqTaxMidRatePct } from '@/lib/calc/gov-tables';
+import { bondRatePerMille, pensionMonthly, PENSION_MIN_AGE, brokerageBracket, ltvPolicyKey, acqTaxPolicyKey, acqTaxMidRatePct, policyPackFromRows } from '@/lib/calc/gov-tables';
 import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc, acquisitionTax, stockRoi, auctionProfit, depositInterest, shortSelling, prepaymentFee, interestTax, carInsuranceEst } from '@/lib/calc/formulas';
 import { formatKRWExact } from '@/lib/calc/tax-tables';
 import { PREPAY_RATES } from '@/lib/calc/gov-tables';
@@ -234,7 +234,10 @@ describe('LTV·DSR — 규제 상수는 DB 가 정본, 코드는 «어느 행인
       ltv_nonregulated_nonowner: 70, ltv_nonregulated_noncapital_owner: 60,
       ltv_first_home_capital_regulated: 70, ltv_first_home_other: 80,
       dsr_bank: 40, dsr_nonbank: 50,
-      stress_dsr_capital_regulated: 3.0, stress_dsr_local: 0.75,
+      // ⚠️ 2026-09-17 정정 — 옛 픽스처는 지방을 실효값 0.75 로 «손으로» 적어 DB 행(첫 원소 1.5%)과 모양이 달랐다.
+      //    이제 DB 와 같이 스트레스 금리 + 적용비율 행으로 적는다.
+      stress_dsr_capital_regulated: 3.0, stress_dsr_capital_regulated_ratio: 100,
+      stress_dsr_local: 1.5, stress_dsr_local_ratio: 50,
     },
     meta: {
       ltv_regulated_nonowner: { item: 'LTV 규제지역 무주택자', source: '금융위', date: '2026-08-13', status: 'confirmed' },
@@ -798,5 +801,39 @@ describe('자동차 보험료 — 시장값 공개형: 추정·예시임을 말�
     expect(r.main.label).toContain('예시');
     expect(r.details.find((d) => d.label === '가정 계수')!.value).toContain('보험사 요율 아님');
     expect(r.details.find((d) => d.label === '참고: 전국 평균')!.value).toContain('원문 대조 전');
+  });
+});
+
+describe('DSR 스트레스 — 픽스처는 «DB 행 모양» 으로 (지방 가산 2배 라이브 결함 고정)', () => {
+  // 실제 DB 행(2026-09-17 조회)과 같은 모양. pct 를 손으로 적지 않는다.
+  const rows = [
+    { key: 'dsr_bank', item: '은행권 DSR', numbers: ['40%'], status: 'confirmed' },
+    { key: 'stress_dsr_local', item: '지방 2단계', numbers: ['1.5%', '50%', '0.75%p', '2단계'], status: 'unverified_current' },
+    { key: 'stress_dsr_local_ratio', item: '지방 적용비율', numbers: ['50%'], status: 'unverified_current' },
+    { key: 'stress_dsr_capital_regulated', item: '수도권·규제 3단계', numbers: ['3.0%', '3단계', '100%'], status: 'confirmed' },
+    { key: 'stress_dsr_capital_regulated_ratio', item: '수도권 적용비율', numbers: ['100%'], status: 'confirmed' },
+    { key: 'acq_tax_1house_6_9eok', item: '6~9억', numbers: ['6억원', '9억원'], status: 'confirmed' },
+  ];
+  const POLICY = JSON.stringify(policyPackFromRows(rows));
+  const run = (region: string) => dsrCalc({ annualIncome: 60_000_000, newLoan: 300_000_000, newYears: 30, newRate: 4, region, lender: 'bank', existingAnnualRepay: 0, __policy: POLICY } as any);
+  const rate = (r: ReturnType<typeof dsrCalc>) => r.details.find((d) => d.label === '적용 금리')!.value;
+
+  it('⛔ 지방은 1.5% × 50% = 0.75%p — 옛 코드는 1.5%p 를 얹었다', () => {
+    expect(rate(run('local_nonreg'))).toContain('4.75%');
+    expect(rate(run('local_nonreg'))).toContain('= 0.75%p');
+  });
+  it('수도권·규제는 3.0% × 100%', () => {
+    expect(rate(run('regulated'))).toContain('7.00%');
+  });
+  it('비율 행이 없으면 100% 로 가정하지 않는다 — 미적용이라고 말한다', () => {
+    const noRatio = JSON.stringify(policyPackFromRows(rows.filter((r) => !r.key.endsWith('_ratio'))));
+    const r = dsrCalc({ annualIncome: 60_000_000, newLoan: 300_000_000, newYears: 30, newRate: 4, region: 'local_nonreg', lender: 'bank', __policy: noRatio } as any);
+    expect(rate(r)).toContain('미적용');
+  });
+  it('파서: 「6억원」 첫 원소는 퍼센트가 아니라 금액 표로 간다(취득세 6~9억 미수신 결함의 뿌리)', () => {
+    const pack = policyPackFromRows(rows);
+    expect(pack.pct.acq_tax_1house_6_9eok).toBeUndefined();
+    expect(pack.amt!.acq_tax_1house_6_9eok).toBe(600_000_000);
+    expect(pack.pct.stress_dsr_local).toBe(1.5);
   });
 });
