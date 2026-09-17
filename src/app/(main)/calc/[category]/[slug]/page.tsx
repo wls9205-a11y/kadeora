@@ -50,44 +50,39 @@ async function getLiveData(slug: string): Promise<Record<string, string> | undef
       return { __fx: JSON.stringify({ rates: data.rates, updatedAt: data.updated_at }) };
     }
 
-    // LTV·DSR — 규제 상수의 정본은 policy_constants 다. 코드에 퍼센트를 적지 않는다.
-    //   대출 규제는 대책 발표마다 바뀌므로, 표가 갱신되면 계산기도 «자동으로» 따라간다.
-    // ⚠️ auction-profit 도 취득세 «같은» 파이프를 탄다 — 경매 취득도 같은 법정 세율이다.
-    //    여기 빠뜨리면 계산기가 「세율 기준 미수신」만 띄우고 아무것도 못 한다.
-    if (slug === 'ltv-calc' || slug === 'dsr-calc' || slug === 'acquisition-tax' || slug === 'stock-roi'
-        || slug === 'auction-profit' || slug === 'deposit-interest' || slug === 'short-selling'
-        || slug === 'interest-tax') {
-      const { data } = await (sb as any)
-        .from('policy_constants')
-        .select('key, item, numbers, source_title, source_date, status')
-        .or('key.like.ltv_%,key.like.dsr_%,key.like.stress_dsr_%,key.like.acq_tax_%,key.like.sec_tax_%,'
-          + 'key.like.int_tax%,key.like.mutual_dep%,key.like.taxfree_sav%,key.like.farm_int%');
-      if (!Array.isArray(data) || !data.length) return undefined;
-      const pct: Record<string, number> = {};
-      const amt: Record<string, number> = {};
-      const meta: Record<string, unknown> = {};
-      for (const row of data as any[]) {
-        // ⚠️ numbers 의 «첫» 항목이 그 행의 비율이다(예: ["70%","6개월"]).
-        //    퍼센트가 아닌 행(처분기한 「6개월」 등)은 비율 표에 넣지 않는다 — 0 으로 때우면
-        //    「LTV 0%」라는 전혀 다른 뜻이 된다.
-        const first = Array.isArray(row?.numbers) ? String(row.numbers[0] ?? '') : '';
-        const m = first.match(/^(-?\d+(?:\.\d+)?)\s*%/);
-        if (m) pct[row.key] = Number(m[1]);
-        // 한도 행(「3,000만원」)은 금액 표로 따로 — 퍼센트 표에 섞으면 「3,000%」가 된다.
-        const w = first.match(/^([\d,]+)\s*만원$/);
-        if (w) amt[row.key] = Number(w[1].replace(/,/g, '')) * 10_000;
-        meta[row.key] = {
-          item: row.item ?? undefined,
-          source: row.source_title ?? undefined,
-          date: row.source_date ?? undefined,
-          status: row.status ?? undefined,
-        };
+    // 제도 수치의 정본은 policy_constants 다. 코드에 퍼센트를 적지 않는다 — 표가 갱신되면 계산기가 «자동으로» 따라간다.
+    // ⛔ 2026-09-17 — slug 허용목록을 없앴다. 목록에 빠진 계산기(registration-cost 등)가 「미수신」 이나
+    //    0원으로 떨어지는 사고가 났고, 계산기를 늘릴 때마다 이 줄이 충돌 지점이 됐다.
+    //    표는 수백 행이고 페이지는 ISR 이라 전 계산기에 통째로 주입해도 비용이 작다. 계산기는 «어느 행인가» 만 안다.
+    const { data } = await (sb as any)
+      .from('policy_constants')
+      .select('key, item, numbers, source_title, source_url, source_date, effective_from, status');
+    if (!Array.isArray(data) || !data.length) return undefined;
+    const pct: Record<string, number> = {};
+    const amt: Record<string, number> = {};
+    const meta: Record<string, unknown> = {};
+    for (const row of data as any[]) {
+      // ⚠️ numbers 의 «첫» 항목이 그 행의 값이다(예: ["70%","6개월"]).
+      //    퍼센트가 아닌 행(처분기한 「6개월」 등)은 비율 표에 넣지 않는다 — 0 으로 때우면 전혀 다른 뜻이 된다.
+      const first = Array.isArray(row?.numbers) ? String(row.numbers[0] ?? '').trim() : '';
+      const m = first.match(/^(-?\d+(?:\.\d+)?)\s*%/);
+      if (m) pct[row.key] = Number(m[1]);
+      // 금액 행은 금액 표로 따로 — 퍼센트 표에 섞으면 「3,000%」가 된다. 「N억원」·「N만원」·「N원」.
+      const w = first.match(/^([\d,]+(?:\.\d+)?)\s*(억원|만원|원)$/);
+      if (w) {
+        const x = Number(w[1].replace(/,/g, ''));
+        amt[row.key] = Math.round(x * (w[2] === '억원' ? 100_000_000 : w[2] === '만원' ? 10_000 : 1));
       }
-      if (!Object.keys(pct).length) return undefined;
-      return { __policy: JSON.stringify({ pct, amt, meta }) };
+      meta[row.key] = {
+        item: row.item ?? undefined,
+        source: row.source_title ?? undefined,
+        url: row.source_url ?? undefined,
+        date: row.source_date ?? undefined,
+        from: row.effective_from ?? undefined,
+        status: row.status ?? undefined,
+      };
     }
-
-    return undefined;
+    return { __policy: JSON.stringify({ pct, amt, meta }) };
   } catch {
     return undefined;
   }
