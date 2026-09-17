@@ -155,6 +155,7 @@ async function handler(req: NextRequest) {
 
       try {
         const pipe = await runImagePipeline(admin, postCtx, {
+          caller: 'cron/blog-generate-images',
           relevanceThreshold: 0.55,
           maxRealImages: 6,
           includeInfographicPosition: true,

@@ -8,6 +8,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { logCronStart, logCronEnd } from "@/lib/cron-log";
+import { naverOpenApiFetch } from "@/lib/naver/openapi";
 
 // [§4] keyword_rank_targets 가 71 → 641 개로 늘었다. 641 × 2 소스 = 1,282 회를
 //   순차로 돌면 30 초에 절대 못 들어간다. 회전 배치(200) + 5 병렬로 바꾸고 120 초를 준다.
@@ -115,7 +116,7 @@ async function fetchRank(
    *    한 키워드가 배치 예산을 먹지 않게). */
   let res: Response | null = null;
   for (let attempt = 0; ; attempt++) {
-    res = await fetch(url, {
+    res = await naverOpenApiFetch("cron/naver-sc-sync", url, {
       headers: {
         "X-Naver-Client-Id": clientId,
         "X-Naver-Client-Secret": clientSecret,
@@ -181,7 +182,9 @@ export async function GET(req: Request) {
     //      그 false 가 9/17 게이트 재도입 때 승부처 본명을 품은 채 남아 있었다.
     //   priority=1(현재 순위가 잡히는 13 개)은 항상 배치에 포함돼 매일 측정된다.
     //   ⚠️ 실측 정정(2026-09-03) — `get_rank_targets_due(200)` 은 «80 건» 만 돌려준다.
-    //      함수 안에 자체 캡이 있다. BATCH_LIMIT 를 올려도 배치 크기는 80(=160 콜) 이다.
+    //      함수 안에 자체 캡이 있다. BATCH_LIMIT 를 올려도 배치 크기는 캡(=캡×2 콜) 이다.
+    //   ⚠️ B4(2026-09-17) — 캡은 app_config('naver_openapi','rank_batch_cap')(없으면 80).
+    //      상향은 pg_cron naver-rank-cap-evaluate(02:15 KST)만 한다(80→92, 원장 7일 p95<60% ∧ 429=0).
     //   RPC 는 DB 담당 배포분(security invoker, service_role 만 EXECUTE). 수정하지 않는다.
     const { data: targets, error: targetsErr } = await supabase
       .rpc("get_rank_targets_due", { p_limit: BATCH_LIMIT });

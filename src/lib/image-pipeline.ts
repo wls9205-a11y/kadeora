@@ -19,6 +19,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { hydrateImage, type HydrateResult } from '@/lib/image-hydrate';
 import { cleanScrapedAlt } from '@/lib/clean-image-alt';
 import { SITE_URL } from '@/lib/constants';
+import { naverOpenApiFetch } from '@/lib/naver/openapi';
 
 const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID || '';
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET || '';
@@ -78,6 +79,8 @@ export interface PipelineOptions {
   includeInfographicPosition?: boolean; // default true (position 7)
   subdir?: string;                   // default 'blog'
   candidatePerQuery?: number;        // default 10
+  /** 네이버 오픈API 원장의 route 값 — 호출 라우트가 명시한다(예: 'cron/issue-image-attach'). */
+  caller?: string;
 }
 
 export interface PipelineResult {
@@ -111,10 +114,11 @@ interface NaverItem {
   source: string;
 }
 
-async function searchNaverImages(query: string, display = 10): Promise<NaverItem[]> {
+async function searchNaverImages(query: string, display = 10, caller = 'lib/image-pipeline'): Promise<NaverItem[]> {
   if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) return [];
   try {
-    const res = await fetch(
+    const res = await naverOpenApiFetch(
+      caller,
       `https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(query)}&display=${display}&sort=sim&filter=large`,
       {
         headers: {
@@ -155,6 +159,7 @@ export async function collectCandidates(
   post: PostContext,
   strategy: { priority_sources?: string[]; fallback_sources?: string[]; search_keyword_template?: string } | null,
   perQuery = 10,
+  caller = 'lib/image-pipeline',
 ): Promise<ImageCandidate[]> {
   const category = (post.category || 'general').toLowerCase();
   const candidates: ImageCandidate[] = [];
@@ -222,7 +227,7 @@ export async function collectCandidates(
       .replace(/\{\w+\}/g, '')
       .replace(/\s+/g, ' ')
       .trim() || topic;
-    const items = await searchNaverImages(query, perQuery);
+    const items = await searchNaverImages(query, perQuery, caller);
     for (const it of items) {
       if (candidates.some((c) => c.url === it.url)) continue;
       candidates.push({
@@ -512,7 +517,7 @@ export async function runImagePipeline(
     .select('*')
     .eq('category', (post.category || 'general'))
     .maybeSingle();
-  const candidates = await collectCandidates(admin, post, strategy, opts.candidatePerQuery ?? 10);
+  const candidates = await collectCandidates(admin, post, strategy, opts.candidatePerQuery ?? 10, opts.caller);
   // s268(나): 자체 생성 카드는 관련성 점수를 매기지 않는다 — 우리가 만든 사실 카드라
   // 외부 후보와 같은 자로 잴 대상이 아니다. 실사진이 모자랄 때 바닥을 받친다.
   const selfMade = (await buildSelfMadeCards(admin, post))

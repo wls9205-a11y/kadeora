@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { verifyPgCronAuth } from '@/lib/cron-pg-auth';
+import { naverOpenApiFetch } from '@/lib/naver/openapi';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -26,7 +27,7 @@ function isBlacklisted(url: string): boolean {
 async function searchNaverImages(query: string, display = 10): Promise<{ url: string; thumb: string; title: string }[]> {
   if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) return [];
   try {
-    const res = await fetch(
+    const res = await naverOpenApiFetch('cron/blog-image-supplement',
       `https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(query)}&display=${display}&sort=sim&filter=large`,
       {
         headers: {

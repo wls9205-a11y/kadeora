@@ -14,6 +14,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { sendKakaoAlimtalk } from '@/lib/kakao-alimtalk';
 import { NotificationBellService } from '@/lib/notification-bell';
+import { naverOpenApiFetch } from '@/lib/naver/openapi';
 
 export const maxDuration = 180;
 export const runtime = 'nodejs';
@@ -36,7 +37,7 @@ interface NewsItem {
 async function fetchNaverNews(query: string, display = 10): Promise<NewsItem[]> {
   if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) return [];
   try {
-    const res = await fetch(
+    const res = await naverOpenApiFetch('cron/big-event-news-detect',
       `https://openapi.naver.com/v1/search/news.json?query=${encodeURIComponent(query)}&display=${display}&sort=date`,
       {
         headers: {

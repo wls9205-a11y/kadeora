@@ -5,6 +5,7 @@ import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 
 import { SITE_URL } from '@/lib/constants';
+import { naverOpenApiFetch } from '@/lib/naver/openapi';
 /**
  * issue-preempt 크론 — 분양 전 단계 이슈 선점 감지
  *
@@ -227,7 +228,7 @@ async function detectNaverSpikes(sb: any): Promise<any[]> {
         keywords: [s.name],
       }));
 
-      const res = await fetch('https://openapi.naver.com/v1/datalab/search', {
+      const res = await naverOpenApiFetch('cron/issue-preempt', 'https://openapi.naver.com/v1/datalab/search', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -166,6 +166,7 @@ async function handler(req: NextRequest) {
 
         try {
           const pipe = await runImagePipeline(admin, postCtx, {
+            caller: 'cron/blog-backfill-poll',
             relevanceThreshold: 0.5,
             maxRealImages: 6,
             includeInfographicPosition: true,

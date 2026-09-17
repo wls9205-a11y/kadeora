@@ -25,6 +25,7 @@ import { registerRankTargets } from '@/lib/cvn/rank-targets';
 import { checkAliasUniqueness, decideTier, matchSite, type NameCandidateInput, type SiteLite } from '@/lib/cvn/decide';
 import { cvnDocSourceFor, toCandidateInput } from '@/lib/cvn/doc-cards';
 import type { NewsCard } from '@/lib/cvn/extract';
+import { naverOpenApiFetch } from '@/lib/naver/openapi';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -57,7 +58,7 @@ const stripHtml = (s: string): string =>
 async function searchNews(query: string, display = 10): Promise<NewsItem[]> {
   if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) return [];
   try {
-    const res = await fetch(
+    const res = await naverOpenApiFetch('cron/cvn-name-watch',
       `https://openapi.naver.com/v1/search/news.json?query=${encodeURIComponent(query)}&display=${display}&sort=date`,
       {
         headers: {

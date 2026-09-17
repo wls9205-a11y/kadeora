@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { naverOpenApiFetch } from '@/lib/naver/openapi';
 
 export const runtime = 'nodejs';
 
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest) {
   // Test 1: Image Search API
   try {
     const url = `https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(query)}&display=5&sort=sim&filter=large`;
-    const res = await fetch(url, {
+    const res = await naverOpenApiFetch('admin/naver-image-test', url, {
       headers: {
         'X-Naver-Client-Id': NAVER_CLIENT_ID,
         'X-Naver-Client-Secret': NAVER_CLIENT_SECRET,
@@ -76,7 +77,7 @@ export async function GET(req: NextRequest) {
 
   // Test 2: Blog Search API (비교용)
   try {
-    const res = await fetch(
+    const res = await naverOpenApiFetch('admin/naver-image-test',
       `https://openapi.naver.com/v1/search/blog?query=${encodeURIComponent(query)}&display=1`,
       {
         headers: {

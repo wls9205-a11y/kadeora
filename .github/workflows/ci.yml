@@ -42,6 +42,8 @@ jobs:
       # LB-1 — Anthropic 호출은 관문 하나로만 나간다. 사람의 규율이 아니라 CI 가 지킨다.
       # ⛔ 이 게이트가 없던 시절 55곳 중 51곳이 원장 밖이었고, 크레딧이 마른 48시간이 조용했다.
       - run: bash scripts/llm-gateway-gate.sh
+      # B4 — 네이버 오픈API(openapi.naver.com) 호출은 관문 src/lib/naver/openapi.ts 로만. 밖으로 새면 쿼터 원장이 과소 집계된다.
+      - run: bash scripts/naver-openapi-gate.sh
       # R-5 — nowrap 이 ellipsis·overflow 없이 «새로» 늘면 실패(파일별 기준선 docs/gates/nowrap-baseline.txt)
       - run: npx tsx scripts/nowrap-gate.ts
 

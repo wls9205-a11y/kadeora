@@ -20,6 +20,7 @@ import { isLeadEligible } from '@/lib/apt/lead-eligibility';
 import { editOutNumbers, loadIssueContext, buildIssueAllow, verifyIssueDraft, type IssueContext } from '@/lib/content/issue-context';
 import { parseSalePeriod } from '@/lib/apt/sale-period';
 import { periodWindow } from '@/lib/apt/upcoming-sales';
+import { naverOpenApiFetch } from '@/lib/naver/openapi';
 
 /**
  * issue-draft v2 — AI 기사 생성 + 자동 발행 + 이미지 + 피드 포스트
@@ -58,7 +59,7 @@ async function getAutoPublishConfig(sb: any) {
 async function searchNaverImages(query: string, count = 5): Promise<{ url: string; alt: string }[]> {
   if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) return [];
   try {
-    const res = await fetch(`https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(query)}&display=${count}&sort=sim&filter=large`, {
+    const res = await naverOpenApiFetch('cron/issue-draft', `https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(query)}&display=${count}&sort=sim&filter=large`, {
       headers: { 'X-Naver-Client-Id': NAVER_CLIENT_ID, 'X-Naver-Client-Secret': NAVER_CLIENT_SECRET },
       signal: AbortSignal.timeout(5000),
     });

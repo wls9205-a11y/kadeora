@@ -213,6 +213,7 @@ async function handler(_req: NextRequest) {
             source_ref: Array.isArray(issue.source_urls) ? issue.source_urls[0] : null,
           };
           const pipe = await runImagePipeline(sb, postCtx, {
+            caller: 'cron/issue-image-attach',
             relevanceThreshold: 0.55,
             maxRealImages: 6,
             includeInfographicPosition: true,

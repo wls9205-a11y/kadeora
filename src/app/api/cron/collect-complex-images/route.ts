@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
 import { cleanScrapedAlt } from '@/lib/clean-image-alt';
+import { naverOpenApiFetch } from '@/lib/naver/openapi';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -19,7 +20,7 @@ interface Img { title: string; url: string; thumbnail: string; source: string }
 async function nv(q: string): Promise<Img[]> {
   if (!NAVER_ID || !NAVER_SECRET) return [];
   try {
-    const r = await fetch(`https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(q)}&display=10&sort=sim`,
+    const r = await naverOpenApiFetch('cron/collect-complex-images', `https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(q)}&display=10&sort=sim`,
       { headers: { 'X-Naver-Client-Id': NAVER_ID, 'X-Naver-Client-Secret': NAVER_SECRET }, signal: AbortSignal.timeout(7000) });
     if (!r.ok) return [];
     return ((await r.json()).items||[]).map((x:any)=>({title:(x.title||'').replace(/<[^>]*>/g,''),url:x.link,thumbnail:x.thumbnail,source:'naver'}));

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
+import { naverOpenApiFetch } from '@/lib/naver/openapi';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -10,7 +11,7 @@ const NSC = process.env.NAVER_CLIENT_SECRET || '';
 
 async function naver(query: string, count = 5) {
   try {
-    const r = await fetch(
+    const r = await naverOpenApiFetch('admin/batch-image-fix',
       `https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(query)}&display=${count}&sort=sim&filter=large`,
       { headers: { 'X-Naver-Client-Id': NID, 'X-Naver-Client-Secret': NSC }, signal: AbortSignal.timeout(5000) }
     );

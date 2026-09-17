@@ -17,6 +17,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
+import { naverOpenApiFetch } from '@/lib/naver/openapi';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -39,7 +40,7 @@ function isBlacklisted(url: string): boolean {
 async function searchImages(query: string, count = 6): Promise<{ url: string; alt: string; source: string }[]> {
   if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) return [];
   try {
-    const res = await fetch(
+    const res = await naverOpenApiFetch('admin/image-backfill',
       `https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(query)}&display=${count}&sort=sim&filter=large`,
       {
         headers: { 'X-Naver-Client-Id': NAVER_CLIENT_ID, 'X-Naver-Client-Secret': NAVER_CLIENT_SECRET },

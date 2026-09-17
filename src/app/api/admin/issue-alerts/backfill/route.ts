@@ -22,6 +22,7 @@ import { requireAdmin } from '@/lib/admin-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 import { safeSlice } from '@/lib/text-safe';
+import { naverOpenApiFetch } from '@/lib/naver/openapi';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -60,7 +61,7 @@ interface NaverImg { url: string; alt: string; caption: string; }
 async function fetchNaverImages(query: string, display = 10): Promise<NaverImg[]> {
   if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) return [];
   try {
-    const res = await fetch(
+    const res = await naverOpenApiFetch('admin/issue-alerts/backfill',
       `https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(query)}&display=${display}&sort=sim&filter=large`,
       {
         headers: {

@@ -46,6 +46,8 @@ export interface FetchJsonOpts {
   retryDelayMs?: number;
   /** 파싱된 본문에서 «결과» 를 꺼낸다. null 을 주면 no_result 로 접힌다. */
   pick?: (json: unknown) => unknown;
+  /** 전송 함수 교체(기본 global fetch). 관문 경유가 필요한 호출부가 쓴다 — 예: naverOpenApiFetch. */
+  fetcher?: (url: string, init: RequestInit) => Promise<Response>;
 }
 
 /**
@@ -57,13 +59,13 @@ export async function fetchJson<T = unknown>(
   init: RequestInit = {},
   opts: FetchJsonOpts = {},
 ): Promise<Outcome<T>> {
-  const { timeoutMs = 10_000, retries = 1, retryDelayMs = 400, pick } = opts;
+  const { timeoutMs = 10_000, retries = 1, retryDelayMs = 400, pick, fetcher = fetch } = opts;
   let last: Outcome<T> = callFailed<T>(0, 'NEVER_RAN');
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     if (attempt > 0) await new Promise((r) => setTimeout(r, retryDelayMs * attempt));
     try {
-      const res = await fetch(url, { ...init, signal: AbortSignal.timeout(timeoutMs) });
+      const res = await fetcher(url, { ...init, signal: AbortSignal.timeout(timeoutMs) });
       const text = await res.text();
 
       if (!res.ok) {

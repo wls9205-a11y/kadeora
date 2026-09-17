@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
+import { naverOpenApiFetch } from '@/lib/naver/openapi';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -194,7 +195,7 @@ async function searchNaverImages(
       ? `${siteName} ${queryKeyword} ${region}`
       : `${siteName} ${queryKeyword}`;
 
-    const res = await fetch(
+    const res = await naverOpenApiFetch('cron/apt-image-crawl',
       `https://openapi.naver.com/v1/search/image?query=${encodeURIComponent(
         query
       )}&display=10&sort=sim&filter=large`,

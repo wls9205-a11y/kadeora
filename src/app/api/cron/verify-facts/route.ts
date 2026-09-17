@@ -16,6 +16,7 @@ import {
 } from '@/lib/verify/facts';
 import { fetchJson, tally, type Outcome } from '@/lib/net/outcome';
 import { anthropicJson } from '@/lib/llm/gateway';
+import { naverOpenApiFetch } from '@/lib/naver/openapi';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -63,7 +64,10 @@ async function naverSearch(kind: 'news' | 'webkr', query: string): Promise<Outco
   return fetchJson<Array<Record<string, string>>>(
     `https://openapi.naver.com/v1/search/${kind}?query=${encodeURIComponent(query)}&display=10&sort=sim`,
     { headers: { 'X-Naver-Client-Id': id, 'X-Naver-Client-Secret': sec } },
-    { timeoutMs: 6000, retries: 1, pick: (j: any) => (Array.isArray(j?.items) ? j.items : null) },
+    {
+      timeoutMs: 6000, retries: 1, pick: (j: any) => (Array.isArray(j?.items) ? j.items : null),
+      fetcher: (u, i) => naverOpenApiFetch('cron/verify-facts', u, i),
+    },
   );
 }
 

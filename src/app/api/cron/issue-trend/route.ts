@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
 import { dbw } from '@/lib/cron-db-log';
+import { naverOpenApiFetch } from '@/lib/naver/openapi';
 
 /**
  * issue-trend 크론 — 네이버 검색 트렌드 모니터링
@@ -72,7 +73,7 @@ async function handler(_req: NextRequest) {
         const endDate = new Date().toISOString().slice(0, 10);
         const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-        const res = await fetch('https://openapi.naver.com/v1/datalab/search', {
+        const res = await naverOpenApiFetch('cron/issue-trend', 'https://openapi.naver.com/v1/datalab/search', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

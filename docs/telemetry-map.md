@@ -19,6 +19,7 @@
 | `conversion_events` | CTA·게이트 계열 | `cta_view` / `cta_click` | `lib/analytics.ts` → `trackCTA()` 의 병행 전송 | S7-0 게이트 실측의 출처 |
 | `blog_posts` | **발행의 정본** | — (`published_at` 시계열) | 블로그 파이프라인 | ⛔ 크론 `records_created` 로 발행을 판단하지 않는다 (§3) |
 | `leads` | 제출 «결과» (고객 DB) | — | Apps Script 시트 경로 | 퍼널의 **종착**. 계측이 아니다 |
+| `naver_openapi_usage_daily` | **네이버 오픈API(openapi.naver.com) 호출량** — KST 일 × route × endpoint 의 `calls` · `http_429` · `http_other_err` | — (카운터 행) | `src/lib/naver/openapi.ts` → `naverOpenApiFetch()` → 요청 종료 후 RPC `naver_openapi_usage_incr` 1회 | B4(2026-09-17). ⛔ 관문 밖 호출은 CI(`scripts/naver-openapi-gate.sh`)가 막는다. `http_other_err` 는 429 외 비-2xx **+ 네트워크·타임아웃**. 검색광고 API·Search Advisor·블로그 글쓰기는 대상 아님. 소비처: `naver_rank_cap_evaluate()` (`docs/CRON_REGISTRY.md` B4 절). 적재 실패는 `console.error` «원장 적재 실패» 로만 남는다 — 원장이 0 인 날은 «안 불렀다» 와 «못 적었다» 를 런타임 로그로 가른다 |
 
 ⚠️ `trackCTA()` 는 **두 테이블에 동시에** 쓴다(`user_events` + `conversion_events`).
    그래서 CTA 계열은 양쪽에서 세어지고, 리드폼 계열은 `user_events` 에만 있다.

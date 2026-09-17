@@ -55,6 +55,34 @@
 | `autoapply_enabled` | `false` | `false` = 섀도(원장만 쌓고 적용 0). ⛔ 사람이 켜지 않는다 — L2 가 켠다 |
 | `daily_ai_budget` | `40` | N-2 의 일 AI 콜 상한 |
 
+## B4 네이버 오픈API 쿼터 원장 · 순위 배치 캡 평가 (2026-09-17 추가)
+
+| 잡 | jobid | 스케줄(UTC) | **KST** | 실체 | 비고 |
+|---|---|---|---|---|---|
+| `naver-rank-cap-evaluate` | 185 | `15 17 * * *` | **02:15 (+1일)** | SQL `SELECT public.naver_rank_cap_evaluate()` (HTTP 없음) | `kadeora-naver-sc-sync`(02:30 KST) **이전**. 캡 80→92 판정 |
+
+### 관측 계약
+
+| 무엇을 | 어디에 | 뜻 |
+|---|---|---|
+| 판정 1행/일 | `naver_rank_cap_decisions` | `decision`(raise·hold) · `reason` · `days_covered` · `daily_quota` · `p95_calls` · `p95_ratio` · `sum_429` · `cap_before/after` |
+| 실행 성공·실패 | `cron.job_run_details` (jobname `naver-rank-cap-evaluate`) | 함수가 예외면 `status='failed'` — 판정 행이 «없는 날» 과 같이 본다 |
+| 현재 캡 | `app_config('naver_openapi','rank_batch_cap')` | `get_rank_targets_due` 가 읽는다. 없거나 숫자가 아니면 80 |
+| 입력 원장 | `naver_openapi_usage_daily` | 적재는 `src/lib/naver/openapi.ts` 만 — `docs/telemetry-map.md` §1 |
+
+판정 규칙(순서대로, 처음 걸린 사유가 `reason`):
+1. 완결된 KST 7일(오늘 제외) 중 원장 행이 있는 날 < 7 → `hold · ledger_days_N_lt_7` ⛔ **7일치 미만이면 절대 상향 안 함**
+2. `app_config('naver_openapi','daily_quota')` 가 null → `hold · quota_unconfirmed` (2026-09-17 기준 **미확정** — 공식 문서 미확인)
+3. 창 안 `http_429` 합 > 0 → `hold`
+4. 일별 전 라우트·전 엔드포인트 합계의 p95 ÷ quota ≥ 0.60 → `hold` (데이터랩 호출도 합산 — 보수 쪽)
+5. 이미 92 → `hold · already_raised` / 아니면 `raise` → 캡 92
+
+⛔ **자동 «하향» 은 없다.** 상향 뒤 429 가 생기면 `hold · http_429_…` 로 «보이기만» 한다. 되돌림은 사람이
+   `app_config` 를 80 으로 고친다(사유는 description).
+⛔ **계기는 자기를 재지 않는다.** 이 잡의 생존은 자기 판정 표가 아니라 `cron.job_run_details` 로 본다.
+⚠️ 쿼터를 넣는 법: 공식 문서(developers.naver.com)로 확인 → `UPDATE app_config SET value='<정수>', description='출처 URL · 기준일' WHERE namespace='naver_openapi' AND key='daily_quota'`.
+   마이그레이션 `supabase/migrations/naver_openapi_quota_ledger_2026-09-17.sql`.
+
 ## 현황 (2026-04-23)
 - **Vercel Pro 크론 한도**: 100 개
 - **현재 vercel.json 등록**: 100 개 (한도 정확히 도달)
@@ -200,6 +228,7 @@ ORDER BY fails DESC;
 | 잡 | jobid | 스케줄(UTC) | UTC | **KST** | 요일 |
 |---|---|---|---|---|---|
 | `blog-stale-unpublish` | 136 | `0 17 * * *` | 17:00 | **02:00 (+1일)** | 매일 |
+| `naver-rank-cap-evaluate` | 185 | `15 17 * * *` | 17:15 | **02:15 (+1일)** | 매일 |
 | `kadeora-naver-sc-sync` | 141 | `30 17 * * *` | 17:30 | **02:30 (+1일)** | 매일 |
 | `apt-subscription-archive-daily` | 151 | `0 18 * * *` | 18:00 | **03:00 (+1일)** | 매일 |
 | `kakao-channel-sync` | 132 | `0 18 * * *` | 18:00 | **03:00 (+1일)** | 매일 |

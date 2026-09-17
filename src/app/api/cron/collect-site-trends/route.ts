@@ -2,6 +2,7 @@ export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { withCronAuth } from '@/lib/cron-auth';
+import { naverOpenApiFetch } from '@/lib/naver/openapi';
 
 const NAVER_CLIENT_ID = process.env.NAVER_CLIENT_ID;
 const NAVER_CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET;
@@ -12,7 +13,7 @@ async function fetchTrend(keyword: string): Promise<{ period: string; ratio: num
   const endDate = new Date().toISOString().slice(0, 10);
   const startDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   try {
-    const res = await fetch('https://openapi.naver.com/v1/datalab/search', {
+    const res = await naverOpenApiFetch('cron/collect-site-trends', 'https://openapi.naver.com/v1/datalab/search', {
       method: 'POST',
       headers: {
         'X-Naver-Client-Id': NAVER_CLIENT_ID,
