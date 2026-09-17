@@ -7,7 +7,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { bondRatePerMille, pensionMonthly, PENSION_MIN_AGE, brokerageBracket, ltvPolicyKey, acqTaxPolicyKey, acqTaxMidRatePct } from '@/lib/calc/gov-tables';
-import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc, acquisitionTax, stockRoi } from '@/lib/calc/formulas';
+import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc, acquisitionTax, stockRoi, auctionProfit } from '@/lib/calc/formulas';
 
 const 억 = 100_000_000;
 
@@ -500,5 +500,74 @@ describe('증권거래세 — 시장값이 아니라 «법정값» 이다 (K-9 �
   it('⛔ 주입이 없으면 세율을 지어내지 않는다', () => {
     const r = stockRoi({ buyPrice: 10000, sellPrice: 12000, quantity: 100, fee: 0, market: 'kospi' });
     expect(r.main.label).toBe('세율 기준 미수신');
+  });
+});
+
+describe('경매 수익률 — 「등 5%」 분해 (K-9 ⓒ)', () => {
+  const POLICY = JSON.stringify({
+    pct: {
+      acq_tax_1house_6eok_under: 1, acq_tax_1house_6_9eok: 1, acq_tax_1house_9eok_over: 3,
+      acq_tax_heavy_8: 8, acq_tax_heavy_12: 12,
+    },
+    meta: { acq_tax_1house_6eok_under: { item: '주택 취득세(유상) — 6억원 이하', source: '지방세법 제11조', date: '2026-07-01' } },
+  });
+  const 억 = 100_000_000;
+  const run = (o: Record<string, unknown>) =>
+    auctionProfit({ appraisal: 5 * 억, bidPrice: 3.5 * 억, repairCost: 0.2 * 억, __policy: POLICY, ...o } as any);
+  const row = (r: ReturnType<typeof auctionProfit>, label: string) =>
+    r.details?.find((d) => d.label.startsWith(label))?.value;
+
+  it('⛔ 옛 「등 5%」는 기본 입력에서 4.5배 과대였다 — 실제는 1.10%', () => {
+    const r = run({});
+    // 3.5억 · 1주택 · 비조정 · 85㎡ 이하 → 취득세 1% + 지방교육세 0.1% + 농특세 0 = 1.10%
+    expect(row(r, '취득세 (1%)')).toBe('350만원');
+    expect(row(r, '지방교육세 (0.1%)')).toBe('35만원');
+    expect(row(r, '세금 합계')).toBe('385만원 (낙찰가의 1.10%)');
+    // 옛 코드: 3.5억 × 5% = 1,750만원. 실제 385만원. 차 1,365만원.
+    expect(3.5 * 억 * 0.05).toBe(17_500_000);
+  });
+
+  it('농특세 0 은 「0원」이 아니라 «사유» 로 쓴다 — 면제와 빠뜨림은 다르다', () => {
+    expect(row(run({}), '농어촌특별세')).toBe('해당 없음 — 전용 85㎡ 이하는 비과세');
+    // 85㎡ 초과면 0.2% 가 붙는다 (표준세율 구간)
+    expect(row(run({ area85: 'over' }), '농어촌특별세')).toBe('70만원 (0.2%)');
+  });
+
+  it('중과는 취득세 계산기와 «같은 답» 을 낸다 — 조정 2주택 8% + 0.4% + 0.6%', () => {
+    const r = run({ houseCount: 2, regulated: 'yes', area85: 'over' });
+    expect(row(r, '취득세 (8%)')).toBe('2,800만원');
+    expect(row(r, '지방교육세 (0.4%)')).toBe('140만원');
+    expect(row(r, '농어촌특별세')).toBe('210만원 (0.6%)');
+    expect(row(r, '세금 합계')).toBe('3,150만원 (낙찰가의 9.00%)');
+  });
+
+  it('주택 외는 4.6% 이고, 상수표 밖이라고 «화면이 말한다»', () => {
+    const r = run({ propertyType: 'other' });
+    expect(row(r, '세금 합계')).toBe('1,610만원 (낙찰가의 4.60%)');
+    expect(row(r, '⚠️ 근거')).toContain('상수표 밖');
+  });
+
+  it('⛔ 기타 부대비용에 «대표값» 을 지어내지 않는다 — 비면 비었다고 쓴다', () => {
+    expect(row(run({}), '기타 부대비용')).toContain('직접 넣는다');
+    expect(row(run({ otherCosts: 15_000_000 }), '기타 부대비용')).toBe('1,500만원');
+  });
+
+  it('⛔ 감정가는 출구가격이 아니다 — 비우면 그 사실을 경고한다', () => {
+    expect(row(run({}), '⚠️ 출구가격')).toContain('6~12개월 전');
+    // 예상 매도가를 넣으면 경고가 사라지고 수익이 그 값으로 계산된다
+    const r = run({ marketPrice: 4.2 * 억 });
+    expect(row(r, '⚠️ 출구가격')).toBeUndefined();
+    // 총투자비 = 3.5억 + 385만 + 2,000만 = 3억 7,385만
+    expect(row(r, '총 투자비')).toBe('3억 7,385만원');
+    expect(row(r, '예상 수익')).toBe('4,615만원');
+  });
+
+  it('낙찰가율은 정의상 «감정가» 대비다 — 출구가격이 바뀌어도 안 움직인다', () => {
+    expect(row(run({ marketPrice: 4.2 * 억 }), '낙찰가율')).toBe('70.0%');
+    expect(row(run({ marketPrice: 6 * 억 }), '낙찰가율')).toBe('70.0%');
+  });
+
+  it('미반영 항목을 숨기지 않는다', () => {
+    expect(row(run({}), '⚠️ 미반영')).toContain('양도소득세');
   });
 });

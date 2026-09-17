@@ -1767,12 +1767,117 @@ export function farBcr(v: V): CalcResult {
   const far = land > 0 ? (total / land) * 100 : 0;
   return { main: { label: '건폐율 / 용적률', value: `${bcr.toFixed(1)}% / ${far.toFixed(1)}%` }, details: [{ label: '건폐율', value: `${bcr.toFixed(1)}%` }, { label: '용적률', value: `${far.toFixed(1)}%` }] };
 }
+/**
+ * 경매 수익률 — K-9 ⓒ 「등」 분해 (2026-09-17)
+ *
+ * ⛔ 옛 코드는 한 줄이었다: `bid * 0.05  // 취득세 등 5%`
+ *    문제는 5%가 아니라 «등» 이다. 그 한 글자 안에 취득세·지방교육세·농어촌특별세·
+ *    등기비·법무비·명도비·중개비가 뭉쳐 있었고, 무엇이 들었고 무엇이 빠졌는지
+ *    코드도 화면도 말하지 않았다. 사용자가 명도비를 따로 더하면 «이중계상»,
+ *    안 더하면 «증발» 이다. 둘 중 하나가 반드시 일어나는데 어느 쪽인지 알 수가 없다 —
+ *    그게 뭉뚱그림의 실제 값이다. 그래서 «가른다»: 세금은 실값으로, 나머지는 별도 입력으로.
+ *    ⚠️ 게다가 5%는 어느 물건에도 맞지 않는다. 주택 1주택 6억 이하 85㎡ 이하면 1.1%,
+ *       주택 외면 4.6%, 12% 중과 85㎡ 초과면 13.4% 다. 평균도 아니고 출처도 없다.
+ *
+ * ⛔ 두 번째 정정 — 감정가는 시세가 아니다.
+ *    옛 코드는 `수익 = 감정가 − 총투자비` 였다. 감정평가는 매각기일보다 6~12개월 «전» 에
+ *    이뤄지고 유찰이 거듭될수록 그 격차가 벌어진다. 감정가를 출구가격으로 쓰면
+ *    상승장에선 수익을 과소, 하락장에선 과대 계상한다. 출구가격은 «따로 묻는다».
+ *    ⚠️ 낙찰가율만은 정의상 감정가 대비이므로 그 자리엔 감정가를 그대로 쓴다.
+ *
+ * ⚠️ 과세표준은 감정가가 아니라 «낙찰가» 다 — 경매는 실제 취득가액이 곧 매각대금이다.
+ */
+/**
+ * 세율 표기 — 유효자리만 남긴다.
+ * ⚠️ `toFixed(n)` 을 고정으로 쓰면 1% 가 「1.000%」로, 사잇세율 1.6667% 가 「1.7%」로 나온다.
+ *    앞은 지저분하고 뒤는 «틀리다». 법정 자리(넷째)까지 재고 꼬리 0 만 떤다.
+ */
+function ratePct(p: number): string {
+  return String(Number(p.toFixed(4)));
+}
+
 export function auctionProfit(v: V): CalcResult {
-  const appraisal = n(v.appraisal); const bid = n(v.bidPrice); const repair = n(v.repairCost);
-  const totalCost = bid + repair + Math.round(bid * 0.05); // 취득세 등 5%
-  const profit = appraisal - totalCost;
+  const appraisal = n(v.appraisal);
+  const bid = n(v.bidPrice);
+  // 비워 두면 감정가로 떨어진다 — 옛 동작과 같은 자리라 화면이 갑자기 달라지지 않는다.
+  const market = n(v.marketPrice) || appraisal;
+  const repair = n(v.repairCost);
+  const other = n(v.otherCosts);
+  const isHouse = (v.propertyType ?? 'house') === 'house';
+  const pack = parsePolicyPack(v.__policy);
+  const notes: { label: string; value: string }[] = [];
+
+  let acqPct = 0, eduPct = 0, farmPct = 0;
+  let pendingSource = false;
+  if (isHouse) {
+    const houseCount = n(v.houseCount) || 1;
+    const regulated = v.regulated === 'yes';
+    // 취득세 계산기와 «같은» 파이프를 탄다. 세율 정본은 policy_constants 하나뿐이다.
+    const key = acqTaxPolicyKey(houseCount, regulated, bid);
+    const fromDb = pack?.pct?.[key];
+    if (typeof fromDb !== 'number') {
+      return {
+        main: { label: '세율 기준 미수신', value: '—', color: 'var(--text-tertiary)' },
+        details: [{ label: '사유', value: '이 조건의 취득세율 기준을 아직 받지 못했다. 잠시 후 다시 시도한다' }],
+      };
+    }
+    acqPct = key === 'acq_tax_1house_6_9eok' ? acqTaxMidRatePct(bid) : fromDb;
+    const heavy: 'none' | 'heavy8' | 'heavy12' =
+      key === 'acq_tax_heavy_12' ? 'heavy12' : key === 'acq_tax_heavy_8' ? 'heavy8' : 'none';
+    const s = acqSurtaxPct(acqPct, heavy, v.area85 === 'over');
+    eduPct = s.eduPct; farmPct = s.farmPct;
+    const m = (pack?.meta?.[key] ?? {}) as { item?: string; source?: string; date?: string };
+    if (m.item) notes.push({ label: '취득세 구간', value: m.item });
+    if (m.source || m.date) notes.push({ label: '세율 근거', value: [m.source, m.date].filter(Boolean).join(' · ') });
+  } else {
+    // 주택 외(상가·토지·오피스텔) 유상취득 — 아직 policy_constants 에 «행이 없다».
+    //   지방세법 §11①⑦ 4% · 지방교육세 §151① 0.4% · 농특세법 §5① 0.2% = 4.6%.
+    //   옮겨 적은 값이 아니라 코드 상수이므로, 화면이 그 사실을 말한다.
+    pendingSource = true;
+    acqPct = 4.0; eduPct = 0.4; farmPct = 0.2;
+  }
+
+  const acqTax = Math.round(bid * acqPct / 100);
+  const eduTax = Math.round(bid * eduPct / 100);
+  const farmTax = Math.round(bid * farmPct / 100);
+  const taxTotal = acqTax + eduTax + farmTax;
+
+  const totalCost = bid + taxTotal + repair + other;
+  const profit = market - totalCost;
   const roi = totalCost > 0 ? (profit / totalCost) * 100 : 0;
-  return { main: { label: '예상 수익률', value: `${roi.toFixed(1)}%` }, details: [{ label: '총 투자비', value: fmt(totalCost) }, { label: '예상 수익', value: fmt(profit) }, { label: '낙찰가율', value: `${((bid / appraisal) * 100).toFixed(1)}%` }] };
+
+  const details: { label: string; value: string }[] = [
+    { label: '총 투자비', value: fmt(totalCost) },
+    { label: '예상 수익', value: fmt(profit) },
+    { label: '낙찰가', value: fmt(bid) },
+    { label: `취득세 (${ratePct(acqPct)}%)`, value: fmt(acqTax) },
+    { label: `지방교육세 (${ratePct(eduPct)}%)`, value: fmt(eduTax) },
+    {
+      label: '농어촌특별세',
+      // ⚠️ 0 을 「0원」으로만 쓰면 «면제» 인지 «빠뜨림» 인지 구분되지 않는다. 사유를 쓴다.
+      value: farmPct > 0 ? `${fmt(farmTax)} (${farmPct.toFixed(1)}%)`
+        : isHouse ? '해당 없음 — 전용 85㎡ 이하는 비과세' : fmt(farmTax),
+    },
+    { label: '세금 합계', value: `${fmt(taxTotal)} (낙찰가의 ${((taxTotal / (bid || 1)) * 100).toFixed(2)}%)` },
+    { label: '수리비', value: fmt(repair) },
+    {
+      label: '기타 부대비용',
+      // ⛔ 여기에 «대표값» 을 넣지 않는다. 명도비는 0원인 물건과 수천만원인 물건이 같이 있고,
+      //    평균을 지어내면 그게 바로 옛 「등 5%」와 같은 죄다. 비어 있으면 비었다고 쓴다.
+      value: other > 0 ? fmt(other) : '0 — 등기·법무·명도·체납관리비·중개보수는 직접 넣는다',
+    },
+    { label: '낙찰가율', value: appraisal > 0 ? `${((bid / appraisal) * 100).toFixed(1)}%` : '—' },
+    ...notes,
+    { label: '⚠️ 미반영', value: '양도소득세·대출이자·보유세는 이 계산에 들어 있지 않다' },
+  ];
+  if (market === appraisal && n(v.marketPrice) === 0) {
+    details.push({ label: '⚠️ 출구가격', value: '예상 매도가를 비워 감정가로 계산했다 — 감정평가는 매각기일 6~12개월 전 시점이다' });
+  }
+  if (pendingSource) {
+    details.push({ label: '⚠️ 근거', value: '주택 외 취득세율은 아직 상수표 밖이다 — 코드 값(4.6%)을 쓰는 중이다' });
+  }
+
+  return { main: { label: '예상 수익률', value: `${roi.toFixed(1)}%` }, details };
 }
 export function dripSim(v: V): CalcResult {
   const inv = n(v.investment); const yr = n(v.yieldRate) / 100; const gr = n(v.growthRate) / 100;

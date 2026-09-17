@@ -52,7 +52,10 @@ async function getLiveData(slug: string): Promise<Record<string, string> | undef
 
     // LTV·DSR — 규제 상수의 정본은 policy_constants 다. 코드에 퍼센트를 적지 않는다.
     //   대출 규제는 대책 발표마다 바뀌므로, 표가 갱신되면 계산기도 «자동으로» 따라간다.
-    if (slug === 'ltv-calc' || slug === 'dsr-calc' || slug === 'acquisition-tax' || slug === 'stock-roi') {
+    // ⚠️ auction-profit 도 취득세 «같은» 파이프를 탄다 — 경매 취득도 같은 법정 세율이다.
+    //    여기 빠뜨리면 계산기가 「세율 기준 미수신」만 띄우고 아무것도 못 한다.
+    if (slug === 'ltv-calc' || slug === 'dsr-calc' || slug === 'acquisition-tax' || slug === 'stock-roi'
+        || slug === 'auction-profit') {
       const { data } = await (sb as any)
         .from('policy_constants')
         .select('key, item, numbers, source_title, source_date, status')
