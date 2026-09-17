@@ -100,7 +100,7 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
   const ogTitle = calc.seoTitle
     ? `${calc.emoji} ${calc.seoTitle}`
     : `${calc.emoji} ${calc.title} — 무료 온라인 계산기`;
-  const metaDesc = `${calc.description} 2026년 최신 기준 반영. 무료·회원가입 불필요.`;
+  const metaDesc = `${calc.description} 무료·회원가입 불필요.`;
   // s224 T1B: 5개 timestamp 모두 calc.lastUpdated 기준으로 통일.
   // 빌드 시점 new Date() 와 hardcoded '2026-01-15' 박혀있던 부분 제거.
   const ts = `${calc.lastUpdated}T00:00:00Z`;

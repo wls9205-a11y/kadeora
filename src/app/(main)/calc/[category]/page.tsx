@@ -16,20 +16,20 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
   const label = cat.label;
   return {
     title: `${label} 계산기 모음 — 카더라`,
-    description: `${label} 관련 무료 계산기. 2026년 최신 기준 반영.`,
+    description: `${label} 관련 무료 계산기.`,
     alternates: { canonical: `${SITE_URL}/calc/${category}` },
     openGraph: {
       title: `${label} 계산기 모음`,
-      description: `${label} 관련 무료 계산기. 2026년 최신 기준 반영.`,
+      description: `${label} 관련 무료 계산기.`,
       url: `${SITE_URL}/calc/${category}`,
       siteName: '카더라', locale: 'ko_KR', type: 'website',
       images: [{ url: `${SITE_URL}/api/og?title=${encodeURIComponent(label + ' 계산기')}&design=2&category=calc`, width: 1200, height: 630 }],
     },
     keywords: [label, '계산기', '무료', '카더라', '2026'],
-    twitter: { card: 'summary_large_image', title: `${label} 계산기 모음`, description: `${label} 관련 무료 계산기. 2026년 최신 기준 반영.` },
+    twitter: { card: 'summary_large_image', title: `${label} 계산기 모음`, description: `${label} 관련 무료 계산기.` },
     other: {
       'naver:author': '카더라', 'naver:site_name': '카더라',
-      'naver:description': `${label} 관련 무료 계산기. 2026년 최신 기준 반영.`,
+      'naver:description': `${label} 관련 무료 계산기.`,
       'naver:written_time': new Date().toISOString(),
       'naver:updated_time': new Date().toISOString(),
       'article:section': label,

@@ -152,7 +152,7 @@ export default async function TopicHubPage({ params }: PageProps) {
         {topic.topic_label}
       </h1>
       <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '8px 0 0' }}>
-        2026년 최신 기준 · 무료 · 회원가입 불필요 · {calcs.length}종 통합
+        무료 · 회원가입 불필요 · {calcs.length}종 통합
       </p>
 
       {/* 도입부 (AI 생성) */}
