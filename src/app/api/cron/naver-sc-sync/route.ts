@@ -176,7 +176,9 @@ export async function GET(req: Request) {
     // [§4-2] 대상 조회를 RPC 로. `tracked AND active` 를 보고 (2026-09-17 게이트 — 이전엔 tracked 만),
     //   priority 오름차순 → last_checked_at 오래된 순으로 회전시킨다.
     //   ⚠️ active=false 는 복귀 트리거가 없다 — 내리면 곧 수집 중단이다.
-    //      2026-08-25 자동 시드 570행이 검수 없이 active=false 로 들어와 승부처 본명을 품고 있었다.
+    //      active 의 뜻은 한 번 바뀌었다: 2026-08-25 시드(034817)는 active=true 로 넣었고, 37초 뒤
+    //      split_legacy_gate(034854)가 «옛 게이트» 로 격하하며 시드분을 일괄 false 로 돌렸다.
+    //      그 false 가 9/17 게이트 재도입 때 승부처 본명을 품은 채 남아 있었다.
     //   priority=1(현재 순위가 잡히는 13 개)은 항상 배치에 포함돼 매일 측정된다.
     //   ⚠️ 실측 정정(2026-09-03) — `get_rank_targets_due(200)` 은 «80 건» 만 돌려준다.
     //      함수 안에 자체 캡이 있다. BATCH_LIMIT 를 올려도 배치 크기는 80(=160 콜) 이다.
