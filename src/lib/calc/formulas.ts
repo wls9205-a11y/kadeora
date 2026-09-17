@@ -632,7 +632,7 @@ export const FORMULAS: Record<string, (v: V) => CalcResult> = {
   //   라이브 반영일 = 오늘(커밋일 아님). 나머지 21종은 A″ 감사 통과 시 개별 등록(src/__tests__/calc-registry-coverage.test.ts 의 PENDING).
   ltvCalc, housingBond, auctionProfit, shortSelling, carInsuranceEst, capitalGainsRights, capitalGainsLand, multiHouseSim, oneHouseCheck, majorShareholderCgt, registrationLicenseTax, stampTax, minimumWage, isaConversion, industrialAccident, consolationMoney, statuteOfLimitations,
   // A″ a2 감사 통과(2026-09-17) — 라이브 반영일 = 등록 커밋 배포일.
-  jeonseLoan, severanceCalc,
+  jeonseLoan, severanceCalc, businessIncomeTax, freelancerTax, creditLoanEst,
 };
 
 // ═══ 청약 가점 계산기 (주택공급에 관한 규칙 별표1) ═══
@@ -1119,16 +1119,7 @@ export function investmentTypeTest(v: V): CalcResult {
   return { main: { label: '투자 성향', value: type }, details: [{ label: '추천 포트폴리오', value: allocation }, { label: '점수', value: `${score}/9점` }] };
 }
 import { dailyWorkerTax } from './k9/fin'; export { dailyWorkerTax }; FORMULAS.dailyWorkerTax = dailyWorkerTax; // K-9 fin — FORMULAS 맵에 빠져 화면에 결과가 안 뜨던 계산기
-export function freelancerTax(v: V): CalcResult {
-  const rev = n(v.annualRevenue); const rate = n(v.expenseRate) / 100;
-  const income = rev * (1 - rate);
-  const taxBase = Math.max(0, income - 5000000); // 기본공제 근사
-  const tax = Math.round(calcProgressiveTax(taxBase, INCOME_TAX_BRACKETS));
-  const local = Math.round(tax * 0.1);
-  const withheld = n(v.withheld);
-  const refund = withheld - tax - local;
-  return { main: { label: refund >= 0 ? '예상 환급' : '추가 납부', value: fmt(Math.abs(Math.round(refund))), color: refund >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }, details: [{ label: '종합소득세', value: fmt(tax) }, { label: '지방소득세', value: fmt(local) }, { label: '기납부 (3.3%)', value: fmt(withheld) }] };
-}
+import { freelancerTax } from './k9/a2'; export { freelancerTax }; // K-9 A″ a2 — 감사 후 본문 이관
 export function telecomCompare(v: V): CalcResult {
   const current = n(v.currentPlan); const newPlan = n(v.newPlan);
   const monthSave = current - newPlan;
@@ -1151,12 +1142,7 @@ import { capitalGainsRights } from './k9/cgt'; export { capitalGainsRights }; //
 import { registrationLicenseTax } from './k9/local'; export { registrationLicenseTax };
 import { deemedRent } from './k9/fin'; export { deemedRent }; FORMULAS.deemedRent = deemedRent; // K-9 fin — FORMULAS 맵에 빠져 화면에 결과가 안 뜨던 계산기
 import { oneHouseCheck } from './k9/cgt'; export { oneHouseCheck }; // K-9 cgt — 본문 이관
-export function businessIncomeTax(v: V): CalcResult {
-  const income = n(v.revenue) - n(v.expenses);
-  const taxBase = Math.max(0, income - 5000000);
-  const tax = Math.round(calcProgressiveTax(taxBase, INCOME_TAX_BRACKETS));
-  return { main: { label: '사업소득세', value: fmt(Math.round(tax * 1.1)) }, details: [{ label: '사업소득', value: fmt(income) }, { label: '과세표준', value: fmt(taxBase) }] };
-}
+import { businessIncomeTax } from './k9/a2'; export { businessIncomeTax }; // K-9 A″ a2 — 감사 후 본문 이관
 import { pensionIncomeTax } from './k9/fin'; export { pensionIncomeTax }; FORMULAS.pensionIncomeTax = pensionIncomeTax; // K-9 fin — FORMULAS 맵에 빠져 화면에 결과가 안 뜨던 계산기
 import { dividendIncomeTax } from './k9/fin'; export { dividendIncomeTax }; FORMULAS.dividendIncomeTax = dividendIncomeTax; // K-9 fin — FORMULAS 맵에 빠져 화면에 결과가 안 뜨던 계산기
 import { majorShareholderCgt } from './k9/cgt'; export { majorShareholderCgt }; // K-9 cgt — 본문 이관
@@ -1491,13 +1477,7 @@ export function refinanceCompare(v: V): CalcResult {
   const breakEvenMonths = annualSaving > 0 ? Math.ceil(fee / (annualSaving / 12)) : 999;
   return { main: { label: '연간 이자 절감', value: fmt(annualSaving) }, details: [{ label: '대환 수수료', value: fmt(fee) }, { label: '손익분기', value: `${breakEvenMonths}개월` }] };
 }
-export function creditLoanEst(v: V): CalcResult {
-  const income = n(v.annualIncome);
-  const multiplier: Record<string, number> = { '1': 3.0, '3': 2.5, '5': 2.0, '7': 1.0 };
-  const mult = multiplier[v.creditGrade as string] || 2.0;
-  const limit = Math.round(income * mult);
-  return { main: { label: '추정 한도', value: fmt(limit) }, details: [{ label: '연소득 대비', value: `${mult}배` }, { label: '참고', value: '실제 한도는 은행 심사 기준에 따라 다름' }] };
-}
+import { creditLoanEst } from './k9/a2'; export { creditLoanEst }; // K-9 A″ a2 — 감사 후 본문 이관
 export function retirementExpense(v: V): CalcResult {
   const monthly = n(v.monthlyExpense); const retire = n(v.retireAge);
   const life = n(v.lifeExpectancy); const inf = n(v.inflation) / 100;
