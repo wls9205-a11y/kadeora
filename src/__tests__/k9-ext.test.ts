@@ -59,12 +59,12 @@ describe('마이그레이션 행 — 파서가 전부 읽는다', () => {
       expect(f({}).main.value).toBe('—');
     }
   });
-  it('기존 FORMULAS 등록 4종은 k9 본문으로 바뀌었다 · 미등록 4종은 등록하지 않았다(사용자 판정 대기)', () => {
+  it('FORMULAS 등록 8종 모두 k9 본문이다 — 미등록 4종은 [S] 해제 판정(2026-09-17)으로 등록됐다', () => {
     expect(FORMULAS.jeonseWolse).toBe(jeonseWolse);
     expect(FORMULAS.giftTax).toBe(giftTax);
     expect(FORMULAS.militaryPay).toBe(militaryPay);
     expect(FORMULAS.childCredit).toBe(childCredit);
-    for (const k of ['minimumWage', 'industrialAccident', 'isaConversion', 'capitalGainsLand']) expect(FORMULAS[k]).toBeUndefined();
+    for (const k of ['minimumWage', 'industrialAccident', 'isaConversion', 'capitalGainsLand']) expect(typeof FORMULAS[k]).toBe('function');
   });
 });
 

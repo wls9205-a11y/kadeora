@@ -11,21 +11,23 @@
  *   (SELECT json_agg(json_build_object('key',key,'numbers',numbers,'status',status) ORDER BY key) FROM policy_constants).
  */
 import { describe, it, expect } from 'vitest';
-import * as F from '@/lib/calc/formulas';
+import { FORMULAS } from '@/lib/calc/formulas';
+import { PENDING } from './calc-registry-coverage.test';
 import { CALC_REGISTRY } from '@/lib/calc/registry';
 import { policyPackFromRows } from '@/lib/calc/gov-tables';
 import rows from './fixtures/policy_constants.snapshot.json';
 
 const POLICY = JSON.stringify(policyPackFromRows(rows as any));
 // currency-convert 는 policy 가 아니라 환율(__fx) 파이프라 여기서 뺀다.
-const SKIP = new Set(['currency-convert']);
+const SKIP = new Set(['currency-convert', ...PENDING]);
 
 describe('전 계산기 — 실제 정책 행으로 기본 입력 계산 시 「미수신」 없음', () => {
   for (const calc of CALC_REGISTRY) {
     if (SKIP.has(calc.slug)) continue;
     it(`${calc.slug} (${calc.formula})`, () => {
-      const fn = (F as any)[calc.formula];
-      expect(typeof fn, `formula 함수 없음: ${calc.formula}`).toBe('function');
+      // ⛔ 정본 경유 — CalcEngine 과 같은 FORMULAS[calc.formula]. 함수 직접 호출은 맵 갭을 못 본다.
+      const fn = (FORMULAS as any)[calc.formula];
+      expect(typeof fn, `FORMULAS 미등록(라이브 무결과): ${calc.formula}`).toBe('function');
       const v: Record<string, string | number> = { __policy: POLICY };
       for (const inp of calc.inputs) v[inp.id] = inp.default;
       const r = fn(v);
@@ -40,7 +42,7 @@ describe('분기 표본 — 기본 입력 밖 구간도 실제 행으로 「미�
     const calc = CALC_REGISTRY.find((c) => c.formula === formula)!;
     const v: Record<string, string | number> = { __policy: POLICY };
     for (const inp of calc.inputs) v[inp.id] = inp.default;
-    return (F as any)[formula]({ ...v, ...overrides });
+    return (FORMULAS as any)[formula]({ ...v, ...overrides });
   };
   it.each([
     ['acquisitionTax', { price: 750_000_000 }],             // 6~9억 매매 — 첫 원소 「6억원」 행

@@ -68,11 +68,11 @@ describe('시딩 SQL — 파서 형식 · 개수', () => {
   });
 });
 
-describe('FORMULAS 맵 등록 — [S] 보류(사용자 판정 대기), 판정 전에는 맵을 건드리지 않는다', () => {
-  it('misc 담당 중 맵에 없는 계산기를 «기록» 한다(등록 대기 목록이 조용히 늘거나 줄면 깨진다)', () => {
+describe('FORMULAS 맵 등록 — [S] 해제 판정(2026-09-17)으로 등록됨', () => {
+  it('misc 담당 중 옛 미등록 3종이 이제 맵에 있다(라이브 반영일 2026-09-17)', () => {
     const mine = ['ltvCalc', 'consolationMoney', 'statuteOfLimitations'];
     const unregistered = mine.filter((f) => !FORMULAS[f]);
-    expect(unregistered).toEqual(mine);
+    expect(unregistered).toEqual([]);
     // registry 에 formula 로 쓰이는지도 확인 — 죽은 이름이 아니다
     for (const f of mine) expect(CALCULATORS.some((c) => c.formula === f)).toBe(true);
   });

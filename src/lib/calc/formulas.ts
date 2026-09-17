@@ -628,6 +628,9 @@ export const FORMULAS: Record<string, (v: V) => CalcResult> = {
   giftExemptionLookup, burdenGift, familyBusiness, generationSkip,
   // 청약 가점 (이전 누락 — registry는 있는데 formula 없어서 결과 안 떴음)
   subscriptionScore,
+  // [S] 해제(2026-09-17 세션 A 판정) — registry 에 있는데 맵에 없어 라이브 무결과였던 38종 중 «감사 통과» 17종.
+  //   라이브 반영일 = 오늘(커밋일 아님). 나머지 21종은 A″ 감사 통과 시 개별 등록(src/__tests__/calc-registry-coverage.test.ts 의 PENDING).
+  ltvCalc, housingBond, auctionProfit, shortSelling, carInsuranceEst, capitalGainsRights, capitalGainsLand, multiHouseSim, oneHouseCheck, majorShareholderCgt, registrationLicenseTax, stampTax, minimumWage, isaConversion, industrialAccident, consolationMoney, statuteOfLimitations,
 };
 
 // ═══ 청약 가점 계산기 (주택공급에 관한 규칙 별표1) ═══

@@ -134,3 +134,22 @@
 
 ⚠️ 다주택·조정대상지역 세율은 아직 원문 확인 전이다. 확인 없이 옮겨 적지 않는다 —
 지방세법 §11·§13 원문 확보가 선행 조건이다.
+
+
+---
+
+## ⛔ 라이브 반영일 원장 (2026-09-17)
+
+**라이브 반영일 ≠ 커밋일.** registry 에 페이지가 있는데 FORMULAS 맵에 공식이 없어 44종이 «결과 없음» 이었다.
+그 동안 커밋된 수리는 화면에 한 번도 나가지 않았다 — 전후 비교 기준일은 아래 «라이브 반영일» 이다.
+
+| 계산기 | 수치 수리 커밋 | 라이브 반영일 |
+|---|---|---|
+| ltv-calc · housing-bond · auction-profit · short-selling · car-insurance-est | 9/16~9/17 | **2026-09-17** (맵 등록) |
+| capital-gains-rights · capital-gains-land · multi-house-sim · one-house-check · major-shareholder-cgt | 9/17 | **2026-09-17** |
+| registration-license-tax · stamp-tax · minimum-wage · isa-conversion · industrial-accident · consolation-money · statute-of-limitations | 9/17 | **2026-09-17** |
+| pension-income-tax · daily-worker-tax · deemed-rent · dividend-income-tax · fis-tax-sim · withholding-calc | 9/17 (fin) | **2026-09-17** |
+| gift-exemption-lookup · burden-gift · family-business · generation-skip | 9/17 (inh) | **2026-09-17** |
+| A″ 감사 대기 21종 (calc-registry-coverage.test.ts PENDING) | — | 미반영 — 감사 통과 시 개별 |
+
+구조 차단: `calc-registry-coverage.test.ts`(양방향) · `calc-live-policy.test.ts`(FORMULAS 경유 + 실 DB 행).
