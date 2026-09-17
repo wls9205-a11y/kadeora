@@ -1,0 +1,3080 @@
+[
+{
+"key": "acq_tax_1house_6_9eok",
+"numbers": [
+"6억원",
+"9억원",
+"1%",
+"3%"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_1house_6eok_under",
+"numbers": [
+"1%",
+"6억원"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_1house_9eok_over",
+"numbers": [
+"3%",
+"9억원"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_edu_ratio",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_farm_ratio",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_farm_relief",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_firsthome_cap",
+"numbers": [
+"200만원"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_firsthome_cap_300",
+"numbers": [
+"300만원"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_firsthome_max",
+"numbers": [
+"12억원"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_gift",
+"numbers": [
+"3.5%"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_gift_heavy_12",
+"numbers": [
+"12%"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_gift_heavy_min",
+"numbers": [
+"3억원"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_heavy_12",
+"numbers": [
+"12%",
+"4%",
+"2%"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_heavy_8",
+"numbers": [
+"8%",
+"4%",
+"2%"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_inherit",
+"numbers": [
+"2.8%"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_inherit_1house",
+"numbers": [
+"0.8%"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_std_rate",
+"numbers": [
+"2%"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_unsold_local",
+"numbers": [
+"25%"
+],
+"status": "confirmed"
+},
+{
+"key": "acq_tax_unsold_local_max",
+"numbers": [
+"6억원"
+],
+"status": "confirmed"
+},
+{
+"key": "biz_inh_limit_10y",
+"numbers": [
+"300억원"
+],
+"status": "confirmed"
+},
+{
+"key": "biz_inh_limit_20y",
+"numbers": [
+"400억원"
+],
+"status": "confirmed"
+},
+{
+"key": "biz_inh_limit_30y",
+"numbers": [
+"600억원"
+],
+"status": "confirmed"
+},
+{
+"key": "biz_inh_rev_cap",
+"numbers": [
+"5,000억원"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_basic_deduction",
+"numbers": [
+"250만원"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_exempt_hold_years",
+"numbers": [
+"2년"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_exempt_live_years",
+"numbers": [
+"2년"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_foreign_rate",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_foreign_sme_rate",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_heavy_2house",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_heavy_3house",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_heavy_grace_end",
+"numbers": [
+"2026년 5월 9일"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_house_exempt_cap",
+"numbers": [
+"12억원"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_local_ratio",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_ltd_t1_base",
+"numbers": [
+"6%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_ltd_t1_max",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_ltd_t1_step",
+"numbers": [
+"2%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_ltd_t2_base",
+"numbers": [
+"12%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_ltd_t2_live2",
+"numbers": [
+"8%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_ltd_t2_max",
+"numbers": [
+"40%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_ltd_t2_step",
+"numbers": [
+"4%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_major_bracket",
+"numbers": [
+"3억원"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_major_rate_high",
+"numbers": [
+"25%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_major_rate_low",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_major_short",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_major_threshold_cap",
+"numbers": [
+"50억원"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_major_threshold_konex",
+"numbers": [
+"4%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_major_threshold_kosdaq",
+"numbers": [
+"2%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_major_threshold_kospi",
+"numbers": [
+"1%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_major_unlisted_cap",
+"numbers": [
+"10억원",
+"40억원"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_major_unlisted_pct",
+"numbers": [
+"4%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_presale_rate",
+"numbers": [
+"60%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_ria_limit",
+"numbers": [
+"5,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_ria_w1",
+"numbers": [
+"100%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_ria_w2",
+"numbers": [
+"80%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_ria_w3",
+"numbers": [
+"50%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_short_house_1y",
+"numbers": [
+"70%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_short_house_2y",
+"numbers": [
+"60%"
+],
+"status": "confirmed"
+},
+{
+"key": "cgt_temp2_window",
+"numbers": [
+"3년",
+"1년"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_ltax_ratio",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_b1",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_b2",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_b3",
+"numbers": [
+"22%"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_b4",
+"numbers": [
+"25%"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_prev_b1",
+"numbers": [
+"9%"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_prev_b2",
+"numbers": [
+"19%"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_prev_b3",
+"numbers": [
+"21%"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_prev_b4",
+"numbers": [
+"24%"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_prev_small_b1",
+"numbers": [
+"19%"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_prev_small_b2",
+"numbers": [
+"21%"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_prev_small_b3",
+"numbers": [
+"24%"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_small_b1",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_small_b2",
+"numbers": [
+"22%"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_small_b3",
+"numbers": [
+"25%"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_small_upto_b1",
+"numbers": [
+"200억원"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_small_upto_b2",
+"numbers": [
+"3,000억원"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_upto_b1",
+"numbers": [
+"2억원"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_upto_b2",
+"numbers": [
+"200억원"
+],
+"status": "confirmed"
+},
+{
+"key": "corp_tax_upto_b3",
+"numbers": [
+"3,000억원"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_credit_cap",
+"numbers": [
+"80%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_ded_general",
+"numbers": [
+"9억원"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_ded_one_house",
+"numbers": [
+"12억원"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_elder_60",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_elder_65",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_elder_70",
+"numbers": [
+"40%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_fmv_ratio",
+"numbers": [
+"60%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_hold_10y",
+"numbers": [
+"40%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_hold_15y",
+"numbers": [
+"50%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_hold_5y",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_nongteuk_rate",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_2h_b1",
+"numbers": [
+"0.5%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_2h_b2",
+"numbers": [
+"0.7%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_2h_b3",
+"numbers": [
+"1.0%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_2h_b4",
+"numbers": [
+"1.3%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_2h_b5",
+"numbers": [
+"1.5%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_2h_b6",
+"numbers": [
+"2.0%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_2h_b7",
+"numbers": [
+"2.7%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_3h_b1",
+"numbers": [
+"0.5%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_3h_b2",
+"numbers": [
+"0.7%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_3h_b3",
+"numbers": [
+"1.0%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_3h_b4",
+"numbers": [
+"2.0%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_3h_b5",
+"numbers": [
+"3.0%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_3h_b6",
+"numbers": [
+"4.0%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_3h_b7",
+"numbers": [
+"5.0%"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_upto_b1",
+"numbers": [
+"3억원"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_upto_b2",
+"numbers": [
+"6억원"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_upto_b3",
+"numbers": [
+"12억원"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_upto_b4",
+"numbers": [
+"25억원"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_upto_b5",
+"numbers": [
+"50억원"
+],
+"status": "confirmed"
+},
+{
+"key": "cpt_rate_upto_b6",
+"numbers": [
+"94억원"
+],
+"status": "confirmed"
+},
+{
+"key": "crypto_basic_ded",
+"numbers": [
+"250만원"
+],
+"status": "confirmed"
+},
+{
+"key": "crypto_rate",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "customs_vat_rate",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "daily_wage_ded",
+"numbers": [
+"15만원"
+],
+"status": "confirmed"
+},
+{
+"key": "daily_wh_credit",
+"numbers": [
+"55%"
+],
+"status": "confirmed"
+},
+{
+"key": "daily_wh_rate",
+"numbers": [
+"6%"
+],
+"status": "confirmed"
+},
+{
+"key": "deemed_rent_2house_base",
+"numbers": [
+"12억원"
+],
+"status": "confirmed"
+},
+{
+"key": "deemed_rent_base",
+"numbers": [
+"3억원"
+],
+"status": "confirmed"
+},
+{
+"key": "deemed_rent_rate",
+"numbers": [
+"3.1%"
+],
+"status": "confirmed"
+},
+{
+"key": "deemed_rent_ratio",
+"numbers": [
+"60%"
+],
+"status": "confirmed"
+},
+{
+"key": "deposit_102_metro",
+"numbers": [
+"400만원",
+"102㎡"
+],
+"status": "confirmed"
+},
+{
+"key": "deposit_102_other",
+"numbers": [
+"300만원",
+"102㎡"
+],
+"status": "confirmed"
+},
+{
+"key": "deposit_102_seoul_busan",
+"numbers": [
+"600만원",
+"102㎡"
+],
+"status": "confirmed"
+},
+{
+"key": "deposit_135_metro",
+"numbers": [
+"700만원",
+"135㎡"
+],
+"status": "confirmed"
+},
+{
+"key": "deposit_135_other",
+"numbers": [
+"400만원",
+"135㎡"
+],
+"status": "confirmed"
+},
+{
+"key": "deposit_135_seoul_busan",
+"numbers": [
+"1,000만원",
+"135㎡"
+],
+"status": "confirmed"
+},
+{
+"key": "deposit_85_metro",
+"numbers": [
+"250만원",
+"85㎡"
+],
+"status": "confirmed"
+},
+{
+"key": "deposit_85_other",
+"numbers": [
+"200만원",
+"85㎡"
+],
+"status": "confirmed"
+},
+{
+"key": "deposit_85_seoul_busan",
+"numbers": [
+"300만원",
+"85㎡"
+],
+"status": "confirmed"
+},
+{
+"key": "deposit_all_metro",
+"numbers": [
+"1,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "deposit_all_other",
+"numbers": [
+"500만원"
+],
+"status": "confirmed"
+},
+{
+"key": "deposit_all_seoul_busan",
+"numbers": [
+"1,500만원"
+],
+"status": "confirmed"
+},
+{
+"key": "designation_busan_ulsan_gyeongnam",
+"numbers": [],
+"status": "confirmed"
+},
+{
+"key": "designation_gyeonggi",
+"numbers": [
+"15곳",
+"12곳",
+"3곳"
+],
+"status": "confirmed"
+},
+{
+"key": "designation_seoul",
+"numbers": [
+"25개"
+],
+"status": "confirmed"
+},
+{
+"key": "designation_total",
+"numbers": [
+"25곳",
+"15곳",
+"40곳"
+],
+"status": "confirmed"
+},
+{
+"key": "div_grossup",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "div_grossup_2027",
+"numbers": [
+"11%"
+],
+"status": "confirmed"
+},
+{
+"key": "div_tax_income",
+"numbers": [
+"14%"
+],
+"status": "confirmed"
+},
+{
+"key": "dsr_bank",
+"numbers": [
+"40%"
+],
+"status": "confirmed"
+},
+{
+"key": "dsr_nonbank",
+"numbers": [
+"50%"
+],
+"status": "confirmed"
+},
+{
+"key": "dui_bac_min",
+"numbers": [
+"0.03%"
+],
+"status": "confirmed"
+},
+{
+"key": "dui_bac_tier2",
+"numbers": [
+"0.08%"
+],
+"status": "confirmed"
+},
+{
+"key": "dui_bac_tier3",
+"numbers": [
+"0.2%"
+],
+"status": "confirmed"
+},
+{
+"key": "elec_fund_rate",
+"numbers": [
+"2.7%"
+],
+"status": "confirmed"
+},
+{
+"key": "elec_vat_rate",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "etf_ovs_basic_ded",
+"numbers": [
+"250만원"
+],
+"status": "confirmed"
+},
+{
+"key": "etf_ovs_rate",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_bok_base_rate",
+"numbers": [
+"3.00%"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_child_birth_1",
+"numbers": [
+"30만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_child_birth_2",
+"numbers": [
+"50만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_child_birth_3",
+"numbers": [
+"70만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_child_credit_1",
+"numbers": [
+"25만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_child_credit_2",
+"numbers": [
+"55만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_child_credit_extra",
+"numbers": [
+"40만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_iaci_rest_pay",
+"numbers": [
+"70%"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_isa_conv_cap",
+"numbers": [
+"300만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_isa_conv_ratio",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_land_nonbiz_add",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_land_short_1y",
+"numbers": [
+"50%"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_land_short_2y",
+"numbers": [
+"40%"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_mil_pay_corporal",
+"numbers": [
+"1,200,000원"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_mil_pay_pfc",
+"numbers": [
+"900,000원"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_mil_pay_private",
+"numbers": [
+"750,000원"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_mil_pay_sergeant",
+"numbers": [
+"1,500,000원"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_min_wage_hourly_2026",
+"numbers": [
+"10,320원"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_min_wage_hourly_2027",
+"numbers": [
+"10,700원"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_pension_credit_rate",
+"numbers": [
+"12%"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_pension_credit_rate_low",
+"numbers": [
+"15%"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_pension_savings_cap",
+"numbers": [
+"600만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_pension_total_cap",
+"numbers": [
+"900만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_rent_conv_add",
+"numbers": [
+"2%"
+],
+"status": "confirmed"
+},
+{
+"key": "ext_rent_conv_cap",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "farm_int_base",
+"numbers": [
+"14%"
+],
+"status": "confirmed"
+},
+{
+"key": "farm_int_rate",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "fin_comp_threshold",
+"numbers": [
+"2,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "gajeom_exclusion",
+"numbers": [
+"1주택",
+"2년"
+],
+"status": "confirmed"
+},
+{
+"key": "gajeom_ratio_60_85_regulated",
+"numbers": [
+"60㎡",
+"85㎡",
+"70%",
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "gajeom_ratio_60_regulated",
+"numbers": [
+"60㎡",
+"40%",
+"60%"
+],
+"status": "confirmed"
+},
+{
+"key": "gajeom_ratio_85over_adjusted",
+"numbers": [
+"85㎡",
+"50%"
+],
+"status": "confirmed"
+},
+{
+"key": "gajeom_ratio_85over_nonregulated",
+"numbers": [
+"85㎡",
+"100%"
+],
+"status": "confirmed"
+},
+{
+"key": "gajeom_ratio_85over_speculative",
+"numbers": [
+"85㎡",
+"80%",
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "gajeom_ratio_85under_nonregulated",
+"numbers": [
+"85㎡",
+"40%"
+],
+"status": "confirmed"
+},
+{
+"key": "gift_ded_ascendant",
+"numbers": [
+"5,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "gift_ded_ascendant_minor",
+"numbers": [
+"2,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "gift_ded_descendant",
+"numbers": [
+"5,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "gift_ded_marriage_birth",
+"numbers": [
+"1억원"
+],
+"status": "confirmed"
+},
+{
+"key": "gift_ded_relative",
+"numbers": [
+"1,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "gift_ded_spouse",
+"numbers": [
+"6억원"
+],
+"status": "confirmed"
+},
+{
+"key": "gift_filing_credit",
+"numbers": [
+"3%"
+],
+"status": "confirmed"
+},
+{
+"key": "gift_skip_minor_threshold",
+"numbers": [
+"20억원"
+],
+"status": "confirmed"
+},
+{
+"key": "gift_skip_surcharge",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "gift_skip_surcharge_minor",
+"numbers": [
+"40%"
+],
+"status": "confirmed"
+},
+{
+"key": "hug_midloan_count",
+"numbers": [
+"2건",
+"1건"
+],
+"status": "confirmed"
+},
+{
+"key": "hug_midloan_per_person_limit",
+"numbers": [
+"60%"
+],
+"status": "confirmed"
+},
+{
+"key": "hug_midloan_per_person_limit_legacy",
+"numbers": [
+"5억원",
+"3억원"
+],
+"status": "confirmed"
+},
+{
+"key": "hug_midloan_price_cap",
+"numbers": [
+"12억원"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_ded_basic",
+"numbers": [
+"2억원"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_ded_child",
+"numbers": [
+"5,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_ded_fin_floor",
+"numbers": [
+"2,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_ded_fin_max",
+"numbers": [
+"2억원"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_ded_fin_rate",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_ded_lump",
+"numbers": [
+"5억원"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_ded_minor_yr",
+"numbers": [
+"1,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_ded_senior",
+"numbers": [
+"5,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_ded_spouse_max",
+"numbers": [
+"30억원"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_ded_spouse_min",
+"numbers": [
+"5억원"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_filing_credit",
+"numbers": [
+"3%"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_rate_b1",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_rate_b2",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_rate_b3",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_rate_b4",
+"numbers": [
+"40%"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_rate_b5",
+"numbers": [
+"50%"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_rate_upto_b1",
+"numbers": [
+"1억원"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_rate_upto_b2",
+"numbers": [
+"5억원"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_rate_upto_b3",
+"numbers": [
+"10억원"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_rate_upto_b4",
+"numbers": [
+"30억원"
+],
+"status": "confirmed"
+},
+{
+"key": "inh_taxfloor",
+"numbers": [
+"50만원"
+],
+"status": "confirmed"
+},
+{
+"key": "int_tax_income",
+"numbers": [
+"14%"
+],
+"status": "confirmed"
+},
+{
+"key": "int_tax_local",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "isa_excess_rate",
+"numbers": [
+"9%"
+],
+"status": "confirmed"
+},
+{
+"key": "isa_taxfree_general",
+"numbers": [
+"200만원"
+],
+"status": "confirmed"
+},
+{
+"key": "isa_taxfree_low",
+"numbers": [
+"400만원"
+],
+"status": "confirmed"
+},
+{
+"key": "lottery_homeless_priority",
+"numbers": [
+"75%",
+"1주택"
+],
+"status": "confirmed"
+},
+{
+"key": "ltv_capital_multi_owner",
+"numbers": [
+"0%",
+"2주택",
+"1주택"
+],
+"status": "confirmed"
+},
+{
+"key": "ltv_disposal_condition_period",
+"numbers": [
+"6개월"
+],
+"status": "confirmed"
+},
+{
+"key": "ltv_first_home_capital_regulated",
+"numbers": [
+"70%",
+"6개월"
+],
+"status": "confirmed"
+},
+{
+"key": "ltv_first_home_other",
+"numbers": [
+"80%"
+],
+"status": "confirmed"
+},
+{
+"key": "ltv_nonregulated_noncapital_owner",
+"numbers": [
+"60%"
+],
+"status": "confirmed"
+},
+{
+"key": "ltv_nonregulated_nonowner",
+"numbers": [
+"70%"
+],
+"status": "confirmed"
+},
+{
+"key": "ltv_regulated_nonowner",
+"numbers": [
+"40%"
+],
+"status": "confirmed"
+},
+{
+"key": "ltv_regulated_owner",
+"numbers": [
+"0%"
+],
+"status": "confirmed"
+},
+{
+"key": "mortgage_cap_15_25eok",
+"numbers": [
+"4억원",
+"15억원",
+"25억원"
+],
+"status": "confirmed"
+},
+{
+"key": "mortgage_cap_15eok_under",
+"numbers": [
+"6억원",
+"15억원"
+],
+"status": "confirmed"
+},
+{
+"key": "mortgage_cap_25eok_over",
+"numbers": [
+"2억원",
+"25억원"
+],
+"status": "confirmed"
+},
+{
+"key": "move_in_obligation",
+"numbers": [
+"6개월"
+],
+"status": "confirmed"
+},
+{
+"key": "multi_owner_renewal_ban",
+"numbers": [],
+"status": "confirmed"
+},
+{
+"key": "mutual_dep_limit",
+"numbers": [
+"3,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "mutual_dep_rate_5",
+"numbers": [
+"5%"
+],
+"status": "confirmed"
+},
+{
+"key": "mutual_dep_rate_9",
+"numbers": [
+"9%"
+],
+"status": "confirmed"
+},
+{
+"key": "nps_benefit_factor",
+"numbers": [
+"129%"
+],
+"status": "confirmed"
+},
+{
+"key": "nps_extra_over20",
+"numbers": [
+"5%"
+],
+"status": "confirmed"
+},
+{
+"key": "nps_income_cap",
+"numbers": [
+"659만원"
+],
+"status": "confirmed"
+},
+{
+"key": "nps_income_floor",
+"numbers": [
+"41만원"
+],
+"status": "confirmed"
+},
+{
+"key": "nps_rate_employee_2026",
+"numbers": [
+"4.75%"
+],
+"status": "confirmed"
+},
+{
+"key": "nps_rate_regional_2026",
+"numbers": [
+"9.5%"
+],
+"status": "confirmed"
+},
+{
+"key": "nps_reduced_base",
+"numbers": [
+"50%"
+],
+"status": "confirmed"
+},
+{
+"key": "nps_reduced_step",
+"numbers": [
+"5%"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_cut_amend_12m",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_cut_amend_18m",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_cut_amend_1m",
+"numbers": [
+"90%"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_cut_amend_24m",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_cut_amend_3m",
+"numbers": [
+"75%"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_cut_amend_6m",
+"numbers": [
+"50%"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_cut_late_1m",
+"numbers": [
+"50%"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_cut_late_3m",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_cut_late_6m",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_late_daily",
+"numbers": [
+"0.022%"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_late_monthly",
+"numbers": [
+"0.67%"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_monthly_min",
+"numbers": [
+"150만원"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_nofile",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_nofile_fraud",
+"numbers": [
+"40%"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_notice",
+"numbers": [
+"3%"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_under",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "penalty_under_fraud",
+"numbers": [
+"40%"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_basic_ded",
+"numbers": [
+"150만원"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_ded_b1",
+"numbers": [
+"100%"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_ded_b2",
+"numbers": [
+"40%"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_ded_b3",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_ded_b4",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_ded_cap",
+"numbers": [
+"900만원"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_ded_t1",
+"numbers": [
+"350만원"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_ded_t2",
+"numbers": [
+"700만원"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_ded_t3",
+"numbers": [
+"1,400만원"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_priv_70_79",
+"numbers": [
+"4%"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_priv_80",
+"numbers": [
+"3%"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_priv_life",
+"numbers": [
+"3%"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_priv_lt70",
+"numbers": [
+"5%"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_priv_sep_cap",
+"numbers": [
+"1,500만원"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_priv_sep_opt",
+"numbers": [
+"15%"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_ret_11_20",
+"numbers": [
+"60%"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_ret_gt20",
+"numbers": [
+"50%"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_ret_le10",
+"numbers": [
+"70%"
+],
+"status": "confirmed"
+},
+{
+"key": "pension_std_credit",
+"numbers": [
+"7만원"
+],
+"status": "confirmed"
+},
+{
+"key": "prop_tax_1h_band_3eok",
+"numbers": [
+"3억원"
+],
+"status": "confirmed"
+},
+{
+"key": "prop_tax_1h_band_6eok",
+"numbers": [
+"6억원"
+],
+"status": "confirmed"
+},
+{
+"key": "prop_tax_1h_rate_cap",
+"numbers": [
+"9억원"
+],
+"status": "confirmed"
+},
+{
+"key": "prop_tax_city",
+"numbers": [
+"0.14%"
+],
+"status": "confirmed"
+},
+{
+"key": "prop_tax_edu",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "prop_tax_fmv",
+"numbers": [
+"60%"
+],
+"status": "confirmed"
+},
+{
+"key": "prop_tax_fmv_1h_3eok",
+"numbers": [
+"43%"
+],
+"status": "confirmed"
+},
+{
+"key": "prop_tax_fmv_1h_6eok",
+"numbers": [
+"44%"
+],
+"status": "confirmed"
+},
+{
+"key": "prop_tax_fmv_1h_over",
+"numbers": [
+"45%"
+],
+"status": "confirmed"
+},
+{
+"key": "rank_system_rule",
+"numbers": [
+"1순위",
+"2순위",
+"3순위",
+"2015년"
+],
+"status": "confirmed"
+},
+{
+"key": "rank1_capital_nonregulated",
+"numbers": [
+"1순위",
+"1년",
+"24개월"
+],
+"status": "confirmed"
+},
+{
+"key": "rank1_contracted_area",
+"numbers": [
+"1순위",
+"1개월"
+],
+"status": "confirmed"
+},
+{
+"key": "rank1_noncapital_nonregulated",
+"numbers": [
+"1순위",
+"6개월",
+"12개월"
+],
+"status": "confirmed"
+},
+{
+"key": "rank1_regulated_summary",
+"numbers": [
+"2년",
+"5년"
+],
+"status": "confirmed"
+},
+{
+"key": "rank1_speculative_overheated",
+"numbers": [
+"1순위",
+"2년",
+"5년",
+"2주택"
+],
+"status": "confirmed"
+},
+{
+"key": "rank2_definition",
+"numbers": [
+"2순위",
+"1순위"
+],
+"status": "confirmed"
+},
+{
+"key": "reg_lic_edu",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "reg_lic_jeonse",
+"numbers": [
+"0.2%"
+],
+"status": "confirmed"
+},
+{
+"key": "reg_lic_mortgage",
+"numbers": [
+"0.2%"
+],
+"status": "confirmed"
+},
+{
+"key": "reg_lic_other",
+"numbers": [
+"6,000원"
+],
+"status": "confirmed"
+},
+{
+"key": "reg_lic_seizure",
+"numbers": [
+"0.2%"
+],
+"status": "confirmed"
+},
+{
+"key": "rent_sep_ded_reg",
+"numbers": [
+"400만원"
+],
+"status": "confirmed"
+},
+{
+"key": "rent_sep_ded_unreg",
+"numbers": [
+"200만원"
+],
+"status": "confirmed"
+},
+{
+"key": "rent_sep_exp_reg",
+"numbers": [
+"60%"
+],
+"status": "confirmed"
+},
+{
+"key": "rent_sep_exp_unreg",
+"numbers": [
+"50%"
+],
+"status": "confirmed"
+},
+{
+"key": "rent_sep_other_cap",
+"numbers": [
+"2,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "rent_sep_rate",
+"numbers": [
+"14%"
+],
+"status": "confirmed"
+},
+{
+"key": "rent_sep_revenue_cap",
+"numbers": [
+"2,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "rent_small_cut_1",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "rent_small_cut_1_long",
+"numbers": [
+"75%"
+],
+"status": "confirmed"
+},
+{
+"key": "rent_small_cut_2",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "rent_small_cut_2_long",
+"numbers": [
+"50%"
+],
+"status": "confirmed"
+},
+{
+"key": "resale_adjusted_capital",
+"numbers": [
+"3년"
+],
+"status": "confirmed"
+},
+{
+"key": "resale_adjusted_noncapital",
+"numbers": [
+"1년"
+],
+"status": "confirmed"
+},
+{
+"key": "resale_contracted_public",
+"numbers": [
+"6개월"
+],
+"status": "confirmed"
+},
+{
+"key": "resale_land_lease",
+"numbers": [
+"10년"
+],
+"status": "confirmed"
+},
+{
+"key": "resale_nonregulated_capital_other",
+"numbers": [
+"6개월"
+],
+"status": "confirmed"
+},
+{
+"key": "resale_nonregulated_metro_urban",
+"numbers": [
+"6개월"
+],
+"status": "confirmed"
+},
+{
+"key": "resale_nonregulated_other",
+"numbers": [],
+"status": "confirmed"
+},
+{
+"key": "resale_nonregulated_overcrowded",
+"numbers": [
+"1년"
+],
+"status": "confirmed"
+},
+{
+"key": "resale_pricecap_private",
+"numbers": [
+"3년",
+"1년"
+],
+"status": "confirmed"
+},
+{
+"key": "resale_pricecap_public_capital",
+"numbers": [
+"3년"
+],
+"status": "confirmed"
+},
+{
+"key": "resale_pricecap_public_noncapital",
+"numbers": [
+"1년"
+],
+"status": "confirmed"
+},
+{
+"key": "resale_speculative_capital",
+"numbers": [
+"3년"
+],
+"status": "confirmed"
+},
+{
+"key": "resale_speculative_noncapital",
+"numbers": [
+"1년"
+],
+"status": "confirmed"
+},
+{
+"key": "retinc_conv_b1",
+"numbers": [
+"100%"
+],
+"status": "confirmed"
+},
+{
+"key": "retinc_conv_b2",
+"numbers": [
+"60%"
+],
+"status": "confirmed"
+},
+{
+"key": "retinc_conv_b3",
+"numbers": [
+"55%"
+],
+"status": "confirmed"
+},
+{
+"key": "retinc_conv_b4",
+"numbers": [
+"45%"
+],
+"status": "confirmed"
+},
+{
+"key": "retinc_conv_b5",
+"numbers": [
+"35%"
+],
+"status": "confirmed"
+},
+{
+"key": "retinc_conv_t1",
+"numbers": [
+"800만원"
+],
+"status": "confirmed"
+},
+{
+"key": "retinc_conv_t2",
+"numbers": [
+"7,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "retinc_conv_t3",
+"numbers": [
+"1억원"
+],
+"status": "confirmed"
+},
+{
+"key": "retinc_conv_t4",
+"numbers": [
+"3억원"
+],
+"status": "confirmed"
+},
+{
+"key": "retinc_svc_11_20",
+"numbers": [
+"250만원"
+],
+"status": "confirmed"
+},
+{
+"key": "retinc_svc_6_10",
+"numbers": [
+"200만원"
+],
+"status": "confirmed"
+},
+{
+"key": "retinc_svc_gt20",
+"numbers": [
+"300만원"
+],
+"status": "confirmed"
+},
+{
+"key": "retinc_svc_le5",
+"numbers": [
+"100만원"
+],
+"status": "confirmed"
+},
+{
+"key": "rewin_adjusted",
+"numbers": [
+"7년"
+],
+"status": "confirmed"
+},
+{
+"key": "rewin_land_lease",
+"numbers": [
+"5년"
+],
+"status": "confirmed"
+},
+{
+"key": "rewin_nonregulated_private_rule",
+"numbers": [],
+"status": "confirmed"
+},
+{
+"key": "rewin_public_85over",
+"numbers": [
+"85㎡",
+"3년",
+"1년"
+],
+"status": "confirmed"
+},
+{
+"key": "rewin_public_85under",
+"numbers": [
+"85㎡",
+"5년",
+"3년"
+],
+"status": "confirmed"
+},
+{
+"key": "rewin_speculative_pricecap",
+"numbers": [
+"10년"
+],
+"status": "confirmed"
+},
+{
+"key": "score_account_period",
+"numbers": [
+"17점",
+"15년",
+"50%",
+"3점"
+],
+"status": "confirmed"
+},
+{
+"key": "score_dependents",
+"numbers": [
+"35점",
+"5점",
+"6명"
+],
+"status": "confirmed"
+},
+{
+"key": "score_homeless_period",
+"numbers": [
+"32점",
+"2점",
+"1년",
+"15년"
+],
+"status": "confirmed"
+},
+{
+"key": "score_total",
+"numbers": [
+"84점"
+],
+"status": "confirmed"
+},
+{
+"key": "sec_tax_kosdaq_trade",
+"numbers": [
+"0.20%"
+],
+"status": "confirmed"
+},
+{
+"key": "sec_tax_kospi_farm",
+"numbers": [
+"0.15%"
+],
+"status": "confirmed"
+},
+{
+"key": "sec_tax_kospi_trade",
+"numbers": [
+"0.05%"
+],
+"status": "confirmed"
+},
+{
+"key": "simvat_exempt_under",
+"numbers": [
+"4800만원"
+],
+"status": "confirmed"
+},
+{
+"key": "simvat_purchase_credit",
+"numbers": [
+"0.5%"
+],
+"status": "confirmed"
+},
+{
+"key": "simvat_rate_construct_it",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "simvat_rate_finance_realty",
+"numbers": [
+"40%"
+],
+"status": "confirmed"
+},
+{
+"key": "simvat_rate_lodging",
+"numbers": [
+"25%"
+],
+"status": "confirmed"
+},
+{
+"key": "simvat_rate_mfg",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "simvat_rate_other_service",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "simvat_rate_retail_food",
+"numbers": [
+"15%"
+],
+"status": "confirmed"
+},
+{
+"key": "simvat_tax_rate",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "simvat_threshold",
+"numbers": [
+"10400만원"
+],
+"status": "confirmed"
+},
+{
+"key": "stamp_duty_1eok_10eok",
+"numbers": [
+"15만원"
+],
+"status": "confirmed"
+},
+{
+"key": "stamp_duty_1k_3k",
+"numbers": [
+"2만원"
+],
+"status": "confirmed"
+},
+{
+"key": "stamp_duty_3k_5k",
+"numbers": [
+"4만원"
+],
+"status": "confirmed"
+},
+{
+"key": "stamp_duty_5k_1eok",
+"numbers": [
+"7만원"
+],
+"status": "confirmed"
+},
+{
+"key": "stamp_duty_house_exempt",
+"numbers": [
+"1억원"
+],
+"status": "confirmed"
+},
+{
+"key": "stamp_duty_loan_exempt",
+"numbers": [
+"5,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "stamp_duty_over_10eok",
+"numbers": [
+"35만원"
+],
+"status": "confirmed"
+},
+{
+"key": "stress_dsr_capital_regulated",
+"numbers": [
+"3.0%",
+"3단계",
+"100%"
+],
+"status": "confirmed"
+},
+{
+"key": "stress_dsr_capital_regulated_ratio",
+"numbers": [
+"100%"
+],
+"status": "confirmed"
+},
+{
+"key": "stress_dsr_local",
+"numbers": [
+"1.5%",
+"50%",
+"0.75%p",
+"2단계"
+],
+"status": "unverified_current"
+},
+{
+"key": "stress_dsr_local_ratio",
+"numbers": [
+"50%"
+],
+"status": "unverified_current"
+},
+{
+"key": "taxfree_sav_limit",
+"numbers": [
+"5,000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "veh_tax_age_step",
+"numbers": [
+"5%"
+],
+"status": "confirmed"
+},
+{
+"key": "veh_tax_cc_1000",
+"numbers": [
+"80원"
+],
+"status": "confirmed"
+},
+{
+"key": "veh_tax_cc_1600",
+"numbers": [
+"140원"
+],
+"status": "confirmed"
+},
+{
+"key": "veh_tax_cc_over",
+"numbers": [
+"200원"
+],
+"status": "confirmed"
+},
+{
+"key": "veh_tax_edu",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "veh_tax_other_car",
+"numbers": [
+"10만원"
+],
+"status": "confirmed"
+},
+{
+"key": "wh_biz_rate",
+"numbers": [
+"3%"
+],
+"status": "confirmed"
+},
+{
+"key": "wh_oth_exp60",
+"numbers": [
+"60%"
+],
+"status": "confirmed"
+},
+{
+"key": "wh_oth_exp80",
+"numbers": [
+"80%"
+],
+"status": "confirmed"
+},
+{
+"key": "wh_oth_min",
+"numbers": [
+"5만원"
+],
+"status": "confirmed"
+},
+{
+"key": "wh_oth_rate",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "wh_small_exempt",
+"numbers": [
+"1,000원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_card_cap_child1_gt70m",
+"numbers": [
+"275만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_card_cap_child1_le70m",
+"numbers": [
+"350만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_card_cap_child2_gt70m",
+"numbers": [
+"300만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_card_cap_child2_le70m",
+"numbers": [
+"400만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_card_cap_gt70m",
+"numbers": [
+"250만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_card_cap_le70m",
+"numbers": [
+"300만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_card_extra_cap_gt70m",
+"numbers": [
+"200만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_card_extra_cap_le70m",
+"numbers": [
+"300만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_card_rate_credit",
+"numbers": [
+"15%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_card_rate_culture",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_card_rate_debit",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_card_rate_market",
+"numbers": [
+"40%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_card_rate_transit",
+"numbers": [
+"40%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_card_salary_tier",
+"numbers": [
+"7000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_card_threshold",
+"numbers": [
+"25%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_donation_limit_general",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_donation_limit_religious",
+"numbers": [
+"10%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_donation_limit_religious_extra",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_donation_rate_base",
+"numbers": [
+"15%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_donation_rate_over",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_donation_tier",
+"numbers": [
+"1000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_edu_cap_school",
+"numbers": [
+"300만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_edu_cap_univ",
+"numbers": [
+"900만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_edu_rate",
+"numbers": [
+"15%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_ins_cap",
+"numbers": [
+"100만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_ins_rate_disabled",
+"numbers": [
+"15%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_ins_rate_general",
+"numbers": [
+"12%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_medical_general_cap",
+"numbers": [
+"700만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_medical_rate",
+"numbers": [
+"15%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_medical_rate_ivf",
+"numbers": [
+"30%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_medical_rate_preterm",
+"numbers": [
+"20%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_medical_threshold",
+"numbers": [
+"3%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_pension_cap_savings",
+"numbers": [
+"600만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_pension_cap_total",
+"numbers": [
+"900만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_pension_rate_high",
+"numbers": [
+"12%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_pension_rate_low",
+"numbers": [
+"15%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_pension_salary_low",
+"numbers": [
+"5500만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_rent_cap",
+"numbers": [
+"1000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_rent_rate_high",
+"numbers": [
+"15%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_rent_rate_low",
+"numbers": [
+"17%"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_rent_salary_cap",
+"numbers": [
+"8000만원"
+],
+"status": "confirmed"
+},
+{
+"key": "ye_rent_salary_low",
+"numbers": [
+"5500만원"
+],
+"status": "confirmed"
+}
+]
