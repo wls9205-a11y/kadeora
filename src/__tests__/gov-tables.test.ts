@@ -7,7 +7,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { bondRatePerMille, pensionMonthly, PENSION_MIN_AGE, brokerageBracket, ltvPolicyKey, acqTaxPolicyKey, acqTaxMidRatePct } from '@/lib/calc/gov-tables';
-import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc, acquisitionTax, stockRoi, auctionProfit, depositInterest, shortSelling, prepaymentFee } from '@/lib/calc/formulas';
+import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc, acquisitionTax, stockRoi, auctionProfit, depositInterest, shortSelling, prepaymentFee, interestTax } from '@/lib/calc/formulas';
 import { formatKRWExact } from '@/lib/calc/tax-tables';
 import { PREPAY_RATES } from '@/lib/calc/gov-tables';
 
@@ -758,5 +758,33 @@ describe('중도상환수수료 — 분모 10배 과소 수리 · 법정 3년 ·
 
   it('요율은 계약일 기준 — 같은 조건도 개편 전 계약이면 1.40%', () => {
     expect(run({ contract: 'pre2025' }).main.value).toBe(W(Math.round(100_000_000 * 0.014 * 24 / 36)));
+  });
+});
+
+describe('이자소득세 — deposit-interest 와 같은 모델·같은 계산 (9.5% 화석 형제)', () => {
+  const POLICY = JSON.stringify({
+    pct: { int_tax_income: 14, int_tax_local: 10, mutual_dep_rate_5: 5, mutual_dep_rate_9: 9, farm_int_base: 14, farm_int_rate: 10 },
+    amt: { mutual_dep_limit: 30_000_000, taxfree_sav_limit: 50_000_000 },
+    meta: {},
+  });
+  const W = (x: number) => formatKRWExact(x);
+  const run = (o: Record<string, unknown>) => interestTax({ interest: 1_000_000, taxType: 'general', __policy: POLICY, ...o } as any);
+
+  it('일반 15.4% = 14 + 1.4 성분', () => {
+    expect(run({}).main.value).toBe(W(154_000));
+  });
+
+  it('두 계산기가 같은 답을 낸다 — 이자 35만원·상호금융 2026 요건 밖', () => {
+    const a = interestTax({ interest: 350_000, taxType: 'mutual', joinYear: '2026', eligible: 'no', __policy: POLICY } as any);
+    const b = depositInterest({ type: 'deposit', amount: 10_000_000, rate: 3.5, months: 12, taxType: 'mutual', joinYear: '2026', eligible: 'no', __policy: POLICY } as any);
+    expect(a.main.value).toBe(b.details.find((d) => d.label === '세금 합계')!.value);
+  });
+
+  it('⛔ 세금우대 선택지는 없다 — 옛 값이 들어오면 일반으로 떨어진다', () => {
+    expect(run({ taxType: 'preferential' }).main.value).toBe(W(154_000));
+  });
+
+  it('특례는 한도 가정을 말한다', () => {
+    expect(run({ taxType: 'mutual', joinYear: '2025' }).details.some((d) => d.label === '⚠️ 한도 가정')).toBe(true);
   });
 });

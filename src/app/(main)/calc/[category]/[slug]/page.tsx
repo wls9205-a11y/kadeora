@@ -55,7 +55,8 @@ async function getLiveData(slug: string): Promise<Record<string, string> | undef
     // ⚠️ auction-profit 도 취득세 «같은» 파이프를 탄다 — 경매 취득도 같은 법정 세율이다.
     //    여기 빠뜨리면 계산기가 「세율 기준 미수신」만 띄우고 아무것도 못 한다.
     if (slug === 'ltv-calc' || slug === 'dsr-calc' || slug === 'acquisition-tax' || slug === 'stock-roi'
-        || slug === 'auction-profit' || slug === 'deposit-interest' || slug === 'short-selling') {
+        || slug === 'auction-profit' || slug === 'deposit-interest' || slug === 'short-selling'
+        || slug === 'interest-tax') {
       const { data } = await (sb as any)
         .from('policy_constants')
         .select('key, item, numbers, source_title, source_date, status')

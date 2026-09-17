@@ -442,6 +442,34 @@ export function loanRepayment(v: V): CalcResult {
 }
 
 /**
+ * 이자 과세 성분 — deposit-interest · interest-tax 가 «같은» 계산을 쓴다(이중 진실 금지).
+ *   genBase: 일반 원천징수 대상 이자 · spBase: 특례(한도 안) 이자
+ */
+function interestTaxParts(
+  genBase: number, spBase: number,
+  row: ReturnType<typeof depositTaxRow>, P: Record<string, number>, farmExempt: boolean,
+) {
+  const incomePct = P.int_tax_income;           // 14 — 소득세법 §129①1라
+  const localPct = P.int_tax_local;             // 10 — 원천징수 소득세의 10%
+  const farmBase = P.farm_int_base;             // 14 — 농특세법 §5④1가
+  const farmRate = P.farm_int_rate;             // 10 — 감면세액의 10%
+  const genIncome = Math.round(genBase * incomePct / 100);
+  const genLocal = Math.round(genIncome * localPct / 100);
+  const spPct = row.incomeKey && row.limitKey ? P[row.incomeKey] : 0;
+  const spIncome = Math.round(spBase * spPct / 100);
+  const spFarm = row.farm && !farmExempt ? Math.round(spBase * (farmBase - spPct) / 100 * farmRate / 100) : 0;
+  const farmPct = (farmBase - spPct) * farmRate / 100;
+  return { incomePct, localPct, genIncome, genLocal, spPct, spIncome, spFarm, farmPct,
+    tax: genIncome + genLocal + spIncome + spFarm };
+}
+
+/** 이자 과세 행에 필요한 policy 키가 전부 왔는가. 안 왔으면 지어내지 않는다. */
+function interestPolicyMissing(row: ReturnType<typeof depositTaxRow>, P: Record<string, number>): boolean {
+  const need = ['int_tax_income', 'int_tax_local', 'farm_int_base', 'farm_int_rate', ...(row.incomeKey ? [row.incomeKey] : [])];
+  return need.some((k) => typeof P[k] !== 'number');
+}
+
+/**
  * 이자를 «특례 한도 안» 과 «밖» 으로 가른다. 한도는 원금 기준이다.
  *   예금: 이자가 원금에 비례하므로 비율로 정확히 갈린다.
  *   적금: 회차마다 예치 기간이 달라 비율로 가르면 틀린다 — 앞 회차부터 한도를 채운다.
@@ -480,10 +508,8 @@ export function depositInterest(v: V): CalcResult {
   const pack = parsePolicyPack(v.__policy);
   const row = depositTaxRow(taxType, joinYear, eligible);
   const P = pack?.pct ?? {};
-  const need = ['int_tax_income', 'int_tax_local', 'farm_int_base', 'farm_int_rate', ...(row.incomeKey ? [row.incomeKey] : [])];
-  const missing = need.filter((k) => typeof P[k] !== 'number');
   const limit = row.limitKey ? pack?.amt?.[row.limitKey] : null;
-  if (missing.length || (row.limitKey && typeof limit !== 'number')) {
+  if (interestPolicyMissing(row, P) || (row.limitKey && typeof limit !== 'number')) {
     return {
       main: { label: '세율 기준 미수신', value: '—', color: 'var(--text-tertiary)' },
       details: [{ label: '사유', value: '이자 과세 기준을 아직 받지 못했다. 잠시 후 다시 시도한다' }],
@@ -495,23 +521,11 @@ export function depositInterest(v: V): CalcResult {
   const { total: interest, inLimit } = splitInterestByLimit(kind, amount, rate, months, limit ?? null);
   const over = interest - inLimit;
 
-  const incomePct = P.int_tax_income;           // 14 — 소득세법 §129①1라
-  const localPct = P.int_tax_local;             // 10 — 원천징수 소득세의 10%
-  const farmBase = P.farm_int_base;             // 14 — 농특세법 §5④1가
-  const farmRate = P.farm_int_rate;             // 10 — 감면세액의 10%
-
-  // 한도 밖(또는 일반 과세 전체) — 일반 원천징수
+  // 한도 밖(또는 일반 과세 전체)은 일반 원천징수 · 한도 안은 특례
   const genBase = row.limitKey ? over : interest;
-  const genIncome = Math.round(genBase * incomePct / 100);
-  const genLocal = Math.round(genIncome * localPct / 100);
-
-  // 한도 안 — 특례
   const spBase = row.limitKey ? inLimit : 0;
-  const spPct = row.incomeKey && row.limitKey ? P[row.incomeKey] : 0;
-  const spIncome = Math.round(spBase * spPct / 100);
-  const spFarm = row.farm && !farmExempt ? Math.round(spBase * (farmBase - spPct) / 100 * farmRate / 100) : 0;
-
-  const tax = genIncome + genLocal + spIncome + spFarm;
+  const { incomePct, localPct, genIncome, genLocal, spPct, spIncome, spFarm, farmPct, tax } =
+    interestTaxParts(genBase, spBase, row, P, farmExempt);
   const net = interest - tax;
   const principal = kind === 'deposit' ? amount : amount * months;
   const total = principal + net;
@@ -537,7 +551,7 @@ export function depositInterest(v: V): CalcResult {
       details.push({ label: '특례 지방소득세', value: '부과하지 않는다 — 조특법 §89의3' });
       details.push(farmExempt
         ? { label: '농어촌특별세', value: '면제 — 농어민·임업인·저소득 근로자(농특세령 §4⑦3)' }
-        : { label: `농어촌특별세 (${((farmBase - spPct) * farmRate / 100).toFixed(1)}%)`, value: fmt(spFarm) });
+        : { label: `농어촌특별세 (${farmPct.toFixed(1)}%)`, value: fmt(spFarm) });
     } else {
       details.push({ label: '농어촌특별세', value: '없음 — 농특세법 §4 비과세 목록(§88의2)' });
     }
@@ -1292,9 +1306,44 @@ export function otherIncomeTax(v: V): CalcResult {
 }
 export function interestTax(v: V): CalcResult {
   const interest = n(v.interest);
-  const taxRate = v.taxType === 'general' ? 0.154 : v.taxType === 'preferential' ? 0.095 : 0;
-  const tax = Math.round(interest * taxRate);
-  return { main: { label: '이자소득세', value: fmt(tax) }, details: [{ label: '세후 이자', value: fmt(interest - tax) }, { label: '세율', value: pct(taxRate) }] };
+  // K-9 ⓒ — deposit-interest 와 같은 모델·같은 상수(policy_constants)·같은 계산(interestTaxParts).
+  //   ⛔ 옛 「세금우대 9.5%」(세금우대종합저축 화석) 제거.
+  const taxType = (['general', 'mutual', 'taxFreeSavings'].includes(String(v.taxType)) ? v.taxType : 'general') as DepositTaxType;
+  const row = depositTaxRow(taxType, n(v.joinYear) || 2026, v.eligible !== 'no');
+  const farmExempt = v.farmExempt === 'yes';
+  const pack = parsePolicyPack(v.__policy);
+  const P = pack?.pct ?? {};
+  if (interestPolicyMissing(row, P)) {
+    return {
+      main: { label: '세율 기준 미수신', value: '—', color: 'var(--text-tertiary)' },
+      details: [{ label: '사유', value: '이자 과세 기준을 아직 받지 못했다. 잠시 후 다시 시도한다' }],
+    };
+  }
+  // 이 계산기는 «이자» 만 묻는다 — 원금을 모르니 한도를 가를 수 없다. 전액을 한도 안으로 본다고 화면에 쓴다.
+  const special = row.limitKey !== null;
+  const t = interestTaxParts(special ? 0 : interest, special ? interest : 0, row, P, farmExempt);
+  const details: { label: string; value: string }[] = [{ label: '적용 구분', value: row.label }];
+  if (!special) {
+    details.push({ label: `소득세 (${t.incomePct}%)`, value: fmt(t.genIncome) });
+    details.push({ label: `지방소득세 (소득세의 ${t.localPct}%)`, value: fmt(t.genLocal) });
+  } else {
+    details.push(t.spPct > 0
+      ? { label: `특례 소득세 (${t.spPct}% 분리과세)`, value: fmt(t.spIncome) }
+      : { label: '특례 소득세', value: '비과세' });
+    if (taxType === 'mutual') {
+      details.push({ label: '특례 지방소득세', value: '부과하지 않는다 — 조특법 §89의3' });
+      details.push(farmExempt
+        ? { label: '농어촌특별세', value: '면제 — 농어민·임업인·저소득 근로자(농특세령 §4⑦3)' }
+        : { label: `농어촌특별세 (${t.farmPct.toFixed(1)}%)`, value: fmt(t.spFarm) });
+    } else {
+      details.push({ label: '농어촌특별세', value: '없음 — 농특세법 §4 비과세 목록(§88의2)' });
+    }
+    details.push({ label: '⚠️ 한도 가정', value: '원금이 특례 한도 안이라고 보고 계산했다 — 넘으면 초과분은 일반 과세다. 원금으로 나눠 보려면 예적금 이자 계산기' });
+  }
+  details.push({ label: '세후 이자', value: fmt(interest - t.tax) });
+  const m = pack?.meta?.[row.incomeKey ?? row.limitKey ?? 'int_tax_income'];
+  if (m?.source || m?.date) details.push({ label: '근거', value: [m.source, m.date].filter(Boolean).join(' · ') });
+  return { main: { label: '이자 관련 세금 합계', value: fmt(t.tax) }, details };
 }
 export function incomeBracketLookup(v: V): CalcResult {
   const base = n(v.taxBase);
