@@ -547,23 +547,28 @@ export const CALC_REGISTRY: CalcMeta[] = [
   {
     slug: 'capital-gains-housing', emoji: '📝', category: 'property-tax', categoryLabel: '부동산 세금',
     title: '2026 양도소득세 계산기 (주택)', titleShort: '양도소득세 계산기',
-    description: '주택 매도 시 양도소득세를 자동 계산. 1세대1주택 비과세, 장기보유특별공제 반영.',
-    keywords: ['양도소득세 계산기','양도세','주택 양도세','1세대1주택','장기보유특별공제','비과세'],
-    legalBasis: '소득세법 제89조, 제95조, 제104조', version: '2026.04', lastUpdated: '2026-04-05',
-    pattern: 'conditional', formula: 'capitalGainsHousing', resultLabel: '양도소득세', resultUnit: '원',
+    description: '주택 매도 시 양도소득세를 계산. 1세대1주택 비과세(취득 당시 조정대상지역 거주요건)·일시적 2주택, 장기보유특별공제 표 1·표 2, 단기세율, 2026-05-10 이후 양도분 다주택 중과(양도 당시 조정대상지역) 반영.',
+    keywords: ['양도소득세 계산기','양도세','주택 양도세','1세대1주택','장기보유특별공제','비과세','다주택 중과'],
+    legalBasis: '소득세법 제89조, 제95조, 제103조, 제104조 · 시행령 제154조, 제155조, 제159조의4, 제160조, 제167조의10 · 지방세법 제103조의3', version: '2026.09', lastUpdated: '2026-09-17',
+    pattern: 'conditional', formula: 'capitalGainsHousing', resultLabel: '양도소득세 (지방소득세 포함)', resultUnit: '원',
     inputs: [
       { id: 'sellPrice', label: '양도가액 (매도가)', type: 'currency', default: 900000000 },
       { id: 'buyPrice', label: '취득가액 (매수가)', type: 'currency', default: 600000000 },
       { id: 'expenses', label: '필요경비 (취득세+중개비 등)', type: 'currency', default: 15000000 },
       { id: 'holdYears', label: '보유기간 (년)', type: 'number', default: 5, min: 0, max: 30 },
-      { id: 'liveYears', label: '거주기간 (년)', type: 'number', default: 3, min: 0, max: 30 },
-      { id: 'houseCount', label: '보유 주택수', type: 'stepper', default: 1, min: 1, max: 5 },
-      { id: 'regulated', label: '조정대상지역', type: 'radio', default: 'no', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }] },
+      { id: 'liveYears', label: '거주기간 (년, 보유기간 중)', type: 'number', default: 3, min: 0, max: 30 },
+      { id: 'houseCount', label: '보유 주택수 (양도 당시, 파는 주택 포함)', type: 'stepper', default: 1, min: 1, max: 5 },
+      { id: 'temporary2', label: '일시적 2주택 요건', type: 'radio', default: 'no', condition: 'houseCount=2', options: [{ value: 'yes', label: '충족' }, { value: 'no', label: '아님' }], hint: '파는 주택 취득 후 1년 이상 지나 새 주택을 샀고, 새 주택 취득일부터 3년 이내에 파는 경우(시행령 §155①)' },
+      { id: 'acqRegulated', label: '«취득 당시» 조정대상지역', type: 'radio', default: 'no', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }], hint: '비과세 거주요건(2년)의 기준 — 시행령 §154①' },
+      { id: 'saleRegulated', label: '«양도 당시» 조정대상지역', type: 'radio', default: 'no', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }], hint: '다주택 중과의 기준 — 소득세법 §104⑦' },
+      { id: 'saleTiming', label: '양도 시기 (다주택 중과 유예)', type: 'radio', default: 'after', options: [{ value: 'after', label: '2026-05-10 이후 양도' }, { value: 'grace', label: '유예 적용분' }], hint: '유예 적용분 = 2026-05-09까지 양도했거나, 5-09까지 계약(토지거래허가 대상은 허가 신청)해 경과규정 기한 안에 양도한 경우(시행령 §167의10①12의2). 보유 2년 이상 주택만' },
     ],
     faqs: [
-      { q: '1세대1주택 비과세 요건은?', a: '2년 이상 보유 (조정지역은 2년 거주도 필요), 양도가 12억 이하 전액 비과세.' },
+      { q: '1세대1주택 비과세 요건은?', a: '보유 2년 이상. «취득 당시» 조정대상지역 주택이면 보유기간 중 거주 2년 이상이 더 필요합니다. 양도가액 12억원 이하면 전액, 초과하면 초과분 비율만큼 과세합니다(소득세법 §89①3, 시행령 §154①·§160, 2026-09-17 원문 대조 기준).' },
+      { q: '다주택 중과 유예는 끝났나요?', a: '네. 유예는 2026-05-09 양도분까지였고 재유예 개정은 공포되지 않았습니다. 2026-05-10 이후 «양도 당시» 조정대상지역 주택을 팔면 2주택 +20%p, 3주택 이상 +30%p가 붙고 장기보유특별공제를 받지 못합니다. 5-09까지 계약(토지거래허가 대상은 허가 신청)한 경과규정분만 예외입니다(시행령 §167의10①12의2, 2026-09-17 원문 대조 기준).' },
+      { q: '계산하지 않는 것은?', a: '중과 제외 주택(장기임대·저가주택 등), 조합원입주권·분양권 보유 시 판정, 상속·동거봉양·혼인 특례, 지방소득세 조례 가감은 반영하지 않습니다.' },
     ],
-    seoContent: '<h2>양도소득세란?</h2>\n<p>양도소득세는 부동산, 주식 등 자산을 양도(매도)하여 발생한 소득에 부과되는 국세입니다. 양도차익(양도가액 - 취득가액 - 필요경비)에서 장기보유특별공제와 기본공제(250만원)를 차감한 과세표준에 6~45%의 누진세율을 적용합니다.</p>\n<h2>2026년 양도소득세율</h2>\n<p>1세대 1주택 비과세: 2년 이상 보유(조정대상지역은 2년 거주 추가), 양도가액 12억원까지 비과세. 일반세율: 과세표준에 따라 6~45% 8단계 누진세율. 단기양도: 1년 미만 보유 시 70%, 1~2년 45%. 다주택 중과: 조정대상지역 2주택 +20%p, 3주택 +30%p.</p>\n<h3>장기보유특별공제</h3>\n<p>보유기간에 따라 양도차익의 최대 80%까지 공제됩니다. 1세대 1주택(거주 요건 충족): 보유 연 4% + 거주 연 4%, 최대 80%(10년). 일반: 보유 연 2%, 최대 30%(15년).</p>\n<h2>양도소득세 계산 순서</h2>\n<p>①양도차익 산정 → ②장기보유특별공제 → ③양도소득금액 → ④기본공제(250만원) → ⑤과세표준 → ⑥세율 적용 → ⑦산출세액 → ⑧지방소득세(10%) 추가. 양도일이 속하는 달의 말일부터 2개월 이내에 예정신고·납부해야 합니다.</p>', relatedCalcs: ['acquisition-tax', 'comprehensive-property-tax', 'registration-cost'],
+    seoContent: '<h2>양도소득세란?</h2>\n<p>양도소득세는 부동산 등 자산을 양도해 생긴 소득에 붙는 국세입니다. 양도차익(양도가액 − 취득가액 − 필요경비)에서 장기보유특별공제와 기본공제를 뺀 과세표준에 세율을 적용하고, 지방소득세(소득세 세율의 1/10 구조)가 따로 붙습니다.</p>\n<h2>세율 구조 (2026-09-17 원문 대조 기준)</h2>\n<p>기본세율은 소득세법 §55①의 8단계 누진세율입니다. 주택·조합원입주권·분양권을 2년 미만 보유하면 단기세율(1년 미만 70%, 1년 이상 2년 미만 60%, §104①2·3)이 적용되고, 둘 이상 해당하면 큰 세액을 씁니다. «양도 당시» 조정대상지역 주택은 2026-05-10 이후 양도분부터 2주택 +20%p, 3주택 이상 +30%p 중과(§104⑦)가 다시 적용됩니다.</p>\n<h3>장기보유특별공제</h3>\n<p>일반(표 1): 보유 3년 6%부터 연 2%p, 15년 30%. 1세대1주택이면서 보유기간 중 거주 2년 이상(표 2): 보유 3년 12%부터 연 4%p·10년 40%, 거주 2년 8%(보유 3년 이상 한정)·3년 12%부터 연 4%p·10년 40%. 중과 대상은 공제가 없습니다(§95②).</p>\n<h2>1세대1주택 비과세</h2>\n<p>보유 2년 이상, «취득 당시» 조정대상지역이면 거주 2년 이상. 양도가액 12억원 초과분은 비율만큼 과세합니다. 일시적 2주택(새 주택 취득일부터 3년 이내 종전 주택 양도)도 1주택으로 봅니다(시행령 §155①).</p>', relatedCalcs: ['one-house-check', 'multi-house-sim', 'acquisition-tax'],
   },
   {
     slug: 'gift-tax', emoji: '🎁', category: 'inheritance', categoryLabel: '상속/증여',
@@ -591,24 +596,28 @@ export const CALC_REGISTRY: CalcMeta[] = [
   {
     slug: 'overseas-cgt', emoji: '🌍', category: 'finance-tax', categoryLabel: '금융/투자 세금',
     title: '해외주식 양도소득세 계산기', titleShort: '해외주식 양도세 계산기',
-    description: '해외주식 매도 차익에 대한 양도소득세 계산. 250만원 기본공제, 22% 세율.',
-    keywords: ['해외주식 양도세','해외주식 세금','미국주식 세금','250만원 공제','양도소득세'],
-    legalBasis: '소득세법 제118조의2', version: '2026.04', lastUpdated: '2026-04-05',
-    pattern: 'simple', formula: 'overseasCgt', resultLabel: '양도소득세', resultUnit: '원',
+    description: '해외주식 매도 차익에 대한 양도소득세 계산. 기본공제(주식등 소득 합산 연 1회), 소득세 20% + 지방소득세, 국내시장복귀계좌(RIA) 공제 특례 선택 반영.',
+    keywords: ['해외주식 양도세','해외주식 세금','미국주식 세금','250만원 공제','양도소득세','국내시장복귀계좌','RIA'],
+    legalBasis: '소득세법 제94조제1항제3호다목, 제103조제1항제2호, 제104조제1항제12호 · 지방세법 제103조의3 · 조세특례제한법 제91조의26', version: '2026.09', lastUpdated: '2026-09-17',
+    pattern: 'simple', formula: 'overseasCgt', resultLabel: '양도소득세 (지방소득세 포함)', resultUnit: '원',
     inputs: [
       { id: 'profit', label: '양도차익 (매도가-매수가-수수료)', type: 'currency', default: 10000000 },
       { id: 'otherProfit', label: '당해연도 다른 해외주식 차익', type: 'currency', default: 0 },
       { id: 'otherLoss', label: '당해연도 해외주식 손실', type: 'currency', default: 0 },
+      { id: 'deductionUsed', label: '올해 기본공제(250만원)를 다른 주식 양도에서 이미 썼나요?', type: 'radio', default: 'no', options: [{ value: 'no', label: '아니오' }, { value: 'yes', label: '이미 사용' }], hint: '국내 대주주·비상장 주식 등과 합산해 연 1회(소득세법 §103①2)' },
+      { id: 'ria', label: '국내시장복귀계좌(RIA)로 판 주식 포함', type: 'radio', default: 'no', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }] },
+      { id: 'riaGain', label: 'RIA로 판 해외주식 양도차익', type: 'currency', default: 0, condition: 'ria=yes', hint: '2025-12-23 이전 보유분을 RIA로 2026-12-31까지 양도한 부분' },
+      { id: 'riaPeriod', label: 'RIA 양도 시기', type: 'radio', default: 'p3', condition: 'ria=yes', options: [{ value: 'p1', label: '1/1~5/31' }, { value: 'p2', label: '6/1~7/31' }, { value: 'p3', label: '8/1~12/31' }] },
+      { id: 'riaRatio', label: 'RIA 조정비율 (0~1)', type: 'number', default: 1, min: 0, max: 1, step: 0.01, condition: 'ria=yes', hint: '1 − (A−B)/C — RIA 밖 계좌의 해외주식·해외지수 ETF 순매수가 있으면 줄어든다(조특법 시행령 §93조의12④). 증권사 산정치를 넣는다' },
     ],
     faqs: [
-      { q: '해외주식 양도세 계산기 결과는 정확한가요?', a: '2026년 최신 기준 반영이지만, 개인 상황에 따라 차이가 있습니다. 소득세법 제118조의2를 기준으로 계산합니다. 전문가 상담을 권장합니다.' },
-      { q: '해외주식 양도세 계산기에서 가장 중요한 입력값은?', a: '해외주식 매도 차익에 대한 양도소득세 계산. 250만원 기본공제, 22% 세율. 정확한 수치를 입력할수록 결과 신뢰도가 높아집니다.' },
-      { q: '해외주식 양도세 계산기는 무료인가요?', a: '네, 카더라 해외주식 양도세 계산기는 완전 무료이며 회원가입 없이 무제한 이용 가능합니다.' },
-      { q: '해외주식 양도세 계산기는 모바일에서도 되나요?', a: '네, 모든 기기에서 최적화되어 있으며 앱 설치 없이 사용 가능합니다.' },
-      { q: '관련 계산기가 더 있나요?', a: '카더라는 금융/투자 세금 포함 142종의 무료 계산기를 제공합니다.' },
+      { q: '해외주식 양도세는 어떻게 계산하나요?', a: '연간 해외주식 차익과 손실을 통산한 뒤 기본공제를 빼고 소득세 20%(소득세법 §104①12나)와 지방소득세(소득세의 1/10 구조)를 더합니다(2026-09-17 원문 대조 기준).' },
+      { q: '기본공제 250만원은 계좌마다 받나요?', a: '아니요. 국내 대주주·비상장 주식 등 «주식등» 소득 전체에서 연 1회입니다(소득세법 §103①2).' },
+      { q: '국내시장복귀계좌(RIA) 특례는?', a: '2025-12-23 이전부터 보유한 해외상장주식을 RIA로 2026-12-31까지 팔면 양도 시기에 따라 양도소득금액의 100%(1~5월)·80%(6~7월)·50%(8~12월)에 조정비율을 곱한 금액을 공제합니다. 납입일부터 1년 안에 인출하면 추징됩니다(조특법 §91조의26, 2026-09-17 원문 대조 기준).' },
+      { q: '해외주식 양도세 계산기는 모바일에서도 되나요?', a: '네, 모바일·태블릿·PC 모든 기기에서 앱 설치 없이 사용 가능합니다.' },
+      { q: '결과를 공유할 수 있나요?', a: '계산 완료 후 공유 버튼으로 카카오톡, URL 복사 등으로 공유 가능합니다.' },
     ],
-    seoContent: '<h2>해외주식 양도소득세 계산기 완벽 가이드</h2><p>해외주식 매도 차익에 대한 양도소득세 계산. 250만원 기본공제, 22% 세율. 카더라 해외주식 양도세 계산기는 2026년 최신 기준을 반영하여 정확한 결과를 제공합니다.</p><p>본 계산기는 <strong>소득세법 제118조의2</strong>를 기준으로 계산합니다. 규정은 매년 개정될 수 있으므로 전문가 확인을 권장합니다.</p><h2>금융/투자 세금 핵심 정보</h2><p>금융투자 수익 과세: 국내 상장주식은 대주주만 양도세, 해외주식은 250만원 초과 시 22%, ETF 배당은 15.4%, ISA 비과세 한도는 일반 200만원·서민 400만원입니다.</p><h2>이런 분들에게 추천</h2><p>정확한 금융/투자 세금 계산이 필요한 분에게 유용합니다. 카더라는 금융/투자 세금 포함 142종의 무료 계산기를 제공하며, 계산 결과를 카카오톡으로 공유할 수 있습니다. 본 계산기는 참고용이며 전문가 상담을 권장합니다.</p>', relatedCalcs: ['stock-roi', 'financial-income-tax', 'dividend-calc'],
-
+    seoContent: '<h2>해외주식 양도소득세 계산기</h2><p>해외주식 매도 차익에 대한 양도소득세를 계산합니다. 과세대상은 외국법인 발행·외국시장 상장 주식등(소득세법 §94①3다)이고, 세율은 20%(§104①12나)에 지방소득세 2%(지방세법 §103의3①12)가 붙습니다. 기본공제 250만원은 주식등 소득 전체에서 연 1회입니다(§103①2).</p><h2>2026년 국내시장복귀계좌 특례</h2><p>조세특례제한법 §91조의26 — RIA로 양도한 해외상장주식 양도소득금액에서 시기별 100/80/50% × 조정비율을 공제합니다. 조정비율은 RIA 밖 계좌의 해외주식 순매수를 반영하는 산식입니다(조특법 시행령 §93조의12④).</p><p>2026-09-17 원문 대조 기준. 참고용이며 실제 신고는 증권사 자료와 세무 전문가 확인을 권장합니다.</p>', relatedCalcs: ['stock-roi', 'major-shareholder-cgt', 'financial-income-tax'],
   },
   {
     slug: 'financial-income-tax', emoji: '💳', category: 'finance-tax', categoryLabel: '금융/투자 세금',
@@ -1614,13 +1623,13 @@ export const CALC_REGISTRY: CalcMeta[] = [
       { q: '결과를 공유할 수 있나요?', a: '계산 완료 후 공유 버튼으로 카카오톡, URL 복사 등으로 공유 가능합니다.' },
     ], seoContent: '<h2>양도소득세 계산기 (토지) 완벽 가이드</h2><p>토지 매도 시 양도소득세를 계산. 비사업용 토지 중과.</p><p>본 계산기는 <strong>소득세법 제104조</strong>를 기준으로 계산합니다. 규정은 매년 개정될 수 있으므로 전문가 확인을 권장합니다.</p><h2>토지 양도세 계산기 계산 방식</h2><p>양도차익 = 양도가액 − 취득가액 − 필요경비. 보유기간별 장기보유특별공제율(3년 이상부터)을 적용하고 기본공제 250만원을 뺀 과세표준에 기본세율(8단계 누진)을 적용합니다. 비사업용 토지는 산출세액을 1.1배로 근사하므로 세율에 가산하는 법정 방식과 결과가 다를 수 있습니다. 지방소득세 10%를 더합니다. 단기 보유 세율·조정대상지역·감면은 반영하지 않습니다.</p><h2>이런 분들에게 추천</h2><p>토지 매도를 앞두고 양도소득세를 대략 가늠하려는 분에게 유용합니다. 카더라는 여러 분야의 무료 계산기를 제공합니다.</p>', relatedCalcs: ['capital-gains-housing', 'acquisition-tax'] },
 
-  { slug: 'multi-house-sim', emoji: '🏘️', category: 'property-tax', categoryLabel: '부동산 세금', title: '다주택자 중과세 시뮬레이터', titleShort: '다주택 중과 시뮬', description: '2주택/3주택 보유 시 취득세·양도세 중과세를 시뮬레이션.', keywords: ['다주택자 세금','2주택 세금','3주택 중과','다주택 양도세'], legalBasis: '지방세법 제13조, 소득세법 제104조', version: '2026.04', lastUpdated: '2026-04-05', pattern: 'conditional', formula: 'multiHouseSim', resultLabel: '중과세 합계', resultUnit: '원', inputs: [{ id: 'houseCount', label: '보유 주택수', type: 'stepper', default: 2, min: 1, max: 5 }, { id: 'price', label: '매도 주택 가격', type: 'currency', default: 800000000 }, { id: 'buyPrice', label: '매수가', type: 'currency', default: 500000000 }, { id: 'regulated', label: '조정대상지역', type: 'radio', default: 'yes', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }] }], faqs: [
-      { q: '다주택 중과 시뮬 결과는 실제 세금과 같나요?', a: '참고용이며, 감면·중과·특례 등에 따라 차이가 있습니다. 지방세법 제13조, 소득세법 제104조를 기준으로 계산합니다. 정확한 세액은 세무사 상담을 권장합니다.' },
-      { q: '다주택 중과 시뮬에서 조정대상지역은 반영되나요?', a: '네, 조정대상지역 여부에 따른 세율 차이를 반영합니다. 최신 규제지역은 국토교통부에서 확인하세요.' },
-      { q: '부동산 세금 절세 방법은?', a: '1세대1주택 비과세, 장기보유특별공제, 생애최초 감면 등을 활용하세요.' },
-      { q: '다주택 중과 시뮬는 모바일에서도 되나요?', a: '네, 모바일·태블릿·PC 모든 기기에서 최적화되어 있으며 앱 설치 없이 사용 가능합니다.' },
+  { slug: 'multi-house-sim', emoji: '🏘️', category: 'property-tax', categoryLabel: '부동산 세금', title: '다주택자 중과세 시뮬레이터', titleShort: '다주택 중과 시뮬', description: '새로 사는 주택의 취득세(주택 수·조정 여부별 중과)와 파는 주택의 양도소득세(2026-05-10 이후 중과 재적용)를 거래별로 나눠 계산.', keywords: ['다주택자 세금','2주택 세금','3주택 중과','다주택 양도세','취득세 중과'], legalBasis: '지방세법 제11조, 제13조의2 · 소득세법 제95조, 제104조 · 시행령 제167조의3, 제167조의10', version: '2026.09', lastUpdated: '2026-09-17', pattern: 'conditional', formula: 'multiHouseSim', resultLabel: '두 거래 세금', resultUnit: '원', inputs: [{ id: 'acqPrice', label: '① 새로 사는 주택 가격', type: 'currency', default: 800000000 }, { id: 'acqHouseCount', label: '① 취득 후 주택 수 (새 주택 포함)', type: 'stepper', default: 2, min: 1, max: 5 }, { id: 'acqRegulated', label: '① 새 주택이 조정대상지역', type: 'radio', default: 'yes', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }] }, { id: 'sellPrice', label: '② 파는 주택 매도가', type: 'currency', default: 800000000 }, { id: 'sellBuyPrice', label: '② 파는 주택 취득가', type: 'currency', default: 500000000 }, { id: 'sellExpenses', label: '② 필요경비', type: 'currency', default: 0 }, { id: 'sellHoldYears', label: '② 보유기간 (년)', type: 'number', default: 3, min: 0, max: 30 }, { id: 'sellLiveYears', label: '② 거주기간 (년)', type: 'number', default: 0, min: 0, max: 30 }, { id: 'sellHouseCount', label: '② 양도 당시 주택 수 (파는 주택 포함)', type: 'stepper', default: 2, min: 1, max: 5 }, { id: 'sellRegulated', label: '② 파는 주택이 «양도 당시» 조정대상지역', type: 'radio', default: 'yes', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }] }, { id: 'sellAcqRegulated', label: '② 파는 주택이 «취득 당시» 조정대상지역', type: 'radio', default: 'no', condition: 'sellHouseCount=1', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }] }, { id: 'saleTiming', label: '양도 시기 (다주택 중과 유예)', type: 'radio', default: 'after', options: [{ value: 'after', label: '2026-05-10 이후 양도' }, { value: 'grace', label: '유예 적용분' }], hint: '유예 적용분 = 2026-05-09까지 양도했거나, 5-09까지 계약(토지거래허가 대상은 허가 신청)해 경과규정 기한 안에 양도한 경우(시행령 §167의10①12의2). 보유 2년 이상 주택만' }], faqs: [
+      { q: '왜 취득과 양도를 따로 입력하나요?', a: '취득세는 «새로 사는» 주택 가격에, 양도세는 «파는» 주택의 차익에 붙습니다. 두 세금은 과세대상이 달라 한 가격으로 합칠 수 없습니다.' },
+      { q: '취득세 중과 기준은?', a: '조정대상지역 2주택 8%·3주택 이상 12%, 비조정 3주택 8%·4주택 이상 12%(지방세법 §13조의2). 일시적 2주택은 중과 제외입니다. 여기서는 본세만 보여 주고 지방교육세·농어촌특별세는 취득세 계산기에서 봅니다.' },
+      { q: '양도세 중과는 지금도 적용되나요?', a: '유예가 2026-05-09 양도분까지로 끝나 2026-05-10 이후 양도분부터 «양도 당시» 조정대상지역 2주택 +20%p·3주택 이상 +30%p, 장기보유특별공제 배제가 다시 적용됩니다(2026-09-17 원문 대조 기준).' },
+      { q: '다주택 중과 시뮬는 모바일에서도 되나요?', a: '네, 모바일·태블릿·PC 모든 기기에서 앱 설치 없이 사용 가능합니다.' },
       { q: '결과를 공유할 수 있나요?', a: '계산 완료 후 공유 버튼으로 카카오톡, URL 복사 등으로 공유 가능합니다.' },
-    ], seoContent: '<h2>다주택자 중과세 시뮬레이터 완벽 가이드</h2><p>2주택/3주택 보유 시 취득세·양도세 중과세를 시뮬레이션. 카더라 다주택 중과 시뮬는 2026년 최신 세법을 반영하여 조정대상지역, 주택 수, 면적, 취득 원인에 따른 세율을 자동 적용합니다.</p><p>본 계산기는 <strong>지방세법 제13조, 소득세법 제104조</strong>를 기준으로 계산합니다. 규정은 매년 개정될 수 있으므로 전문가 확인을 권장합니다.</p><h2>부동산 세금 핵심 포인트</h2><p>부동산 거래 시 취득세(1~12%), 양도소득세(6~45%+중과), 재산세, 종합부동산세 등 다양한 세금이 부과됩니다. 1세대1주택 비과세(12억까지), 장기보유특별공제(최대 80%), 생애최초 감면(200만원 한도) 등 절세 제도를 적극 활용하세요.</p><h2>이런 분들에게 추천</h2><p>주택 매매·매도를 계획 중인 분, 다주택 중과세 영향을 파악하고 싶은 분, 부동산 투자 수익률을 계산하고 싶은 분에게 유용합니다. 카더라는 부동산 세금 포함 142종의 무료 계산기를 제공합니다.</p>', relatedCalcs: ['acquisition-tax', 'capital-gains-housing'] },
+    ], seoContent: '<h2>다주택자 중과세 시뮬레이터</h2><p>새로 사는 주택의 취득세와 파는 주택의 양도소득세를 거래별로 나눠 계산합니다. 취득세 세율은 취득세 계산기와 같은 정책 상수(지방세법 §11①8·§13조의2)를, 양도세는 주택 양도세 계산기와 같은 계산 함수(소득세법 §55·§95·§104⑦)를 씁니다.</p><h2>2026년 다주택 중과 (2026-09-17 원문 대조 기준)</h2><p>양도세 중과 유예는 2026-05-09 양도분까지로 종료됐습니다. 2026-05-10 이후 «양도 당시» 조정대상지역 주택을 팔면 2주택 +20%p, 3주택 이상 +30%p가 붙고 장기보유특별공제를 받지 못합니다. 보유 2년 미만이면 단기세율과 비교해 큰 세액을 씁니다.</p><p>중과 제외 주택(장기임대·저가주택 등)과 지방교육세·농어촌특별세는 반영하지 않습니다. 참고용입니다.</p>', relatedCalcs: ['acquisition-tax', 'capital-gains-housing'] },
   // ════ 투자 추가 ════
   { slug: 'investment-type-test', emoji: '🧪', category: 'investment', categoryLabel: '주식/투자', title: '투자 성향 진단기', titleShort: '투자 성향 진단', description: '3개 질문으로 안전형부터 적극투자형까지 투자 성향을 진단.', keywords: ['투자 성향 진단','투자 성향 테스트','위험 성향'], legalBasis: '', version: '2026.04', lastUpdated: '2026-04-05', pattern: 'diagnose', formula: 'investmentTypeTest', resultLabel: '투자 성향', resultUnit: '', inputs: [{ id: 'q1', label: '투자 경험', type: 'radio', default: '2', options: [{ value: '1', label: '없음' }, { value: '2', label: '1~3년' }, { value: '3', label: '3년 이상' }] }, { id: 'q2', label: '원금 손실 감내', type: 'radio', default: '2', options: [{ value: '1', label: '10% 이하' }, { value: '2', label: '20~30%' }, { value: '3', label: '50% 이상' }] }, { id: 'q3', label: '투자 기간', type: 'radio', default: '2', options: [{ value: '1', label: '1년 미만' }, { value: '2', label: '1~5년' }, { value: '3', label: '5년 이상' }] }], faqs: [
       { q: '투자 성향 진단은 어떻게 점수를 매기나요?', a: '투자 경험·원금 손실 감내·투자 기간 3문항 점수를 더해(9점 만점) 4단계 성향과 예시 자산배분을 보여줍니다. 세금·수익률 계산은 하지 않습니다.' },
@@ -1694,13 +1703,13 @@ export const CALC_REGISTRY: CalcMeta[] = [
 
   // ════ 4차 최종 배치 (43종) ════
   // 부동산세 +4
-  { slug: 'capital-gains-rights', emoji: '📝', category: 'property-tax', categoryLabel: '부동산 세금', title: '양도소득세 계산기 (분양권)', titleShort: '분양권 양도세', description: '분양권 전매 시 양도소득세를 계산.', keywords: ['분양권 양도세','분양권 전매','단기양도'], legalBasis: '소득세법 제104조', version: '2026.04', lastUpdated: '2026-04-05', pattern: 'simple', formula: 'capitalGainsRights', resultLabel: '양도소득세', resultUnit: '원', inputs: [{ id: 'sellPrice', label: '양도가액', type: 'currency', default: 500000000 }, { id: 'buyPrice', label: '취득가액 (분양가+프리미엄)', type: 'currency', default: 400000000 }, { id: 'holdYears', label: '보유기간 (년)', type: 'number', default: 1, min: 0, max: 10 }], faqs: [
-      { q: '분양권 양도세 결과는 실제 세금과 같나요?', a: '참고용이며, 감면·중과·특례 등에 따라 차이가 있습니다. 소득세법 제104조를 기준으로 계산합니다. 정확한 세액은 세무사 상담을 권장합니다.' },
-      { q: '분양권 양도세에서 조정대상지역은 반영되나요?', a: '네, 조정대상지역 여부에 따른 세율 차이를 반영합니다. 최신 규제지역은 국토교통부에서 확인하세요.' },
-      { q: '부동산 세금 절세 방법은?', a: '1세대1주택 비과세, 장기보유특별공제, 생애최초 감면 등을 활용하세요.' },
-      { q: '분양권 양도세는 모바일에서도 되나요?', a: '네, 모바일·태블릿·PC 모든 기기에서 최적화되어 있으며 앱 설치 없이 사용 가능합니다.' },
+  { slug: 'capital-gains-rights', emoji: '📝', category: 'property-tax', categoryLabel: '부동산 세금', title: '양도소득세 계산기 (분양권)', titleShort: '분양권 양도세', description: '분양권 전매 시 양도소득세를 계산. 보유기간과 무관하게 최저 60%, 1년 미만 70%.', keywords: ['분양권 양도세','분양권 전매','단기양도'], legalBasis: '소득세법 제103조, 제104조제1항 · 지방세법 제103조의3', version: '2026.09', lastUpdated: '2026-09-17', pattern: 'simple', formula: 'capitalGainsRights', resultLabel: '양도소득세 (지방소득세 포함)', resultUnit: '원', inputs: [{ id: 'sellPrice', label: '양도가액', type: 'currency', default: 500000000 }, { id: 'buyPrice', label: '취득가액 (분양가+프리미엄)', type: 'currency', default: 400000000 }, { id: 'expenses', label: '필요경비 (중개보수 등)', type: 'currency', default: 0 }, { id: 'holdYears', label: '보유기간 (년)', type: 'number', default: 1, min: 0, max: 10 }], faqs: [
+      { q: '분양권 양도세율은?', a: '1년 미만 70%, 1년 이상은 보유기간과 무관하게 60%입니다(소득세법 §104①1 괄호·①2·①3). 지방소득세는 소득세의 1/10 구조로 따로 붙습니다(2026-09-17 원문 대조 기준).' },
+      { q: '조정대상지역이면 세율이 달라지나요?', a: '분양권 자체의 세율은 조정대상지역과 무관합니다. 다만 분양권을 가진 채 주택을 팔면 그 주택의 비과세·중과 판정이 달라질 수 있으며, 이 계산기는 그 판정을 하지 않습니다.' },
+      { q: '장기보유특별공제는?', a: '분양권은 장기보유특별공제 대상 자산이 아닙니다(소득세법 §95②).' },
+      { q: '분양권 양도세는 모바일에서도 되나요?', a: '네, 모바일·태블릿·PC 모든 기기에서 앱 설치 없이 사용 가능합니다.' },
       { q: '결과를 공유할 수 있나요?', a: '계산 완료 후 공유 버튼으로 카카오톡, URL 복사 등으로 공유 가능합니다.' },
-    ], seoContent: '<h2>양도소득세 계산기 (분양권) 완벽 가이드</h2><p>분양권 전매 시 양도소득세를 계산. 카더라 분양권 양도세는 2026년 최신 세법을 반영하여 조정대상지역, 주택 수, 면적, 취득 원인에 따른 세율을 자동 적용합니다.</p><p>본 계산기는 <strong>소득세법 제104조</strong>를 기준으로 계산합니다. 규정은 매년 개정될 수 있으므로 전문가 확인을 권장합니다.</p><h2>부동산 세금 핵심 포인트</h2><p>부동산 거래 시 취득세(1~12%), 양도소득세(6~45%+중과), 재산세, 종합부동산세 등 다양한 세금이 부과됩니다. 1세대1주택 비과세(12억까지), 장기보유특별공제(최대 80%), 생애최초 감면(200만원 한도) 등 절세 제도를 적극 활용하세요.</p><h2>이런 분들에게 추천</h2><p>주택 매매·매도를 계획 중인 분, 다주택 중과세 영향을 파악하고 싶은 분, 부동산 투자 수익률을 계산하고 싶은 분에게 유용합니다. 카더라는 부동산 세금 포함 142종의 무료 계산기를 제공합니다.</p>', relatedCalcs: ['capital-gains-housing'] },
+    ], seoContent: '<h2>분양권 양도소득세 계산기</h2><p>분양권 전매 차익(양도가액 − 취득가액 − 필요경비)에서 기본공제를 뺀 과세표준에 세율을 곱합니다. 분양권은 보유기간과 무관하게 최저 60%, 1년 미만 70%입니다(소득세법 §104①). 지방소득세는 소득세 세율의 1/10 구조입니다(지방세법 §103의3①).</p><p>2026-09-17 원문 대조 기준. 참고용이며 정확한 세액은 세무 전문가 확인을 권장합니다.</p>', relatedCalcs: ['capital-gains-housing'] },
   { slug: 'registration-license-tax', emoji: '📜', category: 'property-tax', categoryLabel: '부동산 세금', title: '등록면허세 계산기', titleShort: '등록면허세 계산기', description: '소유권이전·설정 시 등록면허세를 계산.', keywords: ['등록면허세','소유권이전','등록세'], legalBasis: '지방세법 제28조', version: '2026.04', lastUpdated: '2026-04-05', pattern: 'simple', formula: 'registrationLicenseTax', resultLabel: '등록면허세', resultUnit: '원', inputs: [{ id: 'price', label: '과세표준', type: 'currency', default: 500000000 }, { id: 'type', label: '등기 유형', type: 'radio', default: 'transfer', options: [{ value: 'transfer', label: '소유권이전 (2%)' }, { value: 'mortgage', label: '저당권설정 (0.2%)' }] }], faqs: [
       { q: '등록면허세 계산기 결과는 실제 세금과 같나요?', a: '참고용이며, 감면·중과·특례 등에 따라 차이가 있습니다. 지방세법 제28조를 기준으로 계산합니다. 정확한 세액은 세무사 상담을 권장합니다.' },
       { q: '등록면허세 계산기에서 조정대상지역은 반영되나요?', a: '네, 조정대상지역 여부에 따른 세율 차이를 반영합니다. 최신 규제지역은 국토교통부에서 확인하세요.' },
@@ -1716,13 +1725,13 @@ export const CALC_REGISTRY: CalcMeta[] = [
       { q: '간주임대료 계산기는 모바일에서도 되나요?', a: '네, 모바일·태블릿·PC 모든 기기에서 최적화되어 있으며 앱 설치 없이 사용 가능합니다.' },
       { q: '결과를 공유할 수 있나요?', a: '계산 완료 후 공유 버튼으로 카카오톡, URL 복사 등으로 공유 가능합니다.' },
     ], seoContent: '<h2>간주임대료 계산기 완벽 가이드</h2><p>전세보증금에 대한 간주임대료(이자 상당액)를 계산. 카더라 간주임대료 계산기는 2026년 최신 세법을 반영하여 조정대상지역, 주택 수, 면적, 취득 원인에 따른 세율을 자동 적용합니다.</p><p>본 계산기는 <strong>소득세법 제25조</strong>를 기준으로 계산합니다. 규정은 매년 개정될 수 있으므로 전문가 확인을 권장합니다.</p><h2>부동산 세금 핵심 포인트</h2><p>부동산 거래 시 취득세(1~12%), 양도소득세(6~45%+중과), 재산세, 종합부동산세 등 다양한 세금이 부과됩니다. 1세대1주택 비과세(12억까지), 장기보유특별공제(최대 80%), 생애최초 감면(200만원 한도) 등 절세 제도를 적극 활용하세요.</p><h2>이런 분들에게 추천</h2><p>주택 매매·매도를 계획 중인 분, 다주택 중과세 영향을 파악하고 싶은 분, 부동산 투자 수익률을 계산하고 싶은 분에게 유용합니다. 카더라는 부동산 세금 포함 142종의 무료 계산기를 제공합니다.</p>', relatedCalcs: ['rental-income-tax'] },
-  { slug: 'one-house-check', emoji: '✅', category: 'property-tax', categoryLabel: '부동산 세금', title: '1세대1주택 비과세 판정기', titleShort: '1세대1주택 판정', description: '보유·거주 요건으로 1세대1주택 비과세 해당 여부를 판정.', keywords: ['1세대1주택 비과세','비과세 요건','보유기간','거주기간'], legalBasis: '소득세법 제89조', version: '2026.04', lastUpdated: '2026-04-05', pattern: 'diagnose', formula: 'oneHouseCheck', resultLabel: '비과세 판정', resultUnit: '', inputs: [{ id: 'houseCount', label: '보유 주택수', type: 'stepper', default: 1, min: 1, max: 5 }, { id: 'holdYears', label: '보유기간 (년)', type: 'number', default: 3 }, { id: 'liveYears', label: '거주기간 (년)', type: 'number', default: 2 }, { id: 'sellPrice', label: '양도가액', type: 'currency', default: 900000000 }, { id: 'regulated', label: '조정대상지역', type: 'radio', default: 'no', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }] }], faqs: [
-      { q: '1세대1주택 판정 결과는 실제 세금과 같나요?', a: '참고용이며, 감면·중과·특례 등에 따라 차이가 있습니다. 소득세법 제89조를 기준으로 계산합니다. 정확한 세액은 세무사 상담을 권장합니다.' },
-      { q: '1세대1주택 판정에서 조정대상지역은 반영되나요?', a: '네, 조정대상지역 여부에 따른 세율 차이를 반영합니다. 최신 규제지역은 국토교통부에서 확인하세요.' },
-      { q: '부동산 세금 절세 방법은?', a: '1세대1주택 비과세, 장기보유특별공제, 생애최초 감면 등을 활용하세요.' },
-      { q: '1세대1주택 판정는 모바일에서도 되나요?', a: '네, 모바일·태블릿·PC 모든 기기에서 최적화되어 있으며 앱 설치 없이 사용 가능합니다.' },
+  { slug: 'one-house-check', emoji: '✅', category: 'property-tax', categoryLabel: '부동산 세금', title: '1세대1주택 비과세 판정기', titleShort: '1세대1주택 판정', description: '보유·거주 요건(취득 당시 조정대상지역), 12억원 기준, 일시적 2주택 특례로 1세대1주택 비과세 해당 여부를 판정.', keywords: ['1세대1주택 비과세','비과세 요건','보유기간','거주기간','일시적 2주택'], legalBasis: '소득세법 제89조제1항제3호 · 시행령 제154조, 제155조제1항, 제160조', version: '2026.09', lastUpdated: '2026-09-17', pattern: 'diagnose', formula: 'oneHouseCheck', resultLabel: '비과세 판정', resultUnit: '', inputs: [{ id: 'houseCount', label: '보유 주택수 (양도 당시)', type: 'stepper', default: 1, min: 1, max: 5 }, { id: 'newAfter1y', label: '종전 주택 취득 후 1년 이상 지나 새 주택을 샀나요?', type: 'radio', default: 'no', condition: 'houseCount=2', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }] }, { id: 'within3y', label: '새 주택 취득일부터 3년 이내에 종전 주택을 파나요?', type: 'radio', default: 'no', condition: 'houseCount=2', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }] }, { id: 'holdYears', label: '파는 주택 보유기간 (년)', type: 'number', default: 3 }, { id: 'liveYears', label: '파는 주택 거주기간 (년)', type: 'number', default: 2 }, { id: 'sellPrice', label: '양도가액', type: 'currency', default: 900000000 }, { id: 'acqRegulated', label: '«취득 당시» 조정대상지역', type: 'radio', default: 'no', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }], hint: '양도 당시가 아니라 취득 당시 기준 — 조정대상지역에서 취득했을 때만 거주 2년 필요(시행령 §154①)' }], faqs: [
+      { q: '비과세 요건은?', a: '양도일 현재 1주택, 보유 2년 이상, «취득 당시» 조정대상지역이면 거주 2년 이상. 양도가액 12억원 이하 전액 비과세, 초과하면 초과분 비율만큼 과세(소득세법 §89①3, 시행령 §154①, 2026-09-17 원문 대조 기준).' },
+      { q: '2주택인데 비과세가 되나요?', a: '종전 주택 취득 후 1년 이상 지나 새 주택을 사고, 새 주택 취득일부터 3년 이내에 종전 주택을 팔면 일시적 2주택으로 1주택처럼 판정합니다(시행령 §155①).' },
+      { q: '이 판정기가 보지 않는 것은?', a: '상속·동거봉양·혼인 합가 특례, 임대주택·수용·해외이주 등 보유기간 예외, 조합원입주권·분양권 보유 시 판정은 하지 않습니다. 해당하면 세무 전문가 확인이 필요합니다.' },
+      { q: '1세대1주택 판정는 모바일에서도 되나요?', a: '네, 모바일·태블릿·PC 모든 기기에서 앱 설치 없이 사용 가능합니다.' },
       { q: '결과를 공유할 수 있나요?', a: '계산 완료 후 공유 버튼으로 카카오톡, URL 복사 등으로 공유 가능합니다.' },
-    ], seoContent: '<h2>1세대1주택 비과세 판정기 완벽 가이드</h2><p>보유·거주 요건으로 1세대1주택 비과세 해당 여부를 판정. 카더라 1세대1주택 판정는 2026년 최신 세법을 반영하여 조정대상지역, 주택 수, 면적, 취득 원인에 따른 세율을 자동 적용합니다.</p><p>본 계산기는 <strong>소득세법 제89조</strong>를 기준으로 계산합니다. 규정은 매년 개정될 수 있으므로 전문가 확인을 권장합니다.</p><h2>부동산 세금 핵심 포인트</h2><p>부동산 거래 시 취득세(1~12%), 양도소득세(6~45%+중과), 재산세, 종합부동산세 등 다양한 세금이 부과됩니다. 1세대1주택 비과세(12억까지), 장기보유특별공제(최대 80%), 생애최초 감면(200만원 한도) 등 절세 제도를 적극 활용하세요.</p><h2>이런 분들에게 추천</h2><p>주택 매매·매도를 계획 중인 분, 다주택 중과세 영향을 파악하고 싶은 분, 부동산 투자 수익률을 계산하고 싶은 분에게 유용합니다. 카더라는 부동산 세금 포함 142종의 무료 계산기를 제공합니다.</p>', relatedCalcs: ['capital-gains-housing'] },
+    ], seoContent: '<h2>1세대1주택 비과세 판정기</h2><p>양도일 현재 1주택을 보유하고 2년 이상 보유했는지, «취득 당시» 조정대상지역 주택이면 보유기간 중 2년 이상 거주했는지, 양도가액이 12억원 이하인지로 비과세 여부를 판정합니다(소득세법 §89①3, 시행령 §154①). 일시적 2주택(시행령 §155①)도 판정합니다.</p><p>상속·동거봉양·혼인 특례와 보유기간 예외는 판정하지 않습니다. 2026-09-17 원문 대조 기준.</p>', relatedCalcs: ['capital-gains-housing'] },
 
   // 소득세 +3
   { slug: 'business-income-tax', emoji: '🏪', category: 'income-tax', categoryLabel: '소득세', title: '사업소득세 계산기', titleShort: '사업소득세 계산기', description: '총수입금액에서 필요경비를 뺀 사업소득에 근사 공제 후 기본세율로 소득세를 계산.', keywords: ['사업소득세','사업자 소득세','경비율'], legalBasis: '소득세법 제19조', version: '2026.04', lastUpdated: '2026-04-05', pattern: 'tax-bracket', formula: 'businessIncomeTax', resultLabel: '사업소득세', resultUnit: '원', inputs: [{ id: 'revenue', label: '총 수입금액', type: 'currency', default: 100000000 }, { id: 'expenses', label: '필요경비', type: 'currency', default: 60000000 }], faqs: [
@@ -1747,13 +1756,13 @@ export const CALC_REGISTRY: CalcMeta[] = [
       { q: '관련 계산기가 더 있나요?', a: '카더라는 소득세 포함 142종의 무료 계산기를 제공합니다.' },
     ], seoContent: '<h2>배당소득세 계산기 완벽 가이드</h2><p>국내/해외 배당소득에 대한 원천징수세액을 계산. 카더라 배당소득세 계산기는 2026년 소득세법 기준 8단계 누진세율(6~45%)을 반영합니다.</p><p>본 계산기는 <strong>소득세법 제129조</strong>를 기준으로 계산합니다. 규정은 매년 개정될 수 있으므로 전문가 확인을 권장합니다.</p><h2>소득세 핵심 정보</h2><p>과세표준에 따라 1,400만원 이하 6%, 5,000만원 이하 15%, 8,800만원 이하 24%, 1.5억 이하 35%, 3억 이하 38%, 5억 이하 40%, 10억 이하 42%, 10억 초과 45%가 적용됩니다. 소득공제로 과세표준을 줄이고, 세액공제로 산출세액을 직접 차감하여 절세하세요.</p><h2>이런 분들에게 추천</h2><p>근로소득자, 프리랜서, 사업자 등 소득세 신고를 준비하는 모든 분에게 유용합니다. 연금저축/IRP 세액공제(최대 900만원 납입)를 활용하면 효과적으로 절세할 수 있습니다.</p>', relatedCalcs: ['dividend-calc', 'financial-income-tax'] },
   // 금융세 +3
-  { slug: 'major-shareholder-cgt', emoji: '📊', category: 'finance-tax', categoryLabel: '금융/투자 세금', title: '대주주 양도세 계산기', titleShort: '대주주 양도세', description: '국내 대주주 주식 양도소득세를 계산.', keywords: ['대주주 양도세','국내주식 양도세','대주주 기준'], legalBasis: '소득세법 제94조', version: '2026.04', lastUpdated: '2026-04-05', pattern: 'simple', formula: 'majorShareholderCgt', resultLabel: '양도소득세', resultUnit: '원', inputs: [{ id: 'profit', label: '양도차익', type: 'currency', default: 50000000 }, { id: 'holdPeriod', label: '보유기간', type: 'radio', default: 'long', options: [{ value: 'short', label: '1년 미만 (33%)' }, { value: 'long', label: '1년 이상 (22~27.5%)' }] }, { id: 'amount', label: '양도가액', type: 'currency', default: 500000000, hint: '3억 초과분 27.5%' }], faqs: [
-      { q: '대주주 양도세 결과는 정확한가요?', a: '2026년 최신 기준 반영이지만, 개인 상황에 따라 차이가 있습니다. 소득세법 제94조를 기준으로 계산합니다. 전문가 상담을 권장합니다.' },
-      { q: '대주주 양도세에서 가장 중요한 입력값은?', a: '국내 대주주 주식 양도소득세를 계산. 정확한 수치를 입력할수록 결과 신뢰도가 높아집니다.' },
-      { q: '대주주 양도세는 무료인가요?', a: '네, 카더라 대주주 양도세는 완전 무료이며 회원가입 없이 무제한 이용 가능합니다.' },
-      { q: '대주주 양도세는 모바일에서도 되나요?', a: '네, 모든 기기에서 최적화되어 있으며 앱 설치 없이 사용 가능합니다.' },
-      { q: '관련 계산기가 더 있나요?', a: '카더라는 금융/투자 세금 포함 142종의 무료 계산기를 제공합니다.' },
-    ], seoContent: '<h2>대주주 양도세 계산기 완벽 가이드</h2><p>국내 대주주 주식 양도소득세를 계산. 카더라 대주주 양도세는 2026년 최신 기준을 반영하여 정확한 결과를 제공합니다.</p><p>본 계산기는 <strong>소득세법 제94조</strong>를 기준으로 계산합니다. 규정은 매년 개정될 수 있으므로 전문가 확인을 권장합니다.</p><h2>금융/투자 세금 핵심 정보</h2><p>금융투자 수익 과세: 국내 상장주식은 대주주만 양도세, 해외주식은 250만원 초과 시 22%, ETF 배당은 15.4%, ISA 비과세 한도는 일반 200만원·서민 400만원입니다.</p><h2>이런 분들에게 추천</h2><p>정확한 금융/투자 세금 계산이 필요한 분에게 유용합니다. 카더라는 금융/투자 세금 포함 142종의 무료 계산기를 제공하며, 계산 결과를 카카오톡으로 공유할 수 있습니다. 본 계산기는 참고용이며 전문가 상담을 권장합니다.</p>', relatedCalcs: ['overseas-cgt', 'stock-roi'] },
+  { slug: 'major-shareholder-cgt', emoji: '📊', category: 'finance-tax', categoryLabel: '금융/투자 세금', title: '대주주 양도세 계산기', titleShort: '대주주 양도세', description: '국내 상장·비상장 주식 대주주의 양도소득세를 계산. 과세표준 3억원 구간 20/25%, 1년 미만 비중소기업 30%, 지방소득세 별도.', keywords: ['대주주 양도세','국내주식 양도세','대주주 기준'], legalBasis: '소득세법 제94조제1항제3호, 제103조제1항제2호, 제104조제1항제11호 · 시행령 제157조, 제167조의8 · 지방세법 제103조의3', version: '2026.09', lastUpdated: '2026-09-17', pattern: 'simple', formula: 'majorShareholderCgt', resultLabel: '양도소득세 (지방소득세 포함)', resultUnit: '원', inputs: [{ id: 'profit', label: '양도차익 (양도가−취득가−필요경비)', type: 'currency', default: 50000000 }, { id: 'holdPeriod', label: '보유기간', type: 'radio', default: 'long', options: [{ value: 'short', label: '1년 미만' }, { value: 'long', label: '1년 이상' }] }, { id: 'sme', label: '중소기업 주식', type: 'radio', default: 'no', condition: 'holdPeriod=short', options: [{ value: 'yes', label: '예' }, { value: 'no', label: '아니오' }], hint: '1년 미만이어도 중소기업 주식이면 30% 단기세율이 아니다' }, { id: 'deductionUsed', label: '올해 기본공제(250만원)를 다른 주식 양도에서 이미 썼나요?', type: 'radio', default: 'no', options: [{ value: 'no', label: '아니오' }, { value: 'yes', label: '이미 사용' }], hint: '해외주식 등과 합산해 연 1회' }], faqs: [
+      { q: '대주주 양도세율은?', a: '과세표준 3억원 이하 20%, 초과분 25%(6천만원 + 초과액×25%). 1년 미만 보유한 중소기업 외 법인 주식은 30%입니다(소득세법 §104①11가). 지방소득세는 소득세의 1/10 구조로 별도입니다(2026-09-17 원문 대조 기준).' },
+      { q: '대주주 기준은?', a: '직전 사업연도 말 지분율 코스피 1%·코스닥 2%·코넥스 4% 이상이거나 종목별 시가총액 50억원 이상(특수관계인 합산 단서 있음, 소득세법 시행령 §157①·②). 비상장은 4% 또는 10억원(벤처 40억원, §167조의8). 2026-09-17 원문 대조 기준.' },
+      { q: '3억원 구간은 양도차익 기준인가요?', a: '아니요. 기본공제를 뺀 «과세표준» 기준입니다.' },
+      { q: '대주주 양도세는 모바일에서도 되나요?', a: '네, 모바일·태블릿·PC 모든 기기에서 앱 설치 없이 사용 가능합니다.' },
+      { q: '결과를 공유할 수 있나요?', a: '계산 완료 후 공유 버튼으로 카카오톡, URL 복사 등으로 공유 가능합니다.' },
+    ], seoContent: '<h2>대주주 양도세 계산기</h2><p>국내 주식 대주주가 주식을 양도할 때 양도차익에서 기본공제를 뺀 과세표준에 3억원 이하 20%, 초과분 25%를 적용합니다. 1년 미만 보유한 중소기업 외 법인 주식은 30%입니다(소득세법 §104①11가). 지방소득세는 같은 구조의 1/10(지방세법 §103의3①11)입니다.</p><p>대주주 판정(시행령 §157·§167조의8) 자체와 차손 통산은 계산하지 않습니다. 2026-09-17 원문 대조 기준.</p>', relatedCalcs: ['overseas-cgt', 'stock-roi'] },
 
   { slug: 'foreign-dividend-credit', emoji: '🌍', category: 'finance-tax', categoryLabel: '금융/투자 세금', title: '해외 배당 이중과세 환급 계산기', titleShort: '외국납부세액공제', description: '해외주식 배당에서 원천징수된 외국세액의 공제(환급)를 계산.', keywords: ['외국납부세액공제','해외배당 이중과세','배당세 환급'], legalBasis: '소득세법 제57조', version: '2026.04', lastUpdated: '2026-04-05', pattern: 'simple', formula: 'foreignDividendCredit', resultLabel: '환급 가능액', resultUnit: '원', inputs: [{ id: 'foreignTax', label: '외국 원천징수세액', type: 'currency', default: 750000 }, { id: 'domesticTax', label: '국내 산출세액', type: 'currency', default: 770000 }], faqs: [
       { q: '외국납부세액공제 결과는 정확한가요?', a: '참고용 계산이며, 개인 상황에 따라 실제와 차이가 있을 수 있습니다. 전문가 상담을 권장합니다.' },

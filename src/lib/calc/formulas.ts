@@ -658,47 +658,7 @@ export function acquisitionTax(v: V): CalcResult {
   };
 }
 
-export function capitalGainsHousing(v: V): CalcResult {
-  const sell = n(v.sellPrice);
-  const buy = n(v.buyPrice);
-  const exp = n(v.expenses);
-  const hold = n(v.holdYears);
-  const live = n(v.liveYears);
-  const houses = n(v.houseCount);
-  const gain = sell - buy - exp;
-  if (gain <= 0) return { main: { label: '양도소득세', value: '0원 (차익 없음)' }, details: [] };
-  // 1세대1주택 비과세
-  if (houses === 1 && hold >= 2 && sell <= CAPITAL_GAINS_TAX.exemption) {
-    return { main: { label: '양도소득세', value: '0원 (비과세)', color: 'var(--accent-green)' }, details: [{ label: '사유', value: '1세대1주택 비과세 (12억 이하)' }] };
-  }
-  // 장기보유특별공제
-  let ltdRate = 0;
-  if (houses === 1) {
-    const holdRate = Math.min(0.40, Math.max(0, (hold - 2) * 0.04));
-    const liveRate = Math.min(0.40, Math.max(0, (live - 2) * 0.04));
-    ltdRate = holdRate + liveRate; // 최대 80%
-  } else {
-    for (const r of CAPITAL_GAINS_TAX.longTermDeduction) { if (hold >= r.years) ltdRate = r.rate; }
-  }
-  let taxableGain = gain;
-  if (houses === 1 && sell > CAPITAL_GAINS_TAX.exemption) {
-    taxableGain = Math.round(gain * (sell - CAPITAL_GAINS_TAX.exemption) / sell);
-  }
-  taxableGain = Math.round(taxableGain * (1 - ltdRate));
-  const taxBase = Math.max(0, taxableGain - 2500000); // 기본공제 250만
-  const tax = Math.round(calcProgressiveTax(taxBase, INCOME_TAX_BRACKETS));
-  const localTax = Math.round(tax * 0.1);
-  return {
-    main: { label: '양도소득세', value: fmt(tax + localTax) },
-    details: [
-      { label: '양도차익', value: fmt(gain) },
-      { label: '장특공제율', value: pct(ltdRate) },
-      { label: '과세표준', value: fmt(taxBase) },
-      { label: '소득세', value: fmt(tax) },
-      { label: '지방소득세', value: fmt(localTax) },
-    ],
-  };
-}
+import { capitalGainsHousing } from './k9/cgt'; export { capitalGainsHousing }; // K-9 cgt — 본문 이관
 
 export function giftTax(v: V): CalcResult {
   const amount = n(v.amount);
@@ -723,20 +683,7 @@ export function giftTax(v: V): CalcResult {
   };
 }
 
-export function overseasCgt(v: V): CalcResult {
-  const profit = n(v.profit) + n(v.otherProfit) - n(v.otherLoss);
-  const taxBase = Math.max(0, profit - 2500000);
-  const tax = Math.round(taxBase * 0.22);
-  return {
-    main: { label: '양도소득세', value: fmt(tax) },
-    details: [
-      { label: '순 양도차익', value: fmt(profit) },
-      { label: '기본공제', value: fmt(2500000) },
-      { label: '과세표준', value: fmt(taxBase) },
-      { label: '세율', value: '22% (소득세 20% + 지방소득세 2%)' },
-    ],
-  };
-}
+import { overseasCgt } from './k9/cgt'; export { overseasCgt }; // K-9 cgt — 본문 이관
 
 export function financialIncomeTax(v: V): CalcResult {
   const interest = n(v.interest);
@@ -1652,18 +1599,7 @@ export function capitalGainsLand(v: V): CalcResult {
   const local = Math.round(tax * 0.1);
   return { main: { label: '양도소득세', value: fmt(tax + local) }, details: [{ label: '양도차익', value: fmt(gain) }, { label: '장특공제', value: pct(ltdRate) }, { label: '소득세', value: fmt(tax) }] };
 }
-export function multiHouseSim(v: V): CalcResult {
-  const houses = n(v.houseCount);
-  const price = n(v.price); const buyPrice = n(v.buyPrice);
-  const regulated = v.regulated === 'yes';
-  const acqRate = houses >= 3 ? (regulated ? 0.12 : 0.04) : houses === 2 ? (regulated ? 0.08 : 0.01) : 0.01;
-  const acqTax = Math.round(price * acqRate);
-  const gain = price - buyPrice;
-  const addRate = houses >= 3 ? 0.30 : houses === 2 ? 0.20 : 0;
-  const cgtRate = regulated ? addRate : 0;
-  const cgt = gain > 0 ? Math.round(gain * (0.24 + cgtRate)) : 0; // 근사
-  return { main: { label: '중과세 합계', value: fmt(acqTax + cgt) }, details: [{ label: '취득세', value: fmt(acqTax) + ` (${pct(acqRate)})` }, { label: '양도세 추정', value: fmt(cgt) }, { label: '양도세 중과', value: regulated ? `+${pct(cgtRate)}` : '없음' }] };
-}
+import { multiHouseSim } from './k9/cgt'; export { multiHouseSim }; // K-9 cgt — 본문 이관
 export function investmentTypeTest(v: V): CalcResult {
   const score = Number(v.q1) + Number(v.q2) + Number(v.q3);
   const type = score <= 4 ? '안전형' : score <= 6 ? '안정추구형' : score <= 8 ? '위험중립형' : '적극투자형';
@@ -1727,15 +1663,7 @@ export function burdenGift(v: V): CalcResult {
 
 // ═══ 4차 최종 배치 공식 ═══
 
-export function capitalGainsRights(v: V): CalcResult {
-  const gain = n(v.sellPrice) - n(v.buyPrice);
-  if (gain <= 0) return { main: { label: '양도소득세', value: '0원' }, details: [] };
-  const hold = n(v.holdYears);
-  const rate = hold < 1 ? 0.70 : hold < 2 ? 0.60 : 0;
-  const taxBase = Math.max(0, gain - 2500000);
-  const tax = rate > 0 ? Math.round(taxBase * rate) : Math.round(calcProgressiveTax(taxBase, INCOME_TAX_BRACKETS));
-  return { main: { label: '양도소득세', value: fmt(Math.round(tax * 1.1)) }, details: [{ label: '양도차익', value: fmt(gain) }, { label: '적용세율', value: rate > 0 ? pct(rate) + ' (단기)' : '누진세율' }] };
-}
+import { capitalGainsRights } from './k9/cgt'; export { capitalGainsRights }; // K-9 cgt — 본문 이관
 export function registrationLicenseTax(v: V): CalcResult {
   const price = n(v.price);
   const rate = v.type === 'transfer' ? 0.02 : 0.002;
@@ -1749,17 +1677,7 @@ export function deemedRent(v: V): CalcResult {
   const deemed = Math.round(excess * 0.021); // 정기예금 이자율 (2.1%)
   return { main: { label: '간주임대료', value: fmt(deemed) }, details: [{ label: '3억 초과 보증금', value: fmt(excess) }, { label: '적용이자율', value: '2.1%' }] };
 }
-export function oneHouseCheck(v: V): CalcResult {
-  const houses = n(v.houseCount); const hold = n(v.holdYears); const live = n(v.liveYears);
-  const price = n(v.sellPrice); const regulated = v.regulated === 'yes';
-  if (houses > 1) return { main: { label: '비과세 불가', value: '다주택 보유', color: 'var(--accent-red)' }, details: [{ label: '보유 주택수', value: `${houses}채` }] };
-  const holdOk = hold >= 2; const liveOk = regulated ? live >= 2 : true; const priceOk = price <= 1200000000;
-  const exempt = holdOk && liveOk;
-  return {
-    main: { label: exempt ? '비과세 해당' : '비과세 불가', value: exempt ? (priceOk ? '전액 비과세' : '12억 초과분 과세') : '요건 미충족', color: exempt ? 'var(--accent-green)' : 'var(--accent-red)' },
-    details: [{ label: '보유 2년+', value: holdOk ? '충족' : '미충족' }, { label: '거주 2년+ (조정지역)', value: regulated ? (liveOk ? '충족' : '미충족') : '해당없음' }, { label: '양도가 12억 이하', value: priceOk ? '충족' : '초과' }],
-  };
-}
+import { oneHouseCheck } from './k9/cgt'; export { oneHouseCheck }; // K-9 cgt — 본문 이관
 export function businessIncomeTax(v: V): CalcResult {
   const income = n(v.revenue) - n(v.expenses);
   const taxBase = Math.max(0, income - 5000000);
@@ -1784,15 +1702,7 @@ export function dividendIncomeTax(v: V): CalcResult {
   const tax = Math.round(div * rate);
   return { main: { label: '배당소득세', value: fmt(tax) }, details: [{ label: '세후 수령', value: fmt(div - tax) }, { label: '세율', value: pct(rate) }] };
 }
-export function majorShareholderCgt(v: V): CalcResult {
-  const profit = n(v.profit); const amount = n(v.amount);
-  const shortRate = v.holdPeriod === 'short' ? 0.33 : 0;
-  if (shortRate > 0) { const tax = Math.round(profit * shortRate); return { main: { label: '양도소득세', value: fmt(Math.round(tax * 1.1)) }, details: [{ label: '세율', value: '33% (1년 미만)' }] }; }
-  const base300 = Math.min(profit, 300000000);
-  const over300 = Math.max(0, profit - 300000000);
-  const tax = Math.round(base300 * 0.22 + over300 * 0.275);
-  return { main: { label: '양도소득세', value: fmt(Math.round(tax * 1.1)) }, details: [{ label: '3억 이하', value: `${fmt(base300)} × 22%` }, { label: '3억 초과', value: `${fmt(over300)} × 27.5%` }] };
-}
+import { majorShareholderCgt } from './k9/cgt'; export { majorShareholderCgt }; // K-9 cgt — 본문 이관
 export function foreignDividendCredit(v: V): CalcResult {
   const foreign = n(v.foreignTax); const domestic = n(v.domesticTax);
   const credit = Math.min(foreign, domestic);
