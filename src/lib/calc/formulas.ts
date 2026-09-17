@@ -799,6 +799,8 @@ export const FORMULAS: Record<string, (v: V) => CalcResult> = {
   childSupport, accidentCompensation,
   prepaymentFee, housingPension, retirementPensionSim,
   alcoholCalc, unitConvert, leaseVsInstallment, overtimePay, annualLeavePay,
+  // K-9 inh — registry 에 있는데 이 맵에 없어 결과가 안 뜨던 4종(2026-09-17 실측: 라이브 generation-skip 결과 영역 없음)
+  giftExemptionLookup, burdenGift, familyBusiness, generationSkip,
   // 청약 가점 (이전 누락 — registry는 있는데 formula 없어서 결과 안 떴음)
   subscriptionScore,
 };
@@ -1092,17 +1094,7 @@ export function monthlyRentDeduction(v: V): CalcResult {
   const rate = salary <= 55000000 ? 0.17 : 0.15;
   return { main: { label: '월세 세액공제', value: fmt(Math.round(base * rate)) }, details: [{ label: '공제 대상', value: fmt(base) }, { label: '공제율', value: pct(rate) }] };
 }
-export function inheritanceTax(v: V): CalcResult {
-  const estate = n(v.totalEstate) - n(v.debts);
-  const hasSpouse = v.hasSpouse === 'yes';
-  const lumpDeduction = 500000000; // 일괄공제 5억
-  const spouseDeduction = hasSpouse ? Math.min(3000000000, Math.max(500000000, estate * 0.3)) : 0;
-  const taxBase = Math.max(0, estate - lumpDeduction - spouseDeduction);
-  let tax = 0;
-  for (const b of GIFT_TAX_BRACKETS) { if (taxBase <= b.max) { tax = taxBase * b.rate - b.deduction; break; } }
-  tax = Math.max(0, Math.round(tax));
-  return { main: { label: '상속세', value: fmt(tax) }, details: [{ label: '순 상속재산', value: fmt(estate) }, { label: '일괄공제', value: fmt(lumpDeduction) }, { label: '배우자공제', value: fmt(spouseDeduction) }, { label: '과세표준', value: fmt(taxBase) }] };
-}
+import { inheritanceTax } from './k9/inh'; export { inheritanceTax }; // K-9 inh — 본문은 k9/inh.ts
 export function vatCalc(v: V): CalcResult {
   const amount = n(v.amount);
   if (v.direction === 'addVat') {
@@ -1205,17 +1197,7 @@ export function simplifiedVat(v: V): CalcResult {
   if (rev <= 48000000) return { main: { label: '납부 부가세', value: '0원 (면제)' }, details: [{ label: '사유', value: '매출 4,800만원 이하 납부 면제' }] };
   return { main: { label: '납부 부가세', value: fmt(vat) }, details: [{ label: '매출세액', value: fmt(Math.round(rev * rate * 0.1)) }, { label: '매입세액 공제', value: fmt(Math.round(purchase * 0.5)) }] };
 }
-export function corporateTax(v: V): CalcResult {
-  const base = n(v.taxBase);
-  const brackets = [
-    { min: 0, max: 200000000, rate: 0.09, deduction: 0 },
-    { min: 200000000, max: 20000000000, rate: 0.19, deduction: 20000000 },
-    { min: 20000000000, max: 300000000000, rate: 0.21, deduction: 420000000 },
-    { min: 300000000000, max: Infinity, rate: 0.24, deduction: 9420000000 },
-  ];
-  const tax = Math.round(calcProgressiveTax(base, brackets));
-  return { main: { label: '법인세', value: fmt(tax) }, details: [{ label: '과세표준', value: fmt(base) }, { label: '지방소득세 포함', value: fmt(Math.round(tax * 1.1)) }] };
-}
+import { corporateTax } from './k9/corp'; export { corporateTax }; // K-9 inh — 본문은 k9/corp.ts
 export function penaltyTax(v: V): CalcResult {
   const type = v.type as string; const amount = n(v.taxAmount);
   let penalty = 0;
@@ -1270,20 +1252,7 @@ export function housingFundDeduction(v: V): CalcResult {
   const mortgage = n(v.mortgageInterest);
   return { main: { label: '주택자금 소득공제', value: fmt(sub + mortgage) }, details: [{ label: '주택청약', value: fmt(sub) }, { label: '주담대 이자', value: fmt(mortgage) }] };
 }
-export function comprehensivePropertyTax(v: V): CalcResult {
-  const pub = n(v.publicPrice);
-  const exemption = v.oneHouse === 'yes' ? 1200000000 : 900000000;
-  const taxBase = Math.max(0, Math.round((pub - exemption) * 0.60));
-  const rates = [
-    { min: 0, max: 300000000, rate: 0.005, deduction: 0 },
-    { min: 300000000, max: 600000000, rate: 0.007, deduction: 600000 },
-    { min: 600000000, max: 1200000000, rate: 0.01, deduction: 2400000 },
-    { min: 1200000000, max: Infinity, rate: 0.02, deduction: 14400000 },
-  ];
-  const tax = Math.round(calcProgressiveTax(taxBase, rates));
-  if (taxBase <= 0) return { main: { label: '종부세', value: '0원 (비과세)' }, details: [{ label: '공제액', value: fmt(exemption) }] };
-  return { main: { label: '종부세', value: fmt(tax) }, details: [{ label: '과세표준', value: fmt(taxBase) }, { label: '공제액', value: fmt(exemption) }] };
-}
+import { comprehensivePropertyTax } from './k9/cpt'; export { comprehensivePropertyTax }; // K-9 inh — 본문은 k9/cpt.ts
 export function rentalIncomeTax(v: V): CalcResult {
   const rent = n(v.annualRent); const other = n(v.otherIncome);
   const expRate = v.registered === 'yes' ? 0.60 : 0.50;
@@ -1528,30 +1497,8 @@ export function graduationYear(v: V): CalcResult {
   const uniGrad = highGrad + 4;
   return { main: { label: '대학 졸업 (예상)', value: `${uniGrad}년 2월` }, details: [{ label: '초등 입학', value: `${elemEntry}년` }, { label: '중학 졸업', value: `${midGrad + 1}년` }, { label: '고등 졸업', value: `${highGrad + 1}년` }, { label: '군 전역 (육군)', value: `${uniGrad - 2 + 2}년` }] };
 }
-export function giftExemptionLookup(v: V): CalcResult {
-  const rel = v.relationship as string;
-  const limits: Record<string, { label: string; amount: number }> = {
-    spouse: { label: '배우자', amount: 600000000 },
-    adultChild: { label: '성년 자녀', amount: 50000000 },
-    minorChild: { label: '미성년 자녀', amount: 20000000 },
-    otherRelative: { label: '기타 친족', amount: 10000000 },
-  };
-  const info = limits[rel] || limits.otherRelative;
-  return { main: { label: '증여 면제한도', value: fmt(info.amount) }, details: [{ label: '관계', value: info.label }, { label: '기간', value: '10년간 합산' }] };
-}
-export function burdenGift(v: V): CalcResult {
-  const value = n(v.propertyValue); const debt = n(v.debt);
-  const buyPrice = n(v.buyPrice); const rel = v.relationship as string;
-  const giftPortion = value - debt;
-  const exemption = rel === 'spouse' ? 600000000 : rel === 'adultChild' ? 50000000 : 20000000;
-  const giftBase = Math.max(0, giftPortion - exemption);
-  let giftTaxAmt = 0;
-  for (const b of GIFT_TAX_BRACKETS) { if (giftBase <= b.max) { giftTaxAmt = Math.round(giftBase * b.rate - b.deduction); break; } }
-  const cgtGain = Math.round(debt * (value - buyPrice) / value);
-  const cgtBase = Math.max(0, cgtGain - 2500000);
-  const cgt = Math.round(calcProgressiveTax(cgtBase, INCOME_TAX_BRACKETS));
-  return { main: { label: '세금 합계', value: fmt(Math.max(0, giftTaxAmt) + Math.max(0, cgt)) }, details: [{ label: '증여세', value: fmt(Math.max(0, giftTaxAmt)) }, { label: '양도소득세 (채무 비율)', value: fmt(Math.max(0, cgt)) }, { label: '증여 부분', value: fmt(giftPortion) }, { label: '양도 부분 (채무)', value: fmt(debt) }] };
-}
+import { giftExemptionLookup } from './k9/inh'; export { giftExemptionLookup }; // K-9 inh — 본문은 k9/inh.ts
+import { burdenGift } from './k9/inh'; export { burdenGift }; // K-9 inh — 본문은 k9/inh.ts
 
 // ═══ 4차 최종 배치 공식 ═══
 
@@ -1602,26 +1549,8 @@ export function fisTaxSim(v: V): CalcResult {
   const total = Math.round((tax300 + taxOver) * 1.1);
   return { main: { label: '금투세 (시뮬)', value: profit <= 50000000 ? '0원 (비과세)' : fmt(total) }, details: [{ label: '5천만원 공제 후', value: fmt(base) }, { label: '참고', value: '시행 유예 중' }] };
 }
-export function familyBusiness(v: V): CalcResult {
-  const value = n(v.businessValue); const years = n(v.years);
-  const maxDeduction = years >= 30 ? 60000000000 : years >= 20 ? 40000000000 : years >= 15 ? 30000000000 : 20000000000;
-  const deduction = Math.min(value, maxDeduction);
-  let normalTax = 0;
-  for (const b of GIFT_TAX_BRACKETS) { if (value <= b.max) { normalTax = Math.round(value * b.rate - b.deduction); break; } }
-  let reducedTax = 0;
-  const reducedBase = Math.max(0, value - deduction);
-  for (const b of GIFT_TAX_BRACKETS) { if (reducedBase <= b.max) { reducedTax = Math.round(reducedBase * b.rate - b.deduction); break; } }
-  return { main: { label: '상속세 절감', value: fmt(Math.max(0, normalTax - reducedTax)) }, details: [{ label: '가업상속공제', value: fmt(deduction) }, { label: '공제 후 상속세', value: fmt(Math.max(0, reducedTax)) }] };
-}
-export function generationSkip(v: V): CalcResult {
-  const amount = n(v.amount);
-  const exemption = 50000000;
-  const taxBase = Math.max(0, amount - exemption);
-  let baseTax = 0;
-  for (const b of GIFT_TAX_BRACKETS) { if (taxBase <= b.max) { baseTax = taxBase * b.rate - b.deduction; break; } }
-  const surcharged = Math.round(baseTax * 1.3);
-  return { main: { label: '증여세 (할증)', value: fmt(Math.max(0, surcharged)) }, details: [{ label: '기본 증여세', value: fmt(Math.round(Math.max(0, baseTax))) }, { label: '30% 할증', value: fmt(Math.round(Math.max(0, surcharged - baseTax))) }] };
-}
+import { familyBusiness } from './k9/inh'; export { familyBusiness }; // K-9 inh — 본문은 k9/inh.ts
+import { generationSkip } from './k9/inh'; export { generationSkip }; // K-9 inh — 본문은 k9/inh.ts
 export function withholdingCalc(v: V): CalcResult {
   const amount = n(v.amount);
   const rates: Record<string, { rate: number; label: string }> = { salary: { rate: 0, label: '간이세액표 적용' }, business: { rate: 0.033, label: '3.3%' }, other: { rate: 0.088, label: '8.8%' }, interest: { rate: 0.154, label: '15.4%' } };
