@@ -79,20 +79,7 @@ export function pyeongToSqm(v: V): CalcResult {
   };
 }
 
-export function jeonseWolse(v: V): CalcResult {
-  const dir = v.direction as string;
-  const jeonse = n(v.jeonse);
-  const deposit = n(v.deposit);
-  const rate = n(v.rate) / 100 || JEONSE_CONVERSION_RATE;
-  if (dir === 'toWolse') {
-    const monthly = Math.round((jeonse - deposit) * rate / 12);
-    return { main: { label: '월세', value: fmt(monthly) }, details: [{ label: '보증금', value: fmt(deposit) }, { label: '전월세전환율', value: pct(rate) }] };
-  } else {
-    const monthly = n(v.monthlyRent) || 0;
-    const converted = Math.round(deposit + (monthly * 12 / rate));
-    return { main: { label: '전세 보증금', value: fmt(converted) }, details: [{ label: '현재 월세', value: fmt(monthly) }, { label: '전월세전환율', value: pct(rate) }] };
-  }
-}
+import { jeonseWolse } from './k9/ext'; export { jeonseWolse }; // K-9 ext — 본문은 k9/ext.ts
 
 export function rentalYield(v: V): CalcResult {
   const price = n(v.purchasePrice);
@@ -556,28 +543,7 @@ export function acquisitionTax(v: V): CalcResult {
 
 import { capitalGainsHousing } from './k9/cgt'; export { capitalGainsHousing }; // K-9 cgt — 본문 이관
 
-export function giftTax(v: V): CalcResult {
-  const amount = n(v.amount);
-  const rel = v.relationship as string;
-  const prior = n(v.priorGifts);
-  const exemption = GIFT_EXEMPTIONS[rel as keyof typeof GIFT_EXEMPTIONS] as number || 0;
-  const taxBase = Math.max(0, amount + prior - exemption);
-  let tax = 0;
-  for (const b of GIFT_TAX_BRACKETS) {
-    if (taxBase <= b.max) { tax = taxBase * b.rate - b.deduction; break; }
-  }
-  if (rel === 'grandchild') tax = Math.round(tax * GIFT_EXEMPTIONS.generationSkip);
-  tax = Math.max(0, Math.round(tax));
-  return {
-    main: { label: '증여세', value: fmt(tax) },
-    details: [
-      { label: '증여 재산', value: fmt(amount) },
-      { label: '면제한도', value: fmt(exemption) },
-      { label: '과세표준', value: fmt(taxBase) },
-      ...(rel === 'grandchild' ? [{ label: '세대생략 할증', value: '30%' }] : []),
-    ],
-  };
-}
+import { giftTax } from './k9/ext'; export { giftTax }; // K-9 ext — 본문은 k9/ext.ts
 
 import { overseasCgt } from './k9/cgt'; export { overseasCgt }; // K-9 cgt — 본문 이관
 
@@ -802,16 +768,7 @@ export function subscriptionTotal(v: V): CalcResult {
   const monthly = subs.reduce((a,b) => a+b, 0);
   return { main: { label: '월 구독 합계', value: fmt(monthly) }, details: [{ label: '연간 총액', value: fmt(monthly * 12) }, { label: '구독 수', value: `${subs.length}개` }] };
 }
-export function militaryPay(v: V): CalcResult {
-  const pays: Record<string, { label: string; amount: number }> = {
-    private: { label: '이병', amount: 640000 },
-    pfc: { label: '일병', amount: 800000 },
-    corporal: { label: '상병', amount: 1000000 },
-    sergeant: { label: '병장', amount: 1250000 },
-  };
-  const p = pays[v.rank as string] || pays.private;
-  return { main: { label: `${p.label} 월급`, value: fmt(p.amount) }, details: [{ label: '기준', value: '2026년 국방부 병 봉급표 (예상)' }] };
-}
+import { militaryPay } from './k9/ext'; export { militaryPay }; // K-9 ext — 본문은 k9/ext.ts
 export function gpaConvert(v: V): CalcResult {
   const gpa = n(v.gpa); const scale = Number(v.scale);
   const pct2 = Math.min(100, Math.round((gpa / scale) * 100 * 10) / 10);
@@ -1008,18 +965,7 @@ import { medicalDeduction } from './k9/misc'; export { medicalDeduction };
 import { educationDeduction } from './k9/misc'; export { educationDeduction };
 import { donationDeduction } from './k9/misc'; export { donationDeduction };
 import { insuranceDeduction } from './k9/misc'; export { insuranceDeduction };
-export function childCredit(v: V): CalcResult {
-  const count = n(v.childCount); const newborn = n(v.newborn);
-  let credit = 0;
-  if (count >= 1) credit += 150000;
-  if (count >= 2) credit += 200000;
-  if (count >= 3) credit += (count - 2) * 300000;
-  let birthCredit = 0;
-  if (newborn >= 1) birthCredit += 300000;
-  if (newborn >= 2) birthCredit += 500000;
-  if (newborn >= 3) birthCredit += (newborn - 2) * 700000;
-  return { main: { label: '자녀 세액공제', value: fmt(credit + birthCredit) }, details: [{ label: '기본공제', value: fmt(credit) }, { label: '출산/입양 공제', value: fmt(birthCredit) }] };
-}
+import { childCredit } from './k9/ext'; export { childCredit }; // K-9 ext — 본문은 k9/ext.ts
 export function housingFundDeduction(v: V): CalcResult {
   const sub = Math.min(n(v.subscription), 3000000);
   const mortgage = n(v.mortgageInterest);
@@ -1159,18 +1105,7 @@ export function annualLeavePay(v: V): CalcResult {
 
 // ═══ 3차 배치 공식 ═══
 
-export function capitalGainsLand(v: V): CalcResult {
-  const gain = n(v.sellPrice) - n(v.buyPrice) - n(v.expenses);
-  if (gain <= 0) return { main: { label: '양도소득세', value: '0원' }, details: [] };
-  let ltdRate = 0;
-  for (const r of CAPITAL_GAINS_TAX.longTermDeduction) { if (n(v.holdYears) >= r.years) ltdRate = r.rate; }
-  const taxableGain = Math.round(gain * (1 - ltdRate));
-  const taxBase = Math.max(0, taxableGain - 2500000);
-  let tax = Math.round(calcProgressiveTax(taxBase, INCOME_TAX_BRACKETS));
-  if (v.nonBusiness === 'yes') tax = Math.round(tax * 1.1); // 비사업용 10% 추가
-  const local = Math.round(tax * 0.1);
-  return { main: { label: '양도소득세', value: fmt(tax + local) }, details: [{ label: '양도차익', value: fmt(gain) }, { label: '장특공제', value: pct(ltdRate) }, { label: '소득세', value: fmt(tax) }] };
-}
+import { capitalGainsLand } from './k9/ext'; export { capitalGainsLand }; // K-9 ext — 본문은 k9/ext.ts
 import { multiHouseSim } from './k9/cgt'; export { multiHouseSim }; // K-9 cgt — 본문 이관
 export function investmentTypeTest(v: V): CalcResult {
   const score = Number(v.q1) + Number(v.q2) + Number(v.q3);
@@ -1544,14 +1479,7 @@ export function rebalanceCalc(v: V): CalcResult {
 export function severanceCalc(v: V): CalcResult {
   return { main: { label: '해고예고수당', value: fmt(n(v.monthlySalary)) }, details: [{ label: '30일분 통상임금', value: fmt(n(v.monthlySalary)) }] };
 }
-export function minimumWage(v: V): CalcResult {
-  const minWage = 10360; // 2026 예상
-  const hours = n(v.weeklyHours);
-  const weeklyPaidHours = v.includeHoliday === 'yes' ? hours + hours / 5 : hours;
-  const monthlyHours = weeklyPaidHours * 52 / 12;
-  const monthly = Math.round(minWage * monthlyHours);
-  return { main: { label: '최저월급', value: fmt(monthly) }, details: [{ label: '최저시급', value: fmt(minWage) }, { label: '월 유급시간', value: `${monthlyHours.toFixed(1)}시간` }, { label: '연봉', value: fmt(monthly * 12) }] };
-}
+import { minimumWage } from './k9/ext'; export { minimumWage }; // K-9 ext — 본문은 k9/ext.ts
 export function jeonseLoan(v: V): CalcResult {
   const amount = n(v.loanAmount); const rate = n(v.rate) / 100;
   const monthlyInterest = Math.round(amount * rate / 12);
@@ -1586,11 +1514,7 @@ export function pensionVsLump(v: V): CalcResult {
   const lumpInvested = total * Math.pow(1 + ret, years);
   return { main: { label: lumpInvested > totalPension ? '일시금+투자 유리' : '연금 수령 유리', value: fmt(Math.round(Math.abs(lumpInvested - totalPension))) + ' 차이' }, details: [{ label: '연금 총 수령', value: fmt(Math.round(totalPension)) }, { label: '일시금 투자 후', value: fmt(Math.round(lumpInvested)) }] };
 }
-export function isaConversion(v: V): CalcResult {
-  const transfer = Math.min(n(v.transferAmount), n(v.isaBalance));
-  const credit = Math.min(Math.round(transfer * 0.1), 3000000);
-  return { main: { label: '추가 세액공제', value: fmt(credit) }, details: [{ label: '전환 금액', value: fmt(transfer) }, { label: '한도', value: '전환액의 10%, 최대 300만원' }] };
-}
+import { isaConversion } from './k9/ext'; export { isaConversion }; // K-9 ext — 본문은 k9/ext.ts
 export function carInsuranceEst(v: V): CalcResult {
   const carAge = n(v.carAge); const age = n(v.driverAge); const price = n(v.carPrice); const safe = n(v.accidentFree);
   // A1 — 시장값 공개형. 아래 계수는 «카더라 가정» 이다(보험사 요율 아님). 옛 화면은 이 사실을 말하지 않았다.
@@ -1627,13 +1551,7 @@ export function propertyDivision(v: V): CalcResult {
   return { main: { label: '분할 금액', value: fmt(Math.round(total * ratio)) }, details: [{ label: '공동재산', value: fmt(total) }, { label: '분할 비율', value: pct(ratio) }] };
 }
 import { statuteOfLimitations } from './k9/misc'; export { statuteOfLimitations };
-export function industrialAccident(v: V): CalcResult {
-  const wage = n(v.dailyWage); const days = n(v.restDays); const grade = Number(v.disabilityGrade);
-  const restPay = Math.round(wage * 0.7 * days);
-  const gradeMultiplier: Record<number, number> = { 0: 0, 14: 55, 12: 99, 10: 154, 7: 297, 4: 616, 1: 1474 };
-  const disabilityPay = Math.round(wage * (gradeMultiplier[grade] || 0));
-  return { main: { label: '보상금 추정', value: fmt(restPay + disabilityPay) }, details: [{ label: '휴업급여 (70%)', value: fmt(restPay) }, { label: '장해급여', value: fmt(disabilityPay) }] };
-}
+import { industrialAccident } from './k9/ext'; export { industrialAccident }; // K-9 ext — 본문은 k9/ext.ts
 export function csatGrade(v: V): CalcResult {
   const score = n(v.score);
   // 영어는 절대등급
