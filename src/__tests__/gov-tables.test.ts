@@ -7,7 +7,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { bondRatePerMille, pensionMonthly, PENSION_MIN_AGE, brokerageBracket, ltvPolicyKey, acqTaxPolicyKey, acqTaxMidRatePct } from '@/lib/calc/gov-tables';
-import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc, acquisitionTax, stockRoi, auctionProfit, depositInterest } from '@/lib/calc/formulas';
+import { housingBond, housingPension, brokerageFee, currencyConvert, ltvCalc, dsrCalc, acquisitionTax, stockRoi, auctionProfit, depositInterest, shortSelling } from '@/lib/calc/formulas';
 import { formatKRWExact } from '@/lib/calc/tax-tables';
 
 const 억 = 100_000_000;
@@ -658,6 +658,49 @@ describe('예적금 이자 — 세금우대 9.5% 화석 제거 · 상호금융 �
 
   it('⛔ 주입이 없으면 세율을 지어내지 않는다', () => {
     const r = depositInterest({ type: 'deposit', amount: 10_000_000, rate: 3.5, months: 12, taxType: 'general' });
+    expect(r.main.label).toBe('세율 기준 미수신');
+  });
+});
+
+describe('공매도 — 수수료는 시장값 입력 · 증권거래세는 법정 파이프 신규 연결 (K-9 ⓒ)', () => {
+  const POLICY = JSON.stringify({
+    pct: { sec_tax_kospi_trade: 0.05, sec_tax_kospi_farm: 0.15, sec_tax_kosdaq_trade: 0.20 },
+    meta: { sec_tax_kospi_trade: { source: '증권거래세법 시행령', date: '2025-12-31' } },
+  });
+  const W = (x: number) => formatKRWExact(x);
+  const run = (o: Record<string, unknown>) =>
+    shortSelling({ sellPrice: 100000, buyPrice: 80000, quantity: 100, borrowFee: 3, days: 30, fee: 0.015, market: 'kospi', __policy: POLICY, ...o } as any);
+  const row = (r: ReturnType<typeof shortSelling>, label: string) => r.details.find((d) => d.label.startsWith(label))?.value;
+
+  it('⛔ 옛 코드에는 증권거래세가 «없었다» — 매도 1,000만원에서 2만원이 통째로 빠졌다', () => {
+    const r = run({});
+    // 매도 1,000만 × 0.05% = 5,000 · × 0.15% = 15,000
+    expect(row(r, '증권거래세')).toBe(W(5_000));
+    expect(row(r, '농어촌특별세')).toBe(W(15_000));
+    // 차익 200만 − 대차료 24,658 − 수수료 2,700 − 세금 20,000
+    expect(r.main.value).toBe(W(2_000_000 - 24_658 - 2_700 - 20_000));
+    const 옛 = 2_000_000 - Math.round(10_000_000 * 0.03 * 30 / 365) - Math.round(18_000_000 * 0.00015);
+    expect(옛 - (2_000_000 - 24_658 - 2_700 - 20_000)).toBe(20_000);
+  });
+
+  it('매도 «편도» 만 과세 — 환매가를 바꿔도 거래세는 그대로', () => {
+    expect(row(run({ buyPrice: 50000 }), '증권거래세')).toBe(row(run({}), '증권거래세'));
+    expect(row(run({}), '환매 매수')).toContain('없음');
+  });
+
+  it('코스닥은 단일 0.20% — 농특세 줄이 없다', () => {
+    const r = run({ market: 'kosdaq' });
+    expect(row(r, '증권거래세')).toBe(W(20_000));
+    expect(r.details.some((d) => d.label.startsWith('농어촌특별세'))).toBe(false);
+  });
+
+  it('수수료율은 입력이다 — 기본값이 예시값임을 말한다', () => {
+    expect(row(run({ fee: 0.1 }), '위탁수수료')).toBe(W(10_000 + 8_000));
+    expect(row(run({}), '⚠️ 수수료율')).toContain('예시값');
+  });
+
+  it('⛔ 주입이 없으면 세율을 지어내지 않는다', () => {
+    const r = shortSelling({ sellPrice: 100000, buyPrice: 80000, quantity: 100, borrowFee: 3, days: 30, market: 'kospi' } as any);
     expect(r.main.label).toBe('세율 기준 미수신');
   });
 });

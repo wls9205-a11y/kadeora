@@ -1991,10 +1991,46 @@ export function dripSim(v: V): CalcResult {
 export function shortSelling(v: V): CalcResult {
   const sell = n(v.sellPrice); const buy = n(v.buyPrice); const qty = n(v.quantity);
   const borrow = n(v.borrowFee) / 100; const days = n(v.days);
+  // K-9 ⓒ — 한 계산기에 파이프 «둘» 이 걸린 첫 사례(계산기:파이프 = 1:1 가정 금지).
+  //   · 위탁수수료 — 시장값 공개형. 옛 상수 0.00015 는 증권사·매체별로 크게 갈리는 값을 한 숫자로 박은 것이라
+  //     입력으로 돌리고, 기본값이 «예시» 임을 화면에 쓴다.
+  //   · 증권거래세 — 법정 파이프(sec_tax_*). 옛 코드에는 «아예 없었다». 최대 비용항이 통째로 빠져 있던 것.
+  //     ⚠️ 매도 «편도» 만: 공매도 개시 매도에 붙고, 상환(환매) 매수에는 붙지 않는다.
+  const feePct = v.fee === undefined || v.fee === '' ? 0.015 : n(v.fee);
+  const market = (v.market === 'kosdaq' ? 'kosdaq' : 'kospi') as StockMarket;
+  const pack = parsePolicyPack(v.__policy);
+  const keys = secTaxKeys(market);
+  const tradePct = keys.trade ? pack?.pct?.[keys.trade] : undefined;
+  const farmPct = keys.farm ? pack?.pct?.[keys.farm] : 0;
+  if (typeof tradePct !== 'number' || typeof farmPct !== 'number') {
+    return {
+      main: { label: '세율 기준 미수신', value: '—', color: 'var(--text-tertiary)' },
+      details: [{ label: '사유', value: '증권거래세율 기준을 아직 받지 못했다. 잠시 후 다시 시도한다' }],
+    };
+  }
+  const sellBase = sell * qty;
   const gross = (sell - buy) * qty;
-  const fee = Math.round(sell * qty * borrow * days / 365);
-  const commission = Math.round((sell + buy) * qty * 0.00015);
-  return { main: { label: '공매도 순수익', value: fmt(gross - fee - commission) }, details: [{ label: '매도차익', value: fmt(gross) }, { label: '대차료', value: fmt(fee) }, { label: '수수료', value: fmt(commission) }] };
+  const borrowFee = Math.round(sellBase * borrow * days / 365);
+  const sellCommission = Math.round(sellBase * feePct / 100);
+  const buyCommission = Math.round(buy * qty * feePct / 100);
+  const tradeTax = Math.round(sellBase * tradePct / 100);
+  const farmTax = Math.round(sellBase * farmPct / 100);
+  const net = gross - borrowFee - sellCommission - buyCommission - tradeTax - farmTax;
+  const m = keys.trade ? (pack?.meta?.[keys.trade] ?? {}) : {};
+  return {
+    main: { label: '공매도 순수익', value: fmt(net), color: net >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' },
+    details: [
+      { label: '매도차익', value: fmt(gross) },
+      { label: '대차료', value: fmt(borrowFee) },
+      { label: `위탁수수료 (${feePct}% × 매도·환매)`, value: fmt(sellCommission + buyCommission) },
+      // ⛔ 합계 한 줄로 뭉개지 않는다 — stockRoi 와 같은 성분 표기.
+      { label: `증권거래세 (${tradePct.toFixed(2)}% · 매도분만)`, value: fmt(tradeTax) },
+      ...(keys.farm ? [{ label: `농어촌특별세 (${farmPct.toFixed(2)}%)`, value: fmt(farmTax) }] : []),
+      { label: '환매 매수', value: '증권거래세 없음 — 매도에만 붙는다' },
+      { label: '⚠️ 수수료율', value: '증권사·매체별로 다르다. 기본값 0.015% 는 예시값이다 — 본인 계좌 약정 요율을 넣는다' },
+      ...(m.source || m.date ? [{ label: '근거', value: [m.source, m.date].filter(Boolean).join(' · ') }] : []),
+    ],
+  };
 }
 export function rebalanceCalc(v: V): CalcResult {
   const total = n(v.totalAsset);
