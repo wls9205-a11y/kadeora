@@ -633,6 +633,7 @@ export const FORMULAS: Record<string, (v: V) => CalcResult> = {
   ltvCalc, housingBond, auctionProfit, shortSelling, carInsuranceEst, capitalGainsRights, capitalGainsLand, multiHouseSim, oneHouseCheck, majorShareholderCgt, registrationLicenseTax, stampTax, minimumWage, isaConversion, industrialAccident, consolationMoney, statuteOfLimitations,
   // A″ a2 감사 통과(2026-09-17) — 라이브 반영일 = 등록 커밋 배포일.
   jeonseLoan, severanceCalc, businessIncomeTax, freelancerTax, creditLoanEst,
+  foreignDividendCredit, csatGrade, investmentTypeTest,
 };
 
 // ═══ 청약 가점 계산기 (주택공급에 관한 규칙 별표1) ═══
@@ -1112,12 +1113,7 @@ export function annualLeavePay(v: V): CalcResult {
 
 import { capitalGainsLand } from './k9/ext'; export { capitalGainsLand }; // K-9 ext — 본문은 k9/ext.ts
 import { multiHouseSim } from './k9/cgt'; export { multiHouseSim }; // K-9 cgt — 본문 이관
-export function investmentTypeTest(v: V): CalcResult {
-  const score = Number(v.q1) + Number(v.q2) + Number(v.q3);
-  const type = score <= 4 ? '안전형' : score <= 6 ? '안정추구형' : score <= 8 ? '위험중립형' : '적극투자형';
-  const allocation = score <= 4 ? '예금 70% + 채권 20% + 주식 10%' : score <= 6 ? '예금 40% + 채권 30% + 주식 30%' : score <= 8 ? '예금 20% + 채권 20% + 주식 60%' : '주식 80% + 대안투자 20%';
-  return { main: { label: '투자 성향', value: type }, details: [{ label: '추천 포트폴리오', value: allocation }, { label: '점수', value: `${score}/9점` }] };
-}
+import { investmentTypeTest } from './k9/a2'; export { investmentTypeTest }; // K-9 A″ a2 — 감사 후 본문 이관
 import { dailyWorkerTax } from './k9/fin'; export { dailyWorkerTax }; FORMULAS.dailyWorkerTax = dailyWorkerTax; // K-9 fin — FORMULAS 맵에 빠져 화면에 결과가 안 뜨던 계산기
 import { freelancerTax } from './k9/a2'; export { freelancerTax }; // K-9 A″ a2 — 감사 후 본문 이관
 export function telecomCompare(v: V): CalcResult {
@@ -1146,11 +1142,7 @@ import { businessIncomeTax } from './k9/a2'; export { businessIncomeTax }; // K-
 import { pensionIncomeTax } from './k9/fin'; export { pensionIncomeTax }; FORMULAS.pensionIncomeTax = pensionIncomeTax; // K-9 fin — FORMULAS 맵에 빠져 화면에 결과가 안 뜨던 계산기
 import { dividendIncomeTax } from './k9/fin'; export { dividendIncomeTax }; FORMULAS.dividendIncomeTax = dividendIncomeTax; // K-9 fin — FORMULAS 맵에 빠져 화면에 결과가 안 뜨던 계산기
 import { majorShareholderCgt } from './k9/cgt'; export { majorShareholderCgt }; // K-9 cgt — 본문 이관
-export function foreignDividendCredit(v: V): CalcResult {
-  const foreign = n(v.foreignTax); const domestic = n(v.domesticTax);
-  const credit = Math.min(foreign, domestic);
-  return { main: { label: '외국납부세액공제', value: fmt(credit) }, details: [{ label: '외국 원천세', value: fmt(foreign) }, { label: '국내 산출세액', value: fmt(domestic) }, { label: '한도', value: '국내 산출세액 이내' }] };
-}
+import { foreignDividendCredit } from './k9/a2'; export { foreignDividendCredit }; // K-9 A″ a2 — 감사 후 본문 이관
 import { fisTaxSim } from './k9/fin'; export { fisTaxSim }; FORMULAS.fisTaxSim = fisTaxSim; // K-9 fin — FORMULAS 맵에 빠져 화면에 결과가 안 뜨던 계산기
 import { familyBusiness } from './k9/inh'; export { familyBusiness }; // K-9 inh — 본문은 k9/inh.ts
 import { generationSkip } from './k9/inh'; export { generationSkip }; // K-9 inh — 본문은 k9/inh.ts
@@ -1531,19 +1523,7 @@ export function propertyDivision(v: V): CalcResult {
 }
 import { statuteOfLimitations } from './k9/misc'; export { statuteOfLimitations };
 import { industrialAccident } from './k9/ext'; export { industrialAccident }; // K-9 ext — 본문은 k9/ext.ts
-export function csatGrade(v: V): CalcResult {
-  const score = n(v.score);
-  // 영어는 절대등급
-  if (v.subject === 'english') {
-    const grades = [90, 80, 70, 60, 50, 40, 30, 20];
-    let grade = 9;
-    for (let i = 0; i < grades.length; i++) { if (score >= grades[i]) { grade = i + 1; break; } }
-    return { main: { label: '영어 등급', value: `${grade}등급` }, details: [{ label: '원점수', value: `${score}점` }] };
-  }
-  // 상대평가 근사
-  const grade = score >= 92 ? 1 : score >= 85 ? 2 : score >= 77 ? 3 : score >= 67 ? 4 : score >= 55 ? 5 : score >= 43 ? 6 : score >= 30 ? 7 : score >= 18 ? 8 : 9;
-  return { main: { label: '예상 등급', value: `${grade}등급` }, details: [{ label: '원점수', value: `${score}점` }, { label: '참고', value: '실제 등급컷은 시험별 상이' }] };
-}
+import { csatGrade } from './k9/a2'; export { csatGrade }; // K-9 A″ a2 — 감사 후 본문 이관
 export function pointConvert(v: V): CalcResult {
   const points = n(v.points); const ratio = n(v.ratio);
   return { main: { label: '현금 가치', value: fmt(Math.round(points * ratio)) }, details: [{ label: '포인트', value: `${points.toLocaleString()}P` }, { label: '환산 비율', value: `1P = ${ratio}원` }] };

@@ -314,3 +314,108 @@ export function creditLoanEst(v: V): CalcResult {
     ],
   };
 }
+
+// ═════════════════════════════════════════════════════════════════════════════
+// 6. foreign-dividend-credit — 소득세법 §57①② · §129④
+// ═════════════════════════════════════════════════════════════════════════════
+
+export interface ForeignCreditParts {
+  ratio: number;
+  limit: number;
+  credit: number;
+  carry: number;
+}
+
+/**
+ * ⛔ 옛 코드: min(외국 원천세, 국내 산출세액) — 한도를 «산출세액 전체» 로 봤다.
+ *    법(§57①): 공제한도 = 종합소득산출세액 × 국외원천소득 ÷ 종합소득금액. 초과분은 다음 과세기간부터 10년 이월(§57②).
+ *    국외배당 500만·외국세 75만·종합소득 3,000만·산출세액 300만: 옛 750,000원 → 법 500,000원(+ 이월 250,000원).
+ *    또 화면이 「환급 가능액」 이라 했지만 이 공제는 산출세액에서 빼는 것이고, 한도 초과분은 돌려받는 돈이 아니다.
+ */
+export function foreignCreditParts(foreignTax: number, domesticTax: number, foreignIncome: number, totalIncome: number): ForeignCreditParts {
+  const ft = Math.max(0, foreignTax);
+  const dt = Math.max(0, domesticTax);
+  const fi = Math.max(0, foreignIncome);
+  const ti = Math.max(0, totalIncome);
+  // 국외원천소득이 종합소득금액보다 클 수 없다 — 입력 오류는 비율 1 로 막는다.
+  const ratio = ti > 0 ? Math.min(1, fi / ti) : 0;
+  const limit = r(dt * ratio);
+  const credit = Math.min(ft, limit);
+  return { ratio, limit, credit, carry: ft - credit };
+}
+
+export function foreignDividendCredit(v: V): CalcResult {
+  const p = foreignCreditParts(n(v.foreignTax), n(v.domesticTax), n(v.foreignIncome), n(v.totalIncome));
+  const details: Row[] = [
+    { label: '외국 원천징수세액', value: fmt(Math.max(0, n(v.foreignTax))) },
+    { label: '종합소득산출세액 (입력)', value: fmt(Math.max(0, n(v.domesticTax))) },
+    { label: `공제한도 (산출세액 × 국외원천소득 ÷ 종합소득금액 = ${(p.ratio * 100).toFixed(2)}%, §57①)`, value: fmt(p.limit) },
+  ];
+  if (p.carry > 0) details.push({ label: `한도 초과분 — 다음 과세기간부터 ${A2_LAW.foreignTaxCarryYears}년 이월공제(§57②)`, value: fmt(p.carry) });
+  details.push(
+    { label: '⚠️ 환급 아님', value: '공제는 산출세액에서 빼는 것이다. 한도를 넘은 외국세는 이번에 돌려받지 않는다(이월 후에도 못 쓰면 필요경비 산입 — §57② 단서)' },
+    { label: '⚠️ 분리과세(금융소득 종합과세 기준 이하)', value: '종합과세되지 않는 국외배당은 국내 원천징수 단계에서 외국세를 빼고, 원천징수세액을 넘는 외국세는 «없는 것으로» 본다(§129④) — 이 계산은 종합과세 신고용이다' },
+    { label: '⚠️ 미반영', value: '국외원천소득대응비용 차감(시행령 §117②)·조세조약 제한세율 초과분 제외(시행령 §117①)·국가별 한도 구분은 계산하지 않았다' },
+    { label: '근거', value: '소득세법 제57조 · 제129조제4항 · 시행령 제117조 (eflaw 현행 2026-07-01 판 대조 2026-09-17)' },
+  );
+  return { main: { label: '외국납부세액공제', value: fmt(p.credit) }, details };
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// 7. csat-grade — 영어 절대평가 구간(공개형) · 국어·수학 «카더라 가정» 구간
+// ═════════════════════════════════════════════════════════════════════════════
+
+/** 영어 절대평가: 원점수 90점 이상 1등급, 10점 간격(한국교육과정평가원 수능 시행 기본계획 — 원문 미대조, 「그렇게 말합니다」). */
+export const CSAT_ENGLISH_CUTS = [90, 80, 70, 60, 50, 40, 30, 20] as const;
+/** 국어·수학 — 실제 등급은 매 시험 표준점수 분포로 정해진다. 아래 구간은 특정 시험의 등급컷이 아니라 카더라 가정이다. */
+export const CSAT_ASSUMED_CUTS = [92, 85, 77, 67, 55, 43, 30, 18] as const;
+
+function gradeOf(score: number, cuts: readonly number[]): number {
+  for (let i = 0; i < cuts.length; i++) if (score >= cuts[i]) return i + 1;
+  return cuts.length + 1;
+}
+
+export function csatGrade(v: V): CalcResult {
+  const raw = n(v.score);
+  const score = Math.min(100, Math.max(0, raw));
+  if (v.subject === 'english') {
+    const grade = gradeOf(score, CSAT_ENGLISH_CUTS);
+    return {
+      main: { label: '영어 등급 (절대평가)', value: `${grade}등급` },
+      details: [
+        { label: '원점수', value: `${score}점` },
+        { label: '구간', value: '90점 이상 1등급부터 10점 간격 — 등급 비율과 무관한 절대평가' },
+        { label: '⚠️ 근거 단계', value: '한국교육과정평가원 수능 시행 기본계획의 영어 절대평가 구간을 옮긴 것이다(원문 대조 전)' },
+      ],
+    };
+  }
+  const grade = gradeOf(score, CSAT_ASSUMED_CUTS);
+  return {
+    main: { label: '가정 구간 등급 (참고)', value: `${grade}등급` },
+    details: [
+      { label: '원점수', value: `${score}점` },
+      { label: '⚠️ 가정 구간', value: `1등급 ${CSAT_ASSUMED_CUTS[0]}점 · 2등급 ${CSAT_ASSUMED_CUTS[1]}점 · 3등급 ${CSAT_ASSUMED_CUTS[2]}점 … 은 카더라 가정이다. 특정 시험의 등급컷이 아니다` },
+      { label: '⚠️ 실제 등급', value: '국어·수학은 상대평가 — 매 시험 표준점수 분포와 선택과목으로 정해진다. 같은 원점수라도 시험마다 1~2등급씩 달라질 수 있다. 해당 시험의 평가원 채점 결과·입시기관 등급컷을 확인한다' },
+    ],
+  };
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// 8. investment-type-test — 점수 합산 분류(순수) · 예시 배분은 카더라 가정
+// ═════════════════════════════════════════════════════════════════════════════
+
+export function investmentTypeTest(v: V): CalcResult {
+  const clamp = (x: unknown) => Math.min(3, Math.max(1, Math.round(n(x) || 1)));
+  const score = clamp(v.q1) + clamp(v.q2) + clamp(v.q3);
+  const type = score <= 4 ? '안전형' : score <= 6 ? '안정추구형' : score <= 8 ? '위험중립형' : '적극투자형';
+  const allocation = score <= 4 ? '예금 70% + 채권 20% + 주식 10%' : score <= 6 ? '예금 40% + 채권 30% + 주식 30%' : score <= 8 ? '예금 20% + 채권 20% + 주식 60%' : '주식 80% + 대안투자 20%';
+  return {
+    main: { label: '투자 성향', value: type },
+    details: [
+      { label: '점수', value: `${score}/9점 (3문항 × 1~3점)` },
+      { label: '구간', value: '3~4점 안전형 · 5~6점 안정추구형 · 7~8점 위험중립형 · 9점 적극투자형' },
+      { label: '예시 자산배분', value: allocation },
+      { label: '⚠️ 성격', value: '구간과 예시 배분은 카더라 가정이다. 금융회사가 투자 권유 전에 하는 투자성향 진단(적합성 확인)을 대신하지 않는다' },
+    ],
+  };
+}

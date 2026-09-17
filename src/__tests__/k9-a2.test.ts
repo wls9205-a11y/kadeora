@@ -147,3 +147,53 @@ describe('credit-loan-est — 신용대출 한도 차주 연소득 이내(행정
     expect(JSON.stringify(c.faqs) + c.seoContent).not.toMatch(/등급별 배수|가정 배수/);
   });
 });
+
+describe('foreign-dividend-credit — 소득세법 §57①② · §129④', () => {
+  it('실해: 국외 500만·외국세 75만·종합소득 3천만·산출세액 3,015,000 — 옛 750,000원 → 502,500원 + 이월 247,500원', () => {
+    const res = run('foreign-dividend-credit');
+    expect(res.main.value).toBe(W(502_500));
+    expect(res.main.value).not.toBe(W(750_000)); // 옛 min(외국세, 산출세액)
+    expect(val(res, '한도 초과분')).toBe(W(247_500));
+    expect(val(res, '공제한도')).toBe(W(502_500));
+  });
+  it('경계: 국외소득 = 종합소득 전부면 옛 산식과 같다 / 외국세 < 한도면 외국세 전액 · 이월 행 없음', () => {
+    expect(run('foreign-dividend-credit', { foreignIncome: 30_000_000 }).main.value).toBe(W(750_000));
+    const low = run('foreign-dividend-credit', { foreignTax: 100_000 });
+    expect(low.main.value).toBe(W(100_000));
+    expect(val(low, '한도 초과분')).toBeUndefined();
+  });
+  it('입력 오류 방어: 종합소득 0 → 한도 0 / 국외소득 > 종합소득 → 비율 1', () => {
+    expect(run('foreign-dividend-credit', { totalIncome: 0 }).main.value).toBe(W(0));
+    expect(run('foreign-dividend-credit', { foreignIncome: 99_000_000 }).main.value).toBe(W(750_000));
+  });
+  it('G7: 결과 라벨이 「환급 가능액」 이 아니다 · 본문에 한도식', () => {
+    const c = CALC_REGISTRY.find((x) => x.slug === 'foreign-dividend-credit')!;
+    expect(c.resultLabel).toBe('외국납부세액공제');
+    expect(c.seoContent).toContain('국외원천소득 ÷ 종합소득금액');
+  });
+});
+
+describe('csat-grade — 영어 절대평가 · 국어·수학 가정 구간 공개', () => {
+  it('영어 경계: 90→1 · 89→2 · 20→8 · 19→9', () => {
+    const g = (score: number) => run('csat-grade', { subject: 'english', score }).main.value;
+    expect([g(90), g(89), g(20), g(19), g(100), g(0)]).toEqual(['1등급', '2등급', '8등급', '9등급', '1등급', '9등급']);
+  });
+  it('국어 기본 85점: 옛값과 같은 2등급이지만 «가정 구간» 라벨로 공개 · 범위 밖 입력은 0~100 으로', () => {
+    const res = run('csat-grade');
+    expect(res.main.value).toBe('2등급');
+    expect(res.main.label).toContain('가정');
+    expect(run('csat-grade', { score: 150 }).main.value).toBe('1등급');
+    expect(run('csat-grade', { score: -3 }).main.value).toBe('9등급');
+  });
+});
+
+describe('investment-type-test — 점수 합산(순수)', () => {
+  it('경계: 3·4점 안전형 / 5·6 안정추구형 / 7·8 위험중립형 / 9 적극투자형', () => {
+    const t = (a: string, b: string, c: string) => run('investment-type-test', { q1: a, q2: b, q3: c }).main.value;
+    expect([t('1', '1', '1'), t('2', '1', '1'), t('2', '2', '1'), t('2', '2', '2'), t('3', '2', '2'), t('3', '3', '2'), t('3', '3', '3')])
+      .toEqual(['안전형', '안전형', '안정추구형', '안정추구형', '위험중립형', '위험중립형', '적극투자형']);
+  });
+  it('범위 밖 값은 1~3 으로 묶는다(옛 코드: q=9 면 27점 적극투자형)', () => {
+    expect(val(run('investment-type-test', { q1: '9', q2: '9', q3: '9' }), '점수')).toContain('9/9점');
+  });
+});

@@ -15,10 +15,8 @@ import { CALC_REGISTRY } from '@/lib/calc/registry';
 
 /** A″ 감사 대기 — 무감사 등록 금지(세금·금액 계산기에서 틀린 숫자는 무결과보다 해롭다). 감사 통과 시 맵 등록과 «같은 커밋» 에서 여기서 뺀다. */
 export const PENDING: readonly string[] = [
-  "investment-type-test",
   "telecom-compare",
   "graduation-year",
-  "foreign-dividend-credit",
   "simple-bookkeeping",
   "far-bcr",
   "drip-sim",
@@ -29,7 +27,6 @@ export const PENDING: readonly string[] = [
   "fuel-saving",
   "inflation-calc",
   "property-division",
-  "csat-grade",
   "point-convert"
 ];
 
