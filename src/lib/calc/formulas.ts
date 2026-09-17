@@ -228,22 +228,7 @@ export function breakeven(v: V): CalcResult {
   };
 }
 
-export function dividendCalc(v: V): CalcResult {
-  const inv = n(v.investment);
-  const y = n(v.yieldRate) / 100;
-  const market = v.market as string;
-  const taxRate = market === 'kr' ? 0.154 : 0.15;
-  const gross = inv * y;
-  const net = gross * (1 - taxRate);
-  return {
-    main: { label: '세후 연간 배당금', value: fmt(Math.round(net)) },
-    details: [
-      { label: '세전 배당금', value: fmt(Math.round(gross)) },
-      { label: '배당소득세', value: fmt(Math.round(gross * taxRate)) },
-      { label: '월 배당금 (세후)', value: fmt(Math.round(net / 12)) },
-    ],
-  };
-}
+import { dividendCalc } from './k9/fin'; export { dividendCalc };
 
 export function dcaSimulator(v: V): CalcResult {
   const m = n(v.monthly);
@@ -400,17 +385,7 @@ export function hourlyAnnual(v: V): CalcResult {
   }
 }
 
-export function withholding33(v: V): CalcResult {
-  const amount = n(v.amount);
-  if (v.direction === 'afterTax') {
-    const tax = Math.round(amount * 0.033);
-    return { main: { label: '세후 수령액', value: fmt(amount - tax) }, details: [{ label: '원천징수세액 (3.3%)', value: fmt(tax) }] };
-  } else {
-    const gross = Math.round(amount / 0.967);
-    const tax = gross - amount;
-    return { main: { label: '세전 금액', value: fmt(gross) }, details: [{ label: '원천징수세액', value: fmt(Math.round(tax)) }] };
-  }
-}
+import { withholding33 } from './k9/fin'; export { withholding33 };
 
 // ═══ 대출/예적금 ═══
 
@@ -606,27 +581,7 @@ export function giftTax(v: V): CalcResult {
 
 import { overseasCgt } from './k9/cgt'; export { overseasCgt }; // K-9 cgt — 본문 이관
 
-export function financialIncomeTax(v: V): CalcResult {
-  const interest = n(v.interest);
-  const dividend = n(v.dividend);
-  const other = n(v.otherIncome);
-  const total = interest + dividend;
-  if (total <= 20000000) {
-    return { main: { label: '추가 납부세액', value: '0원 (2천만 이하 분리과세)' }, details: [{ label: '금융소득 합계', value: fmt(total) }, { label: '원천징수 (15.4%)', value: fmt(Math.round(total * 0.154)) }] };
-  }
-  const excess = total - 20000000;
-  const comprehensiveTax = calcProgressiveTax(other + excess, INCOME_TAX_BRACKETS);
-  const otherTax = calcProgressiveTax(other, INCOME_TAX_BRACKETS);
-  const separateTax = 20000000 * 0.14;
-  const additionalTax = Math.max(0, Math.round(comprehensiveTax - otherTax + separateTax - total * 0.14));
-  return {
-    main: { label: '추가 납부세액 (추정)', value: fmt(additionalTax) },
-    details: [
-      { label: '금융소득 합계', value: fmt(total) },
-      { label: '2천만 초과분', value: fmt(excess) },
-    ],
-  };
-}
+import { financialIncomeTax } from './k9/fin'; export { financialIncomeTax };
 
 // ═══ 생활 ═══
 
@@ -1118,14 +1073,7 @@ export function earnedIncomeTax(v: V): CalcResult {
   const local = Math.round(tax * 0.1);
   return { main: { label: '월 원천징수세액', value: fmt(tax + local) }, details: [{ label: '소득세', value: fmt(tax) }, { label: '지방소득세', value: fmt(local) }] };
 }
-export function retirementIncomeTax(v: V): CalcResult {
-  const pay = n(v.retirementPay); const years = n(v.years);
-  const deduction = Math.min(pay, years <= 5 ? years * 1000000 * 5 : 25000000 + (years - 5) * 2000000 * 5);
-  const taxBase = Math.max(0, (pay - deduction) * 0.6 / years);
-  const annualTax = calcProgressiveTax(taxBase * 12, INCOME_TAX_BRACKETS);
-  const totalTax = Math.round(annualTax / 12 * years);
-  return { main: { label: '퇴직소득세', value: fmt(totalTax) }, details: [{ label: '퇴직금', value: fmt(pay) }, { label: '근속연수공제', value: fmt(Math.round(deduction)) }, { label: '실효세율', value: pct(pay > 0 ? totalTax / pay : 0) }] };
-}
+import { retirementIncomeTax } from './k9/fin'; export { retirementIncomeTax };
 export function otherIncomeTax(v: V): CalcResult {
   const gross = n(v.grossIncome);
   const rate = v.expenseRate === 'actual' ? 0 : Number(v.expenseRate) / 100;
@@ -1198,14 +1146,7 @@ export function simplifiedVat(v: V): CalcResult {
   return { main: { label: '납부 부가세', value: fmt(vat) }, details: [{ label: '매출세액', value: fmt(Math.round(rev * rate * 0.1)) }, { label: '매입세액 공제', value: fmt(Math.round(purchase * 0.5)) }] };
 }
 import { corporateTax } from './k9/corp'; export { corporateTax }; // K-9 inh — 본문은 k9/corp.ts
-export function penaltyTax(v: V): CalcResult {
-  const type = v.type as string; const amount = n(v.taxAmount);
-  let penalty = 0;
-  if (type === 'noFiling') penalty = Math.round(amount * 0.2);
-  else if (type === 'underReport') penalty = Math.round(amount * 0.1);
-  else penalty = Math.round(amount * n(v.days) * 0.00022); // 1일 0.022%
-  return { main: { label: '가산세', value: fmt(penalty) }, details: [{ label: '원 세액', value: fmt(amount) }] };
-}
+import { penaltyTax } from './k9/fin'; export { penaltyTax };
 export function expenseRateLookup(v: V): CalcResult {
   const rev = n(v.revenue); const rate = n(v.rate) / 100;
   const income = Math.round(rev * (1 - rate));
@@ -1253,42 +1194,10 @@ export function housingFundDeduction(v: V): CalcResult {
   return { main: { label: '주택자금 소득공제', value: fmt(sub + mortgage) }, details: [{ label: '주택청약', value: fmt(sub) }, { label: '주담대 이자', value: fmt(mortgage) }] };
 }
 import { comprehensivePropertyTax } from './k9/cpt'; export { comprehensivePropertyTax }; // K-9 inh — 본문은 k9/cpt.ts
-export function rentalIncomeTax(v: V): CalcResult {
-  const rent = n(v.annualRent); const other = n(v.otherIncome);
-  const expRate = v.registered === 'yes' ? 0.60 : 0.50;
-  const basicDed = v.registered === 'yes' ? 4000000 : 2000000;
-  const separateTaxBase = Math.max(0, rent - rent * expRate - basicDed);
-  const separateTax = Math.round(separateTaxBase * 0.14);
-  const compTaxBase = rent * (1 - expRate);
-  const compTax = Math.round(calcProgressiveTax(other + compTaxBase, INCOME_TAX_BRACKETS) - calcProgressiveTax(other, INCOME_TAX_BRACKETS));
-  const better = separateTax <= compTax ? '분리과세 유리' : '종합과세 유리';
-  return { main: { label: better, value: fmt(Math.min(separateTax, compTax)) }, details: [{ label: '분리과세 (14%)', value: fmt(separateTax) }, { label: '종합과세', value: fmt(compTax) }] };
-}
-export function cryptoTax(v: V): CalcResult {
-  const profit = n(v.profit);
-  const taxBase = Math.max(0, profit - 2500000);
-  const tax = Math.round(taxBase * 0.22);
-  return { main: { label: '가상자산 소득세', value: fmt(tax) }, details: [{ label: '양도차익', value: fmt(profit) }, { label: '기본공제', value: fmt(2500000) }, { label: '세율', value: '22%' }, { label: '참고', value: '2027년 1월 시행 예정' }] };
-}
-export function etfTax(v: V): CalcResult {
-  const profit = n(v.profit);
-  if (v.type === 'domestic') {
-    const tax = Math.round(profit * 0.154);
-    return { main: { label: '배당소득세 (15.4%)', value: fmt(tax) }, details: [{ label: '세후 수익', value: fmt(profit - tax) }] };
-  }
-  const base = Math.max(0, profit - 2500000);
-  const tax = Math.round(base * 0.22);
-  return { main: { label: '양도소득세 (22%)', value: fmt(tax) }, details: [{ label: '기본공제 250만원 적용', value: fmt(base) }] };
-}
-export function isaTaxFree(v: V): CalcResult {
-  const profit = n(v.profit);
-  const limit = v.type === 'general' ? 2000000 : 4000000;
-  const taxFree = Math.min(profit, limit);
-  const taxable = Math.max(0, profit - limit);
-  const tax = Math.round(taxable * 0.099); // 9.9% 분리과세
-  const saved = Math.round(taxFree * 0.154); // 일반 과세 대비 절세
-  return { main: { label: '절세 금액', value: fmt(saved) }, details: [{ label: '비과세 한도', value: fmt(limit) }, { label: '초과분 세금 (9.9%)', value: fmt(tax) }] };
-}
+import { rentalIncomeTax } from './k9/fin'; export { rentalIncomeTax };
+import { cryptoTax } from './k9/fin'; export { cryptoTax };
+import { etfTax } from './k9/fin'; export { etfTax };
+import { isaTaxFree } from './k9/fin'; export { isaTaxFree };
 export function childSupport(v: V): CalcResult {
   const fIncome = n(v.fatherIncome); const mIncome = n(v.motherIncome);
   const total = fIncome + mIncome;
@@ -1383,18 +1292,7 @@ export function housingPension(v: V): CalcResult {
     ],
   };
 }
-export function retirementPensionSim(v: V): CalcResult {
-  const total = n(v.totalAmount); const years = n(v.years); const pensionYears = n(v.pensionYears);
-  // 일시금 세금
-  const deduction = Math.min(total, years * 5000000);
-  const lumpTax = Math.round(calcProgressiveTax(Math.max(0, total - deduction), INCOME_TAX_BRACKETS) * 0.6);
-  // 연금 세금 (70% 감면)
-  const monthlyPension = total / (pensionYears * 12);
-  const pensionTaxRate = pensionYears >= 10 ? 0.033 : 0.044;
-  const annualPensionTax = Math.round(monthlyPension * 12 * pensionTaxRate);
-  const totalPensionTax = annualPensionTax * pensionYears;
-  return { main: { label: '연금 수령이 유리', value: fmt(lumpTax - totalPensionTax) + ' 절세' }, details: [{ label: '일시금 세금', value: fmt(lumpTax) }, { label: '연금 총 세금', value: fmt(totalPensionTax) }, { label: '월 연금액', value: fmt(Math.round(monthlyPension)) }] };
-}
+import { retirementPensionSim } from './k9/fin'; export { retirementPensionSim };
 export function alcoholCalc(v: V): CalcResult {
   const gender = v.gender as string; const w = n(v.weight); const drinks = n(v.drinks);
   const drinkType = v.drinkType as string; const hours = n(v.hours);
@@ -1467,13 +1365,7 @@ export function investmentTypeTest(v: V): CalcResult {
   const allocation = score <= 4 ? '예금 70% + 채권 20% + 주식 10%' : score <= 6 ? '예금 40% + 채권 30% + 주식 30%' : score <= 8 ? '예금 20% + 채권 20% + 주식 60%' : '주식 80% + 대안투자 20%';
   return { main: { label: '투자 성향', value: type }, details: [{ label: '추천 포트폴리오', value: allocation }, { label: '점수', value: `${score}/9점` }] };
 }
-export function dailyWorkerTax(v: V): CalcResult {
-  const daily = n(v.dailyWage);
-  const taxable = Math.max(0, daily - 150000);
-  const tax = Math.round(taxable * 0.06 * 0.45); // 6% × (1-55% 세액공제)
-  const local = Math.round(tax * 0.1);
-  return { main: { label: '원천징수세액', value: fmt(tax + local) }, details: [{ label: '비과세 (15만원)', value: fmt(150000) }, { label: '과세 대상', value: fmt(taxable) }, { label: '실수령', value: fmt(daily - tax - local) }] };
-}
+import { dailyWorkerTax } from './k9/fin'; export { dailyWorkerTax }; FORMULAS.dailyWorkerTax = dailyWorkerTax; // K-9 fin — FORMULAS 맵에 빠져 화면에 결과가 안 뜨던 계산기
 export function freelancerTax(v: V): CalcResult {
   const rev = n(v.annualRevenue); const rate = n(v.expenseRate) / 100;
   const income = rev * (1 - rate);
@@ -1504,12 +1396,7 @@ import { burdenGift } from './k9/inh'; export { burdenGift }; // K-9 inh — 본
 
 import { capitalGainsRights } from './k9/cgt'; export { capitalGainsRights }; // K-9 cgt — 본문 이관
 import { registrationLicenseTax } from './k9/local'; export { registrationLicenseTax };
-export function deemedRent(v: V): CalcResult {
-  const deposit = n(v.deposit); const threshold = n(v.threshold);
-  const excess = Math.max(0, deposit - threshold);
-  const deemed = Math.round(excess * 0.021); // 정기예금 이자율 (2.1%)
-  return { main: { label: '간주임대료', value: fmt(deemed) }, details: [{ label: '3억 초과 보증금', value: fmt(excess) }, { label: '적용이자율', value: '2.1%' }] };
-}
+import { deemedRent } from './k9/fin'; export { deemedRent }; FORMULAS.deemedRent = deemedRent; // K-9 fin — FORMULAS 맵에 빠져 화면에 결과가 안 뜨던 계산기
 import { oneHouseCheck } from './k9/cgt'; export { oneHouseCheck }; // K-9 cgt — 본문 이관
 export function businessIncomeTax(v: V): CalcResult {
   const income = n(v.revenue) - n(v.expenses);
@@ -1517,48 +1404,18 @@ export function businessIncomeTax(v: V): CalcResult {
   const tax = Math.round(calcProgressiveTax(taxBase, INCOME_TAX_BRACKETS));
   return { main: { label: '사업소득세', value: fmt(Math.round(tax * 1.1)) }, details: [{ label: '사업소득', value: fmt(income) }, { label: '과세표준', value: fmt(taxBase) }] };
 }
-export function pensionIncomeTax(v: V): CalcResult {
-  const annual = n(v.annualPension); const age = n(v.age);
-  if (v.type === 'private') {
-    const rate = age >= 80 ? 0.033 : age >= 70 ? 0.044 : 0.055;
-    const tax = Math.round(annual * rate);
-    return { main: { label: '연금소득세', value: fmt(tax) }, details: [{ label: '적용세율', value: pct(rate) }] };
-  }
-  const deduction = Math.min(annual * 0.4, 9000000);
-  const taxBase = Math.max(0, annual - deduction - 5000000);
-  const tax = Math.round(calcProgressiveTax(taxBase, INCOME_TAX_BRACKETS));
-  return { main: { label: '연금소득세', value: fmt(tax) }, details: [{ label: '연금소득공제', value: fmt(Math.round(deduction)) }] };
-}
-export function dividendIncomeTax(v: V): CalcResult {
-  const div = n(v.dividend);
-  const rate = v.market === 'kr' ? 0.154 : 0.15;
-  const tax = Math.round(div * rate);
-  return { main: { label: '배당소득세', value: fmt(tax) }, details: [{ label: '세후 수령', value: fmt(div - tax) }, { label: '세율', value: pct(rate) }] };
-}
+import { pensionIncomeTax } from './k9/fin'; export { pensionIncomeTax }; FORMULAS.pensionIncomeTax = pensionIncomeTax; // K-9 fin — FORMULAS 맵에 빠져 화면에 결과가 안 뜨던 계산기
+import { dividendIncomeTax } from './k9/fin'; export { dividendIncomeTax }; FORMULAS.dividendIncomeTax = dividendIncomeTax; // K-9 fin — FORMULAS 맵에 빠져 화면에 결과가 안 뜨던 계산기
 import { majorShareholderCgt } from './k9/cgt'; export { majorShareholderCgt }; // K-9 cgt — 본문 이관
 export function foreignDividendCredit(v: V): CalcResult {
   const foreign = n(v.foreignTax); const domestic = n(v.domesticTax);
   const credit = Math.min(foreign, domestic);
   return { main: { label: '외국납부세액공제', value: fmt(credit) }, details: [{ label: '외국 원천세', value: fmt(foreign) }, { label: '국내 산출세액', value: fmt(domestic) }, { label: '한도', value: '국내 산출세액 이내' }] };
 }
-export function fisTaxSim(v: V): CalcResult {
-  const profit = n(v.profit);
-  const base = Math.max(0, profit - 50000000);
-  const tax300 = Math.min(base, 300000000) * 0.22;
-  const taxOver = Math.max(0, base - 300000000) * 0.275;
-  const total = Math.round((tax300 + taxOver) * 1.1);
-  return { main: { label: '금투세 (시뮬)', value: profit <= 50000000 ? '0원 (비과세)' : fmt(total) }, details: [{ label: '5천만원 공제 후', value: fmt(base) }, { label: '참고', value: '시행 유예 중' }] };
-}
+import { fisTaxSim } from './k9/fin'; export { fisTaxSim }; FORMULAS.fisTaxSim = fisTaxSim; // K-9 fin — FORMULAS 맵에 빠져 화면에 결과가 안 뜨던 계산기
 import { familyBusiness } from './k9/inh'; export { familyBusiness }; // K-9 inh — 본문은 k9/inh.ts
 import { generationSkip } from './k9/inh'; export { generationSkip }; // K-9 inh — 본문은 k9/inh.ts
-export function withholdingCalc(v: V): CalcResult {
-  const amount = n(v.amount);
-  const rates: Record<string, { rate: number; label: string }> = { salary: { rate: 0, label: '간이세액표 적용' }, business: { rate: 0.033, label: '3.3%' }, other: { rate: 0.088, label: '8.8%' }, interest: { rate: 0.154, label: '15.4%' } };
-  const r = rates[v.type as string] || rates.business;
-  if (v.type === 'salary') return { main: { label: '원천징수세액', value: '간이세액표 참조' }, details: [{ label: '계산기 이용', value: '근로소득세 계산기 참조' }] };
-  const tax = Math.round(amount * r.rate);
-  return { main: { label: '원천징수세액', value: fmt(tax) }, details: [{ label: '세율', value: r.label }, { label: '세후 수령', value: fmt(amount - tax) }] };
-}
+import { withholdingCalc } from './k9/fin'; export { withholdingCalc }; FORMULAS.withholdingCalc = withholdingCalc; // K-9 fin — FORMULAS 맵에 빠져 화면에 결과가 안 뜨던 계산기
 import { stampTax } from './k9/local'; export { stampTax };
 export function simpleBookkeeping(v: V): CalcResult {
   const income = n(v.revenue) - n(v.expenses);
