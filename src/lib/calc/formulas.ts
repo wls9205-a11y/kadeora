@@ -631,6 +631,8 @@ export const FORMULAS: Record<string, (v: V) => CalcResult> = {
   // [S] 해제(2026-09-17 세션 A 판정) — registry 에 있는데 맵에 없어 라이브 무결과였던 38종 중 «감사 통과» 17종.
   //   라이브 반영일 = 오늘(커밋일 아님). 나머지 21종은 A″ 감사 통과 시 개별 등록(src/__tests__/calc-registry-coverage.test.ts 의 PENDING).
   ltvCalc, housingBond, auctionProfit, shortSelling, carInsuranceEst, capitalGainsRights, capitalGainsLand, multiHouseSim, oneHouseCheck, majorShareholderCgt, registrationLicenseTax, stampTax, minimumWage, isaConversion, industrialAccident, consolationMoney, statuteOfLimitations,
+  // A″ a2 감사 통과(2026-09-17) — 라이브 반영일 = 등록 커밋 배포일.
+  jeonseLoan, severanceCalc,
 };
 
 // ═══ 청약 가점 계산기 (주택공급에 관한 규칙 별표1) ═══
@@ -1479,15 +1481,9 @@ export function rebalanceCalc(v: V): CalcResult {
   const bondDiff = bondTarget - bondCurrent;
   return { main: { label: '리밸런싱 필요', value: stockDiff > 0 ? `주식 ${fmt(Math.round(stockDiff))} 매수` : `주식 ${fmt(Math.round(Math.abs(stockDiff)))} 매도` }, details: [{ label: '주식 조정', value: `${stockDiff > 0 ? '+' : ''}${fmt(Math.round(stockDiff))}` }, { label: '채권 조정', value: `${bondDiff > 0 ? '+' : ''}${fmt(Math.round(bondDiff))}` }] };
 }
-export function severanceCalc(v: V): CalcResult {
-  return { main: { label: '해고예고수당', value: fmt(n(v.monthlySalary)) }, details: [{ label: '30일분 통상임금', value: fmt(n(v.monthlySalary)) }] };
-}
+import { severanceCalc } from './k9/a2'; export { severanceCalc }; // K-9 A″ a2 — 감사 후 본문 이관
 import { minimumWage } from './k9/ext'; export { minimumWage }; // K-9 ext — 본문은 k9/ext.ts
-export function jeonseLoan(v: V): CalcResult {
-  const amount = n(v.loanAmount); const rate = n(v.rate) / 100;
-  const monthlyInterest = Math.round(amount * rate / 12);
-  return { main: { label: '월 이자', value: fmt(monthlyInterest) }, details: [{ label: '연 이자', value: fmt(Math.round(amount * rate)) }] };
-}
+import { jeonseLoan } from './k9/a2'; export { jeonseLoan }; // K-9 A″ a2 — 감사 후 본문 이관
 export function refinanceCompare(v: V): CalcResult {
   const bal = n(v.balance); const curr = n(v.currentRate) / 100; const newR = n(v.newRate) / 100;
   const fee = n(v.refinanceFee);

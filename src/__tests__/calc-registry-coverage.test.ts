@@ -25,8 +25,6 @@ export const PENDING: readonly string[] = [
   "far-bcr",
   "drip-sim",
   "rebalance-calc",
-  "severance-calc",
-  "jeonse-loan",
   "refinance-compare",
   "credit-loan-est",
   "retirement-expense",

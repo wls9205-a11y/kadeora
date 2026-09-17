@@ -150,7 +150,8 @@
 | registration-license-tax · stamp-tax · minimum-wage · isa-conversion · industrial-accident · consolation-money · statute-of-limitations | 9/17 | **2026-09-17** |
 | pension-income-tax · daily-worker-tax · deemed-rent · dividend-income-tax · fis-tax-sim · withholding-calc | 9/17 (fin) | **2026-09-17** |
 | gift-exemption-lookup · burden-gift · family-business · generation-skip | 9/17 (inh) | **2026-09-17** |
-| A″ 감사 대기 21종 (calc-registry-coverage.test.ts PENDING) | — | 미반영 — 감사 통과 시 개별 |
+| A″ a2 감사 통과 — jeonse-loan · severance-calc | 9/17 (k9/a2.ts) | **2026-09-17** (맵 등록) |
+| A″ 감사 대기 19종 (calc-registry-coverage.test.ts PENDING) | — | 미반영 — 감사 통과 시 개별 |
 
 구조 차단: `calc-registry-coverage.test.ts`(양방향) · `calc-live-policy.test.ts`(FORMULAS 경유 + 실 DB 행).
 
