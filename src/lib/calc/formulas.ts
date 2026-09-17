@@ -570,92 +570,13 @@ export function depositInterest(v: V): CalcResult {
 
 // ═══ 세금 ═══
 
+import { acquisitionTaxLocal } from './k9/local';
+/**
+ * K-9 local (2026-09-17) — 매매·증여·상속·감면 전부 k9/local.ts 의 acquisitionParts 한 계산으로.
+ * registration-cost 가 같은 계산을 쓴다(이중 진실 금지). 이 함수의 자리·이름은 그대로 둔다.
+ */
 export function acquisitionTax(v: V): CalcResult {
-  const price = n(v.price);
-  const type = v.type as string;
-  const houseCount = n(v.houseCount);
-  const regulated = v.regulated === 'yes';
-  const firstTime = v.firstTime === 'yes';
-  let rate = 0.01;
-  const pack = parsePolicyPack(v.__policy);
-  const notes: { label: string; value: string }[] = [];
-  let pendingSource = false;
-  let heavy: 'none' | 'heavy8' | 'heavy12' = 'none';
-  const over85 = v.area85 === 'over';
-
-  if (type === 'purchase') {
-    // K-9 ⓒ ③ — 이중 진실 해소: 세율의 정본은 policy_constants 다.
-    //   ⛔ ACQUISITION_TAX_RATES 를 import «만» 하고 쓰지 않으면서 함수 안에 따로 박아 두었고,
-    //      그 표의 6~9억 칸(2% 고정)과 함수의 보간이 «서로 다른 답» 을 냈다.
-    const key = acqTaxPolicyKey(houseCount, regulated, price);
-    const pctFromDb = pack?.pct?.[key];
-    if (typeof pctFromDb !== 'number') {
-      return {
-        main: { label: '세율 기준 미수신', value: '—', color: 'var(--text-tertiary)' },
-        details: [{ label: '사유', value: '이 조건의 취득세율 기준을 아직 받지 못했다. 잠시 후 다시 시도한다' }],
-      };
-    }
-    // 6~9억 구간만 «산식» 이다. 나머지는 표의 단일 세율.
-    const pct = key === 'acq_tax_1house_6_9eok' ? acqTaxMidRatePct(price) : pctFromDb;
-    rate = pct / 100;
-    heavy = key === 'acq_tax_heavy_12' ? 'heavy12' : key === 'acq_tax_heavy_8' ? 'heavy8' : 'none';
-    const m = pack?.meta?.[key] ?? {};
-    if (m.item) notes.push({ label: '적용 구간', value: m.item });
-    if (key === 'acq_tax_1house_6_9eok') {
-      notes.push({ label: '사잇세율', value: '(취득가액×2/3억−3)×1/100 — 6억 1%에서 9억 3%로 연속' });
-    }
-    if (key === 'acq_tax_heavy_8' && regulated && houseCount === 2) {
-      // ⚠️ 원문 단서를 흘리지 않는다. 일시적 2주택은 중과 대상이 아니다.
-      notes.push({ label: '⚠️ 단서', value: '일시적 2주택은 중과 제외다 — 해당하면 표준세율을 본다' });
-    }
-    if (m.source || m.date) notes.push({ label: '근거', value: [m.source, m.date].filter(Boolean).join(' · ') });
-  } else if (type === 'gift') {
-    // ⚠️ 증여·상속 세율은 아직 policy_constants 에 «행이 없다». 옮겨 적은 값이 아니라
-    //    기존 코드 값을 그대로 쓰는 중이므로, 화면이 그 사실을 말한다.
-    pendingSource = true;
-    rate = 0.035;
-    if (houseCount >= 2 && regulated) rate = 0.12;
-  } else { pendingSource = true; rate = 0.028; } // 상속 — 위와 같이 상수표 밖이다
-  const acqTax = Math.round(price * rate);
-  // ⛔ 본세만 고치고 부가세목을 두면 합계가 다시 틀린다 — 실제로 그랬다.
-  //    옛 코드: eduTax = 취득세액×10% 를 «중과에도» 적용 → 8% 중과에서 0.8%(실제 0.4%, 2배 과대).
-  //             farmTax = 취득세액×2% + 「6억 초과」 조건 → 8% 중과에서 0.16%(실제 0.6%, 1/4 과소).
-  //    두 오차가 상쇄돼 «합계만 비슷해 보이던» 구간이 있어 더 위험했다.
-  //    ⚠️ 농특세는 «전용면적 85㎡ 초과» 에만 붙는다. 가액이 아니라 면적이 기준이다.
-  let eduTax: number;
-  let farmTax: number;
-  if (type === 'purchase') {
-    const s = acqSurtaxPct(rate * 100, heavy, over85);
-    eduTax = Math.round(price * (s.eduPct / 100));
-    farmTax = Math.round(price * (s.farmPct / 100));
-  } else {
-    // 증여·상속은 부가세목까지 상수표 밖이다. 기존 계산을 유지하되 아래에서 그 사실을 밝힌다.
-    eduTax = Math.round(acqTax * 0.1);
-    farmTax = 0;
-  }
-  let total = acqTax + eduTax + farmTax;
-  let discount = 0;
-  if (firstTime && houseCount === 1 && price <= 1200000000) {
-    discount = Math.min(2000000, total);
-    total -= discount;
-  }
-  return {
-    main: { label: '취득세 합계', value: fmt(total) },
-    details: [
-      { label: '취득세', value: fmt(acqTax) },
-      { label: '적용 세율', value: `${(rate * 100).toFixed(rate * 100 % 1 === 0 ? 0 : 3)}%` },
-      ...notes,
-      { label: '지방교육세', value: fmt(eduTax) },
-      { label: '농어촌특별세', value: fmt(farmTax) },
-      ...(discount > 0 ? [{ label: '생애최초 감면', value: `-${fmt(discount)}` }] : []),
-      // ⛔ 상수표 밖의 값을 썼으면 «그렇게 말한다». 조용히 쓰지 않는다.
-      ...(pendingSource
-        ? [{ label: '⚠️ 출처', value: '증여·상속 세율은 아직 상수표에 등재되지 않았다 — 확인 후 쓸 것' }]
-        : []),
-      // 부가세목·감면도 아직 상수표 밖이다. 같은 규율로 밝힌다.
-      { label: '참고', value: '지방교육세·농어촌특별세·생애최초 감면은 상수표 등재 전이며, 실제 고지는 지자체 산정에 따른다' },
-    ],
-  };
+  return acquisitionTaxLocal(v);
 }
 
 import { capitalGainsHousing } from './k9/cgt'; export { capitalGainsHousing }; // K-9 cgt — 본문 이관
@@ -1002,16 +923,7 @@ export function ovulation(v: V): CalcResult {
   const fmt2 = (dt: Date) => `${dt.getMonth()+1}/${dt.getDate()}`;
   return { main: { label: '배란 예정일', value: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }, details: [{ label: '가임기', value: `${fmt2(start)} ~ ${fmt2(end)}` }] };
 }
-export function vehicleTax(v: V): CalcResult {
-  const cc = n(v.cc); const type = v.type as string; const age = n(v.age);
-  if (type === 'ev') return { main: { label: '자동차세', value: fmt(100000) }, details: [{ label: '전기차 고정', value: '연 10만원' }] };
-  const rate = cc <= 1000 ? 80 : cc <= 1600 ? 140 : 200;
-  let tax = cc * rate;
-  const discount = Math.min(0.5, age * 0.05); // 연식 할인 최대 50%
-  tax = Math.round(tax * (1 - discount));
-  const edu = Math.round(tax * 0.3);
-  return { main: { label: '연간 자동차세', value: fmt(tax + edu) }, details: [{ label: '자동차세', value: fmt(tax) }, { label: '지방교육세 (30%)', value: fmt(edu) }, { label: '연식 할인', value: pct(discount) }] };
-}
+import { vehicleTax } from './k9/local'; export { vehicleTax };
 export function fuelCost(v: V): CalcResult {
   const dist = n(v.distance); const eff = n(v.efficiency); const price = n(v.fuelPrice);
   const monthly = Math.round(dist / eff * price);
@@ -1075,28 +987,8 @@ export function comprehensiveIncomeTax(v: V): CalcResult {
   const local = Math.round(tax * 0.1);
   return { main: { label: '종합소득세', value: fmt(tax + local) }, details: [{ label: '과세표준', value: fmt(income) }, { label: '소득세', value: fmt(tax) }, { label: '지방소득세', value: fmt(local) }] };
 }
-export function propertyTax(v: V): CalcResult {
-  const pub = n(v.publicPrice);
-  const taxBase = Math.round(pub * PROPERTY_TAX_RATES.fairMarketRatio);
-  let tax = 0;
-  for (const r of PROPERTY_TAX_RATES.housing) {
-    if (taxBase <= r.max) { tax = taxBase * r.rate - (r.deduction || 0); break; }
-  }
-  tax = Math.max(0, Math.round(tax));
-  const edu = Math.round(tax * 0.2);
-  const city = Math.round(taxBase * 0.0014);
-  return { main: { label: '재산세 합계', value: fmt(tax + edu + city) }, details: [{ label: '재산세', value: fmt(tax) }, { label: '지방교육세', value: fmt(edu) }, { label: '도시지역분', value: fmt(city) }] };
-}
-export function registrationCost(v: V): CalcResult {
-  const price = n(v.price);
-  const regTax = Math.round(price * 0.02); // 등록면허세 2%
-  const eduTax = Math.round(regTax * 0.2);
-  const acqResult = acquisitionTax(v);
-  const acqTotal = Number(acqResult.main.value.replace(/[^0-9]/g, '')) || 0;
-  const lawyerFee = price > 500000000 ? 800000 : price > 200000000 ? 500000 : 300000;
-  const stampTax = price > 1000000000 ? 350000 : price > 500000000 ? 150000 : price > 100000000 ? 70000 : 0;
-  return { main: { label: '등기비용 합계', value: fmt(regTax + eduTax + acqTotal + lawyerFee + stampTax) }, details: [{ label: '등록면허세', value: fmt(regTax) }, { label: '지방교육세', value: fmt(eduTax) }, { label: '취득세 (별도)', value: fmt(acqTotal) }, { label: '법무사 수수료 (추정)', value: fmt(lawyerFee) }, { label: '인지세', value: fmt(stampTax) }] };
-}
+import { propertyTax } from './k9/local'; export { propertyTax };
+import { registrationCost } from './k9/local'; export { registrationCost };
 /**
  * K-9 ⓒ ② — DSR 한도 40% 하드코딩을 걷어내고 «업권별 한도 + 스트레스 금리» 로 (2026-09-16).
  *
@@ -1664,13 +1556,7 @@ export function burdenGift(v: V): CalcResult {
 // ═══ 4차 최종 배치 공식 ═══
 
 import { capitalGainsRights } from './k9/cgt'; export { capitalGainsRights }; // K-9 cgt — 본문 이관
-export function registrationLicenseTax(v: V): CalcResult {
-  const price = n(v.price);
-  const rate = v.type === 'transfer' ? 0.02 : 0.002;
-  const tax = Math.round(price * rate);
-  const edu = Math.round(tax * 0.2);
-  return { main: { label: '등록면허세', value: fmt(tax + edu) }, details: [{ label: '등록면허세', value: fmt(tax) }, { label: '교육세', value: fmt(edu) }] };
-}
+import { registrationLicenseTax } from './k9/local'; export { registrationLicenseTax };
 export function deemedRent(v: V): CalcResult {
   const deposit = n(v.deposit); const threshold = n(v.threshold);
   const excess = Math.max(0, deposit - threshold);
@@ -1744,11 +1630,7 @@ export function withholdingCalc(v: V): CalcResult {
   const tax = Math.round(amount * r.rate);
   return { main: { label: '원천징수세액', value: fmt(tax) }, details: [{ label: '세율', value: r.label }, { label: '세후 수령', value: fmt(amount - tax) }] };
 }
-export function stampTax(v: V): CalcResult {
-  const amount = n(v.contractAmount);
-  const tax = amount > 1000000000 ? 350000 : amount > 500000000 ? 150000 : amount > 100000000 ? 70000 : amount > 50000000 ? 40000 : amount > 10000000 ? 20000 : 0;
-  return { main: { label: '인지세', value: fmt(tax) }, details: [{ label: '계약금액', value: fmt(amount) }] };
-}
+import { stampTax } from './k9/local'; export { stampTax };
 export function simpleBookkeeping(v: V): CalcResult {
   const income = n(v.revenue) - n(v.expenses);
   return { main: { label: '소득금액', value: fmt(Math.max(0, income)) }, details: [{ label: '총수입', value: fmt(n(v.revenue)) }, { label: '필요경비', value: fmt(n(v.expenses)) }] };
@@ -1903,7 +1785,8 @@ export function auctionProfit(v: V): CalcResult {
     const regulated = v.regulated === 'yes';
     // 취득세 계산기와 «같은» 파이프를 탄다. 세율 정본은 policy_constants 하나뿐이다.
     const key = acqTaxPolicyKey(houseCount, regulated, bid);
-    const fromDb = pack?.pct?.[key];
+    // ⚠️ 6~9억 행은 numbers 첫 원소가 「6억원」이라 파서가 pct 가 아니라 amt 로 싣는다 — 산식 구간이므로 «행 존재» 로 판정.
+    const fromDb = key === 'acq_tax_1house_6_9eok' && pack?.meta?.[key] ? 1 : pack?.pct?.[key];
     if (typeof fromDb !== 'number') {
       return {
         main: { label: '세율 기준 미수신', value: '—', color: 'var(--text-tertiary)' },

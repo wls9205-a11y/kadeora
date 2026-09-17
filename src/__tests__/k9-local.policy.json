@@ -1,0 +1,300 @@
+{
+ "pct": {
+  "acq_tax_gift": 3.5,
+  "acq_tax_gift_heavy_12": 12.0,
+  "acq_tax_inherit": 2.8,
+  "acq_tax_inherit_1house": 0.8,
+  "acq_tax_std_rate": 2.0,
+  "acq_tax_edu_ratio": 20.0,
+  "acq_tax_farm_ratio": 10.0,
+  "acq_tax_farm_relief": 20.0,
+  "acq_tax_unsold_local": 25.0,
+  "prop_tax_fmv": 60.0,
+  "prop_tax_fmv_1h_3eok": 43.0,
+  "prop_tax_fmv_1h_6eok": 44.0,
+  "prop_tax_fmv_1h_over": 45.0,
+  "prop_tax_city": 0.14,
+  "prop_tax_edu": 20.0,
+  "reg_lic_mortgage": 0.2,
+  "reg_lic_jeonse": 0.2,
+  "reg_lic_seizure": 0.2,
+  "reg_lic_edu": 20.0,
+  "veh_tax_age_step": 5.0,
+  "veh_tax_edu": 30.0,
+  "acq_tax_1house_6eok_under": 1,
+  "acq_tax_1house_6_9eok": 1,
+  "acq_tax_1house_9eok_over": 3,
+  "acq_tax_heavy_8": 8,
+  "acq_tax_heavy_12": 12
+ },
+ "amt": {
+  "acq_tax_gift_heavy_min": 300000000,
+  "acq_tax_firsthome_cap": 2000000,
+  "acq_tax_firsthome_cap_300": 3000000,
+  "acq_tax_firsthome_max": 1200000000,
+  "acq_tax_unsold_local_max": 600000000,
+  "prop_tax_1h_band_3eok": 300000000,
+  "prop_tax_1h_band_6eok": 600000000,
+  "prop_tax_1h_rate_cap": 900000000,
+  "reg_lic_other": 6000,
+  "stamp_duty_1k_3k": 20000,
+  "stamp_duty_3k_5k": 40000,
+  "stamp_duty_5k_1eok": 70000,
+  "stamp_duty_1eok_10eok": 150000,
+  "stamp_duty_over_10eok": 350000,
+  "stamp_duty_house_exempt": 100000000,
+  "stamp_duty_loan_exempt": 50000000,
+  "veh_tax_cc_1000": 80,
+  "veh_tax_cc_1600": 140,
+  "veh_tax_cc_over": 200,
+  "veh_tax_other_car": 100000
+ },
+ "meta": {
+  "acq_tax_gift": {
+   "item": "주택 무상취득(증여) 취득세 — 표준세율",
+   "source": "지방세법 제11조제1항제2호 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "acq_tax_gift_heavy_12": {
+   "item": "조정대상지역 주택 무상취득 중과세율",
+   "source": "지방세법 제13조의2제2항 · 시행령 제28조의6 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "acq_tax_gift_heavy_min": {
+   "item": "무상취득 중과 문턱 — 시가표준액",
+   "source": "지방세법 시행령 제28조의6제1항 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "acq_tax_inherit": {
+   "item": "상속 취득세(농지 외)",
+   "source": "지방세법 제11조제1항제1호나목 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "acq_tax_inherit_1house": {
+   "item": "상속 1가구1주택 취득세 특례",
+   "source": "지방세법 제15조제1항제2호가목 · 시행령 제29조 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "acq_tax_std_rate": {
+   "item": "중과기준세율",
+   "source": "지방세법 제6조제19호 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "acq_tax_edu_ratio": {
+   "item": "지방교육세(취득분) — (세율 − 중과기준세율) 산출액의 비율",
+   "source": "지방세법 제151조제1항제1호 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "acq_tax_farm_ratio": {
+   "item": "농어촌특별세(취득세분) — 표준세율 2% 적용 취득세액의 비율",
+   "source": "농어촌특별세법 제5조제1항제6호 (현행 시행본)",
+   "date": "2026-05-12",
+   "status": "confirmed"
+  },
+  "acq_tax_farm_relief": {
+   "item": "농어촌특별세 — 감면받은 취득세액의 비율",
+   "source": "농어촌특별세법 제5조제1항제1호 (현행 시행본)",
+   "date": "2026-05-12",
+   "status": "confirmed"
+  },
+  "acq_tax_firsthome_cap": {
+   "item": "생애최초 주택 구입 취득세 감면 한도 — 일반(2028-12-31까지)",
+   "source": "지방세특례제한법 제36조의3제1항제2호 (현행 시행본)",
+   "date": "2026-06-02",
+   "status": "confirmed"
+  },
+  "acq_tax_firsthome_cap_300": {
+   "item": "생애최초 주택 구입 취득세 감면 한도 — 소형 비아파트·인구감소지역(2028-12-31까지)",
+   "source": "지방세특례제한법 제36조의3제1항제1호 (현행 시행본)",
+   "date": "2026-06-02",
+   "status": "confirmed"
+  },
+  "acq_tax_firsthome_max": {
+   "item": "생애최초 감면 — 취득당시가액 상한",
+   "source": "지방세특례제한법 제36조의3제1항 (현행 시행본)",
+   "date": "2026-06-02",
+   "status": "confirmed"
+  },
+  "acq_tax_unsold_local": {
+   "item": "지방 준공후미분양 아파트 취득세 경감률(2026-12-31까지)",
+   "source": "지방세특례제한법 제33조의3제4항 (현행 시행본)",
+   "date": "2026-06-02",
+   "status": "confirmed"
+  },
+  "acq_tax_unsold_local_max": {
+   "item": "지방 준공후미분양 경감 — 취득당시가액 상한",
+   "source": "지방세특례제한법 제33조의3제4항제4호 (현행 시행본)",
+   "date": "2026-06-02",
+   "status": "confirmed"
+  },
+  "prop_tax_fmv": {
+   "item": "재산세 공정시장가액비율 — 주택(일반)",
+   "source": "지방세법 시행령 제109조제1항제2호 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "prop_tax_fmv_1h_3eok": {
+   "item": "재산세 공정시장가액비율 — 1세대1주택 시가표준액 3억원 이하(2026년도분)",
+   "source": "지방세법 시행령 제109조제1항제2호가목 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "prop_tax_fmv_1h_6eok": {
+   "item": "재산세 공정시장가액비율 — 1세대1주택 3억원 초과 6억원 이하(2026년도분)",
+   "source": "지방세법 시행령 제109조제1항제2호나목 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "prop_tax_fmv_1h_over": {
+   "item": "재산세 공정시장가액비율 — 1세대1주택 6억원 초과(2026년도분)",
+   "source": "지방세법 시행령 제109조제1항제2호다목 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "prop_tax_1h_band_3eok": {
+   "item": "1세대1주택 공정시장가액비율 구간 경계 — 3억원",
+   "source": "지방세법 시행령 제109조제1항제2호 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "prop_tax_1h_band_6eok": {
+   "item": "1세대1주택 공정시장가액비율 구간 경계 — 6억원",
+   "source": "지방세법 시행령 제109조제1항제2호 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "prop_tax_1h_rate_cap": {
+   "item": "1세대1주택 재산세 특례세율 대상 — 시가표준액 상한",
+   "source": "지방세법 제111조의2제1항 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "prop_tax_city": {
+   "item": "재산세 도시지역분 세율",
+   "source": "지방세법 제112조제1항제2호 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "prop_tax_edu": {
+   "item": "지방교육세 — 재산세액의 비율",
+   "source": "지방세법 제151조제1항제6호 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "reg_lic_mortgage": {
+   "item": "등록면허세 — 저당권 설정",
+   "source": "지방세법 제28조제1항제1호다목2) (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "reg_lic_jeonse": {
+   "item": "등록면허세 — 전세권 설정",
+   "source": "지방세법 제28조제1항제1호다목4) (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "reg_lic_seizure": {
+   "item": "등록면허세 — 경매신청·가압류·가처분·가등기",
+   "source": "지방세법 제28조제1항제1호라목 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "reg_lic_other": {
+   "item": "등록면허세 — 그 밖의 등기(건당)·최저세액",
+   "source": "지방세법 제28조제1항제1호마목 · 제1항 단서 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "reg_lic_edu": {
+   "item": "지방교육세 — 등록면허세액의 비율",
+   "source": "지방세법 제151조제1항제2호 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "stamp_duty_1k_3k": {
+   "item": "인지세 — 부동산 소유권 이전 증서 1천만원 초과 3천만원 이하",
+   "source": "인지세법 제3조제1항제1호 (현행 시행본)",
+   "date": "2026-01-02",
+   "status": "confirmed"
+  },
+  "stamp_duty_3k_5k": {
+   "item": "인지세 — 부동산 소유권 이전 증서 3천만원 초과 5천만원 이하",
+   "source": "인지세법 제3조제1항제1호 (현행 시행본)",
+   "date": "2026-01-02",
+   "status": "confirmed"
+  },
+  "stamp_duty_5k_1eok": {
+   "item": "인지세 — 부동산 소유권 이전 증서 5천만원 초과 1억원 이하",
+   "source": "인지세법 제3조제1항제1호 (현행 시행본)",
+   "date": "2026-01-02",
+   "status": "confirmed"
+  },
+  "stamp_duty_1eok_10eok": {
+   "item": "인지세 — 부동산 소유권 이전 증서 1억원 초과 10억원 이하",
+   "source": "인지세법 제3조제1항제1호 (현행 시행본)",
+   "date": "2026-01-02",
+   "status": "confirmed"
+  },
+  "stamp_duty_over_10eok": {
+   "item": "인지세 — 부동산 소유권 이전 증서 10억원 초과",
+   "source": "인지세법 제3조제1항제1호 (현행 시행본)",
+   "date": "2026-01-02",
+   "status": "confirmed"
+  },
+  "stamp_duty_house_exempt": {
+   "item": "인지세 비과세 — 주택 소유권 이전 증서",
+   "source": "인지세법 제6조제5호 (현행 시행본)",
+   "date": "2026-01-02",
+   "status": "confirmed"
+  },
+  "stamp_duty_loan_exempt": {
+   "item": "인지세 비과세 — 금전소비대차 증서",
+   "source": "인지세법 제6조제8호 (현행 시행본)",
+   "date": "2026-01-02",
+   "status": "confirmed"
+  },
+  "veh_tax_cc_1000": {
+   "item": "자동차세 비영업용 승용 — 1,000cc 이하 cc당",
+   "source": "지방세법 제127조제1항제1호 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "veh_tax_cc_1600": {
+   "item": "자동차세 비영업용 승용 — 1,600cc 이하 cc당",
+   "source": "지방세법 제127조제1항제1호 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "veh_tax_cc_over": {
+   "item": "자동차세 비영업용 승용 — 1,600cc 초과 cc당",
+   "source": "지방세법 제127조제1항제1호 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "veh_tax_age_step": {
+   "item": "자동차세 차령 경감 — 차령 1년당",
+   "source": "지방세법 제127조제1항제2호 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "veh_tax_other_car": {
+   "item": "자동차세 — 그 밖의 승용자동차(전기차 등) 비영업용",
+   "source": "지방세법 제127조제1항제3호 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  },
+  "veh_tax_edu": {
+   "item": "지방교육세 — 자동차세액의 비율",
+   "source": "지방세법 제151조제1항제7호 (현행 시행본)",
+   "date": "2026-07-01",
+   "status": "confirmed"
+  }
+ }
+}
