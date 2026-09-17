@@ -59,7 +59,9 @@ export async function registerRankTargets(
       .from('keyword_rank_targets')
       .select('id', { count: 'exact', head: true })
       .eq('priority', 1)
-      .eq('tracked', true);
+      .eq('tracked', true)
+      // 상주층(승부처 고정핀)은 cap 의 통치 밖 — lifecycle 과 같은 집합으로 센다 (2026-09-17 3층 판정).
+      .eq('resident', false);
     const room = Math.max(0, P1_CAP - (p1 ?? 0));
     if (room <= 0) {
       return { requested: seeds.length, inserted: 0, skipped: seeds.length, reason: `P1 상한 ${P1_CAP} 도달` };
