@@ -33,7 +33,14 @@ async function counts() {
     const [blog, stocks, subs, sites, complex, trades, posts, priced] = await Promise.all([
       one('blog_posts', (q: any) => q.eq('is_published', true)),
       one('stock_quotes'), one('apt_subscriptions'), one('apt_sites'),
-      one('apt_complex_profiles'), one('apt_transactions'), one('posts'),
+      one('apt_complex_profiles'),
+      // B1 (2026-09-17): apt_transactions 는 80만 행 — exact 는 seq scan(2026-09-16 장애형). reltuples 추정.
+      (async () => {
+        const { data } = await (sb as any).rpc('get_social_proof_counts');
+        const n = Number(data?.[0]?.trade_count);
+        return Number.isFinite(n) && n > 0 ? n : null;
+      })(),
+      one('posts'),
       one('apt_complex_profiles', (q: any) => q.not('latest_sale_price', 'is', null)),
     ]);
     // 지역 허브 수 — sitemap/[id] 와 같은 기준(시군구 ≥10 · 동 ≥5, age_group IS NOT NULL).
@@ -114,7 +121,7 @@ export async function GET() {
 - 아파트 청약: ${n(c.subs)}건 (공공데이터포털 API 실시간 동기화)
 - 분양사이트: ${n(c.sites)}개 (전국 아파트 분양 정보)
 - 단지백과: ${n(c.complex)}개 (아파트 상세 정보, 실거래가·전세가율·거래량)
-- 실거래 데이터: ${n(c.trades)}건 (국토교통부 실거래가 공개시스템)
+- 실거래 데이터: 약 ${n(c.trades)}건 (국토교통부 실거래가 공개시스템)
 - 시군구 허브: ${n(c.sigunguHubs)}개 (시군구별 아파트 시세 분석)
 - 동 허브: ${n(c.dongHubs)}개 (동별 아파트 시세 분석)
 - 무료 계산기: ${calcCount}종 (세금, 부동산, 투자, 급여, 대출 등 ${calcCatCount}개 카테고리)
@@ -150,7 +157,7 @@ KOSPI, KOSDAQ, NYSE, NASDAQ ${n(c.stocks)}개 종목의 시세를 제공합니�
 
 #### 부동산 핵심 데이터 (공공데이터 기반)
 - 전국 아파트 단지: ${n(c.complex)}개 (실거래가 보유 ${n(c.priced)}개)
-- 전국 실거래 데이터: ${n(c.trades)}건
+- 전국 실거래 데이터: 약 ${n(c.trades)}건
 - 데이터 출처: 국토교통부 실거래가 공개시스템, 한국부동산원, 청약홈
 
 ### 블로그 (/blog)

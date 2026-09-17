@@ -1,4 +1,5 @@
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import Link from 'next/link';
 import { SITE_URL as SITE } from '@/lib/constants';
 import type { Metadata } from 'next';
@@ -33,7 +34,11 @@ export default async function StockDataPage() {
 
   // 통계 집계
   const { count: totalSymbols } = await (sb as any).from('stock_quotes').select('id', { count: 'exact', head: true });
-  const { count: totalPrices } = await (sb as any).from('stock_price_history').select('id', { count: 'exact', head: true });
+  // B1 (2026-09-17): stock_price_history 는 14만 행 — 공개 SSR 에서 exact count 는 seq scan(2026-09-16 장애형).
+  //   get_social_proof_counts() 의 reltuples 추정을 재사용한다. 화면에 「약」 병기. exact 로 되돌리지 말 것.
+  const { data: estRows } = await (getSupabaseAdmin() as any).rpc('get_social_proof_counts');
+  const priceEst = Number(estRows?.[0]?.price_history_count);
+  const totalPrices = Number.isFinite(priceEst) && priceEst > 0 ? priceEst : null;
 
   // 마켓별 종목수
   // s221 (S215.5 #5): PostgREST 1k cap → SQL aggregate RPC. 1,800+ 종목 정확 집계.
@@ -80,7 +85,7 @@ export default async function StockDataPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: 28 }}>
         {[
           { label: '종목 수', value: totalSymbols?.toLocaleString() ?? '-', emoji: '📊' },
-          { label: '가격 데이터', value: totalPrices?.toLocaleString() ?? '-', emoji: '💹' },
+          { label: '가격 데이터', value: totalPrices != null ? `약 ${totalPrices.toLocaleString()}` : '-', emoji: '💹' },
           { label: 'KOSPI', value: `${marketCounts['KOSPI'] || 0}종목`, emoji: '🇰🇷' },
           { label: 'KOSDAQ', value: `${marketCounts['KOSDAQ'] || 0}종목`, emoji: '🇰🇷' },
           { label: 'NYSE', value: `${marketCounts['NYSE'] || 0}종목`, emoji: '🇺🇸' },

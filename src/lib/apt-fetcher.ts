@@ -291,6 +291,8 @@ export async function fetchStatsKPI(region: string, sigungu: string | null): Pro
       return q;
     };
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    // exact-ok: B1 (2026-09-17) apt_transactions 80만 행이지만 deal_date ≥ 7일 필터로 결과가 작고
+    //   EXPLAIN 이 Index Only Scan(idx_apt_trans_date · 시군구 시 idx_apt_tx_sigungu_date)을 확인했다.
     let txQ: any = (sb as any).from('apt_transactions').select('id', { count: 'exact', head: true });
     if (region && region !== '전국') txQ = txQ.eq('region_nm', region);
     if (sigungu) txQ = txQ.eq('sigungu', sigungu);
