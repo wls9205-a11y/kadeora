@@ -40,7 +40,7 @@ export const VIEWPORTS: VP[] = [
   { key: 'w768', engine: 'chromium', opts: { viewport: { width: 768, height: 1024 } } },
 ];
 
-type Node = { k: string; fs: string; fw: string; lh: string; ls: string; ta: string; ff: string; lines: number; ovf: boolean };
+type Node = { k: string; fs: string; fw: string; lh: string; ls: string; ta: string; ff: string; lines: number; h: number; ovf: boolean };
 
 async function measure(browser: Browser, vp: VP, url: string) {
   const ctx = await browser.newContext(vp.opts);
@@ -81,12 +81,17 @@ async function measure(browser: Browser, vp: VP, url: string) {
       const lhPx = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.5;
       const range = document.createRange();
       range.selectNodeContents(el);
-      const lines = new Set(Array.from(range.getClientRects()).filter((q) => q.width > 0).map((q) => Math.round(q.top))).size || Math.round(rect.height / lhPx);
+      // 줄 수 = 텍스트 조각 top 을 반 줄 높이 단위로 묶은 군집 수. (flex 안의 텍스트 조각은 top 이 조금씩 달라
+      // 서로 다른 top 을 그대로 세면 한 줄 알약이 «3줄» 로 잡힌다 — 2026-09-18 T4-3 오탐.)
+      const tops = Array.from(range.getClientRects()).filter((q) => q.width > 0).map((q) => q.top).sort((a, b) => a - b);
+      let lines = tops.length ? 1 : Math.max(1, Math.round(rect.height / lhPx));
+      for (let i = 1; i < tops.length; i++) if (tops[i] - tops[i - 1] > lhPx * 0.5) lines++;
       out.push({
         k: base + '#' + n,
         fs: cs.fontSize, fw: cs.fontWeight, lh: cs.lineHeight, ls: cs.letterSpacing, ta: cs.textAlign,
         ff: cs.fontFamily.split(',')[0].replace(/["']/g, '').trim(),
         lines,
+        h: Math.round(rect.height),
         ovf: (el as HTMLElement).scrollWidth > (el as HTMLElement).clientWidth + 1 && cs.overflowX !== 'visible',
       });
     }
@@ -157,7 +162,8 @@ async function main() {
           if (d !== 0) deltas[d] = (deltas[d] ?? 0) + 1;
           if (Math.abs(d) > 2) { bandOut++; safety.push(`${id} ±2 대역 이탈 ${p.fs}→${n.fs}: ${n.k}`); }
           if (n.ovf && !p.ovf) { safetyBad++; safety.push(`${id} 신규 넘침: ${n.k} (${p.fs}→${n.fs})`); }
-          if (n.lines > p.lines) { safetyBad++; safety.push(`${id} 신규 줄바꿈 ${p.lines}→${n.lines}: ${n.k} (${p.fs}→${n.fs})`); }
+          // 신규 줄바꿈 = 줄 수 증가 «그리고» 높이 증가(2px 초과). 둘 다여야 실제로 한 줄이 더 생긴 것이다.
+          if (n.lines > p.lines && (p.h == null || n.h - p.h > 2)) { safetyBad++; safety.push(`${id} 신규 줄바꿈 ${p.lines}→${n.lines}: ${n.k} (${p.fs}→${n.fs})`); }
         }
         safety.push(`${id}: 대조 ${matched}/${r.nodes.length} · 크기 델타 ${JSON.stringify(deltas)}`);
       }

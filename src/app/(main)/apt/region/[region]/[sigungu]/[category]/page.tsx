@@ -138,21 +138,21 @@ export default async function RegionSigunguCategoryHub({ params }: Props) {
       <JsonLd data={itemListLd} />
       <JsonLd data={breadcrumbLd} />
 
-      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12, flexWrap: 'wrap' }}>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 12, flexWrap: 'wrap' }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
         <span>›</span>
         <Link href="/apt" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>부동산</Link>
         <span>›</span>
         <Link href={`/apt/region/${encodeURIComponent(region)}`} style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>{region}</Link>
         <span>›</span>
-        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{sigungu} {cat.label}</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{sigungu} {cat.label}</span>
       </nav>
 
       <header style={{ margin: '0 0 18px' }}>
-        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: -0.5 }}>
+        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', letterSpacing: '-0.4px' }}>
           {region} {sigungu} {cat.label} 단지 가이드
         </h1>
-        <div style={{ marginTop: 8, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
+        <div style={{ marginTop: 8, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
           {region} {sigungu} 지역의 {cat.label} 단지 {sites.length.toLocaleString()}곳을 정리했습니다.
           {cluster?.upcoming_count > 0 && ` 분양 예정 ${cluster.upcoming_count}곳, `}
           {cluster?.active_trade_count > 0 && ` 활성 거래 ${cluster.active_trade_count}곳, `}
@@ -166,13 +166,13 @@ export default async function RegionSigunguCategoryHub({ params }: Props) {
           <Link key={s.slug} href={`/apt/${encodeURIComponent(s.slug)}`} style={{ textDecoration: 'none' }}>
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 14, transition: 'border-color var(--transition-fast)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
-                <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.3 }}>{s.name}</h3>
-                {s.popularity_score > 0 && s.popularity_score !== 100 && <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)', flexShrink: 0 }}>★ {s.popularity_score}</span>}
+                <h3 style={{ margin: 0, fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', lineHeight: 1.3 }}>{s.name}</h3>
+                {s.popularity_score > 0 && s.popularity_score !== 100 && <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', color: 'var(--brand)', flexShrink: 0 }}>★ {s.popularity_score}</span>}
               </div>
-              <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6 }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 6 }}>
                 {s.dong || sigungu} {s.builder ? `· ${s.builder}` : ''}
               </div>
-              <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
                 {s.total_units && <span>{s.total_units.toLocaleString()}세대</span>}
                 {(s.price_min || s.price_max) && <span>{fmtAmount(s.price_min)}{s.price_min && s.price_max ? `~${fmtAmount(s.price_max)}` : ''}</span>}
                 {s.move_in_date && <span>입주 {s.move_in_date}</span>}
@@ -190,13 +190,13 @@ export default async function RegionSigunguCategoryHub({ params }: Props) {
       )}
 
       <section aria-label="다른 카테고리" style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>{region} {sigungu} 다른 카테고리</div>
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 8 }}>{region} {sigungu} 다른 카테고리</div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {Object.entries(CATEGORY).filter(([k]) => k !== category).map(([k, c]) => (
             <Link
               key={k}
               href={`/apt/region/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}/${encodeURIComponent(k)}`}
-              style={{ padding: '6px 12px', borderRadius: 999, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)', background: 'var(--bg-hover)', textDecoration: 'none', border: '1px solid var(--border)' }}
+              style={{ padding: '6px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-secondary)', background: 'var(--bg-hover)', textDecoration: 'none', border: '1px solid var(--border)' }}
             >
               {c.label}
             </Link>

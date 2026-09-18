@@ -89,17 +89,17 @@ export default async function RegionRedevPage({ params }: Props) {
   if (total === 0) {
     return (
       <div style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '60px 16px', textAlign: 'center' }}>
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>
           <Link href="/apt/redev" style={{ color: 'var(--brand)', textDecoration: 'none' }}>전국 재개발·재건축</Link> → {decodedRegion}
         </div>
-        <h1 style={{ fontSize: 22, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px' }}>🏗️ {decodedRegion} 재개발·재건축 현황</h1>
-        <p style={{ fontSize: 14, color: 'var(--text-tertiary)', marginBottom: 24 }}>{decodedRegion} 지역의 재개발·재건축 데이터를 수집 중입니다. 곧 업데이트됩니다.</p>
-        <Link href="/apt/redev" style={{ display: 'inline-block', padding: '10px 24px', borderRadius: 'var(--radius-xl)', background: 'var(--brand)', color: '#fff', fontSize: 13, fontWeight: 500, textDecoration: 'none' }}>전국 현황 보기 →</Link>
+        <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 12px' }}>🏗️ {decodedRegion} 재개발·재건축 현황</h1>
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 24 }}>{decodedRegion} 지역의 재개발·재건축 데이터를 수집 중입니다. 곧 업데이트됩니다.</p>
+        <Link href="/apt/redev" style={{ display: 'inline-block', padding: '10px 24px', borderRadius: 'var(--radius-xl)', background: 'var(--brand)', color: '#fff', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', textDecoration: 'none' }}>전국 현황 보기 →</Link>
         <div style={{ borderTop: '1px solid var(--border)', marginTop: 32, paddingTop: 16 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>다른 지역 재개발·재건축 현황</div>
+          <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 8 }}>다른 지역 재개발·재건축 현황</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
             {VALID_REGIONS.filter(r => r !== decodedRegion).map(r => (
-              <Link key={r} href={`/apt/redev/${encodeURIComponent(r)}`} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text-secondary)' }}>{r}</Link>
+              <Link key={r} href={`/apt/redev/${encodeURIComponent(r)}`} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text-secondary)' }}>{r}</Link>
             ))}
           </div>
         </div>
@@ -167,14 +167,14 @@ export default async function RegionRedevPage({ params }: Props) {
 
       {/* 히어로 */}
       <div style={{ padding: '32px 0 16px', textAlign: 'center' }}>
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>
           <Link href="/apt/redev" style={{ color: 'var(--brand)', textDecoration: 'none' }}>전국 재개발·재건축</Link> → {decodedRegion}
         </div>
-        <h1 style={{ fontSize: 22, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 6px' }}>
+        <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 6px' }}>
           🏗️ {decodedRegion} 재개발·재건축 현황
         </h1>
-        <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: 0 }}>
-          <strong style={{ color: 'var(--brand)', fontSize: 18 }}>{total}</strong>개 구역
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: 0 }}>
+          <strong style={{ color: 'var(--brand)', fontSize: 'var(--fs-base)' }}>{total}</strong>개 구역
           {totalHouseholds > 0 && <> · <strong>{totalHouseholds.toLocaleString()}</strong>세대</>}
         </p>
       </div>
@@ -182,24 +182,24 @@ export default async function RegionRedevPage({ params }: Props) {
       {/* 상단 통계 요약 카드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: 6, marginBottom: 16, padding: '12px', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--brand)' }}>{total}</div>
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>전체 구역</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', color: 'var(--brand)' }}>{total}</div>
+          <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)' }}>전체 구역</div>
         </div>
         {redevCount > 0 && <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--accent-purple)' }}>{redevCount}</div>
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>재개발</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', color: 'var(--accent-purple)' }}>{redevCount}</div>
+          <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)' }}>재개발</div>
         </div>}
         {rebuildCount > 0 && <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--warning)' }}>{rebuildCount}</div>
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>재건축</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', color: 'var(--warning)' }}>{rebuildCount}</div>
+          <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)' }}>재건축</div>
         </div>}
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 18, fontWeight: 700, color: avgProgress >= 50 ? 'var(--accent-green)' : 'var(--accent-orange)' }}>{avgProgress}%</div>
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>평균 진행률</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', color: avgProgress >= 50 ? 'var(--accent-green)' : 'var(--accent-orange)' }}>{avgProgress}%</div>
+          <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)' }}>평균 진행률</div>
         </div>
         {lateStageCnt > 0 && <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--accent-green)' }}>{lateStageCnt}</div>
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>착공↑</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', color: 'var(--accent-green)' }}>{lateStageCnt}</div>
+          <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)' }}>착공↑</div>
         </div>}
       </div>
 
@@ -211,15 +211,15 @@ export default async function RegionRedevPage({ params }: Props) {
           const shortLabel: Record<string, string> = { '추진위': '추진위', '정비구역지정': '구역지정', '조합설립': '조합', '사업시행인가': '시행', '관리처분': '관리', '착공': '착공', '준공': '준공' };
           return (
             <div key={stage} style={{ flex: Math.max(count, 1), textAlign: 'center', padding: '8px 2px', borderRadius: 'var(--radius-sm)', background: `${STAGE_COLORS[stage]}15`, border: `1px solid ${STAGE_COLORS[stage]}30`, minWidth: 0, overflow: 'hidden' }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: STAGE_COLORS[stage] }}>{count}</div>
-              <div style={{ fontSize: 9, color: STAGE_COLORS[stage], fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{shortLabel[stage] || stage}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: STAGE_COLORS[stage] }}>{count}</div>
+              <div style={{ fontSize: 'var(--fs-2xs)', color: STAGE_COLORS[stage], fontWeight: 'var(--fw-title)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{shortLabel[stage] || stage}</div>
             </div>
           );
         })}
       </div>
 
       {/* 구역 목록 */}
-      <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>📋 {decodedRegion} 구역 목록</h2>
+      <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 10 }}>📋 {decodedRegion} 구역 목록</h2>
       <div style={{ display: 'grid', gap: 6, marginBottom: 24 }}>
         {projects.map((p: any) => {
           const sc = STAGE_COLORS[p.stage || '정비구역지정'] || STAGE_COLORS['정비구역지정'];
@@ -240,25 +240,25 @@ export default async function RegionRedevPage({ params }: Props) {
                 style={{ width: 72, height: 54, objectFit: 'cover', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                <span style={{ fontSize: 10, fontWeight: 500, padding: '2px 6px', borderRadius: 'var(--radius-sm)', background: p.project_type === '재건축' ? 'rgba(245,158,11,0.9)' : 'rgba(139,92,246,0.9)', color: '#fff' }}>{p.project_type || '재개발'}</span>
-                <span style={{ fontSize: 10, fontWeight: 600, color: sc }}>{p.stage}</span>
+                <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', padding: '2px 6px', borderRadius: 'var(--radius-sm)', background: p.project_type === '재건축' ? 'rgba(245,158,11,0.9)' : 'rgba(139,92,246,0.9)', color: '#fff' }}>{p.project_type || '재개발'}</span>
+                <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', color: sc }}>{p.stage}</span>
                 <div style={{ flex: 1, height: 3, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${progress}%`, background: sc, borderRadius: 2 }} />
                 </div>
-                <span style={{ fontSize: 10, fontWeight: 700, color: sc }}>{progress}%</span>
+                <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-num)', color: sc }}>{progress}%</span>
               </div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 3 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 3 }}>
                 {projectName}
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', display: 'flex', flexWrap: 'wrap', gap: '2px 10px' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', display: 'flex', flexWrap: 'wrap', gap: '2px 10px' }}>
                 {p.sigungu && <span>{p.sigungu}</span>}
                 {p.total_households && <span>🏢 {p.total_households.toLocaleString()}세대</span>}
                 {p.constructor && <span style={{ color: 'var(--accent-green)' }}>🏗️ {p.constructor}</span>}
                 {p.area_sqm && <span>📐 {p.area_sqm >= 10000 ? `${(p.area_sqm / 10000).toFixed(1)}만m²` : `${(p.area_sqm / 1000).toFixed(0)}천m²`}</span>}
                 {p.avg_trade_price && <span>💰 평균 {(p.avg_trade_price / 10000).toFixed(1)}억</span>}
               </div>
-              {p.address && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>📍 {p.address}</div>}
-              {(p.ai_summary || (p.notes && !/사업지구|정비사업/.test(p.notes))) && <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, borderLeft: `2px solid ${sc}`, paddingLeft: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {p.ai_summary || p.notes}</div>}
+              {p.address && <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>📍 {p.address}</div>}
+              {(p.ai_summary || (p.notes && !/사업지구|정비사업/.test(p.notes))) && <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-secondary)', marginTop: 4, borderLeft: `2px solid ${sc}`, paddingLeft: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {p.ai_summary || p.notes}</div>}
               </div>
             </Link>
           );
@@ -267,13 +267,13 @@ export default async function RegionRedevPage({ params }: Props) {
 
       {/* 관련 블로그 */}
       {blogs.length > 0 && (<>
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>📝 {decodedRegion} 관련 분석</h2>
+        <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 10 }}>📝 {decodedRegion} 관련 분석</h2>
         <div style={{ marginBottom: 24 }}>
           {blogs.map((b: any, i: number) => (
             <Link key={b.slug} href={`/blog/${b.slug}`} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px', marginBottom: 3, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
-              <span style={{ fontSize: 10, color: 'var(--text-tertiary)', width: 16 }}>#{i + 1}</span>
-              <span style={{ fontSize: 12, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</span>
-              <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{b.view_count?.toLocaleString()}뷰</span>
+              <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', width: 16 }}>#{i + 1}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</span>
+              <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{b.view_count?.toLocaleString()}뷰</span>
             </Link>
           ))}
         </div>
@@ -281,35 +281,35 @@ export default async function RegionRedevPage({ params }: Props) {
 
       {/* 다른 지역 CTA */}
       <div style={{ textAlign: 'center', padding: '16px 0 32px' }}>
-        <Link href="/apt/redev" style={{ display: 'inline-block', padding: '10px 24px', borderRadius: 'var(--radius-xl)', background: 'var(--brand)', color: '#fff', fontSize: 13, fontWeight: 500, textDecoration: 'none' }}>
+        <Link href="/apt/redev" style={{ display: 'inline-block', padding: '10px 24px', borderRadius: 'var(--radius-xl)', background: 'var(--brand)', color: '#fff', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', textDecoration: 'none' }}>
           ← 전국 재개발 현황 보기
         </Link>
       </div>
 
       {/* FAQ 아코디언 (SEO + 사용자 편의) */}
       <div style={{ borderTop: '1px solid var(--border)', padding: '16px 0' }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>❓ {decodedRegion} 재개발 자주 묻는 질문</h2>
+        <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 10 }}>❓ {decodedRegion} 재개발 자주 묻는 질문</h2>
         <details style={{ marginBottom: 6, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-          <summary style={{ padding: '10px 14px', fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', cursor: 'pointer' }}>{decodedRegion} 재개발·재건축 구역은 몇 개인가요?</summary>
-          <div style={{ padding: '0 14px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          <summary style={{ padding: '10px 14px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)', cursor: 'pointer' }}>{decodedRegion} 재개발·재건축 구역은 몇 개인가요?</summary>
+          <div style={{ padding: '0 14px 12px', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
             {decodedRegion} 지역에는 현재 {total}개의 재개발·재건축 구역이 활성화되어 있습니다. 재개발 {redevCount}건, 재건축 {rebuildCount}건이며 평균 진행률은 {avgProgress}%입니다.
           </div>
         </details>
         <details style={{ marginBottom: 6, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-          <summary style={{ padding: '10px 14px', fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', cursor: 'pointer' }}>{decodedRegion}에서 착공 단계 이상인 구역은?</summary>
-          <div style={{ padding: '0 14px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          <summary style={{ padding: '10px 14px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)', cursor: 'pointer' }}>{decodedRegion}에서 착공 단계 이상인 구역은?</summary>
+          <div style={{ padding: '0 14px 12px', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
             {decodedRegion} 지역에서 관리처분·착공·준공 단계에 도달한 구역은 {lateStageCnt}건입니다. 전체 {total}건 중 {Math.round(lateStageCnt / total * 100)}%가 후기 단계에 진입했습니다.
           </div>
         </details>
         {totalHouseholds > 0 && <details style={{ marginBottom: 6, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-          <summary style={{ padding: '10px 14px', fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', cursor: 'pointer' }}>{decodedRegion} 재개발 총 세대수는?</summary>
-          <div style={{ padding: '0 14px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          <summary style={{ padding: '10px 14px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)', cursor: 'pointer' }}>{decodedRegion} 재개발 총 세대수는?</summary>
+          <div style={{ padding: '0 14px 12px', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
             {decodedRegion} 지역 재개발·재건축 사업의 총 계획 세대수는 약 {totalHouseholds.toLocaleString()}세대입니다.
           </div>
         </details>}
         {constructorCount > 0 && <details style={{ marginBottom: 6, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-          <summary style={{ padding: '10px 14px', fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', cursor: 'pointer' }}>{decodedRegion} 재개발 시공사는 어디인가요?</summary>
-          <div style={{ padding: '0 14px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          <summary style={{ padding: '10px 14px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)', cursor: 'pointer' }}>{decodedRegion} 재개발 시공사는 어디인가요?</summary>
+          <div style={{ padding: '0 14px 12px', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
             {decodedRegion} 지역 {constructorCount}개 구역에서 시공사가 선정되었습니다. {projects.filter((p: any) => p.constructor).slice(0, 3).map((p: any) => `${p.district_name}(${p.constructor})`).join(', ')} 등이 있습니다.
           </div>
         </details>}
@@ -317,10 +317,10 @@ export default async function RegionRedevPage({ params }: Props) {
 
       {/* 다른 지역 링크 (SEO 내부링크) */}
       <div style={{ borderTop: '1px solid var(--border)', padding: '16px 0 24px' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>다른 지역 재개발·재건축 현황</div>
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 8 }}>다른 지역 재개발·재건축 현황</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
           {VALID_REGIONS.filter(r => r !== decodedRegion).map(r => (
-            <Link key={r} href={`/apt/redev/${encodeURIComponent(r)}`} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text-secondary)' }}>{r}</Link>
+            <Link key={r} href={`/apt/redev/${encodeURIComponent(r)}`} style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text-secondary)' }}>{r}</Link>
           ))}
         </div>
       </div>

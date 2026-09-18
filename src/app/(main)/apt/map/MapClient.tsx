@@ -191,11 +191,11 @@ export default function MapClient() {
           styles: [{
             width: '44px', height: '44px', background: 'rgba(37,99,235,0.85)',
             borderRadius: '50%', color: '#fff', textAlign: 'center',
-            lineHeight: '44px', fontSize: '13px', fontWeight: '600',
+            lineHeight: '44px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
           }, {
             width: '54px', height: '54px', background: 'rgba(37,99,235,0.9)',
             borderRadius: '50%', color: '#fff', textAlign: 'center',
-            lineHeight: '54px', fontSize: '14px', fontWeight: '600',
+            lineHeight: '54px', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)',
           }],
           });
           clustererRef.current.addMarkers(newMarkers);
@@ -253,7 +253,7 @@ export default function MapClient() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)' }}>
         <div>
           <Link href="/apt" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
-          <h1 style={{ margin: '4px 0 0', fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)' }}>🗺️ 부동산 지도</h1>
+          <h1 style={{ margin: '4px 0 0', fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>🗺️ 부동산 지도</h1>
         </div>
       </div>
 
@@ -266,7 +266,7 @@ export default function MapClient() {
           const active = layers.has(l);
           return (
             <button aria-label="닫기" key={l} onClick={() => toggleLayer(l)} style={{
-              padding: '6px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: 600,
+              padding: '6px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
               border: `1.5px solid ${active ? conf.color : 'var(--border)'}`,
               background: active ? `${conf.color}15` : 'var(--bg-surface)',
               color: active ? conf.color : 'var(--text-tertiary)',
@@ -283,14 +283,14 @@ export default function MapClient() {
         <div ref={mapRef} style={{ width: '100%', height: sdkError ? 'auto' : 'min(500px, 60vh)', background: 'var(--bg-hover)' }}>
           {sdkError ? (
             <div style={{ padding: '20px 16px', textAlign: 'center' }}>
-              <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 10 }}>카카오 지도 SDK를 불러올 수 없습니다 · 아래 목록에서 지역별 현황을 확인하세요</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 10 }}>카카오 지도 SDK를 불러올 수 없습니다 · 아래 목록에서 지역별 현황을 확인하세요</div>
               <div style={{ display: 'flex', gap: 'var(--sp-sm)', justifyContent: 'center' }}>
-                <a href="https://map.kakao.com" target="_blank" rel="noopener noreferrer" style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(254,229,0,0.1)', border: '1px solid rgba(254,229,0,0.3)', color: 'var(--accent-yellow)'  /* #FEE500 은 제 10% 틴트 위 1.24 였다 */, textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>카카오맵에서 보기</a>
-                <button onClick={() => window.location.reload()} style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>새로고침</button>
+                <a href="https://map.kakao.com" target="_blank" rel="noopener noreferrer" style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', background: 'rgba(254,229,0,0.1)', border: '1px solid rgba(254,229,0,0.3)', color: 'var(--accent-yellow)'  /* #FEE500 은 제 10% 틴트 위 1.24 였다 */, textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' }}>카카오맵에서 보기</a>
+                <button onClick={() => window.location.reload()} style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' }}>새로고침</button>
               </div>
             </div>
           ) : !sdkReady ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-tertiary)', fontSize: 13 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>
               지도 로딩 중...
             </div>
           ) : null}
@@ -307,14 +307,14 @@ export default function MapClient() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--sp-xs)' }}>
                   <span style={{
-                    fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 4,
+                    fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', padding: '1px 6px', borderRadius: 4,
                     background: `${LAYER_CONF[selectedPin.layer].color}20`,
                     color: LAYER_CONF[selectedPin.layer].color,
                   }}>
                     {LAYER_CONF[selectedPin.layer].icon} {LAYER_CONF[selectedPin.layer].label}
                   </span>
                 </div>
-                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>{selectedPin.name}</div>
+                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{selectedPin.name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{selectedPin.address}</div>
                 {selectedPin.extra && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 'var(--sp-xs)' }}>{selectedPin.extra}</div>}
               </div>
@@ -336,12 +336,12 @@ export default function MapClient() {
                 display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px',
                 borderBottom: '1px solid var(--border)', cursor: 'pointer',
               }}>
-                <span style={{ fontSize: 16 }}>{LAYER_CONF[pin.layer].icon}</span>
+                <span style={{ fontSize: 'var(--fs-sm)' }}>{LAYER_CONF[pin.layer].icon}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pin.name}</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pin.name}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{pin.address}</div>
                 </div>
-                {pin.extra && <span style={{ fontSize: 'var(--fs-xs)', color: LAYER_CONF[pin.layer].color, fontWeight: 600, flexShrink: 0 }}>{pin.extra}</span>}
+                {pin.extra && <span style={{ fontSize: 'var(--fs-xs)', color: LAYER_CONF[pin.layer].color, fontWeight: 'var(--fw-title)', flexShrink: 0 }}>{pin.extra}</span>}
               </div>
             ))}
           </div>

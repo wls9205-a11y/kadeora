@@ -22,12 +22,12 @@ async function SigunguLinks({ region }: { region: string }) {
   if (items.length === 0) return null;
   return (
     <section style={{ marginBottom: 14 }}>
-      <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>{region} 시군구별 아파트 시세</h2>
+      <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 8px' }}>{region} 시군구별 아파트 시세</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
         {items.slice(0, 15).map(([sg, cnt]) => (
-          <Link key={sg} href={`/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sg)}`} style={{ padding: '8px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 12 }}>
-            <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{sg}</div>
-            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{cnt}개 단지</div>
+          <Link key={sg} href={`/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sg)}`} style={{ padding: '8px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 'var(--fs-xs)' }}>
+            <div style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{sg}</div>
+            <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{cnt}개 단지</div>
           </Link>
         ))}
       </div>
@@ -338,18 +338,18 @@ export default async function RegionLandingPage({ params }: Props) {
       ]}} />
       {/* 헤더 */}
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
-        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
+        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
           <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
           <span>›</span>
           <Link href="/apt" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>부동산</Link>
           <span>›</span>
-          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{decoded}</span>
+          <span style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{decoded}</span>
         </nav>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={`/api/og?title=${encodeURIComponent(decoded + ' 부동산')}&design=2&category=apt&subtitle=${encodeURIComponent('청약·실거래·재개발·미분양')}`} alt={`${decoded} 부동산 정보 — 청약 실거래 재개발 미분양 종합`} width={1200} height={630} style={{ width: '100%', maxHeight: 160, objectFit: 'cover', display: 'block', borderRadius: 'var(--radius-md)', marginBottom: 'var(--sp-md)', border: '1px solid var(--border)' }} loading="lazy" />
         {/* NV-1 — h1 도 title 과 같은 공식(개정 근거: 최종지시서_M4NV §4 A-2). 이모지는 뺀다. */}
-        <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)' }}>{decoded} 아파트 분양·청약 일정</h1>
-        <time dateTime={new Date().toISOString()} style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
+        <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{decoded} 아파트 분양·청약 일정</h1>
+        <time dateTime={new Date().toISOString()} style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{new Date().toLocaleDateString('ko-KR')} 기준</time>
         <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
           청약 {data.subscriptions.length}건 · 실거래 {data.transactions.length}건 · 재개발 {data.redevelopments.length}건 · 미분양 {data.unsolds.length}건
           {(() => { const plc = data.subscriptions.filter((s: any) => s.is_price_limit).length; return plc > 0 ? ` · 분양가상한제 ${plc}건` : ''; })()}
@@ -358,7 +358,7 @@ export default async function RegionLandingPage({ params }: Props) {
       </div>
 
       {/* SEO 가시적 텍스트 */}
-      <p className="site-description" style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.7, margin: '0 0 14px', wordBreak: 'keep-all' }}>
+      <p className="site-description" style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.6, margin: '0 0 14px', wordBreak: 'keep-all' }}>
         {decoded} 지역의 최신 부동산 정보를 종합 제공합니다. 아파트 청약 모집공고 요약, 실거래가 시세, 재개발·재건축 진행 현황, 미분양 현황을 한눈에 확인하세요.
         {data.subscriptions.length > 0 && ` 현재 ${data.subscriptions.length}건의 청약이 진행 중이며, 입주자모집공고 핵심 정보를 카더라에서 확인할 수 있습니다.`}
       </p>
@@ -386,12 +386,12 @@ export default async function RegionLandingPage({ params }: Props) {
                   offset += pct;
                   return <circle key={item.label} cx="40" cy="40" r="30" fill="none" stroke={item.color} strokeWidth="10" strokeDasharray={`${dash} ${gap}`} transform={`rotate(${rotation} 40 40)`} />;
                 })}
-                <text x="40" y="37" textAnchor="middle" style={{ fontSize: 14, fontWeight: 600, fill: 'var(--text-primary)' }}>{total}</text>
-                <text x="40" y="50" textAnchor="middle" style={{ fontSize: 10, fill: 'var(--text-tertiary)' }}>현장</text>
+                <text x="40" y="37" textAnchor="middle" style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', fill: 'var(--text-primary)' }}>{total}</text>
+                <text x="40" y="50" textAnchor="middle" style={{ fontSize: 'var(--fs-2xs)', fill: 'var(--text-tertiary)' }}>현장</text>
               </svg>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 8px', marginTop: 6, justifyContent: 'center' }}>
                 {items.filter(i => i.count > 0).map(i => (
-                  <span key={i.label} style={{ fontSize: 10, color: i.color }}>● {i.label} {i.count}</span>
+                  <span key={i.label} style={{ fontSize: 'var(--fs-2xs)', color: i.color }}>● {i.label} {i.count}</span>
                 ))}
               </div>
             </>);
@@ -406,9 +406,9 @@ export default async function RegionLandingPage({ params }: Props) {
             { icon: '🏚️', label: '미분양', count: data.unsolds.length, max: 50, color: 'var(--accent-red)' },
           ].map(s => (
             <div key={s.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
-              <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.label}</div>
-              <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: s.count > 0 ? s.color : 'var(--text-tertiary)' }}>{s.count}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', marginBottom: 2 }}>{s.icon}</div>
+              <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{s.label}</div>
+              <div style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', color: s.count > 0 ? s.color : 'var(--text-tertiary)' }}>{s.count}</div>
               <div style={{ height: 3, borderRadius: 4, background: 'var(--bg-hover)', marginTop: 'var(--sp-xs)', overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${Math.min((s.count / s.max) * 100, 100)}%`, borderRadius: 4, background: s.color }} />
               </div>
@@ -425,24 +425,24 @@ export default async function RegionLandingPage({ params }: Props) {
         const tradeAvg = tradeAmts.length > 0 ? Math.round(tradeAmts.reduce((s: number, a: number) => s + a, 0) / tradeAmts.length) : 0;
         return (
           <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '14px', marginBottom: 'var(--sp-lg)' }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>💰 {decoded} 분양가 현황 <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)' }}>{ps.count}개 현장 기준</span></div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 10 }}>💰 {decoded} 분양가 현황 <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)' }}>{ps.count}개 현장 기준</span></div>
             <div style={{ display: 'grid', gridTemplateColumns: tradeAvg > 0 ? 'repeat(3, minmax(0,1fr))' : 'repeat(2, minmax(0,1fr))', gap: 6 }}>
               <div style={{ background: 'rgba(59,123,246,0.05)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--brand)' }}>{fmtA(ps.avgMin)}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>평균 최저 분양가</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: 'var(--brand)' }}>{fmtA(ps.avgMin)}</div>
+                <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>평균 최저 분양가</div>
               </div>
               <div style={{ background: 'rgba(248,113,113,0.05)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--accent-red)' }}>{fmtA(ps.avgMax)}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>평균 최고 분양가</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: 'var(--accent-red)' }}>{fmtA(ps.avgMax)}</div>
+                <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>평균 최고 분양가</div>
               </div>
               {tradeAvg > 0 && (
                 <div style={{ background: 'rgba(52,211,153,0.05)', borderRadius: 'var(--radius-sm)', padding: '8px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--accent-green)' }}>{fmtA(tradeAvg)}</div>
-                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>실거래 평균 ({tradeAmts.length}건)</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: 'var(--accent-green)' }}>{fmtA(tradeAvg)}</div>
+                  <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>실거래 평균 ({tradeAmts.length}건)</div>
                 </div>
               )}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 6, paddingTop: 6, borderTop: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 6, paddingTop: 6, borderTop: '1px solid var(--border)' }}>
               <span>최저 {fmtA(ps.lowestMin)}</span>
               <span>최고 {fmtA(ps.highestMax)}</span>
             </div>
@@ -454,15 +454,15 @@ export default async function RegionLandingPage({ params }: Props) {
            ⚠️ 시기는 원문 정밀도 그대로(salePeriodText)·기준일 병기. 지나간 시기는 upcomingItems 가 뺀다. */}
       {(data.upcoming.length > 0 || data.recentSeeds.length > 0) && (
         <section style={{ marginBottom: 'var(--sp-2xl)' }} aria-labelledby="region-upcoming">
-          <h2 id="region-upcoming" style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>📅 {decoded} 분양예정 단지 <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)', marginLeft: 6 }}>{data.upcoming.length}곳</span></h2>
+          <h2 id="region-upcoming" style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 10 }}>📅 {decoded} 분양예정 단지 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{data.upcoming.length}곳</span></h2>
           {data.upcoming.length > 0 && (
             <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: 6 }}>
               {data.upcoming.map((u) => (
                 <li key={u.slug} style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--sp-sm)', fontSize: 'var(--fs-sm)', padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)' }}>
-                  <Link href={`/apt/${encodeURIComponent(u.slug)}`} style={{ minWidth: 0, color: 'var(--text-primary)', fontWeight: 600, textDecoration: 'none', overflowWrap: 'anywhere' }}>
-                    {u.name}{u.sigungu ? <span style={{ fontWeight: 400, color: 'var(--text-tertiary)', marginLeft: 6, fontSize: 11 }}>{u.sigungu}</span> : null}
+                  <Link href={`/apt/${encodeURIComponent(u.slug)}`} style={{ minWidth: 0, color: 'var(--text-primary)', fontWeight: 'var(--fw-title)', textDecoration: 'none', overflowWrap: 'anywhere' }}>
+                    {u.name}{u.sigungu ? <span style={{ fontWeight: 'var(--fw-quiet)', color: 'var(--text-tertiary)', marginLeft: 6, fontSize: 'var(--fs-xs)' }}>{u.sigungu}</span> : null}
                   </Link>
-                  <span style={{ flexShrink: 0, textAlign: 'right', color: 'var(--text-secondary)', fontSize: 11 }}>
+                  <span style={{ flexShrink: 0, textAlign: 'right', color: 'var(--text-secondary)', fontSize: 'var(--fs-xs)' }}>
                     {u.text}{u.asof ? <span style={{ display: 'block', color: 'var(--text-tertiary)' }}>{String(u.asof).slice(0, 10)} 보도 기준</span> : null}
                   </span>
                 </li>
@@ -471,8 +471,8 @@ export default async function RegionLandingPage({ params }: Props) {
           )}
           {data.recentSeeds.length > 0 && (
             <>
-              <h3 style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', margin: '12px 0 6px' }}>최근 등록 · 분양 시기 미확인</h3>
-              <p style={{ margin: 0, fontSize: 12, lineHeight: 1.8, color: 'var(--text-secondary)', wordBreak: 'keep-all' }}>
+              <h3 style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', margin: '12px 0 6px' }}>최근 등록 · 분양 시기 미확인</h3>
+              <p style={{ margin: 0, fontSize: 'var(--fs-xs)', lineHeight: 1.6, color: 'var(--text-secondary)', wordBreak: 'keep-all' }}>
                 {data.recentSeeds.map((r, i) => (
                   <React.Fragment key={r.slug}>
                     {i > 0 ? ' · ' : ''}
@@ -488,7 +488,7 @@ export default async function RegionLandingPage({ params }: Props) {
       {/* 청약 섹션 */}
       {data.subscriptions.length > 0 && (
         <section style={{ marginBottom: 'var(--sp-2xl)' }}>
-          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>📋 최근 청약 {(() => { const plCount = data.subscriptions.filter((s: any) => s.is_price_limit).length; return plCount > 0 ? <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent-purple)', marginLeft: 6 }}>분양가상한제 {plCount}건</span> : null; })()}</h2>
+          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 10 }}>📋 최근 청약 {(() => { const plCount = data.subscriptions.filter((s: any) => s.is_price_limit).length; return plCount > 0 ? <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--accent-purple)', marginLeft: 6 }}>분양가상한제 {plCount}건</span> : null; })()}</h2>
           {data.subscriptions.map((s: any) => (
             <Link key={s.id} href={`/apt/${s.id}`} style={{
               display: 'flex', gap: 10, textDecoration: 'none', padding: 'var(--sp-md) var(--card-p)',
@@ -499,17 +499,17 @@ export default async function RegionLandingPage({ params }: Props) {
               <RegionThumb region={decoded} meta={data.siteMeta.get(s.house_nm)} name={s.house_nm} w={72} size={54} />
               <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.house_nm}</span>
-                {s.is_price_limit && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: 'rgba(139,92,246,0.1)', color: 'var(--accent-purple)', flexShrink: 0 }}>상한제</span>}
-                {s.brand_name && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', flexShrink: 0 }}>{s.brand_name}</span>}
-                {s.project_type && s.project_type !== '민간' && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: s.project_type === '재개발' ? 'rgba(251,146,60,0.1)' : 'rgba(52,211,153,0.1)', color: s.project_type === '재개발' ? 'var(--accent-orange)' : 'var(--accent-green)', flexShrink: 0 }}>{s.project_type}</span>}
-                {s.is_regulated_area && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: 'rgba(239,68,68,0.08)', color: 'var(--accent-red)', flexShrink: 0 }}>규제</span>}
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.house_nm}</span>
+                {s.is_price_limit && <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', padding: '1px 5px', borderRadius: 4, background: 'rgba(139,92,246,0.1)', color: 'var(--accent-purple)', flexShrink: 0 }}>상한제</span>}
+                {s.brand_name && <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', padding: '1px 5px', borderRadius: 4, background: 'rgba(59,123,246,0.08)', color: 'var(--brand)', flexShrink: 0 }}>{s.brand_name}</span>}
+                {s.project_type && s.project_type !== '민간' && <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', padding: '1px 5px', borderRadius: 4, background: s.project_type === '재개발' ? 'rgba(251,146,60,0.1)' : 'rgba(52,211,153,0.1)', color: s.project_type === '재개발' ? 'var(--accent-orange)' : 'var(--accent-green)', flexShrink: 0 }}>{s.project_type}</span>}
+                {s.is_regulated_area && <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', padding: '1px 5px', borderRadius: 4, background: 'rgba(239,68,68,0.08)', color: 'var(--accent-red)', flexShrink: 0 }}>규제</span>}
               </div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
                 {s.constructor_nm ? `${s.constructor_nm} · ` : ''}{s.tot_supply_hshld_co}세대 · ~{s.rcept_endde?.slice(5)}
-                {s.loan_rate && <span style={{ marginLeft: 4, fontSize: 10, fontWeight: 600, padding: '1px 4px', borderRadius: 4, background: s.loan_rate.includes('무이자') ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)', color: s.loan_rate.includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)' }}>중도금 {s.loan_rate}</span>}
+                {s.loan_rate && <span style={{ marginLeft: 4, fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', padding: '1px 4px', borderRadius: 4, background: s.loan_rate.includes('무이자') ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)', color: s.loan_rate.includes('무이자') ? 'var(--accent-green)' : 'var(--accent-yellow)' }}>중도금 {s.loan_rate}</span>}
               </div>
-              {s.ai_summary && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {s.ai_summary}</div>}
+              {s.ai_summary && <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🤖 {s.ai_summary}</div>}
               {/* 분양가 (house_type_info에서 추출) */}
               {(() => {
                 const hti = s.house_type_info;
@@ -520,8 +520,8 @@ export default async function RegionLandingPage({ params }: Props) {
                 const pMax = Math.max(...prices);
                 return (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginTop: 'var(--sp-xs)' }}>
-                    <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)' }}>💰 {fmtPrice(pMin)}{pMax !== pMin ? `~${fmtPrice(pMax)}` : ''}</span>
-                    {s.price_per_pyeong_avg > 0 && <span style={{ fontSize: 10, color: 'var(--accent-purple)' }}>평당 {s.price_per_pyeong_avg.toLocaleString()}만</span>}
+                    <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', color: 'var(--brand)' }}>💰 {fmtPrice(pMin)}{pMax !== pMin ? `~${fmtPrice(pMax)}` : ''}</span>
+                    {s.price_per_pyeong_avg > 0 && <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--accent-purple)' }}>평당 {s.price_per_pyeong_avg.toLocaleString()}만</span>}
                   </div>
                 );
               })()}
@@ -534,7 +534,7 @@ export default async function RegionLandingPage({ params }: Props) {
       {/* 실거래 섹션 */}
       {data.transactions.length > 0 && (
         <section style={{ marginBottom: 'var(--sp-2xl)' }}>
-          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>💰 최근 실거래</h2>
+          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 10 }}>💰 최근 실거래</h2>
           {data.transactions.map((t: any, i: number) => (
             <div key={i} style={{
               display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px',
@@ -549,13 +549,13 @@ export default async function RegionLandingPage({ params }: Props) {
                      특히 재개발은 11건 중 9건이 진짜 조감도다(R1 의 최대 수확).
                      세 섹션의 RegionThumb 을 «같이» 걷어내지 말 것. */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{t.apt_name}</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{t.apt_name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{t.deal_date} · {t.exclusive_area}㎡</div>
               </div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--accent-blue)', textAlign: 'right', minWidth: 50 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--accent-blue)', textAlign: 'right', minWidth: 50 }}>
                 {fmtPrice(t.deal_amount)}
                 {t.exclusive_area > 0 && t.deal_amount > 0 && (
-                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 500 }}>평당 {fmtPrice(Math.round(t.deal_amount / (t.exclusive_area / 3.3058)))}</div>
+                  <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-body)' }}>평당 {fmtPrice(Math.round(t.deal_amount / (t.exclusive_area / 3.3058)))}</div>
                 )}
               </div>
             </div>
@@ -566,7 +566,7 @@ export default async function RegionLandingPage({ params }: Props) {
       {/* 재개발 섹션 */}
       {data.redevelopments.length > 0 && (
         <section style={{ marginBottom: 'var(--sp-2xl)' }}>
-          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>🏗️ 재개발 현황</h2>
+          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 10 }}>🏗️ 재개발 현황</h2>
           {data.redevelopments.map((r: any) => (
             <div key={r.id} style={{
               display: 'flex', alignItems: 'center', gap: 10,
@@ -576,12 +576,12 @@ export default async function RegionLandingPage({ params }: Props) {
               {/* R1: hero 체인 — 재개발. 부산 11건 중 9건이 조감도로 바뀐다(최대 수확). */}
               <RegionThumb region={decoded} meta={data.siteMeta.get(r.district_name)} name={r.district_name} w={56} size={42} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{r.district_name}</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{r.district_name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{r.region}</div>
               </div>
               <span style={{
                 fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 4,
-                background: 'var(--bg-hover)', color: 'var(--accent-orange)', fontWeight: 600, flexShrink: 0,
+                background: 'var(--bg-hover)', color: 'var(--accent-orange)', fontWeight: 'var(--fw-title)', flexShrink: 0,
               }}>
                 {r.stage || '진행중'}
               </span>
@@ -593,7 +593,7 @@ export default async function RegionLandingPage({ params }: Props) {
       {/* 미분양 섹션 */}
       {data.unsolds.length > 0 && (
         <section style={{ marginBottom: 'var(--sp-2xl)' }}>
-          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>🏚️ 미분양</h2>
+          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 10 }}>🏚️ 미분양</h2>
           {data.unsolds.map((u: any) => (
             <div key={u.id} style={{
               display: 'flex', alignItems: 'center', gap: 10,
@@ -602,8 +602,8 @@ export default async function RegionLandingPage({ params }: Props) {
             }}>
               {/* R1: hero 체인 — 미분양. */}
               <RegionThumb region={decoded} meta={data.siteMeta.get(u.house_nm)} name={u.house_nm} w={56} size={42} />
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1, minWidth: 0 }}>{u.house_nm}</div>
-              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--accent-red)', flexShrink: 0 }}>{u.tot_unsold_hshld_co}세대</span>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', flex: 1, minWidth: 0 }}>{u.house_nm}</div>
+              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: 'var(--accent-red)', flexShrink: 0 }}>{u.tot_unsold_hshld_co}세대</span>
             </div>
           ))}
         </section>
@@ -611,8 +611,8 @@ export default async function RegionLandingPage({ params }: Props) {
 
       {/* SSR 지역 분석 텍스트 — Featured Snippet 타겟 */}
       <section className="region-summary" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 14 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>{decoded} 부동산 시장 요약</h2>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0 }}>
+        <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 8px' }}>{decoded} 부동산 시장 요약</h2>
+        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
           {decoded} 지역에는 현재 청약 {data.subscriptions.length}건, 실거래 {data.transactions.length}건, 재개발·재건축 {data.redevelopments.length}건, 미분양 {data.unsolds.length}건의 부동산 정보가 등록되어 있습니다.
           {data.transactions.length > 0 && ` 최근 실거래 기준 평균 매매가는 ${(() => { const avg = Math.round(data.transactions.reduce((s: number, t: any) => s + (t.deal_amount || 0), 0) / data.transactions.length); return avg >= 10000 ? (avg / 10000).toFixed(1) + '억원' : avg.toLocaleString() + '만원'; })()}이며, 가장 최근 거래는 ${data.transactions[0]?.apt_name || ''} 단지입니다.`}
           {data.redevelopments.length > 0 && ` 재개발·재건축 사업이 ${data.redevelopments.length}건 진행 중이어서 향후 공급 물량이 기대됩니다.`}
@@ -626,7 +626,7 @@ export default async function RegionLandingPage({ params }: Props) {
 
       {/* 테마 분석 */}
       <section style={{ marginBottom: 14 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>테마별 분석</h2>
+        <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 8px' }}>테마별 분석</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
           {[
             { slug: 'price-up', label: '가격 상승 아파트' },
@@ -636,33 +636,33 @@ export default async function RegionLandingPage({ params }: Props) {
             { slug: 'high-trade', label: '거래 활발 단지' },
             { slug: 'high-jeonse-ratio', label: '전세가율 높은 단지' },
           ].map(t => (
-            <Link key={t.slug} href={`/apt/theme/${t.slug}?region=${encodeURIComponent(decoded)}`} style={{ padding: '8px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>{t.label}</Link>
+            <Link key={t.slug} href={`/apt/theme/${t.slug}?region=${encodeURIComponent(decoded)}`} style={{ padding: '8px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)' }}>{t.label}</Link>
           ))}
         </div>
       </section>
 
       {/* NV-1 — 가시 FAQ 3문답. 위 JSON-LD 와 «같은 말» 이다(구조화 데이터만 있는 FAQ 금지). */}
       <section style={{ marginBottom: 'var(--sp-xl)' }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>{decoded} 분양 자주 묻는 질문</h2>
-        <dl style={{ margin: 0, fontSize: 12, lineHeight: 1.7, color: 'var(--text-secondary)', wordBreak: 'keep-all' }}>
+        <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 8px' }}>{decoded} 분양 자주 묻는 질문</h2>
+        <dl style={{ margin: 0, fontSize: 'var(--fs-xs)', lineHeight: 1.6, color: 'var(--text-secondary)', wordBreak: 'keep-all' }}>
           {/* E-11 — 질문형 FAQ. JSON-LD 와 «같은 말» (위 FAQPage 에 같은 배열을 싣는다) */}
           {data.upcomingFaq.map((f) => (
             <React.Fragment key={f.q}>
-              <dt style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: 8 }}>{f.q}</dt>
+              <dt style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginTop: 8 }}>{f.q}</dt>
               <dd style={{ margin: '2px 0 0' }}>{f.a}</dd>
             </React.Fragment>
           ))}
-          <dt style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: 8 }}>{decoded} 아파트 분양 일정은 어디서 확인하나요?</dt>
+          <dt style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginTop: 8 }}>{decoded} 아파트 분양 일정은 어디서 확인하나요?</dt>
           <dd style={{ margin: '2px 0 0' }}>이 페이지에서 {decoded} 아파트 분양·청약 일정을 매일 갱신합니다. 지금은 청약 {data.subscriptions.length}건을 접수 일정·분양가와 함께 보고 있습니다.</dd>
-          <dt style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: 8 }}>{decoded} 미분양·줍줍(무순위)은 어디서 보나요?</dt>
+          <dt style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginTop: 8 }}>{decoded} 미분양·줍줍(무순위)은 어디서 보나요?</dt>
           <dd style={{ margin: '2px 0 0' }}>
             {decoded} 미분양·선착순 현장 {data.unsolds.length}건을{' '}
-            <Link href={`/apt/unsold/${encodeURIComponent(decoded)}`} style={{ color: 'var(--brand)', fontWeight: 600 }}>{decoded} 미분양 페이지</Link>에서 잔여세대와 함께 볼 수 있습니다.
+            <Link href={`/apt/unsold/${encodeURIComponent(decoded)}`} style={{ color: 'var(--brand)', fontWeight: 'var(--fw-title)' }}>{decoded} 미분양 페이지</Link>에서 잔여세대와 함께 볼 수 있습니다.
           </dd>
-          <dt style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: 8 }}>{decoded} 재개발 진행 단계는 어떻게 보나요?</dt>
+          <dt style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginTop: 8 }}>{decoded} 재개발 진행 단계는 어떻게 보나요?</dt>
           <dd style={{ margin: '2px 0 0' }}>
             {decoded} 재개발·재건축 {data.redevelopments.length}건의 조합설립·사업시행·관리처분 단계를{' '}
-            <Link href="/apt/redev" style={{ color: 'var(--brand)', fontWeight: 600 }}>재개발 현황</Link>에서 단계별로 확인하세요.
+            <Link href="/apt/redev" style={{ color: 'var(--brand)', fontWeight: 'var(--fw-title)' }}>재개발 현황</Link>에서 단계별로 확인하세요.
           </dd>
         </dl>
       </section>
@@ -671,7 +671,7 @@ export default async function RegionLandingPage({ params }: Props) {
       <div style={{ textAlign: 'center', padding: 20 }}>
         <Link href="/apt" style={{
           display: 'inline-block', padding: '12px 28px', background: 'var(--brand)',
-          color: 'var(--text-inverse)', borderRadius: 'var(--radius-md)', fontWeight: 500, fontSize: 'var(--fs-base)', textDecoration: 'none',
+          color: 'var(--text-inverse)', borderRadius: 'var(--radius-md)', fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-base)', textDecoration: 'none',
         }}>
           전체 부동산 정보 보기 →
         </Link>

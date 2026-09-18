@@ -54,6 +54,42 @@
     "f": "src/app/(main)/stock/[symbol]/vs/[target]/page.tsx",
     "l": 58,
     "raw": "'clamp(20px, 5vw, 28px)'"
+   },
+   {
+    "f": "src/app/(main)/apt/complex/ComplexClient.tsx",
+    "l": 170,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/apt/complex/[name]/error.tsx",
+    "l": 5,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/apt/complex/[name]/page.tsx",
+    "l": 711,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/apt/data/page.tsx",
+    "l": 139,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/apt/diagnose/DiagnoseClient.tsx",
+    "l": 138,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/apt/diagnose/DiagnoseClient.tsx",
+    "l": 152,
+    "raw": "56",
+    "note": "over-ladder"
    }
   ],
   "ls-positive-zeroed": [
@@ -68,6 +104,18 @@
     "f": "src/app/(main)/stock/[symbol]/page.tsx",
     "l": 291,
     "raw": "\"-.0125em\""
+   }
+  ],
+  "lh-unit": [
+   {
+    "f": "src/app/(main)/apt/map/MapClient.tsx",
+    "l": 194,
+    "raw": "'44px'"
+   },
+   {
+    "f": "src/app/(main)/apt/map/MapClient.tsx",
+    "l": 198,
+    "raw": "'54px'"
    }
   ]
  },

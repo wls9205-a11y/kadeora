@@ -154,7 +154,7 @@ export default async function AptStageRegionHub({ params }: Props) {
         <span aria-hidden="true">›</span>
         <Link href="/apt" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>부동산</Link>
         <span aria-hidden="true">›</span>
-        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{region} {def.label}</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{region} {def.label}</span>
       </nav>
 
       <HubHero
@@ -173,7 +173,7 @@ export default async function AptStageRegionHub({ params }: Props) {
                   padding: '6px 12px',
                   borderRadius: 'var(--radius-pill)',
                   fontSize: 'var(--fs-xs)',
-                  fontWeight: 500,
+                  fontWeight: 'var(--fw-body)',
                   color: 'var(--text-secondary)',
                   background: 'var(--bg-hover)',
                   textDecoration: 'none',
@@ -224,7 +224,7 @@ export default async function AptStageRegionHub({ params }: Props) {
       >
         <h2
           id="stage-regions"
-          style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 var(--sp-sm)' }}
+          style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 var(--sp-sm)' }}
         >
           다른 지역 {def.label}
         </h2>
@@ -237,7 +237,7 @@ export default async function AptStageRegionHub({ params }: Props) {
                 padding: '6px 12px',
                 borderRadius: 'var(--radius-pill)',
                 fontSize: 'var(--fs-xs)',
-                fontWeight: 500,
+                fontWeight: 'var(--fw-body)',
                 color: 'var(--text-secondary)',
                 background: 'var(--bg-hover)',
                 textDecoration: 'none',

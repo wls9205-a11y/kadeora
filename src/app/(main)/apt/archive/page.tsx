@@ -87,15 +87,15 @@ const CHIP: React.CSSProperties = {
   minHeight: 32,
   padding: '0 11px',
   borderRadius: 'var(--radius-pill)',
-  fontSize: 11.5,
-  fontWeight: 600,
+  fontSize: 'var(--fs-2xs)',
+  fontWeight: 'var(--fw-title)',
   textDecoration: 'none',
   border: '1px solid var(--border)',
   whiteSpace: 'nowrap',
 };
 const chipStyle = (active: boolean): React.CSSProperties =>
   active
-    ? { ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 500 }
+    ? { ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 'var(--fw-body)' }
     : { ...CHIP, background: 'var(--bg-surface)', color: 'var(--text-secondary)' };
 
 const ROW: React.CSSProperties = {
@@ -141,10 +141,10 @@ export default async function AptArchivePage({ searchParams }: { searchParams?: 
       <div className="kd-list-main">
         <h1 className="sr-only">{scope} 지난 아파트 청약 공고</h1>
 
-        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-tertiary)', padding: '0 6px', marginBottom: 10 }}>
+        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', padding: '0 6px', marginBottom: 10 }}>
           <Link href="/apt" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>부동산</Link>
           <span aria-hidden>›</span>
-          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>지난 공고</span>
+          <span style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>지난 공고</span>
         </nav>
 
         <div role="group" aria-label="지역 선택" style={ROW}>
@@ -158,12 +158,12 @@ export default async function AptArchivePage({ searchParams }: { searchParams?: 
           <div role="group" aria-label="연도 선택" style={ROW}>
             <Link href={href({ year: null })} style={chipStyle(!year)}>
               전체
-              <span style={{ fontSize: 10, opacity: year ? 0.6 : 0.8 }}>{data.total}</span>
+              <span style={{ fontSize: 'var(--fs-2xs)', opacity: year ? 0.6 : 0.8 }}>{data.total}</span>
             </Link>
             {data.years.map((y) => (
               <Link key={y.year} href={href({ year: y.year })} style={chipStyle(year === y.year)}>
                 {y.year}
-                <span style={{ fontSize: 10, opacity: year === y.year ? 0.8 : 0.6 }}>{y.cnt}</span>
+                <span style={{ fontSize: 'var(--fs-2xs)', opacity: year === y.year ? 0.8 : 0.6 }}>{y.cnt}</span>
               </Link>
             ))}
           </div>
@@ -211,11 +211,11 @@ export default async function AptArchivePage({ searchParams }: { searchParams?: 
                 ← 이전
               </Link>
             ) : null}
-            <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>
               {pageNum} / {data.total_pages}
             </span>
             {pageNum < data.total_pages ? (
-              <Link href={href({ page: pageNum + 1 })} style={{ ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 500, minHeight: 40, padding: '0 16px' }}>
+              <Link href={href({ page: pageNum + 1 })} style={{ ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 'var(--fw-body)', minHeight: 40, padding: '0 16px' }}>
                 다음 →
               </Link>
             ) : null}

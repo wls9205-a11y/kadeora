@@ -160,6 +160,14 @@ export function transformFile(abs: string, holds: Set<string>, ledger: Ledger, a
           }
         }
       }
+    } else if (!onlyTw && ts.isJsxAttribute(node) && node.name.getText() === 'fontWeight') {
+      // (나)형 SVG 속성 굵기 — var() 가 안 먹으니 값만 700 캡(화면계 800+ 금지).
+      const init = node.initializer;
+      const expr = init && ts.isJsxExpression(init) ? init.expression : init;
+      if (expr) for (const lf of leaves(expr as ts.Expression, sf)) {
+        const v = typeof lf.leaf === 'number' ? lf.leaf : typeof lf.leaf === 'string' && /^\d+$/.test(lf.leaf) ? +lf.leaf : null;
+        if (v != null && v >= 800) { replace(lf.node, typeof lf.leaf === 'string' ? '"700"' : '700'); bump(`fw ${v}→num(cap)`); }
+      }
     } else if (!onlyTw && ts.isJsxAttribute(node) && node.name.getText() === 'fontSize') {
       const init = node.initializer;
       const expr = init && ts.isJsxExpression(init) ? init.expression : init;

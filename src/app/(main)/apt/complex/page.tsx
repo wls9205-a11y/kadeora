@@ -132,19 +132,19 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
       }} />
 
       {/* ═══ 최소 헤더 ═══ */}
-      <nav style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6, display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
+      <nav style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 6, display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
         <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>홈</Link><span>›</span>
         <Link href="/apt" style={{ color: 'inherit', textDecoration: 'none' }}>부동산</Link><span>›</span>
         {selectedRegion ? (<><Link href="/apt/complex" style={{ color: 'inherit', textDecoration: 'none' }}>단지백과</Link><span>›</span><span style={{ color: 'var(--text-primary)' }}>{selectedRegion}</span></>) : (<span style={{ color: 'var(--text-primary)' }}>단지백과</span>)}
       </nav>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-          <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+          <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: 0 }}>
             {selectedRegion ? `${selectedRegion} 단지백과` : '단지백과'}
           </h1>
-          <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600 }}>{displayCount.toLocaleString()}개</span>
+          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)' }}>{displayCount.toLocaleString()}개</span>
           {selectedRegion && (
-            <Link href="/apt/complex" style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)', textDecoration: 'none', background: 'rgba(59,123,246,0.1)', padding: '3px 10px', borderRadius: 'var(--radius-sm)' }}>✕ 전체</Link>
+            <Link href="/apt/complex" style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', color: 'var(--brand)', textDecoration: 'none', background: 'rgba(59,123,246,0.1)', padding: '3px 10px', borderRadius: 'var(--radius-sm)' }}>✕ 전체</Link>
           )}
         </div>
         <ShareButtons title={`${selectedRegion || '전국'} 단지백과 — ${displayCount.toLocaleString()}개 아파트 비교`} contentType="page" contentRef="apt-complex" />
@@ -152,7 +152,7 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
 
       {/* ═══ 지역별 현황 — 도넛 + 타일 (부동산 메인 스타일) ═══ */}
       <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>지역별 현황</div>
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 6 }}>지역별 현황</div>
 
         {/* 도넛 + 범례 */}
         <div style={{
@@ -174,21 +174,21 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
                 return arc;
               });
             })()}
-            <text x={50} y={46} textAnchor="middle" style={{ fontSize: 10, fontWeight: 600, fill: 'var(--text-secondary)' }}>{selectedRegion || '전체'}</text>
-            <text x={50} y={60} textAnchor="middle" style={{ fontSize: 13, fontWeight: 700, fill: 'var(--text-primary)' }}>{displayCount.toLocaleString()}</text>
+            <text x={50} y={46} textAnchor="middle" style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', fill: 'var(--text-secondary)' }}>{selectedRegion || '전체'}</text>
+            <text x={50} y={60} textAnchor="middle" style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', fill: 'var(--text-primary)' }}>{displayCount.toLocaleString()}</text>
           </svg>
 
           {/* 연차 범례 */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 80 }}>
-            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 1 }}>연차별 분포 · 총 {donutTotal.toLocaleString()}개</div>
+            <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginBottom: 1 }}>연차별 분포 · 총 {donutTotal.toLocaleString()}개</div>
             {(() => {
               const ageColors: Record<string, string> = { '신축': '#3B7BF6', '5년차': '#22d3ee', '10년차': '#8b5cf6', '15년차': '#f59e0b', '20년차': '#f97316', '25년차': '#ef4444', '30년+': '#dc2626' };
               return ageDonut.map(a => (
                 <div key={a.group} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ width: 7, height: 7, borderRadius: '50%', background: ageColors[a.group], flexShrink: 0 }} />
-                  <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{a.group}</span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginLeft: 'auto', fontVariantNumeric: 'tabular-nums' }}>
-                    {a.count.toLocaleString()}<span style={{ fontSize: 10, fontWeight: 400, opacity: 0.5, marginLeft: 1 }}>개</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>{a.group}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', marginLeft: 'auto', fontVariantNumeric: 'tabular-nums' }}>
+                    {a.count.toLocaleString()}<span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-quiet)', opacity: 0.5, marginLeft: 1 }}>개</span>
                   </span>
                 </div>
               ));
@@ -212,8 +212,8 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--sp-xs)' }}>
-                    <span style={{ fontSize: 13, fontWeight: isActive ? 600 : 500, color: isActive ? 'var(--brand-navy)' : 'var(--text-primary)', whiteSpace: 'nowrap', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.region}</span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: isActive ? 'var(--brand-navy)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>{r.count.toLocaleString()}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: isActive ? 'var(--fw-title)' : 'var(--fw-body)', color: isActive ? 'var(--brand-navy)' : 'var(--text-primary)', whiteSpace: 'nowrap', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.region}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: isActive ? 'var(--brand-navy)' : 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>{r.count.toLocaleString()}</span>
                   </div>
                   <div style={{ display: 'flex', width: '100%', height: 3, borderRadius: 4, overflow: 'hidden', marginTop: 2, background: 'var(--bg-hover)' }}>
                     {/* kd-brand-exempt: width 가 pct 인 «비율 막대» — 데이터 시각화다.
@@ -239,22 +239,22 @@ export default async function ComplexPage({ searchParams }: { searchParams: Prom
       {/* SEO 허브 링크 — 크롤 심도 + 롱테일 키워드 */}
       <div style={{ marginTop: 20 }}>
         <section style={{ marginBottom: 16 }}>
-          <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>테마별 분석</h2>
+          <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 8px' }}>테마별 분석</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
             {[
               { s: 'price-up', l: '📈 가격 상승' }, { s: 'price-down', l: '📉 가격 하락' },
               { s: 'low-jeonse-ratio', l: '🛡️ 전세가율↓' }, { s: 'high-jeonse-ratio', l: '⚠️ 전세가율↑' },
               { s: 'new-built', l: '🏗️ 신축' }, { s: 'high-trade', l: '🔥 거래활발' },
             ].map(t => (
-              <Link key={t.s} href={`/apt/theme/${t.s}${selectedRegion ? `?region=${encodeURIComponent(selectedRegion)}` : ''}`} style={{ padding: '8px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'center' }}>{t.l}</Link>
+              <Link key={t.s} href={`/apt/theme/${t.s}${selectedRegion ? `?region=${encodeURIComponent(selectedRegion)}` : ''}`} style={{ padding: '8px 10px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', textAlign: 'center' }}>{t.l}</Link>
             ))}
           </div>
         </section>
         <section style={{ marginBottom: 16 }}>
-          <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>지역별 시세</h2>
+          <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 8px' }}>지역별 시세</h2>
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
             {REGIONS.map(r => (
-              <Link key={r} href={`/apt/region/${encodeURIComponent(r)}`} style={{ padding: '4px 10px', borderRadius: 16, fontSize: 11, textDecoration: 'none', fontWeight: 600, background: 'var(--bg-surface)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>{r}</Link>
+              <Link key={r} href={`/apt/region/${encodeURIComponent(r)}`} style={{ padding: '4px 10px', borderRadius: 16, fontSize: 'var(--fs-xs)', textDecoration: 'none', fontWeight: 'var(--fw-title)', background: 'var(--bg-surface)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>{r}</Link>
             ))}
           </div>
         </section>

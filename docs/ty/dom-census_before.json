@@ -1,7 +1,7 @@
 {
  "label": "before",
- "base": "http://localhost:3000",
- "at": "2026-09-18T01:30:22.793Z",
+ "base": "http://localhost:3001",
+ "at": "2026-09-18T02:00:48.780Z",
  "screens": {
   "home@desktop": {
    "textNodes": 136,
@@ -146,33 +146,32 @@
    "pageOverflow": 0
   },
   "blog-slug@desktop": {
-   "textNodes": 363,
-   "combos": 88,
-   "sizes": 17,
+   "textNodes": 357,
+   "combos": 84,
+   "sizes": 16,
    "sizeHist": {
     "10px": 2,
     "11px": 2,
     "12px": 1,
     "12.5px": 3,
     "13px": 10,
-    "14px": 98,
-    "15px": 25,
-    "16px": 168,
+    "14px": 95,
+    "15px": 24,
+    "16px": 167,
     "17px": 1,
     "18px": 30,
     "19px": 1,
     "20px": 3,
     "21px": 8,
     "24px": 4,
-    "26px": 1,
     "28px": 4,
     "32px": 2
    },
    "weights": 5,
-   "lineHeights": 41,
+   "lineHeights": 39,
    "letterSpacings": 12,
    "gaps": 13,
-   "paddings": 55,
+   "paddings": 54,
    "pageOverflow": 0
   },
   "stock@desktop": {
@@ -402,29 +401,30 @@
    "pageOverflow": 0
   },
   "blog-slug@mobile": {
-   "textNodes": 336,
-   "combos": 83,
-   "sizes": 13,
+   "textNodes": 342,
+   "combos": 86,
+   "sizes": 14,
    "sizeHist": {
     "10px": 2,
     "12px": 1,
     "13px": 36,
-    "14px": 63,
-    "15px": 169,
-    "16px": 15,
+    "14px": 66,
+    "15px": 170,
+    "16px": 16,
     "17px": 8,
     "18px": 21,
     "20px": 11,
     "23px": 4,
+    "26px": 1,
     "28px": 4,
     "30px": 1,
     "32px": 1
    },
    "weights": 5,
-   "lineHeights": 36,
+   "lineHeights": 37,
    "letterSpacings": 11,
    "gaps": 11,
-   "paddings": 50,
+   "paddings": 51,
    "pageOverflow": 0
   },
   "stock@mobile": {

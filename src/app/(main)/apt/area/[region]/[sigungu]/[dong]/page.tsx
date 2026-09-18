@@ -65,46 +65,46 @@ export default async function DongHubPage({ params }: Props) {
       <JsonLd data={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: `${SITE_URL}/apt` }, { '@type': 'ListItem', position: 3, name: region, item: `${SITE_URL}/apt/region/${encodeURIComponent(region)}` }, { '@type': 'ListItem', position: 4, name: sigungu, item: `${SITE_URL}/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}` }, { '@type': 'ListItem', position: 5, name: dong }] }} />
       <JsonLd data={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }} />
 
-      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)', flexWrap: 'wrap' }}>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)', flexWrap: 'wrap' }}>
         <Link href="/apt" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>부동산</Link><span>›</span>
         <Link href={`/apt/region/${encodeURIComponent(region)}`} style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>{region}</Link><span>›</span>
         <Link href={`/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}`} style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>{sigungu}</Link><span>›</span>
-        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{dong}</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{dong}</span>
       </nav>
 
-      <h1 style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>{dong} 아파트 실거래가<span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-tertiary)', marginLeft: 8 }}>{profiles.length}개 단지</span></h1>
+      <h1 style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 8px' }}>{dong} 아파트 실거래가<span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', marginLeft: 8 }}>{profiles.length}개 단지</span></h1>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
         {[{ l: '평균 매매가', v: fmtAmount(avg) }, { l: '전세가율', v: avgJR > 0 ? `${avgJR}%` : '-' }, { l: '1년 거래', v: `${totalTrades}건` }].map((k, i) => (
-          <div key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 10, textAlign: 'center' }}><div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{k.l}</div><div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{k.v}</div></div>
+          <div key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 10, textAlign: 'center' }}><div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{k.l}</div><div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)' }}>{k.v}</div></div>
         ))}
       </div>
 
-      <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--text-secondary)', marginBottom: 16, padding: '12px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+      <p style={{ fontSize: 'var(--fs-xs)', lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: 16, padding: '12px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
         {region} {sigungu} {dong}에는 <strong>{profiles.length}개</strong> 아파트가 있습니다. 평균 매매가 <strong>{fmtAmount(avg)}</strong>{avgJR > 0 && `, 전세가율 ${avgJR}%`}.
         {wp.length > 0 && ` 최고가 ${wp.sort((a: any, b: any) => b.latest_sale_price - a.latest_sale_price)[0].apt_name}(${fmtAmount(wp[0].latest_sale_price)}).`}
         {` 출처: 국토교통부 실거래가 공개시스템.`}
       </p>
 
       <section style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>{dong} 아파트 단지</h2>
+        <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 10px' }}>{dong} 아파트 단지</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {profiles.map((p: any, i: number) => (
             <Link key={i} href={`/apt/complex/${encodeURIComponent(p.apt_name)}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none' }}>
-              <div><div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{p.apt_name}</div><div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{p.built_year ? `${p.built_year}년` : ''} · {p.age_group || ''}</div></div>
-              <div style={{ textAlign: 'right' }}><div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{p.latest_sale_price > 0 ? fmtAmount(p.latest_sale_price) : '-'}</div>{p.jeonse_ratio > 0 && <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>전세가율 {p.jeonse_ratio}%</div>}</div>
+              <div><div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{p.apt_name}</div><div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{p.built_year ? `${p.built_year}년` : ''} · {p.age_group || ''}</div></div>
+              <div style={{ textAlign: 'right' }}><div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)' }}>{p.latest_sale_price > 0 ? fmtAmount(p.latest_sale_price) : '-'}</div>{p.jeonse_ratio > 0 && <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>전세가율 {p.jeonse_ratio}%</div>}</div>
             </Link>
           ))}
         </div>
       </section>
 
-      <section style={{ marginBottom: 20 }}><h2 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px' }}>자주 묻는 질문</h2>{faq.map((f, i) => (<details key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '10px 14px', marginBottom: 6 }}><summary style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer' }}>{f.q}</summary><p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>{f.a}</p></details>))}</section>
+      <section style={{ marginBottom: 20 }}><h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', margin: '0 0 10px' }}>자주 묻는 질문</h2>{faq.map((f, i) => (<details key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '10px 14px', marginBottom: 6 }}><summary style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', cursor: 'pointer' }}>{f.q}</summary><p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 8 }}>{f.a}</p></details>))}</section>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 40 }}>
-        <Link href={`/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}`} style={{ flex: 1, display: 'block', textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>← {sigungu} 전체</Link>
-        <Link href={`/apt/complex?region=${encodeURIComponent(region)}`} style={{ flex: 1, display: 'block', textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', textDecoration: 'none', fontSize: 12, fontWeight: 500, color: '#fff' }}>📊 단지백과</Link>
+        <Link href={`/apt/area/${encodeURIComponent(region)}/${encodeURIComponent(sigungu)}`} style={{ flex: 1, display: 'block', textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', border: '1px solid var(--border)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)' }}>← {sigungu} 전체</Link>
+        <Link href={`/apt/complex?region=${encodeURIComponent(region)}`} style={{ flex: 1, display: 'block', textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: '#fff' }}>📊 단지백과</Link>
       </div>
-      <footer style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center', paddingBottom: 40 }}>데이터 출처: 국토교통부 실거래가 공개시스템 · 카더라</footer>
+      <footer style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', textAlign: 'center', paddingBottom: 40 }}>데이터 출처: 국토교통부 실거래가 공개시스템 · 카더라</footer>
     </article>
   );
 }

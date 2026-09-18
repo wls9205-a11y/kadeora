@@ -109,35 +109,35 @@ export default async function ComparePage({ params }: Props) {
         mainEntity: faq.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
       }} />
 
-      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
         <Link href="/apt" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>부동산</Link><span>›</span>
-        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>단지 비교</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>단지 비교</span>
       </nav>
 
-      <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 16px', lineHeight: 1.3 }}>
-        {a.apt_name} <span style={{ color: 'var(--text-tertiary)', fontWeight: 500 }}>vs</span> {b.apt_name}
+      <h1 style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 16px', lineHeight: 1.3 }}>
+        {a.apt_name} <span style={{ color: 'var(--text-tertiary)', fontWeight: 'var(--fw-body)' }}>vs</span> {b.apt_name}
       </h1>
 
       {/* 비교 테이블 */}
       <div style={{ marginBottom: 20, border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
         {/* 헤더 */}
         <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ padding: '10px 8px', fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>항목</div>
-          <div style={{ padding: '10px 8px', fontSize: 12, fontWeight: 500, color: 'var(--accent-blue)', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{a.apt_name}</div>
-          <div style={{ padding: '10px 8px', fontSize: 12, fontWeight: 500, color: 'var(--accent-blue)', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{b.apt_name}</div>
+          <div style={{ padding: '10px 8px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)' }}>항목</div>
+          <div style={{ padding: '10px 8px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--accent-blue)', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{a.apt_name}</div>
+          <div style={{ padding: '10px 8px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--accent-blue)', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{b.apt_name}</div>
         </div>
         {/* 행 */}
         {rows.map((r, i) => (
           <div key={i} style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none', background: r.highlight ? 'rgba(37, 99, 235, 0.05)' : 'transparent' }}>
-            <div style={{ padding: '8px', fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>{r.label}</div>
-            <div style={{ padding: '8px', fontSize: 12, fontWeight: r.highlight ? 700 : 500, color: 'var(--text-primary)', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{r.va}</div>
-            <div style={{ padding: '8px', fontSize: 12, fontWeight: r.highlight ? 700 : 500, color: 'var(--text-primary)', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{r.vb}</div>
+            <div style={{ padding: '8px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)' }}>{r.label}</div>
+            <div style={{ padding: '8px', fontSize: 'var(--fs-xs)', fontWeight: r.highlight ? 'var(--fw-num)' : 'var(--fw-body)', color: 'var(--text-primary)', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{r.va}</div>
+            <div style={{ padding: '8px', fontSize: 'var(--fs-xs)', fontWeight: r.highlight ? 'var(--fw-num)' : 'var(--fw-body)', color: 'var(--text-primary)', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{r.vb}</div>
           </div>
         ))}
       </div>
 
       {/* 유니크 분석 문단 */}
-      <section style={{ marginBottom: 20, padding: '14px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: 13, lineHeight: 1.7, color: 'var(--text-secondary)' }}>
+      <section style={{ marginBottom: 20, padding: '14px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-xs)', lineHeight: 1.6, color: 'var(--text-secondary)' }}>
         <p style={{ margin: 0 }}>
           <strong>{a.apt_name}</strong>은 {a.region_nm} {a.sigungu} {a.dong || ''} 소재{a.built_year ? ` ${a.built_year}년 준공` : ''} 아파트이고,
           <strong> {b.apt_name}</strong>은 {b.region_nm} {b.sigungu} {b.dong || ''} 소재{b.built_year ? ` ${b.built_year}년 준공` : ''} 아파트입니다.
@@ -149,28 +149,28 @@ export default async function ComparePage({ params }: Props) {
 
       {/* FAQ */}
       <section style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>자주 묻는 질문</h2>
+        <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 10px' }}>자주 묻는 질문</h2>
         {faq.map((f, i) => (
           <details key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '10px 14px', marginBottom: 6 }}>
-            <summary style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', cursor: 'pointer' }}>{f.q}</summary>
-            <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8, lineHeight: 1.6 }}>{f.a}</p>
+            <summary style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)', cursor: 'pointer' }}>{f.q}</summary>
+            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 8, lineHeight: 1.6 }}>{f.a}</p>
           </details>
         ))}
       </section>
 
       {/* 단지별 상세 링크 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 40 }}>
-        <Link href={`/apt/complex/${encodeURIComponent(a.apt_name)}`} style={{ display: 'block', textAlign: 'center', padding: '14px', borderRadius: 'var(--radius-sm)', background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', textDecoration: 'none', fontSize: 12, fontWeight: 500, color: '#fff' }}>{a.apt_name} 상세 →</Link>
-        <Link href={`/apt/complex/${encodeURIComponent(b.apt_name)}`} style={{ display: 'block', textAlign: 'center', padding: '14px', borderRadius: 'var(--radius-sm)', background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', textDecoration: 'none', fontSize: 12, fontWeight: 500, color: '#fff' }}>{b.apt_name} 상세 →</Link>
+        <Link href={`/apt/complex/${encodeURIComponent(a.apt_name)}`} style={{ display: 'block', textAlign: 'center', padding: '14px', borderRadius: 'var(--radius-sm)', background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: '#fff' }}>{a.apt_name} 상세 →</Link>
+        <Link href={`/apt/complex/${encodeURIComponent(b.apt_name)}`} style={{ display: 'block', textAlign: 'center', padding: '14px', borderRadius: 'var(--radius-sm)', background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: '#fff' }}>{b.apt_name} 상세 →</Link>
       </div>
 
-      <footer style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center', paddingBottom: 40 }}>
+      <footer style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', textAlign: 'center', paddingBottom: 40 }}>
         데이터 출처: 국토교통부 실거래가 공개시스템 · 카더라
       </footer>
       {/* LoginGate 기능 게이팅 (세션 108) */}
       <LoginGate feature="apt_compare_save" blurHeight={80}>
         <div style={{ padding: "8px 0" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", color: "var(--text-tertiary)" }}><span>비교 결과</span><span>저장 가능</span></div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 'var(--fs-xs)', padding: "4px 0", color: "var(--text-tertiary)" }}><span>비교 결과</span><span>저장 가능</span></div>
         </div>
       </LoginGate>
     </article>

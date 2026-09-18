@@ -102,7 +102,7 @@ export default async function BigEventsHubPage({ searchParams }: SearchProps) {
     <div style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '24px 16px' }}>
       <JsonLd data={itemListLd} />
 
-      <nav aria-label="breadcrumb" style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 10 }}>
+      <nav aria-label="breadcrumb" style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 10 }}>
         <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>홈</Link>
         <span style={{ margin: '0 6px', opacity: 0.5 }}>/</span>
         <Link href="/apt" style={{ color: 'inherit', textDecoration: 'none' }}>아파트</Link>
@@ -110,10 +110,10 @@ export default async function BigEventsHubPage({ searchParams }: SearchProps) {
         <span>대형 이벤트</span>
       </nav>
 
-      <h1 style={{ fontSize: 24, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 6px' }}>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 6px' }}>
         전국 재건축·재개발 대형 이벤트
       </h1>
-      <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 18px', lineHeight: 1.7 }}>
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: '0 0 18px', lineHeight: 1.6 }}>
         카더라가 추적하는 전국 주요 정비사업 단지 {events.length}곳의 현재 Stage·브랜드·시공사·세대수를 한눈에. 모든 정보는 공공 데이터와 내부 노트를 기반으로 하며, 수주 미확정 항목은 투명하게 표시합니다.
       </p>
 
@@ -131,8 +131,8 @@ export default async function BigEventsHubPage({ searchParams }: SearchProps) {
                 flexShrink: 0,
                 padding: '7px 14px',
                 borderRadius: 999,
-                fontSize: 12,
-                fontWeight: 500,
+                fontSize: 'var(--fs-xs)',
+                fontWeight: 'var(--fw-body)',
                 border: '1px solid var(--border)',
                 background: active ? 'var(--brand-navy)' : 'var(--bg-surface)',
                 color: active ? '#fff' : 'var(--text-secondary)',
@@ -154,8 +154,8 @@ export default async function BigEventsHubPage({ searchParams }: SearchProps) {
               flexShrink: 0,
               padding: '5px 10px',
               borderRadius: 6,
-              fontSize: 11,
-              fontWeight: 600,
+              fontSize: 'var(--fs-xs)',
+              fontWeight: 'var(--fw-title)',
               border: '1px solid var(--border)',
               background: activeStage === 'all' ? 'var(--bg-hover)' : 'transparent',
               color: activeStage === 'all' ? 'var(--text-primary)' : 'var(--text-tertiary)',
@@ -174,8 +174,8 @@ export default async function BigEventsHubPage({ searchParams }: SearchProps) {
                   flexShrink: 0,
                   padding: '5px 10px',
                   borderRadius: 6,
-                  fontSize: 11,
-                  fontWeight: 600,
+                  fontSize: 'var(--fs-xs)',
+                  fontWeight: 'var(--fw-title)',
                   border: '1px solid var(--border)',
                   background: active ? 'var(--bg-hover)' : 'transparent',
                   color: active ? 'var(--text-primary)' : 'var(--text-tertiary)',
@@ -191,7 +191,7 @@ export default async function BigEventsHubPage({ searchParams }: SearchProps) {
 
       {/* 카드 그리드 */}
       {filtered.length === 0 ? (
-        <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 13, border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)' }}>
+        <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)' }}>
           해당 조건의 이벤트가 아직 없습니다. 카더라가 지속적으로 업데이트 중입니다.
         </div>
       ) : (
@@ -201,23 +201,23 @@ export default async function BigEventsHubPage({ searchParams }: SearchProps) {
             const cardContent = (
               <>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 10, fontWeight: 500, padding: '2px 7px', borderRadius: 4, background: 'var(--brand-bg)', color: 'var(--brand)' }}>
+                  <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', padding: '2px 7px', borderRadius: 4, background: 'var(--brand-bg)', color: 'var(--brand)' }}>
                     Stage {e.stage ?? '-'} {STAGE_LABEL[e.stage] ? `· ${STAGE_LABEL[e.stage]}` : ''}
                   </span>
                   {e.constructor_status && e.constructor_status !== 'confirmed' && (
-                    <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'var(--warning-bg, rgba(234,179,8,0.08))', color: 'var(--text-tertiary)' }}>
+                    <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', padding: '2px 6px', borderRadius: 4, background: 'var(--warning-bg, rgba(234,179,8,0.08))', color: 'var(--text-tertiary)' }}>
                       {e.constructor_status === 'likely' ? '수주 유력' : '수주 미확정'}
                     </span>
                   )}
                 </div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 4 }}>
                   {e.name}
-                  {e.new_brand_name ? <span style={{ color: 'var(--text-secondary)', fontWeight: 600, fontSize: 13 }}> · {e.new_brand_name}</span> : null}
+                  {e.new_brand_name ? <span style={{ color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-xs)' }}> · {e.new_brand_name}</span> : null}
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 8 }}>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>
                   {e.region_sido || ''} {e.region_sigungu || ''} {e.region_dong || ''}
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                   {e.scale_before ?? '?'}세대 → <strong style={{ color: 'var(--text-primary)' }}>{e.scale_after ?? '?'}+세대</strong>
                   {Array.isArray(e.key_constructors) && e.key_constructors.length > 0 && (
                     <> · {e.key_constructors.join(', ')}</>
@@ -242,7 +242,7 @@ export default async function BigEventsHubPage({ searchParams }: SearchProps) {
                 ) : (
                   <Link href={`/apt/big-events/${encodeURIComponent(e.slug)}`} style={baseStyle} aria-label={`${e.name} 상세 보기`}>
                     {cardContent}
-                    <div style={{ marginTop: 8, fontSize: 11, color: 'var(--brand)' }}>이벤트 상세 →</div>
+                    <div style={{ marginTop: 8, fontSize: 'var(--fs-xs)', color: 'var(--brand)' }}>이벤트 상세 →</div>
                   </Link>
                 )}
               </li>
@@ -251,7 +251,7 @@ export default async function BigEventsHubPage({ searchParams }: SearchProps) {
         </ul>
       )}
 
-      <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 20, lineHeight: 1.6 }}>
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 20, lineHeight: 1.6 }}>
         ⚠️ 수주사·브랜드·세대수·일정은 공공 데이터 기준 최신 업데이트입니다. 확정되지 않은 정보는 &quot;수주 유력&quot;/&quot;수주 미확정&quot;로 표시합니다. 본 페이지는 투자자문이 아닙니다.
       </p>
     </div>

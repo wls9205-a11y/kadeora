@@ -1,0 +1,152 @@
+{
+ "label": "t4-3",
+ "base": "http://localhost:3000",
+ "at": "2026-09-18T02:01:18.691Z",
+ "screens": {
+  "apt-complex@desktop": {
+   "textNodes": 670,
+   "combos": 49,
+   "sizes": 11,
+   "sizeHist": {
+    "9px": 10,
+    "12px": 56,
+    "13px": 10,
+    "14px": 538,
+    "15px": 4,
+    "16px": 28,
+    "18px": 7,
+    "19px": 3,
+    "21px": 8,
+    "24px": 5,
+    "28px": 1
+   },
+   "weights": 5,
+   "lineHeights": 19,
+   "letterSpacings": 6,
+   "gaps": 11,
+   "paddings": 45,
+   "pageOverflow": 0
+  },
+  "apt-complex@mobile": {
+   "textNodes": 615,
+   "combos": 40,
+   "sizes": 11,
+   "sizeHist": {
+    "9px": 10,
+    "11px": 55,
+    "13px": 486,
+    "14px": 20,
+    "15px": 25,
+    "16px": 1,
+    "17px": 6,
+    "18px": 4,
+    "20px": 2,
+    "23px": 5,
+    "28px": 1
+   },
+   "weights": 5,
+   "lineHeights": 15,
+   "letterSpacings": 5,
+   "gaps": 10,
+   "paddings": 35,
+   "pageOverflow": 0
+  },
+  "apt-complex@w768": {
+   "textNodes": 664,
+   "combos": 46,
+   "sizes": 11,
+   "sizeHist": {
+    "9px": 10,
+    "12px": 56,
+    "13px": 5,
+    "14px": 538,
+    "15px": 4,
+    "16px": 27,
+    "18px": 7,
+    "19px": 3,
+    "21px": 8,
+    "24px": 5,
+    "28px": 1
+   },
+   "weights": 5,
+   "lineHeights": 18,
+   "letterSpacings": 6,
+   "gaps": 10,
+   "paddings": 42,
+   "pageOverflow": 0
+  },
+  "apt@desktop": {
+   "textNodes": 433,
+   "combos": 46,
+   "sizes": 13,
+   "sizeHist": {
+    "8.5px": 8,
+    "9.5px": 90,
+    "10px": 76,
+    "11px": 4,
+    "12px": 44,
+    "12.5px": 15,
+    "13px": 48,
+    "14px": 92,
+    "15px": 3,
+    "16px": 27,
+    "18px": 7,
+    "21px": 16,
+    "24px": 3
+   },
+   "weights": 5,
+   "lineHeights": 27,
+   "letterSpacings": 12,
+   "gaps": 10,
+   "paddings": 33,
+   "pageOverflow": 0
+  },
+  "apt@mobile": {
+   "textNodes": 404,
+   "combos": 41,
+   "sizes": 11,
+   "sizeHist": {
+    "8.5px": 8,
+    "9.5px": 85,
+    "10px": 76,
+    "12px": 43,
+    "13px": 128,
+    "14px": 3,
+    "15px": 35,
+    "16px": 3,
+    "17px": 3,
+    "20px": 16,
+    "23px": 4
+   },
+   "weights": 5,
+   "lineHeights": 21,
+   "letterSpacings": 11,
+   "gaps": 9,
+   "paddings": 31,
+   "pageOverflow": 0
+  },
+  "apt@w768": {
+   "textNodes": 410,
+   "combos": 37,
+   "sizes": 10,
+   "sizeHist": {
+    "8.5px": 8,
+    "9.5px": 85,
+    "10px": 76,
+    "12px": 44,
+    "13px": 43,
+    "14px": 95,
+    "16px": 34,
+    "18px": 5,
+    "21px": 16,
+    "24px": 4
+   },
+   "weights": 5,
+   "lineHeights": 20,
+   "letterSpacings": 10,
+   "gaps": 10,
+   "paddings": 28,
+   "pageOverflow": 0
+  }
+ }
+}

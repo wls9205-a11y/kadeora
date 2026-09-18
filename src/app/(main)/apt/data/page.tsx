@@ -83,14 +83,14 @@ export default async function AptDataPage() {
 
       {/* 헤더 */}
       <div style={{ padding: '24px 0 16px' }}>
-        <nav style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12, display: 'flex', gap: 4 }}>
+        <nav style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 12, display: 'flex', gap: 4 }}>
           <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
           <span>›</span>
           <Link href="/apt" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>부동산</Link>
           <span>›</span>
-          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>통계 자료실</span>
+          <span style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>통계 자료실</span>
         </nav>
-        <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8, letterSpacing: '-0.5px' }}>
+        <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 8, letterSpacing: '-0.4px' }}>
           📊 부동산 통계 자료실
         </h1>
         <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 20 }}>
@@ -108,15 +108,15 @@ export default async function AptDataPage() {
           { label: '업데이트', value: '매일', emoji: '🔄' },
         ].map(k => (
           <div key={k.label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 14, textAlign: 'center' }}>
-            <div style={{ fontSize: 24, marginBottom: 4 }}>{k.emoji}</div>
-            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)' }}>{k.value}</div>
+            <div style={{ fontSize: 'var(--fs-xl)', marginBottom: 4 }}>{k.emoji}</div>
+            <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{k.value}</div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{k.label}</div>
           </div>
         ))}
       </div>
 
       {/* 다운로드 카테고리 */}
-      <h2 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 14 }}>📥 데이터 카테고리</h2>
+      <h2 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 14 }}>📥 데이터 카테고리</h2>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12, marginBottom: 32 }}>
         {[
@@ -137,14 +137,14 @@ export default async function AptDataPage() {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
               <span style={{ fontSize: 28 }}>{item.icon}</span>
-              <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)' }}>{item.title}</div>
+              <div style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{item.title}</div>
             </div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 12 }}>{item.desc}</div>
             <div style={{ display: 'flex', gap: 8 }}>
               {item.links.map(l => (
                 <a key={l.label} href={l.href} download style={{
                   display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 14px',
-                  borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: 500,
+                  borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
                   textDecoration: 'none', background: `color-mix(in srgb, ${l.color} 15%, transparent)`,
                   color: l.color, border: `1px solid color-mix(in srgb, ${l.color} 30%, transparent)`,
                 }}>📥 {l.label}</a>
@@ -155,7 +155,7 @@ export default async function AptDataPage() {
       </div>
 
       {/* 지역별 데이터 */}
-      <h2 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 14 }}>🗺️ 지역별 데이터</h2>
+      <h2 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 14 }}>🗺️ 지역별 데이터</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8, marginBottom: 32 }}>
         {REGIONS.map(r => (
           <Link key={r.code} href={`/apt/region/${r.code}`} style={{
@@ -163,10 +163,10 @@ export default async function AptDataPage() {
             padding: '12px 14px', borderRadius: 'var(--radius-md)',
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
             textDecoration: 'none', color: 'var(--text-primary)',
-            fontSize: 'var(--fs-sm)', fontWeight: 600,
+            fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)',
           }}>
             <span>{r.label}</span>
-            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 400 }}>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-quiet)' }}>
               {regionCounts[r.code] || 0}건
             </span>
           </Link>
@@ -179,7 +179,7 @@ export default async function AptDataPage() {
         background: 'linear-gradient(135deg, var(--brand-bg), var(--accent-green-bg))',
         border: '1px solid var(--brand-border)',
       }}>
-        <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
+        <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 6 }}>
           더 많은 데이터를 원하시나요?
         </div>
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 16, lineHeight: 1.6 }}>
@@ -188,7 +188,7 @@ export default async function AptDataPage() {
         <Link href="/login?redirect=/apt/data" style={{
           display: 'inline-block', padding: '12px 32px', borderRadius: 'var(--radius-pill)',
           background: 'var(--kakao-bg)', color: 'var(--kakao-text)',
-          fontWeight: 600, fontSize: 'var(--fs-base)', textDecoration: 'none',
+          fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-base)', textDecoration: 'none',
         }}>
           카카오로 3초 가입
         </Link>
