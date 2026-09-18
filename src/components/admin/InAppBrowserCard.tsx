@@ -33,9 +33,9 @@ export default function InAppBrowserCard() {
     return () => { cancelled = true; };
   }, []);
 
-  if (err) return <div style={{ padding: 16, color: 'var(--accent-red)', fontSize: 12 }}>인앱 funnel 로드 실패: {err}</div>;
-  if (!data) return <div style={{ padding: 16, color: 'var(--text-tertiary)', fontSize: 12 }}>인앱 funnel 로딩 중…</div>;
-  if (!data.ok) return <div style={{ padding: 16, color: 'var(--accent-red)', fontSize: 12 }}>{data.error || '데이터 없음'}</div>;
+  if (err) return <div style={{ padding: 16, color: 'var(--accent-red)', fontSize: 'var(--fs-xs)' }}>인앱 funnel 로드 실패: {err}</div>;
+  if (!data) return <div style={{ padding: 16, color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>인앱 funnel 로딩 중…</div>;
+  if (!data.ok) return <div style={{ padding: 16, color: 'var(--accent-red)', fontSize: 'var(--fs-xs)' }}>{data.error || '데이터 없음'}</div>;
 
   const browsers = data.by_browser;
   const totalAttempts = browsers.reduce((s, b) => s + b.attempts, 0);
@@ -50,22 +50,22 @@ export default function InAppBrowserCard() {
       style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginTop: 16 }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>📱 인앱 브라우저 가입 funnel (14d)</h2>
-        <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+        <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', margin: 0 }}>📱 인앱 브라우저 가입 funnel (14d)</h2>
+        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
           전체 {totalAttempts.toLocaleString()} 시도 · 성공률 {overallPct}% · 인앱 차단군 {blockedPct}%
         </span>
       </div>
 
       <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', fontSize: 11, borderCollapse: 'collapse' }}>
+        <table style={{ width: '100%', fontSize: 'var(--fs-xs)', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1.5px solid var(--border)' }}>
-              <th style={{ padding: '6px 8px', textAlign: 'left', color: 'var(--text-tertiary)', fontWeight: 500 }}>브라우저</th>
-              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: 500 }}>시도</th>
-              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: 500 }}>OAuth 시작</th>
-              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: 500 }}>콜백</th>
-              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: 500 }}>성공</th>
-              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: 500 }}>성공률</th>
+              <th style={{ padding: '6px 8px', textAlign: 'left', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-body)' }}>브라우저</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-body)' }}>시도</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-body)' }}>OAuth 시작</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-body)' }}>콜백</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-body)' }}>성공</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-body)' }}>성공률</th>
             </tr>
           </thead>
           <tbody>
@@ -76,15 +76,15 @@ export default function InAppBrowserCard() {
               const isBlocked = DANGER_BROWSERS.has(b.browser_type);
               return (
                 <tr key={b.browser_type} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '6px 8px', fontWeight: 500, color: 'var(--text-primary)' }}>
+                  <td style={{ padding: '6px 8px', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)' }}>
                     {isBlocked && <span style={{ color: 'var(--accent-red)', marginRight: 4 }}>🚫</span>}
                     {b.browser_type}
                   </td>
                   <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{b.attempts.toLocaleString()}</td>
                   <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{b.oauth_started.toLocaleString()}</td>
                   <td style={{ padding: '6px 8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{b.oauth_callback.toLocaleString()}</td>
-                  <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)' }}>{b.success.toLocaleString()}</td>
-                  <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: badgeColor(b.success_pct, b.attempts) }}>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)' }}>{b.success.toLocaleString()}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 'var(--fw-num)', color: badgeColor(b.success_pct, b.attempts) }}>
                     {b.success_pct.toFixed(1)}%
                   </td>
                 </tr>
@@ -96,11 +96,11 @@ export default function InAppBrowserCard() {
 
       {data.daily.length > 0 && (
         <details style={{ marginTop: 12 }}>
-          <summary style={{ fontSize: 11, color: 'var(--text-tertiary)', cursor: 'pointer', fontWeight: 600 }}>
+          <summary style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', cursor: 'pointer', fontWeight: 'var(--fw-title)' }}>
             일별 상세 ({data.daily.length} 행)
           </summary>
           <div style={{ marginTop: 8, maxHeight: 240, overflowY: 'auto', overflowX: 'auto' }}>
-            <table style={{ width: '100%', fontSize: 10, borderCollapse: 'collapse' }}>
+            <table style={{ width: '100%', fontSize: 'var(--fs-2xs)', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th style={{ padding: '4px 6px', textAlign: 'left', color: 'var(--text-tertiary)' }}>날짜</th>
@@ -117,7 +117,7 @@ export default function InAppBrowserCard() {
                     <td style={{ padding: '4px 6px', color: 'var(--text-primary)' }}>{r.browser_type}</td>
                     <td style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-secondary)' }}>{r.attempts}</td>
                     <td style={{ padding: '4px 6px', textAlign: 'right', color: 'var(--text-primary)' }}>{r.success}</td>
-                    <td style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 700, color: badgeColor(Number(r.success_pct ?? 0), r.attempts) }}>
+                    <td style={{ padding: '4px 6px', textAlign: 'right', fontWeight: 'var(--fw-num)', color: badgeColor(Number(r.success_pct ?? 0), r.attempts) }}>
                       {r.success_pct != null ? `${Number(r.success_pct).toFixed(1)}%` : '-'}
                     </td>
                   </tr>

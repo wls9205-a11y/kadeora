@@ -114,10 +114,10 @@ export default function SignupFunnelWidget() {
     >
       {/* 헤더 */}
       <header style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <h2 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+        <h2 style={{ margin: 0, fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>
           🎯 가입 진단
         </h2>
-        <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
           오늘 vs 어제 · 24h funnel · 8h trend · 최근 가입
         </span>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -136,7 +136,7 @@ export default function SignupFunnelWidget() {
           <a
             href="/admin/signup-flow"
             style={{
-              fontSize: 11, fontWeight: 500,
+              fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
               padding: '6px 12px', borderRadius: 6,
               background: 'transparent', color: 'var(--text-secondary)',
               border: '1px solid var(--border)', textDecoration: 'none',
@@ -145,7 +145,7 @@ export default function SignupFunnelWidget() {
           <button
             onClick={fetchData}
             style={{
-              fontSize: 11, fontWeight: 500, padding: '6px 10px', borderRadius: 6,
+              fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', padding: '6px 10px', borderRadius: 6,
               background: 'transparent', color: 'var(--text-secondary)',
               border: '1px solid var(--border)', cursor: 'pointer',
             }}
@@ -154,10 +154,10 @@ export default function SignupFunnelWidget() {
       </header>
 
       {loading && !data && (
-        <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 12 }}>로드 중…</div>
+        <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>로드 중…</div>
       )}
       {err && !loading && (
-        <div style={{ padding: 10, fontSize: 12, color: 'var(--accent-red)', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.4)', borderRadius: 8 }}>
+        <div style={{ padding: 10, fontSize: 'var(--fs-xs)', color: 'var(--accent-red)', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.4)', borderRadius: 8 }}>
           위젯 데이터 가져오기 실패: {err}
         </div>
       )}
@@ -174,26 +174,26 @@ export default function SignupFunnelWidget() {
 
           {/* B) 24h funnel 미니 막대 */}
           <div>
-            <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', letterSpacing: 1, marginBottom: 6 }}>24H FUNNEL</div>
+            <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', letterSpacing: 0, marginBottom: 6 }}>24H FUNNEL</div>
             <FunnelMini funnel={funnel} />
           </div>
 
           {/* C+D 두 칼럼 — 8h sparkline + 최근 가입 */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
             <div>
-              <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', letterSpacing: 1, marginBottom: 6 }}>
-                8H TREND <span style={{ marginLeft: 6, color: 'var(--brand)', fontWeight: 500 }}>● 방문</span>
-                <span style={{ marginLeft: 6, color: 'var(--accent-green)', fontWeight: 500 }}>● 가입</span>
+              <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', letterSpacing: 0, marginBottom: 6 }}>
+                8H TREND <span style={{ marginLeft: 6, color: 'var(--brand)', fontWeight: 'var(--fw-body)' }}>● 방문</span>
+                <span style={{ marginLeft: 6, color: 'var(--accent-green)', fontWeight: 'var(--fw-body)' }}>● 가입</span>
               </div>
               <Sparkline rows={spark} />
             </div>
             <div>
-              <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', letterSpacing: 1, marginBottom: 6 }}>최근 가입 (5)</div>
+              <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', letterSpacing: 0, marginBottom: 6 }}>최근 가입 (5)</div>
               <RecentList rows={recent} />
             </div>
           </div>
 
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'right' }}>
+          <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', textAlign: 'right' }}>
             generated_at {data.generated_at ? new Date(data.generated_at).toLocaleTimeString('ko-KR') : '—'}
             {lastFetch && <> · 갱신 {new Date(lastFetch).toLocaleTimeString('ko-KR')} · 30s 자동</>}
           </div>
@@ -212,14 +212,14 @@ function KpiTile({ label, value, delta, highlight }: { label: string; value: num
       background: highlight ? 'rgba(52,211,153,0.06)' : 'var(--bg-base)',
       border: '1px solid var(--border)',
     }}>
-      <div style={{ fontSize: 9, fontWeight: 500, color: 'var(--text-tertiary)', letterSpacing: 1 }}>{label}</div>
+      <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', letterSpacing: 0 }}>{label}</div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 2 }}>
         <span style={{
-          fontSize: 22, fontWeight: 700, letterSpacing: -0.5,
+          fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-num)', letterSpacing: '-0.4px',
           color: highlight ? 'var(--accent-green)' : 'var(--text-primary)',
         }}>{fmtNum(value)}</span>
         {delta != null && (
-          <span style={{ fontSize: 10, fontWeight: 500, color: deltaColor(delta) }}>
+          <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: deltaColor(delta) }}>
             {fmtPct(delta)}
           </span>
         )}
@@ -249,19 +249,19 @@ function FunnelMini({ funnel }: { funnel: Funnel24h }) {
           : 'var(--accent-red)';
         return (
           <div key={s.key} style={{ display: 'grid', gridTemplateColumns: '52px 1fr 56px 70px', gap: 8, alignItems: 'center' }}>
-            <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-secondary)' }}>{s.label}</span>
+            <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-secondary)' }}>{s.label}</span>
             <div style={{ height: 14, background: 'var(--bg-base)', borderRadius: 3, overflow: 'hidden', border: '1px solid var(--border)' }}>
               <div style={{ width: `${w}%`, height: '100%', background: 'linear-gradient(90deg, #2563EB 0%, #60A5FA 100%)' }} />
             </div>
-            <span style={{ fontSize: 11, fontWeight: 700, textAlign: 'right' }}>{fmtNum(s.v)}</span>
-            <span style={{ fontSize: 9, fontWeight: 700, color: passColor, textAlign: 'right' }}>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', textAlign: 'right' }}>{fmtNum(s.v)}</span>
+            <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-num)', color: passColor, textAlign: 'right' }}>
               {passRate == null ? '—' : `통과 ${passRate.toFixed(0)}%`}
             </span>
           </div>
         );
       })}
       {/* 보조 KPI: 클릭→시도, 시도→가입 */}
-      <div style={{ display: 'flex', gap: 12, marginTop: 6, fontSize: 10, color: 'var(--text-tertiary)' }}>
+      <div style={{ display: 'flex', gap: 12, marginTop: 6, fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>
         <span>클릭→시도 <strong style={{ color: 'var(--text-secondary)', marginLeft: 2 }}>{Number(funnel.click_to_attempt_pct ?? 0).toFixed(1)}%</strong></span>
         <span>시도→가입 <strong style={{ color: 'var(--text-secondary)', marginLeft: 2 }}>{Number(funnel.attempt_to_signup_pct ?? 0).toFixed(1)}%</strong></span>
       </div>
@@ -271,7 +271,7 @@ function FunnelMini({ funnel }: { funnel: Funnel24h }) {
 
 function Sparkline({ rows }: { rows: SparkRow[] }) {
   if (!rows || rows.length === 0) {
-    return <div style={{ padding: 16, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 11 }}>데이터 없음</div>;
+    return <div style={{ padding: 16, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>데이터 없음</div>;
   }
   const sorted = [...rows].sort((a, b) => String(a.h ?? '').localeCompare(String(b.h ?? '')));
   const W = 320, H = 64, PADX = 6, PADY = 6;
@@ -293,7 +293,7 @@ function Sparkline({ rows }: { rows: SparkRow[] }) {
           <circle key={i} cx={xAt(i)} cy={yAt(signups[i])} r={3} style={{ fill: 'var(--accent-green)' }} />
         ) : null)}
       </svg>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--text-tertiary)', marginTop: 2 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
         {sorted.length > 0 && <span>{sorted[0].h ?? ''}h</span>}
         <span>최대 방문 {fmtNum(max)}</span>
         {sorted.length > 0 && <span>{sorted[sorted.length - 1].h ?? ''}h</span>}
@@ -304,7 +304,7 @@ function Sparkline({ rows }: { rows: SparkRow[] }) {
 
 function RecentList({ rows }: { rows: RecentSignup[] }) {
   if (!rows || rows.length === 0) {
-    return <div style={{ padding: 16, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 11 }}>최근 가입 없음</div>;
+    return <div style={{ padding: 16, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>최근 가입 없음</div>;
   }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -314,13 +314,13 @@ function RecentList({ rows }: { rows: RecentSignup[] }) {
           padding: '6px 10px', borderRadius: 6,
           background: 'var(--bg-base)', border: '1px solid var(--border)',
         }}>
-          <span style={{ fontSize: 11, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {r.email_masked || '—'}
           </span>
-          <span style={{ fontSize: 9, fontWeight: 500, color: 'var(--text-secondary)', padding: '1px 6px', borderRadius: 3, background: 'var(--bg-elevated)' }}>
+          <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-secondary)', padding: '1px 6px', borderRadius: 3, background: 'var(--bg-elevated)' }}>
             {r.source || r.provider || '—'}
           </span>
-          <span style={{ fontSize: 10, color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
             {fmtKstHm(r.created_at)}
           </span>
         </div>

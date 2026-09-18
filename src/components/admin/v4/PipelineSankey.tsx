@@ -35,7 +35,7 @@ export default function PipelineSankey({ rows }: { rows: Row[] }) {
 
   if (data.length === 0) {
     return (
-      <div style={{ fontSize: 12, color: 'var(--text-tertiary)', padding: 24, textAlign: 'center' }}>
+      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', padding: 24, textAlign: 'center' }}>
         24h 이슈 큐 데이터 없음
       </div>
     );
@@ -48,12 +48,12 @@ export default function PipelineSankey({ rows }: { rows: Row[] }) {
         const color = d.kind === 'ok' ? COLOR_OK : d.kind === 'pending' ? COLOR_PENDING : COLOR_BLOCK;
         const pct = (d.cnt / max) * 100;
         return (
-          <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 60px', gap: 8, alignItems: 'center', fontSize: 11 }}>
+          <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 60px', gap: 8, alignItems: 'center', fontSize: 'var(--fs-xs)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
               <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.label}</span>
               <div style={{ height: 14, width: `${pct}%`, background: color, borderRadius: 2, minWidth: 4 }} />
             </div>
-            <span style={{ textAlign: 'right', fontWeight: 700 }}>{d.cnt}</span>
+            <span style={{ textAlign: 'right', fontWeight: 'var(--fw-num)' }}>{d.cnt}</span>
           </div>
         );
       })}

@@ -38,8 +38,8 @@ const PANEL: React.CSSProperties = {
 
 const LABEL: React.CSSProperties = {
   display: 'block',
-  fontSize: 11,
-  fontWeight: 600,
+  fontSize: 'var(--fs-xs)',
+  fontWeight: 'var(--fw-title)',
   color: 'var(--text-tertiary)',
   marginBottom: 4,
 };
@@ -181,10 +181,10 @@ export default function AptCoverUploader() {
 
   return (
     <section style={{ ...PANEL, marginTop: 16 }} aria-label="조감도 업로드">
-      <h2 style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+      <h2 style={{ margin: '0 0 4px', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>
         조감도 업로드
       </h2>
-      <p style={{ margin: '0 0 12px', fontSize: 11.5, lineHeight: 1.6, color: 'var(--text-tertiary)' }}>
+      <p style={{ margin: '0 0 12px', fontSize: 'var(--fs-2xs)', lineHeight: 1.6, color: 'var(--text-tertiary)' }}>
         시행사·시공사에게 받은 조감도만 올립니다. 저장하면 상세 히어로 1순위와 큐레이션 캐러셀
         대형 노출에 바로 쓰입니다 (2순위 위성 · 3순위 이니셜 블록).
         <br />
@@ -201,7 +201,7 @@ export default function AptCoverUploader() {
         placeholder="예: 엄궁역 트라비스"
         style={INPUT}
       />
-      {searching && <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '6px 0 0' }}>검색 중…</p>}
+      {searching && <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', margin: '6px 0 0' }}>검색 중…</p>}
 
       {items.length > 0 && (
         <ul style={{ listStyle: 'none', margin: '8px 0 0', padding: 0, border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', maxHeight: 260, overflowY: 'auto' }}>
@@ -218,14 +218,14 @@ export default function AptCoverUploader() {
                 }}
               >
                 <span style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ display: 'block', fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span style={{ display: 'block', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {s.name}
                   </span>
-                  <span style={{ display: 'block', fontSize: 10.5, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span style={{ display: 'block', fontSize: 'var(--fs-3xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {[s.region, s.sigungu].filter(Boolean).join(' ')} · {s.slug}
                   </span>
                 </span>
-                <span style={{ flexShrink: 0, fontSize: 10, fontWeight: 500, color: s.hero_image_url ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>
+                <span style={{ flexShrink: 0, fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: s.hero_image_url ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>
                   {s.hero_image_url ? '조감도 있음' : s.satellite_image_url ? '위성만' : '이미지 없음'}
                 </span>
               </button>
@@ -237,9 +237,9 @@ export default function AptCoverUploader() {
       {/* 선택된 현장 */}
       {selected && (
         <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
-          <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+          <p style={{ margin: '0 0 10px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>
             {selected.name}
-            <span style={{ marginLeft: 6, fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>{selected.slug}</span>
+            <span style={{ marginLeft: 6, fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)' }}>{selected.slug}</span>
           </p>
 
           {selected.hero_image_url && (
@@ -251,7 +251,7 @@ export default function AptCoverUploader() {
                 alt=""
                 style={{ width: '100%', maxWidth: 360, borderRadius: 'var(--radius-sm)', display: 'block' }}
               />
-              <p style={{ margin: '4px 0 0', fontSize: 10.5, color: 'var(--text-tertiary)' }}>
+              <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-3xs)', color: 'var(--text-tertiary)' }}>
                 출처: {selected.hero_image_credit || '(없음)'}
               </p>
               <button
@@ -262,7 +262,7 @@ export default function AptCoverUploader() {
                   marginTop: 8, minHeight: 36, padding: '0 12px',
                   borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
                   background: 'var(--bg-base)', color: 'var(--accent-red)',
-                  fontSize: 12, fontWeight: 500, cursor: busy ? 'not-allowed' : 'pointer',
+                  fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', cursor: busy ? 'not-allowed' : 'pointer',
                 }}
               >
                 조감도 내리기
@@ -281,7 +281,7 @@ export default function AptCoverUploader() {
             placeholder="예: 대우건설 분양홍보팀 · 2026-08-20 메일 서면 허락"
             style={INPUT}
           />
-          <p style={{ margin: '4px 0 12px', fontSize: 10.5, color: 'var(--text-tertiary)' }}>
+          <p style={{ margin: '4px 0 12px', fontSize: 'var(--fs-3xs)', color: 'var(--text-tertiary)' }}>
             이 문구가 상세 페이지 이미지 하단에 출처로 표시됩니다.
           </p>
 
@@ -296,7 +296,7 @@ export default function AptCoverUploader() {
             placeholder="예: https://www.ihanulche.co.kr/sale/view/1083"
             style={INPUT}
           />
-          <p style={{ margin: '4px 0 12px', fontSize: 10.5, color: 'var(--text-tertiary)' }}>
+          <p style={{ margin: '4px 0 12px', fontSize: 'var(--fs-3xs)', color: 'var(--text-tertiary)' }}>
             apt_sites.official_url 에 함께 저장됩니다. 나중에 「이 사진 어디서 왔냐」에 답할 근거입니다.
           </p>
 
@@ -308,7 +308,7 @@ export default function AptCoverUploader() {
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             style={{ ...INPUT, paddingTop: 8 }}
           />
-          <p style={{ margin: '4px 0 0', fontSize: 10.5, color: 'var(--text-tertiary)' }}>
+          <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-3xs)', color: 'var(--text-tertiary)' }}>
             원본 그대로 올리세요. 서버가 1600px webp 로 변환해 저장합니다 (버킷 한도 2MB).
           </p>
 
@@ -330,7 +330,7 @@ export default function AptCoverUploader() {
               borderRadius: 'var(--radius-sm)', border: 'none',
               background: busy || !credit.trim() || !file ? 'var(--bg-sunken)' : 'var(--brand)',
               color: busy || !credit.trim() || !file ? 'var(--text-tertiary)' : 'var(--text-inverse)',
-              fontSize: 13.5, fontWeight: 600,
+              fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
               cursor: busy || !credit.trim() || !file ? 'not-allowed' : 'pointer',
             }}
           >
@@ -344,8 +344,8 @@ export default function AptCoverUploader() {
           role="status"
           style={{
             margin: '10px 0 0',
-            fontSize: 12,
-            fontWeight: 600,
+            fontSize: 'var(--fs-xs)',
+            fontWeight: 'var(--fw-title)',
             color: msg.kind === 'ok' ? 'var(--accent-green)' : 'var(--accent-red)',
           }}
         >

@@ -35,17 +35,17 @@ export default function AdminKPI({ label, value, delta, deltaColor = 'tertiary',
       borderLeft,
       minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4,
     }}>
-      <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: 0.3, textTransform: 'uppercase' }}>
+      <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
         {label}
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-        <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
+        <div style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', lineHeight: 1 }}>
           {value}
         </div>
-        {unit && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{unit}</span>}
+        {unit && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{unit}</span>}
       </div>
       {delta !== undefined && delta !== null && (
-        <div style={{ fontSize: 11, fontWeight: 600, color: DELTA_COLOR[deltaColor] }}>
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: DELTA_COLOR[deltaColor] }}>
           {delta}
         </div>
       )}

@@ -58,10 +58,10 @@ export default async function AbExperimentViewer({
   if (active.length === 0) {
     return (
       <section aria-label="A/B 실험" style={{ marginBottom: 18 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 6, color: 'var(--text-primary)' }}>
+        <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', marginBottom: 6, color: 'var(--text-primary)' }}>
           🧪 A/B 실험 ({windowDays}일)
         </h2>
-        <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
           진행 중 실험 없음. 등록된 실험: {experiments.map((e) => e.name).join(', ')}
         </div>
       </section>
@@ -70,7 +70,7 @@ export default async function AbExperimentViewer({
 
   return (
     <section aria-label="A/B 실험" style={{ marginBottom: 18 }}>
-      <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: 'var(--text-primary)' }}>
+      <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', marginBottom: 10, color: 'var(--text-primary)' }}>
         🧪 A/B 실험 ({windowDays}일)
       </h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -84,21 +84,21 @@ export default async function AbExperimentViewer({
               borderRadius: 'var(--radius-md, 10px)',
             }}
           >
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8, wordBreak: 'keep-all' }}>
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 8, wordBreak: 'keep-all' }}>
               {spec.label}
-              <span style={{ marginLeft: 8, fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+              <span style={{ marginLeft: 8, fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
                 {spec.name}
               </span>
             </div>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, fontVariantNumeric: 'tabular-nums' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-xs)', fontVariantNumeric: 'tabular-nums' }}>
               <thead style={{ background: 'var(--bg-hover)' }}>
                 <tr>
-                  <th style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600 }}>Variant</th>
-                  <th style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>View</th>
-                  <th style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>Click</th>
-                  <th style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>CTR</th>
-                  <th style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>vs A</th>
-                  <th style={{ padding: '6px 10px', textAlign: 'center', color: 'var(--text-secondary)', fontWeight: 600 }}>유의</th>
+                  <th style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)' }}>Variant</th>
+                  <th style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)' }}>View</th>
+                  <th style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)' }}>Click</th>
+                  <th style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)' }}>CTR</th>
+                  <th style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)' }}>vs A</th>
+                  <th style={{ padding: '6px 10px', textAlign: 'center', color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)' }}>유의</th>
                 </tr>
               </thead>
               <tbody>
@@ -107,16 +107,16 @@ export default async function AbExperimentViewer({
                   const vs = r.vs_control_pct === null ? null : Number(r.vs_control_pct);
                   return (
                     <tr key={r.variant} style={{ borderTop: '1px solid var(--border)' }}>
-                      <td style={{ padding: '6px 10px', fontWeight: 500, color: 'var(--text-primary)' }}>{r.variant}</td>
+                      <td style={{ padding: '6px 10px', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)' }}>{r.variant}</td>
                       <td style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)' }}>{Number(r.views).toLocaleString()}</td>
                       <td style={{ padding: '6px 10px', textAlign: 'right', color: 'var(--text-secondary)' }}>{Number(r.clicks).toLocaleString()}</td>
-                      <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 700, color: ctrTone(ctr) }}>
+                      <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 'var(--fw-num)', color: ctrTone(ctr) }}>
                         {ctr === null ? '—' : `${ctr.toFixed(2)}%`}
                       </td>
-                      <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 700, color: deltaTone(vs, r.significant) }}>
+                      <td style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 'var(--fw-num)', color: deltaTone(vs, r.significant) }}>
                         {r.variant === 'A' ? '—' : vs === null ? '—' : `${vs >= 0 ? '+' : ''}${vs.toFixed(1)}%`}
                       </td>
-                      <td style={{ padding: '6px 10px', textAlign: 'center', color: r.significant ? 'var(--accent-green)' : 'var(--text-tertiary)', fontSize: 11 }}>
+                      <td style={{ padding: '6px 10px', textAlign: 'center', color: r.significant ? 'var(--accent-green)' : 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>
                         {r.significant ? '✓' : '—'}
                       </td>
                     </tr>
@@ -127,7 +127,7 @@ export default async function AbExperimentViewer({
           </div>
         ))}
       </div>
-      <div style={{ marginTop: 6, fontSize: 10, color: 'var(--text-tertiary)' }}>
+      <div style={{ marginTop: 6, fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>
         유의 = views ≥ 100 + |Δ| ≥ 0.5%pt 차이. 정확한 통계 검정 (chi-square) 은 별도.
       </div>
     </section>

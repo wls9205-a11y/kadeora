@@ -232,17 +232,17 @@ export default function SignupFlowClient() {
         padding: '12px 14px', borderRadius: 10,
         background: 'var(--bg-elevated)', border: '1px solid var(--border)',
       }}>
-        <h1 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>📊 가입 플로우 진단</h1>
-        <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+        <h1 style={{ margin: 0, fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)' }}>📊 가입 플로우 진단</h1>
+        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
           dropped_step / OAuth / source 별 funnel 회귀 모니터링
         </span>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
           {data?.errors && data.errors.length > 0 && (
-            <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 999, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)' }} title={data.errors.join('\n')}>
+            <span style={{ fontSize: 'var(--fs-2xs)', padding: '3px 8px', borderRadius: 999, background: 'rgba(248,113,113,0.12)', color: 'var(--accent-red)' }} title={data.errors.join('\n')}>
               ⚠ rpc 부분 실패 {data.errors.length}건
             </span>
           )}
-          <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
+          <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>
             {lastFetch ? `${fmtTime(new Date(lastFetch).toISOString())} · 30s 자동` : '로드 중'}
           </span>
           <button onClick={fetchData} style={btnGhost()}>↻ 새로고침</button>
@@ -278,7 +278,7 @@ export default function SignupFlowClient() {
                 {droppedSteps.slice(0, 12).map((d) => (
                   <span key={d.step} style={{
                     padding: '6px 12px', borderRadius: 999,
-                    fontSize: 11, fontWeight: 500,
+                    fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
                     background: 'rgba(248,113,113,0.10)', color: 'var(--accent-red)',
                     border: '1px solid rgba(248,113,113,0.25)',
                   }}>
@@ -299,7 +299,7 @@ export default function SignupFlowClient() {
                     <Td align="right">{fmtNum(r.clicks)}</Td>
                     <Td align="right">{fmtNum(r.signups)}</Td>
                     <Td align="right">
-                      <span style={{ color: r.rate >= 30 ? 'var(--accent-green)' : r.rate >= 10 ? 'var(--accent-yellow)' : 'var(--accent-red)', fontWeight: 700 }}>
+                      <span style={{ color: r.rate >= 30 ? 'var(--accent-green)' : r.rate >= 10 ? 'var(--accent-yellow)' : 'var(--accent-red)', fontWeight: 'var(--fw-num)' }}>
                         {fmtPct(r.rate)}
                       </span>
                     </Td>
@@ -322,7 +322,7 @@ export default function SignupFlowClient() {
           {/* 7) 가입자 상세 */}
           <Section title="가입자 상세" subtitle="시드/실 토글, 이메일/소스 검색, 페이징">
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 8 }}>
-              <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-xs)' }}>
                 <input
                   type="checkbox"
                   checked={includeSeed}
@@ -342,20 +342,20 @@ export default function SignupFlowClient() {
                 style={{
                   flex: 1, minWidth: 180,
                   padding: '6px 10px', borderRadius: 6,
-                  fontSize: 11, color: 'var(--text-primary)',
+                  fontSize: 'max(16px, var(--fs-xs))', color: 'var(--text-primary)',
                   background: 'var(--bg-base)', border: '1px solid var(--border)',
                   outline: 'none',
                 }}
               />
               <button onClick={onApplySearch} style={btnGhost()}>검색</button>
-              {userTotal != null && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>총 {fmtNum(userTotal)}건</span>}
+              {userTotal != null && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>총 {fmtNum(userTotal)}건</span>}
               <div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>
                 <button
                   onClick={() => setUserOffset(Math.max(0, userOffset - userLimit))}
                   disabled={userOffset === 0}
                   style={btnGhost(userOffset === 0)}
                 >‹ 이전</button>
-                <span style={{ fontSize: 11, color: 'var(--text-tertiary)', alignSelf: 'center', padding: '0 6px' }}>
+                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', alignSelf: 'center', padding: '0 6px' }}>
                   {userOffset + 1}~{userOffset + userRows.length}
                 </span>
                 <button
@@ -368,7 +368,7 @@ export default function SignupFlowClient() {
             <UserTable rows={userRows} />
           </Section>
 
-          <div style={{ padding: '6px 10px', fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'right' }}>
+          <div style={{ padding: '6px 10px', fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', textAlign: 'right' }}>
             생성 시각: {data.generated_at ?? '—'}
           </div>
         </>
@@ -388,8 +388,8 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
       background: 'var(--bg-elevated)', border: '1px solid var(--border)',
     }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
-        <h2 style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>{title}</h2>
-        {subtitle && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{subtitle}</span>}
+        <h2 style={{ margin: 0, fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' }}>{title}</h2>
+        {subtitle && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{subtitle}</span>}
       </div>
       {children}
     </section>
@@ -404,7 +404,7 @@ function Banner({ tone = 'default', children }: { tone?: 'default' | 'danger'; c
       background: dangerC ? 'rgba(248,113,113,0.08)' : 'var(--bg-elevated)',
       border: dangerC ? '1px solid rgba(248,113,113,0.4)' : '1px solid var(--border)',
       color: dangerC ? 'var(--accent-red)' : 'var(--text-tertiary)',
-      fontSize: 12,
+      fontSize: 'var(--fs-xs)',
     }}>{children}</div>
   );
 }
@@ -425,12 +425,12 @@ function FunnelBars({ rows }: { rows: { label: string; key: string; count: numbe
           : 'var(--accent-red)';
         return (
           <div key={r.key} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 80px 90px', gap: 10, alignItems: 'center' }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>{r.label}</span>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)' }}>{r.label}</span>
             <div style={{ height: 22, background: 'var(--bg-base)', borderRadius: 4, overflow: 'hidden', border: '1px solid var(--border)' }}>
               <div style={{ width: `${w}%`, height: '100%', background: 'linear-gradient(90deg, #2563EB 0%, #60A5FA 100%)' }} />
             </div>
-            <span style={{ fontSize: 12, fontWeight: 700, textAlign: 'right' }}>{fmtNum(r.count)}</span>
-            <span style={{ fontSize: 10, color: passColor, fontWeight: 700, textAlign: 'right' }} title="이전 단계 대비 통과율">
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', textAlign: 'right' }}>{fmtNum(r.count)}</span>
+            <span style={{ fontSize: 'var(--fs-2xs)', color: passColor, fontWeight: 'var(--fw-num)', textAlign: 'right' }} title="이전 단계 대비 통과율">
               {passRate == null ? '—' : `통과 ${passRate.toFixed(0)}%`}
             </span>
           </div>
@@ -444,9 +444,9 @@ function DropCard({ label, pct, num, den, thresholds }: { label: string; pct: nu
   const c = pct >= thresholds.green ? 'var(--accent-green)' : pct >= thresholds.orange ? 'var(--accent-yellow)' : 'var(--accent-red)';
   return (
     <div style={{ padding: '12px 14px', borderRadius: 10, background: 'var(--bg-base)', border: '1px solid var(--border)' }}>
-      <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', letterSpacing: 1 }}>{label}</div>
-      <div style={{ fontSize: 24, fontWeight: 700, color: c, marginTop: 4 }}>{fmtPct(pct)}</div>
-      <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{fmtNum(num)} / {fmtNum(den)}</div>
+      <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', letterSpacing: 0 }}>{label}</div>
+      <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-num)', color: c, marginTop: 4 }}>{fmtPct(pct)}</div>
+      <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{fmtNum(num)} / {fmtNum(den)}</div>
     </div>
   );
 }
@@ -454,15 +454,15 @@ function DropCard({ label, pct, num, den, thresholds }: { label: string; pct: nu
 function Table({ head, children }: { head: string[]; children: React.ReactNode }) {
   return (
     <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-xs)' }}>
         <thead>
           <tr>
             {head.map((h, i) => (
               <th key={i} style={{
                 textAlign: i === 0 ? 'left' : 'right',
-                padding: '8px 10px', fontSize: 10, fontWeight: 500,
+                padding: '8px 10px', fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)',
                 color: 'var(--text-tertiary)', borderBottom: '1px solid var(--border)',
-                letterSpacing: 1,
+                letterSpacing: 0,
               }}>{h.toUpperCase()}</th>
             ))}
           </tr>
@@ -479,7 +479,7 @@ function Td({ children, align = 'left', highlight = false }: { children: React.R
       padding: '8px 10px', textAlign: align,
       borderBottom: '1px solid var(--border)',
       color: highlight ? 'var(--accent-red)' : 'inherit',
-      fontWeight: highlight ? 600 : 500,
+      fontWeight: highlight ? 'var(--fw-title)' : 'var(--fw-body)',
     }}>{children}</td>
   );
 }
@@ -548,7 +548,7 @@ function HourlyChart({ rows }: { rows: any[] }) {
         {sorted.map((r, i) => {
           const hh = n(r?.hour ?? r?.hh);
           if (hh % 4 !== 0) return null;
-          return <text key={i} x={xAt(i)} y={H - 2} fontSize={9} textAnchor="middle" style={{ fill: 'var(--text-tertiary)' }}>{hh}h</text>;
+          return <text key={i} x={xAt(i)} y={H - 2} fontSize={10} textAnchor="middle" style={{ fill: 'var(--text-tertiary)' }}>{hh}h</text>;
         })}
         {/* lines */}
         {series.map((s) => {
@@ -558,12 +558,12 @@ function HourlyChart({ rows }: { rows: any[] }) {
       </svg>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 6 }}>
         {series.map((s) => (
-          <span key={s.key} style={{ fontSize: 10, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <span key={s.key} style={{ fontSize: 'var(--fs-2xs)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
             <span style={{ width: 10, height: 2, background: s.color, display: 'inline-block' }} />
             {s.label}
           </span>
         ))}
-        <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-tertiary)' }}>최대 {fmtNum(max)}</span>
+        <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>최대 {fmtNum(max)}</span>
       </div>
     </div>
   );
@@ -580,8 +580,8 @@ function UserTable({ rows }: { rows: UserRow[] }) {
           <tr key={r.id ?? i}>
             <Td>{created}</Td>
             <Td>
-              <span style={{ fontSize: 11, color: 'var(--text-primary)' }}>{r.email ?? '—'}</span>
-              {seed && <span style={{ marginLeft: 6, fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(156,163,175,0.20)', color: 'var(--text-tertiary)' }}>seed</span>}
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-primary)' }}>{r.email ?? '—'}</span>
+              {seed && <span style={{ marginLeft: 6, fontSize: 'var(--fs-2xs)', padding: '1px 6px', borderRadius: 4, background: 'rgba(156,163,175,0.20)', color: 'var(--text-tertiary)' }}>seed</span>}
             </Td>
             <Td>{r.signup_source ?? '—'}</Td>
             <Td align="right">{r.has_profile === true ? '✓' : r.has_profile === false ? '×' : '—'}</Td>
@@ -597,7 +597,7 @@ function UserTable({ rows }: { rows: UserRow[] }) {
 // ─── 스타일 헬퍼 ───────────────────────────────────────
 function btnGhost(disabled: boolean = false): React.CSSProperties {
   return {
-    fontSize: 11, fontWeight: 500,
+    fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
     padding: '6px 12px', borderRadius: 6,
     background: 'transparent',
     color: disabled ? 'var(--text-tertiary)' : 'var(--text-secondary)',
@@ -609,7 +609,7 @@ function btnGhost(disabled: boolean = false): React.CSSProperties {
 function selStyle(): React.CSSProperties {
   return {
     padding: '6px 10px', borderRadius: 6,
-    fontSize: 11, fontWeight: 500,
+    fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
     background: 'var(--bg-base)', color: 'var(--text-primary)',
     border: '1px solid var(--border)', cursor: 'pointer', outline: 'none',
   };

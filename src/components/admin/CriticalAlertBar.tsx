@@ -41,14 +41,14 @@ export default async function CriticalAlertBar() {
               animation: isCritical ? 'kd-critical-pulse 2s ease-in-out infinite' : 'none',
             }}
           >
-            <span style={{ fontSize: 16 }}>{isCritical ? '🚨' : '⚠️'}</span>
-            <strong style={{ fontSize: 13, color: isCritical ? 'var(--accent-red)' : 'var(--warning)', fontWeight: 600 }}>
+            <span style={{ fontSize: 'var(--fs-sm)' }}>{isCritical ? '🚨' : '⚠️'}</span>
+            <strong style={{ fontSize: 'var(--fs-xs)', color: isCritical ? 'var(--accent-red)' : 'var(--warning)', fontWeight: 'var(--fw-title)' }}>
               {a.title}
             </strong>
-            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>
               {a.detail}
             </span>
-            <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-tertiary)' }}>→</span>
+            <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>→</span>
           </a>
         );
       })}

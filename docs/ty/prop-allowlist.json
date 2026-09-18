@@ -150,6 +150,24 @@
     "l": 99,
     "raw": "\"10\"",
     "note": "→ 10"
+   },
+   {
+    "f": "src/app/admin/signup-flow/SignupFlowClient.tsx",
+    "l": 551,
+    "raw": "9",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/app/admin/v4/sections/WatchlistWidget.tsx",
+    "l": 393,
+    "raw": "9",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/app/admin/v4/sections/WatchlistWidget.tsx",
+    "l": 395,
+    "raw": "9",
+    "note": "→ 10"
    }
   ]
  }

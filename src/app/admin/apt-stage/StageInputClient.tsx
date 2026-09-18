@@ -66,14 +66,14 @@ const field: React.CSSProperties = {
   border: '1px solid var(--border)',
   background: 'var(--bg-surface)',
   color: 'var(--text-primary)',
-  fontSize: 15,
+  fontSize: 'var(--fs-sm)',
 };
 
 const label: React.CSSProperties = {
   display: 'block',
-  fontSize: 11,
-  fontWeight: 500,
-  letterSpacing: '.02em',
+  fontSize: 'var(--fs-xs)',
+  fontWeight: 'var(--fw-body)',
+  letterSpacing: 0,
   color: 'var(--text-tertiary)',
   margin: '0 0 6px',
 };

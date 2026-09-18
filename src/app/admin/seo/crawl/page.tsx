@@ -42,8 +42,8 @@ export default async function CrawlAdminPage() {
 
   return (
     <div style={{ padding: 24, color: 'var(--text-primary)' }}>
-      <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16 }}>봇 크롤 대시보드 (최근 7일)</h1>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+      <h1 style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', marginBottom: 16 }}>봇 크롤 대시보드 (최근 7일)</h1>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-xs)' }}>
         <thead>
           <tr style={{ background: 'var(--bg-hover)' }}>
             <th style={{ padding: 8, textAlign: 'left' }}>날짜</th>

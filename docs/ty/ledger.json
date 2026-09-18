@@ -641,6 +641,66 @@
     "f": "src/app/(main)/profile/[id]/InviteSection.tsx",
     "l": 47,
     "raw": "4"
+   },
+   {
+    "f": "src/app/admin/apt-stage/StageInputClient.tsx",
+    "l": 76,
+    "raw": "'.02em'"
+   },
+   {
+    "f": "src/app/admin/signup-flow/SignupFlowClient.tsx",
+    "l": 447,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/signup-flow/SignupFlowClient.tsx",
+    "l": 465,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/SignupFunnelWidget.tsx",
+    "l": 177,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/SignupFunnelWidget.tsx",
+    "l": 184,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/SignupFunnelWidget.tsx",
+    "l": 191,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/SignupFunnelWidget.tsx",
+    "l": 215,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/WatchlistWidget.tsx",
+    "l": 278,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/WatchlistWidget.tsx",
+    "l": 287,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/WatchlistWidget.tsx",
+    "l": 302,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/WatchlistWidget.tsx",
+    "l": 329,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/WatchlistWidget.tsx",
+    "l": 413,
+    "raw": "1"
    }
   ],
   "ls-unknown-size": [

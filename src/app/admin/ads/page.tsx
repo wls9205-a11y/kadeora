@@ -63,7 +63,7 @@ export default async function AdminAds() {
   return (
     <main style={{ padding: 'var(--sp-4, 16px)', display: 'grid', gap: 'var(--sp-4, 16px)' }}>
       <header>
-        <h1 style={{ fontSize: 'var(--fs-lg, 18px)', fontWeight: 600, margin: 0 }}>광고 단위경제</h1>
+        <h1 style={{ fontSize: 'var(--fs-lg, 18px)', fontWeight: 'var(--fw-title)', margin: 0 }}>광고 단위경제</h1>
         <p style={{ fontSize: 'var(--fs-sm, 13px)', color: 'var(--text-muted, #6b7280)', margin: '4px 0 0' }}>
           키워드별 지출 ÷ 리드. 집계 기간 {range} · 지출 상위 200
         </p>
@@ -101,7 +101,7 @@ export default async function AdminAds() {
                 }}
               >
                 <div style={{ fontSize: 'var(--fs-xs, 12px)', color: 'var(--text-muted, #6b7280)' }}>{label}</div>
-                <div style={{ fontSize: 'var(--fs-lg, 18px)', fontWeight: 700 }}>{value}</div>
+                <div style={{ fontSize: 'var(--fs-lg, 18px)', fontWeight: 'var(--fw-num)' }}>{value}</div>
               </div>
             ))}
           </section>
@@ -155,7 +155,7 @@ export default async function AdminAds() {
                     <td style={{ padding: '8px 6px', maxWidth: 260 }}>
                       {r.keyword ?? (
                         <span style={{ color: 'var(--text-muted, #6b7280)' }}>
-                          미동기 키워드 <code style={{ fontSize: 11 }}>{r.keyword_id.slice(-12)}</code>
+                          미동기 키워드 <code style={{ fontSize: 'var(--fs-xs)' }}>{r.keyword_id.slice(-12)}</code>
                         </span>
                       )}
                       {r.adgroup_name && (
@@ -167,7 +167,7 @@ export default async function AdminAds() {
                     <td style={{ padding: '8px 6px', color: 'var(--text-muted, #6b7280)' }}>{r.site_slug ?? '—'}</td>
                     <td style={{ padding: '8px 6px', textAlign: 'right' }}>{num(r.imps)}</td>
                     <td style={{ padding: '8px 6px', textAlign: 'right' }}>{num(r.clicks)}</td>
-                    <td style={{ padding: '8px 6px', textAlign: 'right', fontWeight: 600 }}>{won(r.spend)}</td>
+                    <td style={{ padding: '8px 6px', textAlign: 'right', fontWeight: 'var(--fw-title)' }}>{won(r.spend)}</td>
                     <td style={{ padding: '8px 6px', textAlign: 'right' }}>{num(r.leads)}</td>
                     <td style={{ padding: '8px 6px', textAlign: 'right' }}>
                       {r.cost_per_lead === null ? (
@@ -178,7 +178,7 @@ export default async function AdminAds() {
                           {r.low_sample && (
                             <span
                               title="리드 n<5 — 통계적 의미 없음"
-                              style={{ marginLeft: 4, fontSize: 11, color: 'var(--text-muted, #6b7280)' }}
+                              style={{ marginLeft: 4, fontSize: 'var(--fs-xs)', color: 'var(--text-muted, #6b7280)' }}
                             >
                               표본부족
                             </span>

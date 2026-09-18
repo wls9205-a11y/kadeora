@@ -28,15 +28,15 @@ export default function AlertCard({ severity, title, hideWhenEmpty, count, child
       display: 'flex', flexDirection: 'column', gap: 10,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 16 }}>{p.icon}</span>
-        <span style={{ fontSize: 13, fontWeight: 600, color: p.text }}>{title}</span>
+        <span style={{ fontSize: 'var(--fs-sm)' }}>{p.icon}</span>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: p.text }}>{title}</span>
         {typeof count === 'number' && (
-          <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, color: p.text, opacity: 0.85 }}>
+          <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: p.text, opacity: 0.85 }}>
             {count}건
           </span>
         )}
       </div>
-      {children && <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{children}</div>}
+      {children && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>{children}</div>}
       {actions && <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>{actions}</div>}
     </div>
   );

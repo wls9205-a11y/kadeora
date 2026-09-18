@@ -5,7 +5,7 @@ export default function CarouselDistribution({ posDist }: { posDist: number[] })
   const max = Math.max(1, ...posDist);
   return (
     <div style={{ width: '100%' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-xs)' }}>
         <thead>
           <tr style={{ borderBottom: '1px solid var(--border)' }}>
             <th style={{ textAlign: 'left', padding: '6px 8px' }}>position</th>
@@ -20,7 +20,7 @@ export default function CarouselDistribution({ posDist }: { posDist: number[] })
             return (
               <tr key={position} style={{ borderBottom: '1px solid var(--border)' }}>
                 <td style={{ padding: '4px 8px' }}>{position}</td>
-                <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: abnormal ? 700 : 400, color: abnormal ? 'var(--accent-red)' : 'inherit' }}>
+                <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: abnormal ? 'var(--fw-num)' : 'var(--fw-quiet)', color: abnormal ? 'var(--accent-red)' : 'inherit' }}>
                   {cnt.toLocaleString()}
                 </td>
                 <td style={{ padding: '4px 8px' }}>

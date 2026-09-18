@@ -34,7 +34,7 @@ export default async function CtaPerformanceTable({ windowDays = 30 }: { windowD
   const { data, error } = await (sb as any).rpc('admin_cta_performance', { window_days: windowDays });
   if (error || !data) {
     return (
-      <section aria-label="CTA 성능" style={{ padding: 12, color: 'var(--text-tertiary)', fontSize: 12 }}>
+      <section aria-label="CTA 성능" style={{ padding: 12, color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>
         CTA 성능 로드 실패
       </section>
     );
@@ -43,7 +43,7 @@ export default async function CtaPerformanceTable({ windowDays = 30 }: { windowD
 
   return (
     <section aria-label="CTA 성능 비교" style={{ marginBottom: 18 }}>
-      <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: 'var(--text-primary)' }}>
+      <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', marginBottom: 10, color: 'var(--text-primary)' }}>
         📊 CTA 성능 ({windowDays}일, {rows.length}개)
       </h2>
       <div
@@ -55,14 +55,14 @@ export default async function CtaPerformanceTable({ windowDays = 30 }: { windowD
           overflowX: 'auto',
         }}
       >
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, minWidth: 540 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-xs)', minWidth: 540 }}>
           <thead style={{ background: 'var(--bg-hover)' }}>
             <tr>
-              <th style={{ padding: '10px 12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600 }}>CTA</th>
-              <th style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>View</th>
-              <th style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>Click</th>
-              <th style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>CTR</th>
-              <th style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 600 }}>최근</th>
+              <th style={{ padding: '10px 12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)' }}>CTA</th>
+              <th style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)' }}>View</th>
+              <th style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)' }}>Click</th>
+              <th style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)' }}>CTR</th>
+              <th style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)' }}>최근</th>
             </tr>
           </thead>
           <tbody>
@@ -81,14 +81,14 @@ export default async function CtaPerformanceTable({ windowDays = 30 }: { windowD
                   </td>
                   <td
                     style={{
-                      padding: '10px 12px', textAlign: 'right', fontWeight: 500,
+                      padding: '10px 12px', textAlign: 'right', fontWeight: 'var(--fw-body)',
                       color: ctrTone(ctr),
                       fontVariantNumeric: 'tabular-nums',
                     }}
                   >
                     {ctr === null ? '—' : `${ctr.toFixed(2)}%`}
                   </td>
-                  <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-tertiary)', fontSize: 11 }}>
+                  <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>
                     {fmtTime(r.last_event)}
                   </td>
                 </tr>
@@ -97,7 +97,7 @@ export default async function CtaPerformanceTable({ windowDays = 30 }: { windowD
           </tbody>
         </table>
       </div>
-      <div style={{ marginTop: 6, fontSize: 10, color: 'var(--text-tertiary)' }}>
+      <div style={{ marginTop: 6, fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>
         🟢 ≥5% 좋음 · 🟡 1-5% 평범 · 🔴 &lt;1% 의심 (UI/카피 점검 필요)
       </div>
     </section>

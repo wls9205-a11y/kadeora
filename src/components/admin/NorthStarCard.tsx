@@ -72,17 +72,17 @@ function MetricCard({
         wordBreak: 'keep-all',
       }}
     >
-      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>{label}</div>
-      <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)' }}>{label}</div>
+      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
         {value}
       </div>
       {delta && (
-        <div style={{ fontSize: 11, color: deltaColor(delta.today, delta.yesterday), fontWeight: 600 }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: deltaColor(delta.today, delta.yesterday), fontWeight: 'var(--fw-title)' }}>
           어제 대비 {deltaLabel(delta.today, delta.yesterday)}
         </div>
       )}
       {sublabel && (
-        <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{sublabel}</div>
+        <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{sublabel}</div>
       )}
       {sparkline && (
         <div style={{ marginTop: 4, color: 'var(--text-secondary)' }}>
@@ -98,7 +98,7 @@ export default async function NorthStarCard() {
   const { data, error } = await (sb as any).rpc('admin_north_star_metrics');
   if (error || !data) {
     return (
-      <div style={{ padding: 12, color: 'var(--text-tertiary)', fontSize: 12 }}>
+      <div style={{ padding: 12, color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>
         North Star 메트릭 로드 실패
       </div>
     );
@@ -108,7 +108,7 @@ export default async function NorthStarCard() {
 
   return (
     <section aria-label="North Star 핵심 지표" style={{ marginBottom: 18 }}>
-      <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: 'var(--text-primary)' }}>
+      <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', marginBottom: 10, color: 'var(--text-primary)' }}>
         🌟 North Star (오늘)
       </h2>
       <div
