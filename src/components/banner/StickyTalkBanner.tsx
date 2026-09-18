@@ -114,7 +114,7 @@ export default function StickyTalkBanner() {
 
         {/* 역할이 곧 제목 — 브랜드명은 방에 들어간 뒤 알아도 늦지 않다 */}
         <span
-          className="flex-none whitespace-nowrap text-[14px] font-medium sm:text-[14px]"
+          className="flex-none whitespace-nowrap text-[length:var(--fs-sm)] font-medium sm:text-[length:var(--fs-sm)]"
           style={{ color: INK }}
         >
           부동산 정보 공유방
@@ -122,7 +122,7 @@ export default function StickyTalkBanner() {
 
         {/* 데스크톱 보조 문구 */}
         <span
-          className="hidden overflow-hidden text-ellipsis whitespace-nowrap text-[13px] sm:inline"
+          className="hidden overflow-hidden text-ellipsis whitespace-nowrap text-[length:var(--fs-xs)] sm:inline"
           style={{ color: INK_SOFT }}
         >
           지금{' '}
@@ -134,7 +134,7 @@ export default function StickyTalkBanner() {
 
         {/* 모바일 보조 문구 — 참여자 수만 */}
         <span
-          className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] sm:hidden"
+          className="overflow-hidden text-ellipsis whitespace-nowrap text-[length:var(--fs-xs)] sm:hidden"
           style={{ color: INK_SOFT }}
         >
           <span className="font-medium" style={{ color: INK }}>
@@ -145,7 +145,7 @@ export default function StickyTalkBanner() {
         <span className="flex-1" />
 
         <span
-          className="flex-none whitespace-nowrap rounded-full px-[14px] py-[6px] text-[12.5px] font-medium"
+          className="flex-none whitespace-nowrap rounded-full px-[14px] py-[6px] text-[length:var(--fs-xs)] font-medium"
           style={{ background: INK, color: YELLOW }}
         >
           참여하기

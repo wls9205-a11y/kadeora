@@ -349,7 +349,7 @@ export async function AptSitePageView({ data }: { data: AptSitePageData }) {
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-3">
-      <div className="text-[10px] text-slate-500 mb-0.5">{label}</div>
+      <div className="text-[length:var(--fs-2xs)] text-slate-500 mb-0.5">{label}</div>
       <div className="text-sm font-bold">{value}</div>
     </div>
   );
@@ -358,10 +358,10 @@ function Fact({ label, value }: { label: string; value: string }) {
 function PaymentCell({ label, pct, amount }: { label: string; pct?: number; amount?: number }) {
   return (
     <div className="text-center bg-slate-50 rounded-lg p-2">
-      <div className="text-[10px] text-slate-500">{label}</div>
+      <div className="text-[length:var(--fs-2xs)] text-slate-500">{label}</div>
       <div className="text-xs font-bold">{pct ?? '—'}%</div>
       {amount && (
-        <div className="text-[10px] text-slate-600">
+        <div className="text-[length:var(--fs-2xs)] text-slate-600">
           {(amount / 10000).toFixed(2)}억
         </div>
       )}

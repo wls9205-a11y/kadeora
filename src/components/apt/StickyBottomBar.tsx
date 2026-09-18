@@ -49,7 +49,7 @@ export function StickyBottomBar({
                   : 'bg-slate-100 text-slate-700'
               }`}
             >
-              <span className="text-[9px] leading-tight opacity-80">청약</span>
+              <span className="text-[length:var(--fs-2xs)] leading-tight opacity-80">청약</span>
               <span className="text-base font-bold leading-tight">D-{dday}</span>
             </div>
           )}

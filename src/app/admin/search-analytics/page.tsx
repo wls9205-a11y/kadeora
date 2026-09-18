@@ -180,7 +180,7 @@ function Stat({ label, value, suffix = "", tone = "ok" }: {
 }) {
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-3">
-      <p className="text-[11px] text-gray-500">{label}</p>
+      <p className="text-[length:var(--fs-xs)] text-gray-500">{label}</p>
       <p
         className={[
           "mt-1 text-xl font-bold tabular-nums",
@@ -202,7 +202,7 @@ function HeatBadge({ level }: { level: string }) {
     normal:   "bg-gray-100 text-gray-600",
   };
   return (
-    <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${styles[level] ?? styles.normal}`}>
+    <span className={`rounded px-1.5 py-0.5 text-[length:var(--fs-2xs)] font-medium ${styles[level] ?? styles.normal}`}>
       {level}
     </span>
   );

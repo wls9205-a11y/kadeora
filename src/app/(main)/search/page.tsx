@@ -190,7 +190,7 @@ export default async function SearchPage({ searchParams }: Props) {
                     </span>
                     {item.dday !== undefined && item.dday !== null && (
                       <span className={[
-                        "ml-1 rounded px-1.5 py-0.5 text-[10px] font-bold tabular-nums",
+                        "ml-1 rounded px-1.5 py-0.5 text-[length:var(--fs-2xs)] font-bold tabular-nums",
                         item.dday <= 3 ? "bg-red-500 text-white"
                           : item.dday <= 7 ? "bg-amber-500 text-white"
                           : "bg-gray-200 text-gray-700",

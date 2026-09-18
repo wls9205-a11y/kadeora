@@ -536,7 +536,7 @@ export default function UniversalSearchBar({
         >
           <SearchIcon />
           <span className="line-clamp-1 flex-1 text-left">{placeholder}</span>
-          <kbd className="hidden rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] text-gray-500 sm:inline">
+          <kbd className="hidden rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[length:var(--fs-2xs)] text-gray-500 sm:inline">
             ⌘K
           </kbd>
         </button>
@@ -666,7 +666,7 @@ export default function UniversalSearchBar({
                     </div>
                   )}
                   {hasKeyboard && (
-                    <div className="px-1 pt-2 text-[11px] text-gray-400">
+                    <div className="px-1 pt-2 text-[length:var(--fs-xs)] text-gray-400">
                       ↑↓ 선택 · Enter 이동 · ESC 닫기
                     </div>
                   )}
@@ -722,7 +722,7 @@ function ResultsPanel({
     <div>
       {sections.map(({ key, items, meta }) => (
         <div key={key} className="mb-3">
-          <h3 className="mb-1 px-2 text-[11px] font-bold uppercase tracking-wide text-gray-500">
+          <h3 className="mb-1 px-2 text-[length:var(--fs-xs)] font-bold uppercase tracking-wide text-gray-500">
             <span className="mr-1">{meta.emoji}</span>
             {meta.label} <span className="font-normal opacity-50">({items.length})</span>
           </h3>
@@ -769,7 +769,7 @@ function ResultsPanel({
                     </span>
                     {item.dday !== undefined && item.dday !== null && (
                       <span className={[
-                        "ml-2 rounded px-1.5 py-0.5 text-[10px] font-bold tabular-nums",
+                        "ml-2 rounded px-1.5 py-0.5 text-[length:var(--fs-2xs)] font-bold tabular-nums",
                         item.dday <= 3 ? "bg-red-500 text-white"
                           : item.dday <= 7 ? "bg-amber-500 text-white"
                           : "bg-gray-200 text-gray-700",
@@ -778,7 +778,7 @@ function ResultsPanel({
                       </span>
                     )}
                     {item.count !== undefined && item.count > 0 && (
-                      <span className="ml-2 text-[10px] text-gray-400 tabular-nums">
+                      <span className="ml-2 text-[length:var(--fs-2xs)] text-gray-400 tabular-nums">
                         {item.count}건
                       </span>
                     )}

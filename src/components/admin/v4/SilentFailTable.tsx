@@ -155,14 +155,14 @@ export default function SilentFailTable({
                             key={i}
                             className="text-xs font-mono bg-white border rounded p-2"
                           >
-                            <div className="text-gray-500 text-[10px]">
+                            <div className="text-gray-500 text-[length:var(--fs-2xs)]">
                               {new Date(s.started_at).toLocaleString("ko-KR")}
                             </div>
                             {s.error_message && (
                               <div className="text-red-600">{s.error_message}</div>
                             )}
                             {s.metadata && (
-                              <pre className="whitespace-pre-wrap break-all text-[11px] text-gray-700">
+                              <pre className="whitespace-pre-wrap break-all text-[length:var(--fs-xs)] text-gray-700">
                                 {JSON.stringify(s.metadata, null, 2).slice(0, 800)}
                               </pre>
                             )}
