@@ -6,7 +6,7 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
-import { MessageCircle, Share2, TrendingUp, Clock, Users, Trash2, Eye } from 'lucide-react';
+import { MessageCircle, Share2, TrendingUp, Clock, Users, Trash2, Eye, PenSquare } from 'lucide-react';
 import type { PostWithProfile } from '@/types/database';
 import { REGIONS, GRADE_EMOJI, gradeColor, gradeTitle } from '@/lib/constants';
 import { getAvatarColor } from '@/lib/avatar';
@@ -333,6 +333,30 @@ export default function FeedClient({
             {activeSort === 'popular' && (
               <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 2 }}>최근 7일</span>
             )}
+
+            {/* ━━━ 글쓰기 — 목록 상단 우측 (UI_INSTRUCTION_20260910 §1.C) ━━━
+                우하단 FAB 가 단톡방으로 교체되면서 «같은 커밋» 에서 신설한다.
+                작성 경로가 0 이 되는 시점을 만들지 않는다는 제약을 이 한 줄이 지킨다.
+                (진입점 자체는 데스크톱 사용자 메뉴·더보기 시트·GlobalMissionBar·
+                 EmptyState 에 이미 있어 «구명» 이 아니라 «보강» 이다.) */}
+            <button
+              type="button"
+              onClick={() => router.push('/write')}
+              aria-label="글쓰기"
+              style={{
+                marginLeft: 'auto',
+                display: 'flex', alignItems: 'center', gap: 4,
+                minHeight: 32, padding: '6px 12px',
+                fontSize: 12, fontWeight: 600,
+                color: 'var(--brand-navy)',
+                background: 'var(--bg-hover)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-pill)',
+                cursor: 'pointer',
+              }}
+            >
+              <PenSquare size={13} strokeWidth={2.2} /> 글쓰기
+            </button>
           </div>
         )}
 
