@@ -1,3 +1,11 @@
+## 2026-09-18 — BN CC 1차: 푸터 링크 오염 원인·수리 · preempt 5 보류 · 근거 채집 (중단점 BN-A 대기)
+
+- C1(3809d1ba): blog_site_links 오염 원인 = issue-draft `appendRelatedHubFooter` 가 정렬 없는 apt_sites 첫 행을 모든 글에 부착. V3′ 2,667행·1,079편·206 slug · hub 오염 184편(발행 100) · §2-2 게이트 무력화 381편(60일). 수리: 글감 현장+본문 링크만.
+- C2: preempt 5편 false 사유 = seo_tier unscored. 본문에 무관 푸터 → 발행 불가, hold:bn_20260918_footer_contam_replace_by_new 기록, §5 신규로 대체.
+- C4: 17건 웹 근거(docs/bn/BN_CC_reply_20260918.md). 괴정5 시공사 = 현대·대우(포스코·롯데 2024-02 해지), 수영1 재개발·재건축은 별개 사업, 복산1 GS 해지(7/7), 김해외동 dn 승격 조건 미충족.
+- C6: 병합 레일 = middleware 301(merged-slugs.ts) + merge_succession(). 신규 이중 후보 사직2(부산-사직2-재건축).
+- C7: sa.py 티어 구분 없음(브랜드 별칭 선순위) → T-B 승격 전 부울경 회전 금지.
+
 ## 2026-09-15 (밤 4) — ABG 증분 5·6: 추정 표현 사전 · E-8 · E-12 A/B
 
 - 증분5: number-verify 추정 표현 사전(예상·추정·대략 / 안팎·전후·선·~대) · 의미 축 매칭 설계 1p · RULES#149. GSC 부검: OAuth 계정에 kadeora.app 속성 없음(0~1행) · Vercel Web Analytics 미활성(404) → page_views human 기준선.
