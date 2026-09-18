@@ -176,7 +176,7 @@ export default async function DailyReportPage({ params }: Props) {
           { href: '/apt/complex', label: '📖 단지백과' },
           { href: '/stock/compare', label: '⚖️ 종목 비교' },
         ].map(l => (
-          <a key={l.href} href={l.href} style={{ padding: '4px 10px', borderRadius: 4, fontSize: 12, fontWeight: 500, background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', border: '1px solid var(--border)' }}>
+          <a key={l.href} href={l.href} style={{ padding: '4px 10px', borderRadius: 4, fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', border: '1px solid var(--border)' }}>
             {l.label}
           </a>
         ))}

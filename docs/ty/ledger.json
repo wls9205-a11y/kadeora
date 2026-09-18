@@ -31,6 +31,27 @@
     "raw": "sm:text-4xl",
     "note": "tailwind 4xl/5xl — 브리지 밖·clamp 편입 안건"
    }
+  ],
+  "display": [
+   {
+    "f": "src/app/(main)/daily/[region]/archive/page.tsx",
+    "l": 89,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/daily/[region]/DailyReportClient.tsx",
+    "l": 363,
+    "raw": "48",
+    "note": "over-ladder"
+   }
+  ],
+  "ls-positive-zeroed": [
+   {
+    "f": "src/app/(main)/daily/[region]/DailyReportClient.tsx",
+    "l": 1188,
+    "raw": "1"
+   }
   ]
  },
  "_doc": "TY3 대장 — codemod 가 치환하지 않고 남긴 좌표(display·자간 0 스냅·단위 행간·크기 불명 자간). 게이트는 display 좌표를 예외로 본다. 파일 단위로 재생성된다."

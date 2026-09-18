@@ -42,7 +42,7 @@ export default function DailyRedirect() {
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', color: 'var(--text-tertiary)', fontSize: 14 }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
       리포트 로딩 중...
     </div>
   );
@@ -69,11 +69,11 @@ function DailyRegionPicker({ onSelect }: { onSelect: (city: string) => void }) {
 
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '40px 16px', textAlign: 'center' }}>
-      <div style={{ fontSize: 32, marginBottom: 12 }}>📍</div>
-      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
+      <div style={{ fontSize: 'var(--fs-2xl)', marginBottom: 12 }}>📍</div>
+      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', marginBottom: 6 }}>
         어디에 사세요?
       </div>
-      <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 24 }}>
+      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 24 }}>
         내 지역 맞춤 부동산·경제 리포트를 받아보세요
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
@@ -81,14 +81,14 @@ function DailyRegionPicker({ onSelect }: { onSelect: (city: string) => void }) {
           <button key={r} onClick={() => saveToDB(r)} style={{
             padding: '12px 0', borderRadius: 'var(--radius-sm)',
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
-            color: 'var(--text-primary)', fontSize: 14, fontWeight: 600,
+            color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)',
             cursor: 'pointer',
           }}>
             {r}
           </button>
         ))}
       </div>
-      <div style={{ marginTop: 16, fontSize: 12, color: 'var(--text-tertiary)' }}>
+      <div style={{ marginTop: 16, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
         설정 후 언제든 변경할 수 있어요
       </div>
     </div>

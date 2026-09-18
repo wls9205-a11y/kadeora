@@ -1,0 +1,67 @@
+{
+ "label": "t4-1",
+ "base": "http://localhost:3000",
+ "at": "2026-09-18T01:46:40.915Z",
+ "screens": {
+  "daily@desktop": {
+   "textNodes": 59,
+   "combos": 24,
+   "sizes": 7,
+   "sizeHist": {
+    "12px": 1,
+    "14px": 40,
+    "15px": 3,
+    "16px": 6,
+    "18px": 7,
+    "21px": 1,
+    "48px": 1
+   },
+   "weights": 4,
+   "lineHeights": 10,
+   "letterSpacings": 4,
+   "gaps": 8,
+   "paddings": 21,
+   "pageOverflow": 0
+  },
+  "daily@mobile": {
+   "textNodes": 40,
+   "combos": 22,
+   "sizes": 7,
+   "sizeHist": {
+    "13px": 23,
+    "14px": 3,
+    "15px": 8,
+    "16px": 1,
+    "17px": 3,
+    "20px": 1,
+    "48px": 1
+   },
+   "weights": 4,
+   "lineHeights": 10,
+   "letterSpacings": 4,
+   "gaps": 7,
+   "paddings": 19,
+   "pageOverflow": 0
+  },
+  "daily@w768": {
+   "textNodes": 59,
+   "combos": 24,
+   "sizes": 7,
+   "sizeHist": {
+    "12px": 1,
+    "14px": 40,
+    "15px": 3,
+    "16px": 6,
+    "18px": 7,
+    "21px": 1,
+    "48px": 1
+   },
+   "weights": 4,
+   "lineHeights": 10,
+   "letterSpacings": 4,
+   "gaps": 8,
+   "paddings": 21,
+   "pageOverflow": 0
+  }
+ }
+}
