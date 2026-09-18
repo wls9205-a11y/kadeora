@@ -44,6 +44,16 @@
     "l": 363,
     "raw": "48",
     "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/stock/[symbol]/page.tsx",
+    "l": 291,
+    "raw": "'clamp(28px, 8vw, 36px)'"
+   },
+   {
+    "f": "src/app/(main)/stock/[symbol]/vs/[target]/page.tsx",
+    "l": 58,
+    "raw": "'clamp(20px, 5vw, 28px)'"
    }
   ],
   "ls-positive-zeroed": [
@@ -51,6 +61,13 @@
     "f": "src/app/(main)/daily/[region]/DailyReportClient.tsx",
     "l": 1188,
     "raw": "1"
+   }
+  ],
+  "ls-unknown-size": [
+   {
+    "f": "src/app/(main)/stock/[symbol]/page.tsx",
+    "l": 291,
+    "raw": "\"-.0125em\""
    }
   ]
  },

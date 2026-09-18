@@ -257,13 +257,13 @@ export default async function StockDetailPage({ params }: Props) {
       }} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
-        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)' }}>
+        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
           <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>
           <span>›</span>
           <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>
           {s.sector && <><span>›</span><Link href={`/stock/sector/${encodeURIComponent(s.sector)}`} style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>{s.sector}</Link></>}
           <span>›</span>
-          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{s.name}</span>
+          <span style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{s.name}</span>
         </nav>
         <div style={{ display: 'flex', gap: 6 }}>
           <StockAlertButton symbol={symbol} stockName={s.name} currentPrice={Number(s.price)} currency={s.currency ?? 'KRW'} />
@@ -278,25 +278,25 @@ export default async function StockDetailPage({ params }: Props) {
         border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '18px 16px', marginBottom: 'var(--sp-md)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
-          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{s.name}</h1>
-          <span style={{ fontSize: 11, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '3px 8px', borderRadius: 4 }}>{symbol}</span>
-          <span style={{ fontSize: 11, background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '3px 8px', borderRadius: 4 }}>{s.market}</span>
+          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: 0 }}>{s.name}</h1>
+          <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '3px 8px', borderRadius: 4 }}>{symbol}</span>
+          <span style={{ fontSize: 'var(--fs-xs)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', padding: '3px 8px', borderRadius: 4 }}>{s.market}</span>
           {sectorRank > 0 && sectorTotal > 0 && s.sector && (
-            <span style={{ fontSize: 10, background: 'rgba(99,102,241,0.1)', color: 'var(--accent-purple)', padding: '3px 8px', borderRadius: 4, fontWeight: 500 }}>
+            <span style={{ fontSize: 'var(--fs-2xs)', background: 'rgba(99,102,241,0.1)', color: 'var(--accent-purple)', padding: '3px 8px', borderRadius: 4, fontWeight: 'var(--fw-body)' }}>
               {s.sector} #{sectorRank}/{sectorTotal}
             </span>
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap', marginBottom: 'var(--sp-xs)' }}>
-          <span style={{ fontSize: 'clamp(28px, 8vw, 36px)', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: "-.0125em" }}>{fmtPrice(Number(s.price), s.currency ?? undefined)}</span>
+          <span style={{ fontSize: 'clamp(28px, 8vw, 36px)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', letterSpacing: "-.0125em" }}>{fmtPrice(Number(s.price), s.currency ?? undefined)}</span>
           {!isStale && (
-            <span style={{ fontSize: 16, fontWeight: 600, color: stockColor(changePct, isKR) }}>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: stockColor(changePct, isKR) }}>
               {isUp ? '▲' : isDown ? '▼' : '━'} {isUp ? '+' : ''}{Number(s.change_amt).toLocaleString()} ({Math.abs(changePct).toFixed(2)}%)
             </span>
           )}
         </div>
         {s.updated_at && !s.updated_at.startsWith('2000-01-01') && (
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
             {new Date(s.updated_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 기준 · 시총 {fmtCap(Number(s.market_cap) > 0 ? Number(s.market_cap) : null, s.currency ?? undefined)}
           </div>
         )}
@@ -318,19 +318,19 @@ export default async function StockDetailPage({ params }: Props) {
                 </>);
               })()}
             </svg>
-            <div style={{ position: 'absolute', bottom: 4, left: 0, fontSize: 10, color: 'var(--text-tertiary)' }}>30일 전</div>
-            <div style={{ position: 'absolute', bottom: 4, right: 0, fontSize: 10, color: 'var(--text-tertiary)' }}>오늘</div>
+            <div style={{ position: 'absolute', bottom: 4, left: 0, fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>30일 전</div>
+            <div style={{ position: 'absolute', bottom: 4, right: 0, fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>오늘</div>
           </div>
         )}
-        {isStale && <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 6 }}>시세 정보 준비 중</div>}
+        {isStale && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 6 }}>시세 정보 준비 중</div>}
       </div>
 
       {/* 기본 정보 그리드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 6, marginBottom: 'var(--sp-md)' }}>
         {items.map(({ label, value }) => (
           <div key={label} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '8px 6px', textAlign: 'center', minWidth: 0 }}>
-            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>{label}</div>
-            <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</div>
+            <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginBottom: 2 }}>{label}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</div>
           </div>
         ))}
       </div>
@@ -339,27 +339,27 @@ export default async function StockDetailPage({ params }: Props) {
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6, marginBottom: 'var(--sp-md)' }}>
         {/* 등락률 게이지 */}
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 6 }}>일간 등락</div>
+          <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginBottom: 6 }}>일간 등락</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', border: `3px solid ${stockColor(changePct, isKR)}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 500, color: stockColor(changePct, isKR) }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', border: `3px solid ${stockColor(changePct, isKR)}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)', color: stockColor(changePct, isKR) }}>
               {isUp ? '▲' : isDown ? '▼' : '━'}
             </div>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 600, color: stockColor(changePct, isKR) }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: stockColor(changePct, isKR) }}>
                 {changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%
               </div>
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.change_amt != null ? `${Number(s.change_amt) > 0 ? '+' : ''}${Number(s.change_amt).toLocaleString()}` : ''}</div>
+              <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{s.change_amt != null ? `${Number(s.change_amt) > 0 ? '+' : ''}${Number(s.change_amt).toLocaleString()}` : ''}</div>
             </div>
           </div>
         </div>
         {/* 시총 위치 */}
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-md) var(--card-p)' }}>
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 6 }}>시가총액</div>
-          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency ?? undefined)}</div>
+          <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginBottom: 6 }}>시가총액</div>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)' }}>{fmtCap(s.market_cap ? Number(s.market_cap) : null, s.currency ?? undefined)}</div>
           <div style={{ marginTop: 'var(--sp-xs)', height: 4, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>
             <div style={{ height: '100%', borderRadius: 4, background: 'var(--brand)', width: `${s.market_cap ? Math.min(Math.log10(Number(s.market_cap) / 1e8) * 15, 100) : 10}%` }} />
           </div>
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
+          <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
             {(() => { const mc = Number(s.market_cap); if (!mc) return ''; if (s.currency === 'USD') return mc >= 1e12 ? '초대형주' : mc >= 1e11 ? '대형주' : mc >= 1e10 ? '중형주' : '소형주'; return mc >= 1e13 ? '초대형주' : mc >= 1e12 ? '대형주' : mc >= 1e11 ? '중형주' : '소형주'; })()}
           </div>
         </div>
@@ -375,11 +375,11 @@ export default async function StockDetailPage({ params }: Props) {
         return (
         <div style={{ marginBottom: 'var(--sp-md)', padding: 'var(--sp-md) var(--card-p)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>52주 가격 범위</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>상위 {Math.round(pct)}%</span>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>52주 가격 범위</span>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)' }}>상위 {Math.round(pct)}%</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-            <span style={{ fontSize: 12, color: stockDownColor(isKR), fontWeight: 600, minWidth: 60 }}>
+            <span style={{ fontSize: 'var(--fs-xs)', color: stockDownColor(isKR), fontWeight: 'var(--fw-title)', minWidth: 60 }}>
               {cur}{l.toLocaleString()}
             </span>
             <div style={{ flex: 1, height: 8, background: `linear-gradient(90deg, ${stockDownColor(isKR)}, var(--stock-flat), ${stockUpColor(isKR)})`, borderRadius: 4, position: 'relative' }}>
@@ -391,7 +391,7 @@ export default async function StockDetailPage({ params }: Props) {
                 transform: 'translateX(-50%)',
               }} />
             </div>
-            <span style={{ fontSize: 12, color: stockUpColor(isKR), fontWeight: 600, minWidth: 60, textAlign: 'right' }}>
+            <span style={{ fontSize: 'var(--fs-xs)', color: stockUpColor(isKR), fontWeight: 'var(--fw-title)', minWidth: 60, textAlign: 'right' }}>
               {cur}{h.toLocaleString()}
             </span>
           </div>
@@ -404,15 +404,15 @@ export default async function StockDetailPage({ params }: Props) {
 
       {/* 투자 요약 (네이버 크롤러 가시적 텍스트) */}
       <section aria-labelledby="stock-sec-1" className="stock-investment-summary" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
-        <h2 id="stock-sec-1" style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>{s.name} ({symbol}) 종목 요약</h2>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 8px', wordBreak: 'keep-all' }}>
+        <h2 id="stock-sec-1" style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 8px' }}>{s.name} ({symbol}) 종목 요약</h2>
+        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 8px', wordBreak: 'keep-all' }}>
           {s.name}({symbol})은 {s.market} 시장에 상장된 {s.sector || '종목'}입니다.
           {!isStale && <> 현재가는 {fmtPrice(Number(s.price), s.currency ?? undefined)}이며, 전일 대비 {isUp ? '상승' : isDown ? '하락' : '보합'}({isUp ? '+' : ''}{changePct.toFixed(2)}%)했습니다.</>}
           {s.market_cap && Number(s.market_cap) > 0 && <> 시가총액은 {fmtCap(Number(s.market_cap), s.currency ?? undefined)}입니다.</>}
           {high52 && low52 && high52 > low52 && <> 최근 가격 범위는 {s.currency === 'USD' ? '$' : '₩'}{low52.toLocaleString()} ~ {s.currency === 'USD' ? '$' : '₩'}{high52.toLocaleString()}입니다.</>}
         </p>
         {s.description && s.description.length > 20 && (
-          <p style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.65, margin: 0, wordBreak: 'keep-all' }}>
+          <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.6, margin: 0, wordBreak: 'keep-all' }}>
             {s.description}
           </p>
         )}
@@ -427,14 +427,14 @@ export default async function StockDetailPage({ params }: Props) {
         return (
           <div style={{ background: 'linear-gradient(135deg, rgba(59,123,246,0.04), rgba(139,92,246,0.04))', border: '1px solid rgba(59,123,246,0.12)', borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: 'var(--sp-md)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-              <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
-              <span style={{ fontSize: 10, fontWeight: 600, color: sigColor, background: `${sigColor}15`, padding: '3px 8px', borderRadius: 4 }}>{signalLabel}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
+              <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', color: sigColor, background: `${sigColor}15`, padding: '3px 8px', borderRadius: 4 }}>{signalLabel}</span>
             </div>
-            <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0, wordBreak: 'keep-all' }}>
+            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0, wordBreak: 'keep-all' }}>
               {ai.comment.length > 200 ? ai.comment.slice(0, 200) + '...' : ai.comment}
             </p>
             {ai.created_at && (
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 6 }}>
+              <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 6 }}>
                 {new Date(ai.created_at).toLocaleDateString('ko-KR')} 기준
               </div>
             )}
@@ -452,14 +452,14 @@ export default async function StockDetailPage({ params }: Props) {
         return (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 'var(--sp-md)' }}>
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 4 }}>🌍 외국인 5일 순매매</div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: fColor }}>{totalForeignNet > 0 ? '+' : ''}{(totalForeignNet / 100000000).toFixed(1)}억</div>
-              <div style={{ fontSize: 10, color: fColor }}>{totalForeignNet > 0 ? '순매수' : totalForeignNet < 0 ? '순매도' : '보합'}</div>
+              <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>🌍 외국인 5일 순매매</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: fColor }}>{totalForeignNet > 0 ? '+' : ''}{(totalForeignNet / 100000000).toFixed(1)}억</div>
+              <div style={{ fontSize: 'var(--fs-2xs)', color: fColor }}>{totalForeignNet > 0 ? '순매수' : totalForeignNet < 0 ? '순매도' : '보합'}</div>
             </div>
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 4 }}>🏦 기관 5일 순매매</div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: iColor }}>{totalInstNet > 0 ? '+' : ''}{(totalInstNet / 100000000).toFixed(1)}억</div>
-              <div style={{ fontSize: 10, color: iColor }}>{totalInstNet > 0 ? '순매수' : totalInstNet < 0 ? '순매도' : '보합'}</div>
+              <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>🏦 기관 5일 순매매</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: iColor }}>{totalInstNet > 0 ? '+' : ''}{(totalInstNet / 100000000).toFixed(1)}억</div>
+              <div style={{ fontSize: 'var(--fs-2xs)', color: iColor }}>{totalInstNet > 0 ? '순매수' : totalInstNet < 0 ? '순매도' : '보합'}</div>
             </div>
           </div>
         );
@@ -476,7 +476,7 @@ export default async function StockDetailPage({ params }: Props) {
           style={{ width: '100%', height: 'auto', display: 'block' }}
           loading="lazy"
         />
-        <figcaption style={{ fontSize: 11, color: 'var(--text-tertiary)', padding: '6px 12px', background: 'var(--bg-surface)', textAlign: 'center' }}>
+        <figcaption style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', padding: '6px 12px', background: 'var(--bg-surface)', textAlign: 'center' }}>
           {s.name}({symbol}) 핵심 투자 지표 · 카더라
         </figcaption>
       </figure>
@@ -485,8 +485,8 @@ export default async function StockDetailPage({ params }: Props) {
       {stockAnalysisText && (
         <>
         <section aria-labelledby="stock-sec-2" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
-          <h2 id="stock-sec-2" style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>{s.name} 종합 분석</h2>
-          <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.85 }}
+          <h2 id="stock-sec-2" style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 10px' }}>{s.name} 종합 분석</h2>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}
             dangerouslySetInnerHTML={{ __html: sanitizeHtml((stockAnalysisText as string)
               .replace(/^## (.+)$/gm, '<h3 style="font-size:14px;font-weight:700;color:var(--text-primary);margin:16px 0 6px">$1</h3>')
               .replace(/^### (.+)$/gm, '<h4 style="font-size:13px;font-weight:600;color:var(--text-primary);margin:12px 0 4px">$1</h4>')
@@ -504,7 +504,7 @@ export default async function StockDetailPage({ params }: Props) {
       {/* 세션 135: 종목 관련 이미지 갤러리 (lightbox + zoom) */}
       {stockGallery.length > 0 && (
         <section aria-labelledby="stock-sec-3" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
-          <h2 id="stock-sec-3" style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>
+          <h2 id="stock-sec-3" style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 10px' }}>
             🖼️ {s.name} 관련 이미지 · {stockGallery.length}장
           </h2>
           <ImageLightbox
@@ -537,7 +537,7 @@ export default async function StockDetailPage({ params }: Props) {
       {/* 최신 뉴스 요약 (서버 렌더링) */}
       {(newsR.data ?? []).length > 0 && (
         <section aria-labelledby="stock-sec-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
-          <h2 id="stock-sec-4" style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>{s.name} 최신 뉴스</h2>
+          <h2 id="stock-sec-4" style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 10px' }}>{s.name} 최신 뉴스</h2>
           {/* 감성 분석 요약 바 */}
           {(() => {
             const all = (newsR.data ?? []) as any[];
@@ -552,7 +552,7 @@ export default async function StockDetailPage({ params }: Props) {
                   {neu > 0 && <div style={{ flex: neu, background: 'var(--border)', borderRadius: 4 }} />}
                   {neg > 0 && <div style={{ flex: neg, background: 'var(--stock-negative)', borderRadius: 4 }} />}
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 3 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 3 }}>
                   <span style={{ color: 'var(--stock-positive)' }}>긍정 {pos}</span>
                   <span>중립 {neu}</span>
                   <span style={{ color: 'var(--stock-negative)' }}>부정 {neg}</span>
@@ -562,13 +562,13 @@ export default async function StockDetailPage({ params }: Props) {
           })()}
           {(newsR.data ?? []).slice(0, 5).map((n: any) => (
             <div key={n.id} style={{ padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.5 }}>{n.title}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2, display: 'flex', gap: 'var(--sp-sm)' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{n.title}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2, display: 'flex', gap: 'var(--sp-sm)' }}>
                 <span>{n.source || '뉴스'}</span>
                 <span>{n.published_at?.slice(0, 10)}</span>
-                {n.sentiment_label && <span style={{ padding: '1px 6px', borderRadius: 4, fontSize: 10, fontWeight: 600, background: sentimentBg(n.sentiment_label || 'neutral'), color: sentimentColor(n.sentiment_label || 'neutral') }}>{n.sentiment_label === 'positive' ? '긍정' : n.sentiment_label === 'negative' ? '부정' : '중립'}</span>}
+                {n.sentiment_label && <span style={{ padding: '1px 6px', borderRadius: 4, fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', background: sentimentBg(n.sentiment_label || 'neutral'), color: sentimentColor(n.sentiment_label || 'neutral') }}>{n.sentiment_label === 'positive' ? '긍정' : n.sentiment_label === 'negative' ? '부정' : '중립'}</span>}
               </div>
-              {n.ai_summary && <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, margin: '4px 0 0', wordBreak: 'keep-all' }}>{n.ai_summary.slice(0, 100)}</p>}
+              {n.ai_summary && <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6, margin: '4px 0 0', wordBreak: 'keep-all' }}>{n.ai_summary.slice(0, 100)}</p>}
             </div>
           ))}
         </section>
@@ -582,7 +582,7 @@ export default async function StockDetailPage({ params }: Props) {
         const downC = stockDownColor(isKRStock);
         return (
         <section aria-labelledby="stock-sec-5" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
-          <h2 id="stock-sec-5" style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>{s.name} 투자자별 수급 ({flows.length}일)</h2>
+          <h2 id="stock-sec-5" style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 10px' }}>{s.name} 투자자별 수급 ({flows.length}일)</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {flows.map((f: any) => {
               const fNet = (Number(f.foreign_buy) || 0) - (Number(f.foreign_sell) || 0);
@@ -590,20 +590,20 @@ export default async function StockDetailPage({ params }: Props) {
               const maxVal = Math.max(Math.abs(fNet), Math.abs(iNet), 1);
               const fmtN = (n: number) => n === 0 ? '-' : `${n > 0 ? '+' : ''}${Math.abs(n) >= 10000 ? `${(n / 10000).toFixed(0)}만` : n.toLocaleString()}`;
               return (
-                <div key={f.date} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
-                  <span style={{ width: 42, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', flexShrink: 0, fontSize: 10 }}>{f.date?.slice(5)}</span>
-                  <span style={{ width: 48, textAlign: 'right', flexShrink: 0, fontWeight: 700, color: fNet >= 0 ? upC : downC, fontSize: 10 }}>외 {fmtN(fNet)}</span>
+                <div key={f.date} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-xs)' }}>
+                  <span style={{ width: 42, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', flexShrink: 0, fontSize: 'var(--fs-2xs)' }}>{f.date?.slice(5)}</span>
+                  <span style={{ width: 48, textAlign: 'right', flexShrink: 0, fontWeight: 'var(--fw-num)', color: fNet >= 0 ? upC : downC, fontSize: 'var(--fs-2xs)' }}>외 {fmtN(fNet)}</span>
                   <div style={{ flex: 1, height: 16, display: 'flex', alignItems: 'center', position: 'relative' }}>
                     <div style={{ position: 'absolute', left: '50%', width: 1, height: '100%', background: 'var(--border)' }} />
                     {fNet !== 0 && <div style={{ position: 'absolute', [fNet > 0 ? 'left' : 'right']: '50%', width: `${Math.min(Math.abs(fNet) / maxVal * 48, 48)}%`, height: 6, borderRadius: 4, background: fNet > 0 ? upC : downC, opacity: 0.6 }} />}
                     {iNet !== 0 && <div style={{ position: 'absolute', [iNet > 0 ? 'left' : 'right']: '50%', width: `${Math.min(Math.abs(iNet) / maxVal * 48, 48)}%`, height: 6, borderRadius: 4, background: iNet > 0 ? upC : downC, opacity: 0.3, top: 8 }} />}
                   </div>
-                  <span style={{ width: 48, textAlign: 'left', flexShrink: 0, fontWeight: 700, color: iNet >= 0 ? upC : downC, fontSize: 10 }}>기 {fmtN(iNet)}</span>
+                  <span style={{ width: 48, textAlign: 'left', flexShrink: 0, fontWeight: 'var(--fw-num)', color: iNet >= 0 ? upC : downC, fontSize: 'var(--fs-2xs)' }}>기 {fmtN(iNet)}</span>
                 </div>
               );
             })}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 8, fontSize: 10, color: 'var(--text-tertiary)' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 8, fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>
             <span>■ 외국인 (진하게)</span><span>□ 기관 (연하게)</span><span style={{ color: upC }}>← 매수</span><span style={{ color: downC }}>매도 →</span>
           </div>
         </section>
@@ -613,11 +613,11 @@ export default async function StockDetailPage({ params }: Props) {
       {/* 공시 요약 (서버 렌더링) */}
       {(discR.data ?? []).length > 0 && (
         <section aria-labelledby="stock-sec-6" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
-          <h2 id="stock-sec-6" style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>{s.name} 최근 공시</h2>
+          <h2 id="stock-sec-6" style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 8px' }}>{s.name} 최근 공시</h2>
           {(discR.data ?? []).slice(0, 3).map((d: any) => (
-            <div key={d.id} style={{ padding: '4px 0', borderBottom: '1px solid var(--border)', fontSize: 12, color: 'var(--text-secondary)' }}>
-              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{d.title}</span>
-              <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--text-tertiary)' }}>{d.published_at?.slice(0, 10)}</span>
+            <div key={d.id} style={{ padding: '4px 0', borderBottom: '1px solid var(--border)', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>
+              <span style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{d.title}</span>
+              <span style={{ marginLeft: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{d.published_at?.slice(0, 10)}</span>
             </div>
           ))}
         </section>
@@ -627,7 +627,7 @@ export default async function StockDetailPage({ params }: Props) {
       {(similarR.data ?? []).length > 0 && (
         <div className="kd-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>📊 같은 섹터 종목 ({s.sector})</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>📊 같은 섹터 종목 ({s.sector})</div>
             <SectionShareButton section="stock-sector" label={`\${s.sector} 섹터 종목 비교`} pagePath={`/stock/\${symbol}`} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
@@ -637,12 +637,12 @@ export default async function StockDetailPage({ params }: Props) {
               return (
                 <Link key={sim.symbol} href={`/stock/${encodeURIComponent(sim.symbol)}`} className="kd-feed-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit', padding: '6px 4px', borderBottom: '1px solid var(--border)', borderRadius: 'var(--radius-xs)', transition: 'background var(--transition-fast)', gap: 'var(--sp-sm)' }}>
                   <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sim.name}</span>
-                    <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>{fmtCap(Number(sim.market_cap), sim.currency)}</span>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sim.name}</span>
+                    <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>{fmtCap(Number(sim.market_cap), sim.currency)}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>{sim.currency === 'USD' ? `$${Number(sim.price).toFixed(2)}` : `₩${Number(sim.price).toLocaleString()}`}</span>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, minWidth: 52, textAlign: 'right', color: stockColor(simPct, isKR) }}>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)' }}>{sim.currency === 'USD' ? `$${Number(sim.price).toFixed(2)}` : `₩${Number(sim.price).toLocaleString()}`}</span>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', minWidth: 52, textAlign: 'right', color: stockColor(simPct, isKR) }}>
                       {simPct > 0 ? '+' : ''}{simPct.toFixed(2)}%
                     </span>
                     <div style={{ width: 24, height: 4, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>
@@ -659,11 +659,11 @@ export default async function StockDetailPage({ params }: Props) {
       {/* 관련 블로그 — with share */}
       {(relatedBlogsR.data ?? []).length > 0 && (
         <div className="kd-card">
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>{s.name} 관련 분석</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 10 }}>{s.name} 관련 분석</div>
           {(relatedBlogsR.data ?? []).map((blog: any) => (
             <Link key={blog.slug} href={`/blog/${blog.slug}`} className="kd-feed-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit', padding: '8px 4px', borderRadius: 'var(--radius-xs)', transition: 'background var(--transition-fast)', borderBottom: '1px solid var(--border)' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{blog.title}</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{blog.title}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
                   {blog.published_at?.slice(0, 10)} · 조회 {blog.view_count || 0}
                 </div>
@@ -676,7 +676,7 @@ export default async function StockDetailPage({ params }: Props) {
 
       {/* 자주 묻는 질문 (본문 렌더링 — 네이버 FAQ 리치스니펫) */}
       <section aria-labelledby="stock-sec-7" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p) var(--sp-lg)', marginBottom: 'var(--sp-md)' }}>
-        <h2 id="stock-sec-7" style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>{s.name} 자주 묻는 질문</h2>
+        <h2 id="stock-sec-7" style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 10px' }}>{s.name} 자주 묻는 질문</h2>
         {[
           { q: `${s.name}(${symbol}) 현재 주가는 얼마인가요?`, a: `${s.name}(${symbol})의 현재가는 ${fmtPrice(Number(s.price), s.currency ?? undefined)}이며, 전일 대비 ${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}% ${isUp ? '상승' : isDown ? '하락' : '보합'}했습니다. ${s.market} 상장 종목으로 시가총액은 ${Number(s.market_cap) > 0 ? fmtCap(Number(s.market_cap), s.currency ?? undefined) : '확인 중'}입니다.` },
           { q: `${s.name} 52주 최고가·최저가는?`, a: high52 && low52 ? `${s.name}의 52주 최고가는 ${s.currency === 'USD' ? '$' : '₩'}${high52.toLocaleString()}, 최저가는 ${s.currency === 'USD' ? '$' : '₩'}${low52.toLocaleString()}입니다. 현재가는 52주 범위 내 ${Math.round(((Number(s.price)-low52)/(high52-low52))*100)}% 위치에 있습니다.` : `${s.name}의 52주 고저 정보는 카더라 차트 탭에서 확인할 수 있습니다.` },
@@ -686,22 +686,22 @@ export default async function StockDetailPage({ params }: Props) {
           { q: `${s.name} 주가 전망·차트 분석은?`, a: `카더라(kadeora.app/stock/${symbol})에서 ${s.name}의 실시간 시세, 일봉·주봉 차트, 외국인·기관 수급 동향, AI 종목 분석을 무료로 확인할 수 있습니다.` },
         ].map((faq, i) => (
           <details key={i} style={{ borderBottom: i < 5 ? '1px solid var(--border)' : 'none', padding: '8px 0' }}>
-            <summary style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between' }}>
+            <summary style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between' }}>
               <span>{faq.q}</span><span style={{ color: 'var(--text-tertiary)' }}>+</span>
             </summary>
-            <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7, margin: '6px 0 0', wordBreak: 'keep-all' }}>{faq.a}</p>
+            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6, margin: '6px 0 0', wordBreak: 'keep-all' }}>{faq.a}</p>
           </details>
         ))}
       </section>
 
       {/* 업데이트 시간 + 태그 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)', fontSize: 11, color: 'var(--text-tertiary)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
         <time dateTime={s.updated_at || new Date().toISOString()}>
           최종 업데이트: {new Date(s.updated_at || Date.now()).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
         </time>
         <div style={{ display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
           {[s.market, s.sector, '시세'].filter(Boolean).map(tag => (
-            <Link key={tag} href={`/search?q=${encodeURIComponent(tag!)}`} style={{ padding: '3px 8px', borderRadius: 'var(--radius-card)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', fontSize: 10, textDecoration: 'none' }}>#{tag}</Link>
+            <Link key={tag} href={`/search?q=${encodeURIComponent(tag!)}`} style={{ padding: '3px 8px', borderRadius: 'var(--radius-card)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', fontSize: 'var(--fs-2xs)', textDecoration: 'none' }}>#{tag}</Link>
           ))}
         </div>
       </div>
@@ -720,10 +720,10 @@ export default async function StockDetailPage({ params }: Props) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 'var(--fs-xl)' }}>🤖</span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>AI가 분석한 {s?.name} 리포트</div>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>프로 멤버십 · 급등락 알림 + AI 분석</div>
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>AI가 분석한 {s?.name} 리포트</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 1 }}>프로 멤버십 · 급등락 알림 + AI 분석</div>
           </div>
-          <Link href="/shop" style={{ padding: '7px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontSize: 11, fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>
+          <Link href="/shop" style={{ padding: '7px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', textDecoration: 'none', flexShrink: 0 }}>
             자세히
           </Link>
         </div>
@@ -732,14 +732,14 @@ export default async function StockDetailPage({ params }: Props) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 6, padding: '6px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(59,123,246,0.03)', border: '1px solid rgba(59,123,246,0.08)' }}>
         <ShareButtons title={`${s.name} (${symbol}) 주가 — 실시간 시세·차트·섹터 분석`} contentType="stock" contentRef={symbol} />
         <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>이 종목 친구에게 공유하면 +5P</span>
+        <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>이 종목 친구에게 공유하면 +5P</span>
       </div>
 
       <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-md)' }}>
-        <Link href={`/stock/compare?a=${encodeURIComponent(symbol)}`} style={{ flex: 1, textAlign: 'center', padding: 12, background: 'linear-gradient(135deg, var(--bg-surface), var(--bg-hover))', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', textDecoration: 'none', fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>
+        <Link href={`/stock/compare?a=${encodeURIComponent(symbol)}`} style={{ flex: 1, textAlign: 'center', padding: 12, background: 'linear-gradient(135deg, var(--bg-surface), var(--bg-hover))', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)' }}>
           ⚔️ 다른 종목과 비교
         </Link>
-        <Link href="/discuss?tab=stock" style={{ flex: 1, textAlign: 'center', padding: 12, background: 'var(--brand)', borderRadius: 'var(--radius-md)', textDecoration: 'none', fontSize: 13, fontWeight: 500, color: '#fff' }}>
+        <Link href="/discuss?tab=stock" style={{ flex: 1, textAlign: 'center', padding: 12, background: 'var(--brand)', borderRadius: 'var(--radius-md)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: '#fff' }}>
           주식방 토론 참여
         </Link>
       </div>

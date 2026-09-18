@@ -1,0 +1,70 @@
+{
+ "label": "t4-2",
+ "base": "http://localhost:3000",
+ "at": "2026-09-18T01:50:28.143Z",
+ "screens": {
+  "stock-symbol@desktop": {
+   "textNodes": 242,
+   "combos": 39,
+   "sizes": 8,
+   "sizeHist": {
+    "12px": 26,
+    "13px": 3,
+    "14px": 119,
+    "15px": 27,
+    "16px": 54,
+    "18px": 8,
+    "24px": 4,
+    "36px": 1
+   },
+   "weights": 4,
+   "lineHeights": 14,
+   "letterSpacings": 5,
+   "gaps": 9,
+   "paddings": 29,
+   "pageOverflow": 0
+  },
+  "stock-symbol@mobile": {
+   "textNodes": 229,
+   "combos": 38,
+   "sizes": 8,
+   "sizeHist": {
+    "11px": 25,
+    "13px": 92,
+    "14px": 22,
+    "15px": 78,
+    "16px": 3,
+    "17px": 4,
+    "23px": 4,
+    "31.200001px": 1
+   },
+   "weights": 4,
+   "lineHeights": 13,
+   "letterSpacings": 5,
+   "gaps": 9,
+   "paddings": 27,
+   "pageOverflow": 0
+  },
+  "stock-symbol@w768": {
+   "textNodes": 248,
+   "combos": 39,
+   "sizes": 8,
+   "sizeHist": {
+    "12px": 26,
+    "13px": 3,
+    "14px": 125,
+    "15px": 27,
+    "16px": 54,
+    "18px": 8,
+    "24px": 4,
+    "36px": 1
+   },
+   "weights": 4,
+   "lineHeights": 14,
+   "letterSpacings": 5,
+   "gaps": 9,
+   "paddings": 28,
+   "pageOverflow": 0
+  }
+ }
+}

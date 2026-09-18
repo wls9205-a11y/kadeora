@@ -34,8 +34,8 @@ function MiniChart({ data, isKR = true }: { data: { date: string; close_price: n
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-sm)' }}>
-        <span style={{ fontWeight: 600 }}>📈 1개월 추이</span>
-        <span style={{ color, fontWeight: 700 }}>{isUp ? '▲' : '▼'} {((prices[prices.length - 1] - prices[0]) / prices[0] * 100).toFixed(1)}%</span>
+        <span style={{ fontWeight: 'var(--fw-title)' }}>📈 1개월 추이</span>
+        <span style={{ color, fontWeight: 'var(--fw-num)' }}>{isUp ? '▲' : '▼'} {((prices[prices.length - 1] - prices[0]) / prices[0] * 100).toFixed(1)}%</span>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 80 }}>
         <polyline points={points} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -106,7 +106,7 @@ function ChartTab({ priceHistory, currency }: { priceHistory: StockPriceHistory[
             {(['candle', 'line'] as const).map(t => (
               <button aria-label="닫기" key={t} onClick={() => setChartType(t)} style={{
                 padding: '4px 10px', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
-                fontSize: 11, fontWeight: 600,
+                fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
                 background: chartType === t ? 'var(--brand)' : 'transparent',
                 color: chartType === t ? '#fff' : 'var(--text-tertiary)',
               }}>
@@ -119,7 +119,7 @@ function ChartTab({ priceHistory, currency }: { priceHistory: StockPriceHistory[
           {PERIODS.map(p => (
             <button key={p.key} onClick={() => setPeriod(p.key)} style={{
               padding: '3px 9px', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
-              fontSize: 11, fontWeight: 600,
+              fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
               background: period === p.key ? 'var(--brand)' : 'var(--bg-hover)',
               color: period === p.key ? '#fff' : 'var(--text-tertiary)',
             }}>
@@ -161,19 +161,19 @@ function ChartTab({ priceHistory, currency }: { priceHistory: StockPriceHistory[
           <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginTop: 'var(--sp-md)', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 80, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>기간 변동</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: stockColor(isUp ? 1 : -1, currency !== 'USD'), marginTop: 2 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: stockColor(isUp ? 1 : -1, currency !== 'USD'), marginTop: 2 }}>
                 {isUp ? '+' : ''}{changePct.toFixed(2)}%
               </div>
             </div>
             <div style={{ flex: 1, minWidth: 80, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최고가</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: stockUpColor(currency !== 'USD'), marginTop: 2 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: stockUpColor(currency !== 'USD'), marginTop: 2 }}>
                 {currency === 'USD' ? `$${high.toFixed(2)}` : `₩${high.toLocaleString()}`}
               </div>
             </div>
             <div style={{ flex: 1, minWidth: 80, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', textAlign: 'center' }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>최저가</div>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: stockDownColor(currency !== 'USD'), marginTop: 2 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: stockDownColor(currency !== 'USD'), marginTop: 2 }}>
                 {currency === 'USD' ? `$${low.toFixed(2)}` : `₩${low.toLocaleString()}`}
               </div>
             </div>
@@ -221,7 +221,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
       <div style={{ display: 'flex', gap: 4, marginBottom: 'var(--sp-md)', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' as any }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
-            padding: '6px 14px', border: tab === t.key ? 'none' : '1px solid var(--border)', cursor: 'pointer', fontSize: 12, fontWeight: 600, borderRadius: 'var(--radius-lg)', flexShrink: 0, fontFamily: 'inherit',
+            padding: '6px 14px', border: tab === t.key ? 'none' : '1px solid var(--border)', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', borderRadius: 'var(--radius-lg)', flexShrink: 0, fontFamily: 'inherit',
             background: tab === t.key ? 'var(--brand)' : 'transparent',
             color: tab === t.key ? '#fff' : 'var(--text-secondary)',
             transition: 'all 0.15s',
@@ -251,8 +251,8 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
             return (
               <div className="kd-card" style={{ background: cardBg, border: signalBorder }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
-                  <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: sigColor, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: signalBg(aiComment.signal || 'neutral') }}>{signalLabel}</span>
+                  <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)' }}>🤖 AI 한줄평</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: sigColor, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: signalBg(aiComment.signal || 'neutral') }}>{signalLabel}</span>
                 </div>
                 <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>{aiComment.comment || aiComment.content}</p>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-sm)' }}>
@@ -263,13 +263,13 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
           })()}
           {!aiComment && (
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-lg)', textAlign: 'center' }}>
-              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>🤖 AI 한줄평</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>🤖 AI 한줄평</div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>이 종목의 AI 분석이 준비되면 표시됩니다</div>
             </div>
           )}
           <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-lg)' }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🏢 회사 소개</div>
-            <p style={{ margin: 0, fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', lineHeight: 1.75 }}>{description}</p>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>🏢 회사 소개</div>
+            <p style={{ margin: 0, fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{description}</p>
           </div>
         </div>
       )}
@@ -282,7 +282,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
       {/* 수급 — investor_flow 게이트 적용 */}
       {tab === 'flow' && (
         <div className="kd-card">
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>투자자별 수급</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>투자자별 수급</div>
           {investorFlow.length > 0 && (() => {
             const totalForeign = investorFlow.reduce((s: number, d) => s + ((d.foreign_buy || 0) - (d.foreign_sell || 0)), 0);
             const totalInst = investorFlow.reduce((s: number, d) => s + ((d.inst_buy || 0) - (d.inst_sell || 0)), 0);
@@ -290,11 +290,11 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
               <div style={{ display: 'flex', gap: 'var(--sp-md)', marginBottom: 'var(--sp-md)' }}>
                 <div style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 12px', textAlign: 'center' }}>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>외국인 누적</div>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: investorColor('foreign'), marginTop: 2 }}>{totalForeign >= 0 ? '순매수' : '순매도'} {Math.abs(Math.round(totalForeign / 10000))}만</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: investorColor('foreign'), marginTop: 2 }}>{totalForeign >= 0 ? '순매수' : '순매도'} {Math.abs(Math.round(totalForeign / 10000))}만</div>
                 </div>
                 <div style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '8px 12px', textAlign: 'center' }}>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>기관 누적</div>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: investorColor('inst'), marginTop: 2 }}>{totalInst >= 0 ? '순매수' : '순매도'} {Math.abs(Math.round(totalInst / 10000))}만</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: investorColor('inst'), marginTop: 2 }}>{totalInst >= 0 ? '순매수' : '순매도'} {Math.abs(Math.round(totalInst / 10000))}만</div>
                 </div>
               </div>
             );
@@ -324,8 +324,8 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
               <div>
                 {/* 누적 라인 차트 */}
                 <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', padding: '10px 12px', marginBottom: 10 }}>
-                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
-                    <span>{pts[0]?.date}</span><span style={{ fontWeight: 600 }}>누적 순매매 추이</span><span>{pts[pts.length-1]?.date}</span>
+                  <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
+                    <span>{pts[0]?.date}</span><span style={{ fontWeight: 'var(--fw-title)' }}>누적 순매매 추이</span><span>{pts[pts.length-1]?.date}</span>
                   </div>
                   <svg width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ display: 'block', height: 80 }}>
                     <line x1="0" y1={zeroY} x2={W} y2={zeroY} stroke="var(--border)" strokeWidth="1" strokeDasharray="3,3" />
@@ -336,9 +336,9 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
                       <circle cx={toX(pts.length-1)} cy={toY(pts[pts.length-1].i)} r="3" fill="var(--stock-inst)" />
                     </>}
                   </svg>
-                  <div style={{ display: 'flex', gap: 12, justifyContent: 'center', fontSize: 10, marginTop: 4 }}>
-                    <span style={{ color: 'var(--stock-foreign)', fontWeight: 600 }}>● 외국인</span>
-                    <span style={{ color: 'var(--stock-inst)', fontWeight: 600 }}>● 기관</span>
+                  <div style={{ display: 'flex', gap: 12, justifyContent: 'center', fontSize: 'var(--fs-2xs)', marginTop: 4 }}>
+                    <span style={{ color: 'var(--stock-foreign)', fontWeight: 'var(--fw-title)' }}>● 외국인</span>
+                    <span style={{ color: 'var(--stock-inst)', fontWeight: 'var(--fw-title)' }}>● 기관</span>
                   </div>
                 </div>
                 {/* 날짜별 요약 — 최근 5일만 */}
@@ -351,18 +351,18 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
                       <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', minWidth: 44, flexShrink: 0 }}>{(d.date || '').slice(5)}</span>
                       <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
-                          <span style={{ fontSize: 10, minWidth: 32, color: 'var(--text-tertiary)' }}>외국인</span>
+                          <span style={{ fontSize: 'var(--fs-2xs)', minWidth: 32, color: 'var(--text-tertiary)' }}>외국인</span>
                           <div style={{ flex: 1, height: 8, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden', display: 'flex', justifyContent: foreignNet >= 0 ? 'flex-start' : 'flex-end' }}>
                             <div style={{ width: `${Math.abs(foreignNet) / maxVal * 100}%`, height: '100%', background: 'var(--stock-foreign)', minWidth: 2 }} />
                           </div>
-                          <span style={{ fontSize: 10, fontWeight: 700, minWidth: 48, textAlign: 'right', color: 'var(--stock-foreign)' }}>{foreignNet >= 0 ? '+' : ''}{(foreignNet / 100000000).toFixed(1)}억</span>
+                          <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-num)', minWidth: 48, textAlign: 'right', color: 'var(--stock-foreign)' }}>{foreignNet >= 0 ? '+' : ''}{(foreignNet / 100000000).toFixed(1)}억</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <span style={{ fontSize: 10, minWidth: 32, color: 'var(--text-tertiary)' }}>기관</span>
+                          <span style={{ fontSize: 'var(--fs-2xs)', minWidth: 32, color: 'var(--text-tertiary)' }}>기관</span>
                           <div style={{ flex: 1, height: 8, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden', display: 'flex', justifyContent: instNet >= 0 ? 'flex-start' : 'flex-end' }}>
                             <div style={{ width: `${Math.abs(instNet) / maxVal * 100}%`, height: '100%', background: 'var(--stock-inst)', minWidth: 2 }} />
                           </div>
-                          <span style={{ fontSize: 10, fontWeight: 700, minWidth: 48, textAlign: 'right', color: 'var(--stock-inst)' }}>{instNet >= 0 ? '+' : ''}{(instNet / 100000000).toFixed(1)}억</span>
+                          <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-num)', minWidth: 48, textAlign: 'right', color: 'var(--stock-inst)' }}>{instNet >= 0 ? '+' : ''}{(instNet / 100000000).toFixed(1)}억</span>
                         </div>
                       </div>
                     </div>
@@ -377,7 +377,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
       {/* 뉴스 */}
       {tab === 'news' && (
         <div className="kd-card">
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>📰 관련 뉴스</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 10 }}>📰 관련 뉴스</div>
           {news.length > 0 && (() => {
             const pos = news.filter((n) => n.sentiment_label === 'positive' || n.sentiment === 'positive').length;
             const neg = news.filter((n) => n.sentiment_label === 'negative' || n.sentiment === 'negative').length;
@@ -385,9 +385,9 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
             const total = news.length || 1;
             return (
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
-                <span style={{ color: 'var(--stock-positive)', fontWeight: 600 }}>긍정 {pos}</span>
+                <span style={{ color: 'var(--stock-positive)', fontWeight: 'var(--fw-title)' }}>긍정 {pos}</span>
                 <span>중립 {neu}</span>
-                <span style={{ color: 'var(--stock-negative)', fontWeight: 600 }}>부정 {neg}</span>
+                <span style={{ color: 'var(--stock-negative)', fontWeight: 'var(--fw-title)' }}>부정 {neg}</span>
                 <div style={{ flex: 1, height: 4, borderRadius: 2, overflow: 'hidden', display: 'flex' }}>
                   <div style={{ width: `${(pos/total)*100}%`, background: 'var(--stock-positive)' }} />
                   <div style={{ width: `${(neu/total)*100}%`, background: 'var(--bg-hover)' }} />
@@ -402,10 +402,10 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
             <a key={n.id} href={n.url || "#"} target="_blank" rel="noopener noreferrer"
               style={{ display: 'block', padding: '10px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, flex: 1 }}>{n.title}</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', lineHeight: 1.3, flex: 1 }}>{n.title}</div>
                 {n.sentiment_label && (
                   <span style={{
-                    fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 'var(--radius-sm)', fontWeight: 500, flexShrink: 0,
+                    fontSize: 'var(--fs-xs)', padding: '1px 6px', borderRadius: 'var(--radius-sm)', fontWeight: 'var(--fw-body)', flexShrink: 0,
                     background: sentimentBg(n.sentiment_label || 'neutral'),
                     color: sentimentColor(n.sentiment_label || 'neutral'),
                   }}>
@@ -414,7 +414,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
                   </span>
                 )}
               </div>
-              {n.ai_summary && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 2, lineHeight: 1.4 }}>{n.ai_summary}</div>}
+              {n.ai_summary && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 2, lineHeight: 1.3 }}>{n.ai_summary}</div>}
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)', display: 'flex', gap: 6 }}>
                 <span>{n.source || '뉴스'}</span>
                 <span>{timeAgo(n.published_at)}</span>
@@ -430,7 +430,7 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
       {tab === 'disclosure' && (
         <div className="kd-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>📋 최근 공시</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>📋 최근 공시</div>
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{disclosures.length}건</span>
           </div>
           {disclosures.length === 0 ? (
@@ -440,10 +440,10 @@ export default function StockDetailTabs({ symbol, stockName, aiComment, priceHis
             return (
               <div key={d.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 4, background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)' }}>
                     {typeMap[d.disclosure_type || ""] || '📋공시'}
                   </span>
-                  <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', fontWeight: 500 }}>{d.title}</span>
+                  <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', fontWeight: 'var(--fw-body)' }}>{d.title}</span>
                 </div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>
                   {d.source || 'DART'} · {timeAgo(d.published_at || d.created_at)}
