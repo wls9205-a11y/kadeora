@@ -226,6 +226,234 @@
     "l": 12,
     "raw": "64",
     "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(auth)/login/LoginClient.tsx",
+    "l": 76,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/attendance/page.tsx",
+    "l": 58,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/calc/error.tsx",
+    "l": 5,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/calc/topic/[keyword]/page.tsx",
+    "l": 151,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/calc/topic/[keyword]/page.tsx",
+    "l": 176,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/calc/[category]/[slug]/r/[shortId]/page.tsx",
+    "l": 120,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/consultant/ConsultantRegister.tsx",
+    "l": 80,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/consultant/ConsultantRegister.tsx",
+    "l": 96,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/consultant/page.tsx",
+    "l": 13,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/discuss/DiscussClient.tsx",
+    "l": 255,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/feed/FeedClient.tsx",
+    "l": 382,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/feed/FeedClient.tsx",
+    "l": 393,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/feed/FeedClient.tsx",
+    "l": 653,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/feed/[id]/page.tsx",
+    "l": 445,
+    "raw": "'clamp(18px, 4.5vw, 24px)'"
+   },
+   {
+    "f": "src/app/(main)/glossary/[slug]/page.tsx",
+    "l": 122,
+    "raw": "'28px'",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/notifications/page.tsx",
+    "l": 99,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/notifications/page.tsx",
+    "l": 151,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/notifications/settings/page.tsx",
+    "l": 131,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/notifications/settings/page.tsx",
+    "l": 185,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/notifications/settings/page.tsx",
+    "l": 208,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/notifications/settings/page.tsx",
+    "l": 220,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/notifications/settings/page.tsx",
+    "l": 234,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/profile/cheongak/CheongakForm.tsx",
+    "l": 93,
+    "raw": "64",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/profile/[id]/error.tsx",
+    "l": 9,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/settings/interests/page.tsx",
+    "l": 61,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/settings/region/page.tsx",
+    "l": 77,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/stock/compare/CompareClient.tsx",
+    "l": 207,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/stock/data/page.tsx",
+    "l": 118,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/stock/dividend/page.tsx",
+    "l": 85,
+    "raw": "'clamp(22px, 5vw, 30px)'"
+   },
+   {
+    "f": "src/app/(main)/stock/market/[code]/page.tsx",
+    "l": 68,
+    "raw": "'clamp(22px, 5vw, 28px)'"
+   },
+   {
+    "f": "src/app/(main)/stock/movers/page.tsx",
+    "l": 83,
+    "raw": "'clamp(22px, 5vw, 28px)'"
+   },
+   {
+    "f": "src/app/(main)/stock/search/SearchClient.tsx",
+    "l": 55,
+    "raw": "'clamp(22px, 5vw, 28px)'"
+   },
+   {
+    "f": "src/app/(main)/stock/short-selling/page.tsx",
+    "l": 160,
+    "raw": "'48px'",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/stock/signals/error.tsx",
+    "l": 5,
+    "raw": "'48px'",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/stock/signals/page.tsx",
+    "l": 144,
+    "raw": "'48px'",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/stock/themes/page.tsx",
+    "l": 66,
+    "raw": "'clamp(22px, 5vw, 28px)'"
+   },
+   {
+    "f": "src/app/payment/fail/page.tsx",
+    "l": 9,
+    "raw": "64",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/payment/PaymentClient.tsx",
+    "l": 140,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/payment/success/page.tsx",
+    "l": 9,
+    "raw": "64",
+    "note": "over-ladder"
    }
   ],
   "ls-positive-zeroed": [
@@ -403,6 +631,16 @@
     "f": "src/app/(main)/apt/page.tsx",
     "l": 538,
     "raw": "'.02em'"
+   },
+   {
+    "f": "src/app/(main)/profile/cheongak/CheongakForm.tsx",
+    "l": 92,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/(main)/profile/[id]/InviteSection.tsx",
+    "l": 47,
+    "raw": "4"
    }
   ],
   "ls-unknown-size": [

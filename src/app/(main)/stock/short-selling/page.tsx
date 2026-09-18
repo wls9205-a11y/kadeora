@@ -92,18 +92,18 @@ function StockRow({ symbol, stockMap, extra }: { symbol: string; stockMap: Recor
       }}
     >
       <div>
-        <span style={{ fontWeight: 600, fontSize: '14px' }}>{stock?.name || symbol}</span>
+        <span style={{ fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-sm)' }}>{stock?.name || symbol}</span>
         {stock && (
           <span style={{
             marginLeft: '8px',
-            fontSize: '13px',
+            fontSize: 'var(--fs-xs)',
             color: Number(stock.change_pct) >= 0 ? 'var(--accent-red)' : 'var(--brand)',
           }}>
             {Number(stock.change_pct) >= 0 ? '+' : ''}{Number(stock.change_pct).toFixed(1)}%
           </span>
         )}
       </div>
-      <div style={{ fontSize: '13px', textAlign: 'right' }}>{extra}</div>
+      <div style={{ fontSize: 'var(--fs-xs)', textAlign: 'right' }}>{extra}</div>
     </a>
   );
 }
@@ -148,10 +148,10 @@ export default async function ShortSellingPage() {
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '16px' }}>
       <JsonLd data={faqLd} />
 
-      <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '8px' }}>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', marginBottom: '8px' }}>
         📉 공매도·대차잔고 대시보드
       </h1>
-      <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '24px', lineHeight: 1.6 }}>
+      <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', marginBottom: '24px', lineHeight: 1.6 }}>
         KRX 데이터 기반 공매도 거래현황, 과열종목, 대차잔고 변화를 매일 자동 업데이트합니다.
       </p>
 
@@ -165,7 +165,7 @@ export default async function ShortSellingPage() {
           {/* 공매도 과열 종목 */}
           {overheat.length > 0 && (
             <section>
-              <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px', color: 'var(--accent-red)' }}>
+              <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', marginBottom: '8px', color: 'var(--accent-red)' }}>
                 🔥 공매도 과열 종목 ({overheat.length}건)
               </h2>
               <div style={{ border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
@@ -175,7 +175,7 @@ export default async function ShortSellingPage() {
                     symbol={item.symbol}
                     stockMap={stockMap}
                     extra={
-                      <span style={{ color: 'var(--accent-red)', fontWeight: 600 }}>
+                      <span style={{ color: 'var(--accent-red)', fontWeight: 'var(--fw-title)' }}>
                         ~{item.overheat_until}까지
                       </span>
                     }
@@ -187,7 +187,7 @@ export default async function ShortSellingPage() {
 
           {/* 공매도 비율 TOP */}
           <section>
-            <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>
+            <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', marginBottom: '8px' }}>
               📊 공매도 비율 TOP 20
             </h2>
             <div style={{ border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
@@ -197,7 +197,7 @@ export default async function ShortSellingPage() {
                   symbol={item.symbol}
                   stockMap={stockMap}
                   extra={
-                    <span style={{ fontWeight: 600 }}>
+                    <span style={{ fontWeight: 'var(--fw-title)' }}>
                       {Number(item.short_ratio).toFixed(1)}%
                     </span>
                   }
@@ -208,7 +208,7 @@ export default async function ShortSellingPage() {
 
           {/* 대차잔고 급증 */}
           <section>
-            <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>
+            <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', marginBottom: '8px' }}>
               📈 대차잔고 급증 TOP 20
             </h2>
             <div style={{ border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
@@ -218,7 +218,7 @@ export default async function ShortSellingPage() {
                   symbol={item.symbol}
                   stockMap={stockMap}
                   extra={
-                    <span style={{ color: 'var(--accent-red)', fontWeight: 600 }}>
+                    <span style={{ color: 'var(--accent-red)', fontWeight: 'var(--fw-title)' }}>
                       +{Number(item.change_1d).toFixed(1)}%
                     </span>
                   }
@@ -229,7 +229,7 @@ export default async function ShortSellingPage() {
 
           {/* 대차잔고 급감 (숏커버링 후보) */}
           <section>
-            <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>
+            <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', marginBottom: '8px' }}>
               ⚡ 대차잔고 급감 (숏커버링 후보)
             </h2>
             <div style={{ border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
@@ -239,7 +239,7 @@ export default async function ShortSellingPage() {
                   symbol={item.symbol}
                   stockMap={stockMap}
                   extra={
-                    <span style={{ color: 'var(--brand)', fontWeight: 600 }}>
+                    <span style={{ color: 'var(--brand)', fontWeight: 'var(--fw-title)' }}>
                       {Number(item.change_1d).toFixed(1)}%
                     </span>
                   }

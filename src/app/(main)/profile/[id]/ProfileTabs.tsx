@@ -171,7 +171,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
             flex: 1, padding: '8px 0', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer',
             background: activeTab === tab ? 'var(--brand-navy)' : 'transparent',
             color: activeTab === tab ? 'var(--text-inverse)' : 'var(--text-secondary)',
-            fontWeight: 600, fontSize: 'var(--fs-sm)', transition: 'all var(--transition-fast)', whiteSpace: 'nowrap', minWidth: 'fit-content',
+            fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-sm)', transition: 'all var(--transition-fast)', whiteSpace: 'nowrap', minWidth: 'fit-content',
           }}>
             {tabLabels[tab]}
           </button>
@@ -193,7 +193,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
                     <div style={{ padding: '12px 0', borderBottom: i < displayedPosts.length-1 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
                       onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                       onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 500, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
+                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 'var(--fw-body)', flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
                       <span style={{ flex: 1, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
                       <div style={{ display: 'flex', gap: 'var(--sp-sm)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>
                         <span>❤️{post.likes_count}</span><span>💬{post.comments_count}</span>
@@ -205,7 +205,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
               })}
               {hasMorePosts && (
                 <button onClick={loadMorePosts} disabled={loadingMorePosts}
-                  style={{ marginTop: 'var(--sp-md)', padding: '10px 0', width: '100%', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer' }}>
+                  style={{ marginTop: 'var(--sp-md)', padding: '10px 0', width: '100%', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', cursor: 'pointer' }}>
                   {loadingMorePosts ? '불러오는 중...' : '더보기'}
                 </button>
               )}
@@ -241,7 +241,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
         {activeTab === 'stocks' && (
           !watchStocksLoaded ? <Spinner /> : watchStocks.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>
-              <div style={{ fontSize: 32, marginBottom: 'var(--sp-sm)' }}>⭐</div>
+              <div style={{ fontSize: 'var(--fs-2xl)', marginBottom: 'var(--sp-sm)' }}>⭐</div>
               관심종목이 없어요<br/>
               <Link href="/stock" style={{ color: 'var(--brand)', fontSize: 'var(--fs-sm)' }}>주식 페이지에서 ☆를 눌러 추가하세요</Link>
             </div>
@@ -254,14 +254,14 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
                   <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{ textDecoration: 'none' }}>
                     <div style={{ padding: '12px 0', borderBottom: i < watchStocks.length - 1 ? '1px solid var(--border)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 'var(--fs-base)' }}>{s.name}</div>
+                        <div style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)' }}>{s.name}</div>
                         <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.symbol} · {s.market}</div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 'var(--fs-base)' }}>
+                        <div style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)' }}>
                           {s.currency === 'KRW' ? `₩${Number(s.price).toLocaleString()}` : `$${Number(s.price).toLocaleString()}`}
                         </div>
-                        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color }}>
+                        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color }}>
                           {isUp ? '+' : ''}{Number(s.change_pct).toFixed(2)}%
                         </div>
                       </div>
@@ -277,7 +277,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
         {activeTab === 'apts' && (
           !watchAptsLoaded ? <Spinner /> : watchApts.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-tertiary)' }}>
-              <div style={{ fontSize: 32, marginBottom: 'var(--sp-sm)' }}>🏠</div>
+              <div style={{ fontSize: 'var(--fs-2xl)', marginBottom: 'var(--sp-sm)' }}>🏠</div>
               관심단지가 없어요<br/>
               <Link href="/apt" style={{ color: 'var(--brand)', fontSize: 'var(--fs-sm)' }}>부동산 페이지에서 북마크를 눌러 추가하세요</Link>
             </div>
@@ -293,17 +293,17 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
                   <Link key={a.id} href={href} style={{ textDecoration: 'none' }}>
                     <div style={{ padding: '12px 0', borderBottom: i < watchApts.length - 1 ? '1px solid var(--border)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 'var(--fs-base)' }}>{a.house_nm}</div>
+                        <div style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)' }}>{a.house_nm}</div>
                         <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                           {a.region_nm}{a.tot_supply_hshld_co ? ` · ${Number(a.tot_supply_hshld_co).toLocaleString()}세대` : ''}
                         </div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         {isComplex ? (
-                          <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '3px 8px', borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>단지</span>
+                          <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', padding: '3px 8px', borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>단지</span>
                         ) : (
                           <>
-                            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '3px 8px', borderRadius: 'var(--radius-md)', background: isOpen ? 'rgba(52,211,153,0.2)' : isClosed ? 'var(--bg-hover)' : 'rgba(251,191,36,0.15)', color: isOpen ? 'var(--accent-green)' : isClosed ? 'var(--text-tertiary)' : 'var(--accent-yellow)' }}>
+                            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', padding: '3px 8px', borderRadius: 'var(--radius-md)', background: isOpen ? 'rgba(52,211,153,0.2)' : isClosed ? 'var(--bg-hover)' : 'rgba(251,191,36,0.15)', color: isOpen ? 'var(--accent-green)' : isClosed ? 'var(--text-tertiary)' : 'var(--accent-yellow)' }}>
                               {isOpen ? '접수중' : isClosed ? '마감' : '접수예정'}
                             </span>
                             {a.rcept_bgnde && (
@@ -333,7 +333,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
                   <div style={{ padding: '12px 0', borderBottom: i < blogBookmarks.length - 1 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
                     onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                     onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-                    <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 500, flexShrink: 0, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>{post.category}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 'var(--fw-body)', flexShrink: 0, background: 'var(--bg-hover)', color: 'var(--text-tertiary)' }}>{post.category}</span>
                     <span style={{ flex: 1, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
                     <div style={{ display: 'flex', gap: 'var(--sp-sm)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>
                       <span>👀{post.view_count || 0}</span>
@@ -359,7 +359,7 @@ export default function ProfileTabs({ profileId, posts, isOwner }: Props) {
                     <div style={{ padding: '12px 0', borderBottom: i < bookmarkedPosts.length-1 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 10, alignItems: 'center', transition: 'opacity 0.15s' }}
                       onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
                       onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 500, flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
+                      <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontWeight: 'var(--fw-body)', flexShrink: 0, background: cat.bg, color: cat.color }}>{cat.label}</span>
                       <span style={{ flex: 1, fontSize: 'var(--fs-base)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
                       <div style={{ display: 'flex', gap: 'var(--sp-sm)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>
                         <span>❤️{post.likes_count}</span><span>💬{post.comments_count}</span>

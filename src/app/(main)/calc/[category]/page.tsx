@@ -55,9 +55,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
         ],
       }} />
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-      <Link href="/calc" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 계산기 전체</Link>
-      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, margin: '8px 0 4px' }}>{cat.icon} {cat.label} 계산기</h1>
-      <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 20 }}>{calcs.length}종 무료 제공</p>
+      <Link href="/calc" style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 계산기 전체</Link>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', margin: '8px 0 4px' }}>{cat.icon} {cat.label} 계산기</h1>
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 20 }}>{calcs.length}종 무료 제공</p>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
         {calcs.map(c => (
@@ -65,19 +65,19 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
             display: 'block', padding: '14px 16px', borderRadius: 'var(--radius-card)', textDecoration: 'none',
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
           }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{c.titleShort}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.4 }}>{c.description.slice(0, 60)}...</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 4 }}>{c.titleShort}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.3 }}>{c.description.slice(0, 60)}...</div>
           </Link>
         ))}
       </div>
 
       {/* 관련 카테고리 */}
       <div style={{ marginTop: 32 }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>다른 카테고리</div>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 10 }}>다른 카테고리</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {CATEGORIES.filter(c => c.id !== category).map(c => (
             <Link key={c.id} href={`/calc/${c.id}`} style={{
-              padding: '6px 12px', borderRadius: 'var(--radius-md)', textDecoration: 'none', fontSize: 12, fontWeight: 600,
+              padding: '6px 12px', borderRadius: 'var(--radius-md)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
               background: 'var(--bg-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border)',
             }}>
               {c.icon} {c.label}

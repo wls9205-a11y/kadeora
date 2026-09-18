@@ -113,13 +113,13 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
         ],
       }} />
 
-      <nav style={{ fontSize: '13px', color: 'var(--text-tertiary)', marginBottom: '16px' }}>
+      <nav style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: '16px' }}>
         <Link href="/glossary" style={{ color: 'var(--brand)', textDecoration: 'none' }}>용어사전</Link>
         <span style={{ margin: '0 6px' }}>›</span>
         <span>{term.term}</span>
       </nav>
 
-      <h1 style={{ fontSize: '28px', fontWeight: 600, marginBottom: '12px' }}>
+      <h1 style={{ fontSize: '28px', fontWeight: 'var(--fw-title)', marginBottom: '12px' }}>
         {term.term}
       </h1>
 
@@ -129,28 +129,28 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
         padding: '20px 24px',
         marginBottom: '24px',
         border: '1px solid var(--border)',
-        fontSize: '16px',
-        lineHeight: 1.8,
+        fontSize: 'var(--fs-sm)',
+        lineHeight: 1.6,
       }}>
         {term.definition_ko}
       </div>
 
       {term.definition_detail && (
-        <div style={{ marginBottom: '24px', lineHeight: 1.8, fontSize: '15px', color: 'var(--text-secondary)' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>상세 설명</h2>
+        <div style={{ marginBottom: '24px', lineHeight: 1.6, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
+          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', marginBottom: '8px' }}>상세 설명</h2>
           {term.definition_detail}
         </div>
       )}
 
       {term.example && (
         <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>예시</h2>
+          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', marginBottom: '8px' }}>예시</h2>
           <div style={{
             background: 'var(--bg-elevated)',
             padding: '14px 18px',
             borderRadius: '8px',
-            fontSize: '14px',
-            lineHeight: 1.7,
+            fontSize: 'var(--fs-sm)',
+            lineHeight: 1.6,
             fontFamily: 'var(--font-mono)',
           }}>
             {term.example}
@@ -161,7 +161,7 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
       {/* 관련 용어 */}
       {relatedData.length > 0 && (
         <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '10px' }}>관련 용어</h2>
+          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', marginBottom: '10px' }}>관련 용어</h2>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {relatedData.map((r: any) => (
               <Link
@@ -171,7 +171,7 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
                   padding: '6px 14px',
                   background: 'var(--bg-surface)',
                   borderRadius: '20px',
-                  fontSize: '13px',
+                  fontSize: 'var(--fs-xs)',
                   textDecoration: 'none',
                   color: 'var(--brand)',
                   border: '1px solid var(--border)',
@@ -187,7 +187,7 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
       {/* 같은 카테고리 */}
       {(sameCat || []).length > 0 && (
         <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '10px' }}>같은 분류의 용어</h2>
+          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', marginBottom: '10px' }}>같은 분류의 용어</h2>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {(sameCat || []).map((s: any) => (
               <Link
@@ -197,7 +197,7 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
                   padding: '6px 14px',
                   background: 'var(--bg-surface)',
                   borderRadius: '20px',
-                  fontSize: '13px',
+                  fontSize: 'var(--fs-xs)',
                   textDecoration: 'none',
                   color: 'inherit',
                   border: '1px solid var(--border)',
@@ -217,7 +217,7 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
         marginTop: '16px',
         borderTop: '1px solid var(--border)',
       }}>
-        <p style={{ fontSize: '14px', color: 'var(--text-tertiary)', marginBottom: '12px' }}>
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: '12px' }}>
           더 많은 주식 용어를 알아보세요
         </p>
         <Link
@@ -228,8 +228,8 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ s
             color: '#fff',
             borderRadius: '8px',
             textDecoration: 'none',
-            fontSize: '14px',
-            fontWeight: 600,
+            fontSize: 'var(--fs-sm)',
+            fontWeight: 'var(--fw-title)',
           }}
         >
           용어사전 전체 보기

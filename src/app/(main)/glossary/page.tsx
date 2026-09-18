@@ -71,16 +71,16 @@ export default async function GlossaryPage() {
         })),
       }} />
 
-      <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '8px' }}>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', marginBottom: '8px' }}>
         📖 주식 용어사전
       </h1>
-      <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '24px' }}>
+      <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', marginBottom: '24px' }}>
         투자 초보도 쉽게 이해하는 주식·경제 용어 {allTerms.length}개
       </p>
 
       {Object.entries(grouped).map(([cat, items]) => (
         <section key={cat} style={{ marginBottom: '28px' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '10px', color: 'var(--brand)' }}>
+          <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', marginBottom: '10px', color: 'var(--brand)' }}>
             {CATEGORY_LABELS[cat] || cat}
           </h2>
           <div style={{
@@ -102,9 +102,9 @@ export default async function GlossaryPage() {
                   border: '1px solid var(--border)',
                 }}
               >
-                <span style={{ fontWeight: 600, fontSize: '14px' }}>{t.term}</span>
+                <span style={{ fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-sm)' }}>{t.term}</span>
                 <p style={{
-                  fontSize: '12px',
+                  fontSize: 'var(--fs-xs)',
                   color: 'var(--text-tertiary)',
                   margin: '4px 0 0',
                   lineHeight: 1.5,

@@ -48,27 +48,27 @@ export default function StockSearchClient() {
 
   return (
     <article style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-      <nav style={{ fontSize: 12, color: 'var(--text-tertiary)', display: 'flex', gap: 4, marginBottom: 8 }}>
+      <nav style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', display: 'flex', gap: 4, marginBottom: 8 }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>›
         <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>›<span>검색</span>
       </nav>
-      <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>🔍 종목 검색</h1>
+      <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 16 }}>🔍 종목 검색</h1>
 
       {/* Search + Filters */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
         <input type="text" placeholder="종목명 또는 심볼 검색..." value={search} onChange={e => setSearch(e.target.value)}
-          style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 14 }} />
+          style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'max(16px, var(--fs-sm))' }} />
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {['ALL','KOSPI','KOSDAQ','NYSE','NASDAQ'].map(m => (
-            <button key={m} onClick={() => setMarketFilter(m)} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border)', background: marketFilter === m ? 'var(--brand)' : 'var(--bg-hover)', color: marketFilter === m ? '#fff' : 'var(--text-secondary)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+            <button key={m} onClick={() => setMarketFilter(m)} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border)', background: marketFilter === m ? 'var(--brand)' : 'var(--bg-hover)', color: marketFilter === m ? '#fff' : 'var(--text-secondary)', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', cursor: 'pointer' }}>
               {m === 'ALL' ? '전체' : m}
             </button>
           ))}
-          <select value={sectorFilter} onChange={e => setSectorFilter(e.target.value)} style={{ padding: '5px 10px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 12 }}>
+          <select value={sectorFilter} onChange={e => setSectorFilter(e.target.value)} style={{ padding: '5px 10px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'max(16px, var(--fs-xs))' }}>
             <option value="all">전체 섹터</option>
             {sectors.map(s => <option key={s} value={s!}>{s}</option>)}
           </select>
-          <select value={sortBy} onChange={e => setSortBy(e.target.value as any)} style={{ padding: '5px 10px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 12 }}>
+          <select value={sortBy} onChange={e => setSortBy(e.target.value as any)} style={{ padding: '5px 10px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'max(16px, var(--fs-xs))' }}>
             <option value="market_cap">시총순</option>
             <option value="change_pct">등락률순</option>
             <option value="volume">거래량순</option>
@@ -77,7 +77,7 @@ export default function StockSearchClient() {
         </div>
       </div>
 
-      <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 10 }}>{loading ? '로딩 중...' : `${filtered.length}종목 (전체 ${stocks.length})`}</p>
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 10 }}>{loading ? '로딩 중...' : `${filtered.length}종목 (전체 ${stocks.length})`}</p>
 
       {/* Results */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -86,24 +86,24 @@ export default function StockSearchClient() {
           const isKR = s.currency !== 'USD';
           return (
             <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', textDecoration: 'none', color: 'inherit', borderRadius: 'var(--radius-xs)', background: i % 2 === 0 ? 'var(--bg-base)' : 'var(--bg-surface)' }}>
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', minWidth: 24 }}>{i + 1}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', minWidth: 24 }}>{i + 1}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.symbol} · {s.market} · {s.sector || '-'}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+                <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{s.symbol} · {s.market} · {s.sector || '-'}</div>
               </div>
-              <span style={{ fontSize: 12, fontWeight: 600, minWidth: 70, textAlign: 'right' }}>{fmtPrice(s.price, s.currency)}</span>
-              <span style={{ fontSize: 12, fontWeight: 600, minWidth: 55, textAlign: 'right', color: stockColor(pct, isKR) }}>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', minWidth: 70, textAlign: 'right' }}>{fmtPrice(s.price, s.currency)}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', minWidth: 55, textAlign: 'right', color: stockColor(pct, isKR) }}>
                 {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
               </span>
-              <span style={{ fontSize: 10, color: 'var(--text-tertiary)', minWidth: 50, textAlign: 'right' }}>{fmtCap(Number(s.market_cap), s.currency)}</span>
+              <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', minWidth: 50, textAlign: 'right' }}>{fmtCap(Number(s.market_cap), s.currency)}</span>
             </Link>
           );
         })}
       </div>
 
       <div style={{ marginTop: 32, display: 'flex', gap: 8 }}>
-        <Link href="/stock" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>전 종목 시세</Link>
-        <Link href="/stock/dividend" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>배당주</Link>
+        <Link href="/stock" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' }}>전 종목 시세</Link>
+        <Link href="/stock/dividend" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' }}>배당주</Link>
       </div>
       <Disclaimer type="stock" />
     </article>

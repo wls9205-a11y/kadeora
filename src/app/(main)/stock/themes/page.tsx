@@ -57,16 +57,16 @@ export default async function ThemesPage() {
   return (
     <article style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <JsonLd data={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` }, { '@type': 'ListItem', position: 3, name: '테마주' }] }} />
-      <nav style={{ fontSize: 12, color: 'var(--text-tertiary)', display: 'flex', gap: 4, marginBottom: 8 }}>
+      <nav style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', display: 'flex', gap: 4, marginBottom: 8 }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>›
         <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>›<span>테마주</span>
       </nav>
       <JsonLd data={{ '@context': 'https://schema.org', '@type': 'WebPage', name: TITLE, url: `${SITE_URL}/stock/themes`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'section'] } }} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>🎯 테마주 분석</h1>
+        <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: 0 }}>🎯 테마주 분석</h1>
         <ShareButtons title={TITLE} contentType="stock-page" contentRef="themes" />
       </div>
-      <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 24 }}>주요 투자 테마별 관련주 목록과 시세를 정리합니다. 총 {(themes ?? []).length}개 테마.</p>
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 24 }}>주요 투자 테마별 관련주 목록과 시세를 정리합니다. 총 {(themes ?? []).length}개 테마.</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {(themes ?? []).map((theme: any) => {
@@ -77,14 +77,14 @@ export default async function ThemesPage() {
             <div key={theme.id} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
               <div style={{ padding: '12px 14px', background: 'var(--bg-surface)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{theme.name}</h2>
-                  {theme.description && <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: '2px 0 0' }}>{theme.description}</p>}
+                  <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: 0 }}>{theme.name}</h2>
+                  {theme.description && <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: '2px 0 0' }}>{theme.description}</p>}
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: stockColor(avgPct, true) }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: stockColor(avgPct, true) }}>
                     {avgPct > 0 ? '+' : ''}{avgPct.toFixed(2)}%
                   </div>
-                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{stocks.length}종목</div>
+                  <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{stocks.length}종목</div>
                 </div>
               </div>
               <div style={{ padding: '6px 14px 10px' }}>
@@ -92,15 +92,15 @@ export default async function ThemesPage() {
                   {stocks.slice(0, 8).map((q: any) => {
                     const pct = Number(q.change_pct);
                     return (
-                      <Link key={q.symbol} href={`/stock/${q.symbol}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', textDecoration: 'none', fontSize: 11 }}>
-                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{q.name}</span>
-                        <span style={{ color: stockColor(pct, isKRMarket(q?.market, q?.currency)), fontWeight: 600 }}>
+                      <Link key={q.symbol} href={`/stock/${q.symbol}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', textDecoration: 'none', fontSize: 'var(--fs-xs)' }}>
+                        <span style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{q.name}</span>
+                        <span style={{ color: stockColor(pct, isKRMarket(q?.market, q?.currency)), fontWeight: 'var(--fw-title)' }}>
                           {pct > 0 ? '+' : ''}{pct.toFixed(1)}%
                         </span>
                       </Link>
                     );
                   })}
-                  {stocks.length > 8 && <span style={{ fontSize: 11, color: 'var(--text-tertiary)', padding: '4px 8px' }}>+{stocks.length - 8}</span>}
+                  {stocks.length > 8 && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', padding: '4px 8px' }}>+{stocks.length - 8}</span>}
                 </div>
               </div>
             </div>
@@ -109,13 +109,13 @@ export default async function ThemesPage() {
       </div>
 
       <div style={{ marginTop: 32, display: 'flex', gap: 8 }}>
-        <Link href="/stock" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>전 종목 시세</Link>
-        <Link href="/stock/movers" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>급등락 종목</Link>
+        <Link href="/stock" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' }}>전 종목 시세</Link>
+        <Link href="/stock/movers" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' }}>급등락 종목</Link>
       </div>
       {/* SSR 서술형 분석 — Thin Content 해소 */}
       {(themes ?? []).length > 0 && (
-        <section style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', lineHeight: 1.8, fontSize: 14, color: 'var(--text-secondary)' }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>테마주 투자 가이드</h2>
+        <section style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', lineHeight: 1.6, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
+          <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 8 }}>테마주 투자 가이드</h2>
           <p>현재 카더라에서 추적 중인 테마는 총 <strong style={{ color: 'var(--text-primary)' }}>{(themes ?? []).length}개</strong>입니다.
           테마주 투자는 정책 변화, 기술 트렌드, 글로벌 이벤트에 따라 단기간 높은 수익을 기대할 수 있지만, 테마 소멸 시 급격한 하락 위험도 함께 존재합니다.</p>
           <p style={{ marginTop: 8 }}>각 테마별 대장주와 시가총액 상위 종목을 참고하되, 기업의 실질적인 사업 연관성과 실적 기여도를 반드시 확인해야 합니다.

@@ -121,7 +121,7 @@ export default function MorePage() {
                 letterSpacing: '.14em',
                 textTransform: 'uppercase',
                 color: 'var(--brand)',
-                fontWeight: 600,
+                fontWeight: 'var(--fw-title)',
                 marginBottom: 3,
               }}
             >
@@ -131,8 +131,8 @@ export default function MorePage() {
               id={id}
               style={{
                 fontSize: 'var(--fs-lg)',
-                fontWeight: 600,
-                letterSpacing: '-.02em',
+                fontWeight: 'var(--fw-title)',
+                letterSpacing: '-0.4px',
                 margin: '0 0 var(--sp-sm)',
                 color: 'var(--text-primary)',
               }}
@@ -167,7 +167,7 @@ export default function MorePage() {
                       style={{
                         display: 'block',
                         fontSize: 'var(--fs-sm)',
-                        fontWeight: 600,
+                        fontWeight: 'var(--fw-title)',
                         color: 'var(--text-primary)',
                       }}
                     >

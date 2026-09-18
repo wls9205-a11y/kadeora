@@ -39,11 +39,11 @@ function BestCommentPreview({ postId }: { postId: number }) {
   return (
     <div style={{ marginTop: 6, padding: '5px 8px', borderLeft: '2px solid rgba(59,123,246,0.3)', background: 'var(--bg-hover)', borderRadius: 0 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', marginBottom: 4 }}>
-        <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)' }}>Best</span>
-        <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{best.nickname} {GRADE_EMOJI[best.grade] ?? '🌱'}</span>
-        <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>♥ {best.likes_count}</span>
+        <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', color: 'var(--brand)' }}>Best</span>
+        <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{best.nickname} {GRADE_EMOJI[best.grade] ?? '🌱'}</span>
+        <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>♥ {best.likes_count}</span>
       </div>
-      <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{best.content}</div>
+      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{best.content}</div>
     </div>
   );
 }
@@ -297,13 +297,13 @@ export default function FeedClient({
                   padding: '7px 14px', borderRadius: 18, flexShrink: 0, border: 'none',
                   background: isActive ? 'var(--bg-hover)' : 'transparent',
                   color: isActive ? 'var(--text-primary)' : 'var(--text-tertiary)',
-                  fontSize: 12, fontWeight: isActive ? 600 : 400,
+                  fontSize: 'var(--fs-xs)', fontWeight: isActive ? 'var(--fw-title)' : 'var(--fw-quiet)',
                   cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
                   transition: 'all 0.2s',
                   boxShadow: isActive ? 'inset 0 0 0 1px var(--border-strong, rgba(255,255,255,0.12))' : 'none',
                 }}
                 onClick={() => router.push(buildUrl({ category: cat.key, region: 'all' }))}>
-                <span style={{ fontSize: 12 }}>{cat.icon}</span> {cat.label}
+                <span style={{ fontSize: 'var(--fs-xs)' }}>{cat.icon}</span> {cat.label}
                 {isActive && <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--brand)', marginLeft: 1 }} />}
               </button>
             );
@@ -318,10 +318,10 @@ export default function FeedClient({
               return (
                 <button key={opt.key}
                   style={{
-                    padding: '5px 10px 6px', fontSize: 11, border: 'none', borderRadius: 0,
+                    padding: '5px 10px 6px', fontSize: 'var(--fs-xs)', border: 'none', borderRadius: 0,
                     background: 'transparent',
                     color: isActive ? 'var(--brand-navy)' : 'var(--text-tertiary)',
-                    fontWeight: isActive ? 500 : 400, cursor: 'pointer',
+                    fontWeight: isActive ? 'var(--fw-body)' : 'var(--fw-quiet)', cursor: 'pointer',
                     borderBottom: isActive ? '2px solid var(--brand-navy)' : '2px solid transparent',
                     display: 'flex', alignItems: 'center', gap: 3,
                   }}
@@ -347,7 +347,7 @@ export default function FeedClient({
                 marginLeft: 'auto',
                 display: 'flex', alignItems: 'center', gap: 4,
                 minHeight: 32, padding: '6px 12px',
-                fontSize: 12, fontWeight: 600,
+                fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
                 color: 'var(--brand-navy)',
                 background: 'var(--bg-hover)',
                 border: '1px solid var(--border)',
@@ -380,8 +380,8 @@ export default function FeedClient({
         {activeCategory === 'local' && currentUserId && !profile?.regionText && (
           <div style={{ padding: '16px', textAlign: 'center', background: 'var(--bg-surface)', border: '1px solid rgba(59,123,246,0.15)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-md)' }}>
             <div style={{ fontSize: 28, marginBottom: 'var(--sp-xs)' }}>📍</div>
-            <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)', fontSize: 'var(--fs-sm)' }}>우리동네를 설정하면 같은 지역 이웃들의 글을 볼 수 있어요</div>
-            <Link href="/settings/region" style={{ display: 'inline-block', marginTop: 8, padding: '8px 20px', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: '#fff', fontWeight: 500, fontSize: 13, textDecoration: 'none' }}>
+            <div style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)', fontSize: 'var(--fs-sm)' }}>우리동네를 설정하면 같은 지역 이웃들의 글을 볼 수 있어요</div>
+            <Link href="/settings/region" style={{ display: 'inline-block', marginTop: 8, padding: '8px 20px', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: '#fff', fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-xs)', textDecoration: 'none' }}>
               동네 설정하기
             </Link>
           </div>
@@ -391,9 +391,9 @@ export default function FeedClient({
         {activeCategory === 'following' && !currentUserId && (
           <div style={{ padding: '24px 16px', textAlign: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-md)' }}>
             <div style={{ fontSize: 36, marginBottom: 'var(--sp-sm)' }}>👥</div>
-            <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>로그인 후 팔로잉 피드를 볼 수 있어요</div>
+            <div style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>로그인 후 팔로잉 피드를 볼 수 있어요</div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>관심 유저를 팔로우하고 맞춤 피드를 만들어 보세요</div>
-            <Link href={`/login?redirect=${encodeURIComponent(pathname)}&source=feed`} style={{ display: 'inline-block', padding: 'var(--sp-md) var(--sp-2xl)', borderRadius: 'var(--radius-md)', background: 'var(--kakao-bg)', color: 'var(--kakao-text)', fontWeight: 500, fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>
+            <Link href={`/login?redirect=${encodeURIComponent(pathname)}&source=feed`} style={{ display: 'inline-block', padding: 'var(--sp-md) var(--sp-2xl)', borderRadius: 'var(--radius-md)', background: 'var(--kakao-bg)', color: 'var(--kakao-text)', fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>
               카카오로 로그인
             </Link>
           </div>
@@ -402,7 +402,7 @@ export default function FeedClient({
         {/* 해시태그 활성 필터 표시 */}
         {activeTag && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 10, padding: '7px 12px', background: 'var(--brand-bg, rgba(37,99,235,0.08))', borderRadius: 'var(--radius-sm)', border: '1px solid var(--brand-border, rgba(37,99,235,0.15))' }}>
-            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', fontWeight: 600 }}>#{activeTag}</span>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', fontWeight: 'var(--fw-title)' }}>#{activeTag}</span>
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>태그 필터 중</span>
             <button onClick={() => setActiveTag(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 4 }}>
               ✕ 해제
@@ -416,7 +416,7 @@ export default function FeedClient({
             width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--sp-sm)',
             padding: '9px 0', marginBottom: 10, borderRadius: 'var(--radius-md)',
             background: 'var(--brand)', color: '#fff', border: 'none', cursor: 'pointer',
-            fontWeight: 600, fontSize: 'var(--fs-sm)',
+            fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-sm)',
           }}>
             ↑ 새 글 {newCount}개 올라왔어요 — 새로고침
           </button>
@@ -436,10 +436,10 @@ export default function FeedClient({
                 borderRadius: 12,
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.3 }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', lineHeight: 1.3 }}>
                     카더라 회원이 되면
                   </div>
-                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     알림 · 댓글 · 포인트 · 글 전문 보기
                   </div>
                 </div>
@@ -448,7 +448,7 @@ export default function FeedClient({
                   style={{
                     flexShrink: 0, padding: '8px 14px', borderRadius: 10,
                     background: 'var(--kakao-bg)', color: 'var(--kakao-text)',
-                    fontSize: 12, fontWeight: 600, textDecoration: 'none',
+                    fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', textDecoration: 'none',
                   }}
                 >
                   카카오 가입
@@ -499,7 +499,7 @@ export default function FeedClient({
                   : { padding: '9px 6px', borderBottom: '1px solid rgba(30,50,88,0.25)', transition: 'all var(--transition-fast)', position: 'relative' }}>
                 {/* 핀 배지 */}
                 {isPinned && (
-                  <div style={{ position: 'absolute', top: -1, right: 10, background: 'var(--brand)', color: '#fff', fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: '0 0 4px 4px' }}>
+                  <div style={{ position: 'absolute', top: -1, right: 10, background: 'var(--brand)', color: '#fff', fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', padding: '1px 6px', borderRadius: '0 0 4px 4px' }}>
                     📌 고정
                   </div>
                 )}
@@ -510,18 +510,18 @@ export default function FeedClient({
                     {!post.is_anonymous && post.profiles?.avatar_url ? (
                       <img src={post.profiles.avatar_url} alt={displayName} style={{ width: 28, height: 28, minWidth: 28, minHeight: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, display: 'block' }} />
                     ) : (
-                      <div style={{ width: 28, height: 28, minWidth: 28, minHeight: 28, borderRadius: '50%', background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, color: 'var(--text-inverse)', flexShrink: 0 }}>
+                      <div style={{ width: 28, height: 28, minWidth: 28, minHeight: 28, borderRadius: '50%', background: getAvatarColor(displayName), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-inverse)', flexShrink: 0 }}>
                         {displayName[0].toUpperCase()}
                       </div>
                     )}
                   </Link>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 12 }}>{displayName}</span>
-                      <span style={{ fontSize: 10, color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}</span>
-                      <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 4, background: cat.bg, color: cat.color, fontWeight: 500 }}>{cat.label}</span>
-                      {postType === 'short' && <span style={{ fontSize: 9, padding: '1px 4px', borderRadius: 3, background: 'rgba(168,85,247,0.1)', color: 'var(--accent-purple)', fontWeight: 500 }}>한마디</span>}
-                      <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
+                      <span style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', fontSize: 'var(--fs-xs)' }}>{displayName}</span>
+                      <span style={{ fontSize: 'var(--fs-2xs)', color: gradeColor(post.profiles?.grade ?? 1) }}>{gradeEmoji}</span>
+                      <span style={{ fontSize: 'var(--fs-2xs)', padding: '1px 5px', borderRadius: 4, background: cat.bg, color: cat.color, fontWeight: 'var(--fw-body)' }}>{cat.label}</span>
+                      {postType === 'short' && <span style={{ fontSize: 'var(--fs-2xs)', padding: '1px 4px', borderRadius: 3, background: 'rgba(168,85,247,0.1)', color: 'var(--accent-purple)', fontWeight: 'var(--fw-body)' }}>한마디</span>}
+                      <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
                     </div>
                   </div>
                   {/* 관리자 빠른 삭제 */}
@@ -540,11 +540,11 @@ export default function FeedClient({
                     <FallbackThumb name={post.title || displayName} size={32} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       {post.title && (
-                        <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 4 }}>
+                        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', lineHeight: 1.3, marginBottom: 4 }}>
                           {post.title}
                         </div>
                       )}
-                      <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
+                      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', wordBreak: 'break-word' }}>
                         {stripHtml(post.excerpt || post.content).slice(0, 150)}
                       </div>
                     </div>
@@ -563,7 +563,7 @@ export default function FeedClient({
                         </div>
                       ))}
                       {post.images.length > 3 && (
-                        <div style={{ width: 70, height: 70, borderRadius: 'var(--radius-md)', flexShrink: 0, background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 600 }}>
+                        <div style={{ width: 70, height: 70, borderRadius: 'var(--radius-md)', flexShrink: 0, background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)' }}>
                           +{post.images.length - 3}
                         </div>
                       )}
@@ -611,20 +611,20 @@ export default function FeedClient({
                   </button>
                   {/* 조회수 */}
                   {viewCount > 0 && (
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'var(--text-tertiary)', padding: '4px 6px', marginLeft: 'auto' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', padding: '4px 6px', marginLeft: 'auto' }}>
                       <Eye size={12} /> {numFmt(viewCount)}
                     </span>
                   )}
                   {/* 북마크 카운트 */}
                   {bookmarksCount > 0 && (
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-tertiary)', padding: '4px 8px' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', padding: '4px 8px' }}>
                       🔖 {numFmt(bookmarksCount)}
                     </span>
                   )}
                   {/* 팔로우 힌트 */}
                   {activeCategory !== 'following' && !post.is_anonymous && post.author_id && post.author_id !== currentUserId && (
                     <Link href={`/profile/${post.author_id}`}
-                      style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'var(--text-tertiary)', textDecoration: 'none' }}>
+                      style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>
                       <Users size={10} /> 팔로우
                     </Link>
                   )}
@@ -651,18 +651,18 @@ export default function FeedClient({
         {activeCategory === 'following' && currentUserId && visiblePosts.length === 0 && !loadingMore && (
           <div style={{ textAlign: 'center', padding: '40px 16px' }}>
             <div style={{ fontSize: 36, marginBottom: 'var(--sp-sm)' }}>👥</div>
-            <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>팔로우한 사람의 글이 없어요</div>
+            <div style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>팔로우한 사람의 글이 없어요</div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>관심 있는 유저를 팔로우해보세요</div>
-            <Link href="/feed" style={{ display: 'inline-block', padding: '8px 20px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontWeight: 500, fontSize: 13, textDecoration: 'none' }}>전체 피드 보기</Link>
+            <Link href="/feed" style={{ display: 'inline-block', padding: '8px 20px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-xs)', textDecoration: 'none' }}>전체 피드 보기</Link>
           </div>
         )}
 
         {/* 해시태그 필터 빈 결과 */}
         {activeTag && visiblePosts.length === 0 && (
           <div style={{ textAlign: 'center', padding: '40px 16px' }}>
-            <div style={{ fontSize: 32, marginBottom: 'var(--sp-sm)' }}>🔍</div>
-            <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>#{activeTag} 태그 글이 없어요</div>
-            <button onClick={() => setActiveTag(null)} style={{ padding: '8px 20px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontWeight: 500, fontSize: 13, border: 'none', cursor: 'pointer' }}>필터 해제</button>
+            <div style={{ fontSize: 'var(--fs-2xl)', marginBottom: 'var(--sp-sm)' }}>🔍</div>
+            <div style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)' }}>#{activeTag} 태그 글이 없어요</div>
+            <button onClick={() => setActiveTag(null)} style={{ padding: '8px 20px', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-xs)', border: 'none', cursor: 'pointer' }}>필터 해제</button>
           </div>
         )}
 

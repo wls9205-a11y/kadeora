@@ -64,7 +64,7 @@ export default function SandboxIssueCards() {
   if (process.env.NODE_ENV === 'production') notFound();
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: 16, background: '#F9FAFB', minHeight: '100vh' }}>
-      <h1 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>s262 Issue Cards Sandbox</h1>
+      <h1 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', marginBottom: 12 }}>s262 Issue Cards Sandbox</h1>
 
       <Section title="IssueScoreBadge / Bar (size variants)">
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
@@ -125,7 +125,7 @@ export default function SandboxIssueCards() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section style={{ marginBottom: 16 }}>
-      <h2 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 6 }}>{title}</h2>
+      <h2 style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: 'var(--text-tertiary)', marginBottom: 6 }}>{title}</h2>
       <div>{children}</div>
     </section>
   );

@@ -104,20 +104,20 @@ export default async function CalcResultPage({ params }: PageProps) {
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '20px var(--sp-lg)' }}>
       <JsonLd data={jsonLd} />
 
-      <nav style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 12 }}>
+      <nav style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 12 }}>
         <Link href="/calc">계산기</Link> › <Link href={`/calc/${category}`}>{catMeta?.label}</Link> › <Link href={`/calc/${category}/${slug}`}>{calc.titleShort}</Link>
       </nav>
 
-      <h1 style={{ fontSize: 24, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: 0 }}>
         {calc.emoji} {calc.title} 결과
       </h1>
 
       <div style={{ marginTop: 20, padding: 24, background: 'linear-gradient(135deg, rgba(59,123,246,0.15), rgba(124,58,237,0.15))',
         borderRadius: 12, border: '1px solid rgba(59,123,246,0.3)', textAlign: 'center' }}>
-        <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 6 }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 6 }}>
           {rec.result?.main?.label || '결과'}
         </div>
-        <div style={{ fontSize: 40, fontWeight: 700, color: 'var(--brand)', letterSpacing: '-1px' }}>
+        <div style={{ fontSize: 40, fontWeight: 'var(--fw-num)', color: 'var(--brand)', letterSpacing: '-0.4px' }}>
           {mainResult}
         </div>
       </div>
@@ -125,11 +125,11 @@ export default async function CalcResultPage({ params }: PageProps) {
       {/* 상세 내역 */}
       {Array.isArray(rec.result?.details) && rec.result.details.length > 0 && (
         <div style={{ marginTop: 20, background: 'var(--bg-surface)', borderRadius: 8, padding: 16 }}>
-          <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px' }}>📋 상세 내역</h2>
+          <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 12px' }}>📋 상세 내역</h2>
           {rec.result.details.map((d: any, i: number) => (
             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
-              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{d.label}</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{d.value}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>{d.label}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{d.value}</span>
             </div>
           ))}
         </div>
@@ -137,10 +137,10 @@ export default async function CalcResultPage({ params }: PageProps) {
 
       {/* 입력값 (자세히) */}
       <details style={{ marginTop: 16, background: 'var(--bg-hover)', borderRadius: 8, padding: 12 }}>
-        <summary style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)', cursor: 'pointer' }}>
+        <summary style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-secondary)', cursor: 'pointer' }}>
           🔍 입력 조건 보기
         </summary>
-        <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-tertiary)' }}>
+        <div style={{ marginTop: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
           {Object.entries(rec.inputs || {}).map(([k, v]) => (
             <div key={k} style={{ padding: '3px 0' }}>{k}: <strong style={{ color: 'var(--text-primary)' }}>{String(v)}</strong></div>
           ))}
@@ -151,7 +151,7 @@ export default async function CalcResultPage({ params }: PageProps) {
       <Link href={`/calc/${category}/${slug}`} style={{
         display: 'block', marginTop: 24, padding: 14, textAlign: 'center',
         background: 'var(--brand)', color: 'white', borderRadius: 10,
-        fontSize: 15, fontWeight: 600, textDecoration: 'none',
+        fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', textDecoration: 'none',
       }}>
         나도 계산해보기 →
       </Link>
@@ -159,15 +159,15 @@ export default async function CalcResultPage({ params }: PageProps) {
       {/* 인기 결과 */}
       {popular.length > 0 && (
         <section style={{ marginTop: 32 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px' }}>
+          <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 12px' }}>
             🔥 같은 계산기 인기 결과
           </h2>
           {popular.map((p: any) => (
             <Link key={p.short_id} href={`/calc/${category}/${slug}/r/${p.short_id}`}
               style={{ display: 'flex', justifyContent: 'space-between', padding: 10, borderRadius: 6,
                 background: 'var(--bg-surface)', textDecoration: 'none', marginBottom: 6 }}>
-              <span style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 600 }}>{p.result?.main?.value}</span>
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>👁 {p.view_count}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{p.result?.main?.value}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>👁 {p.view_count}</span>
             </Link>
           ))}
         </section>
@@ -176,7 +176,7 @@ export default async function CalcResultPage({ params }: PageProps) {
       {/* 관련 블로그 */}
       {Array.isArray(relatedBlogs) && relatedBlogs.length > 0 && (
         <section style={{ marginTop: 32 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px' }}>
+          <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 12px' }}>
             📖 더 자세한 가이드
           </h2>
           {relatedBlogs.map((b: any) => (
@@ -184,14 +184,14 @@ export default async function CalcResultPage({ params }: PageProps) {
               display: 'block', padding: 12, borderRadius: 8, background: 'var(--bg-surface)',
               marginBottom: 8, textDecoration: 'none',
             }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{b.title}</div>
-              {b.excerpt && <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 4 }}>{b.excerpt.slice(0, 80)}…</div>}
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{b.title}</div>
+              {b.excerpt && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>{b.excerpt.slice(0, 80)}…</div>}
             </Link>
           ))}
         </section>
       )}
 
-      <p style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', marginTop: 32 }}>
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: 32 }}>
         조회 {rec.view_count + 1}회 · {new Date(rec.created_at).toLocaleString('ko-KR')} 계산
       </p>
     </div>

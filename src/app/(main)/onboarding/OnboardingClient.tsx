@@ -119,10 +119,10 @@ export default function OnboardingClient() {
         {/* 진행 바 */}
         <div style={{ height: 3, borderRadius: 4, background: 'var(--brand)', marginBottom: 24 }} />
 
-        <h1 style={{ fontSize: 20, fontWeight: 600, margin: '0 0 4px', color: 'var(--text-primary)' }}>
+        <h1 style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', margin: '0 0 4px', color: 'var(--text-primary)' }}>
           환영합니다! 🎉
         </h1>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 18px', lineHeight: 1.5 }}>
+        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: '0 0 18px', lineHeight: 1.5 }}>
           관심 분야를 고르면 맞춤 알림을 바로 받을 수 있어요
         </p>
 
@@ -137,8 +137,8 @@ export default function OnboardingClient() {
                 border: `1.5px solid ${sel ? 'var(--brand)' : 'var(--border)'}`,
                 transition: 'all 0.15s',
               }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: sel ? 'var(--brand)' : 'var(--text-primary)', marginBottom: 2 }}>{label}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{desc}</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: sel ? 'var(--brand)' : 'var(--text-primary)', marginBottom: 2 }}>{label}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{desc}</div>
               </button>
             );
           })}
@@ -146,10 +146,10 @@ export default function OnboardingClient() {
 
         {/* 지역 선택 — 선택사항 강조 */}
         <div style={{ marginBottom: 14 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <label style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
             📍 거주 지역
             <span style={{
-              fontSize: 10, padding: '2px 6px', borderRadius: 10,
+              fontSize: 'var(--fs-2xs)', padding: '2px 6px', borderRadius: 10,
               background: 'rgba(100,116,139,0.15)', color: 'var(--text-tertiary)',
             }}>선택사항</span>
           </label>
@@ -157,14 +157,14 @@ export default function OnboardingClient() {
             width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
             border: '1.5px solid var(--border)', background: 'var(--bg-base)',
             color: region ? 'var(--text-primary)' : 'var(--text-tertiary)',
-            fontSize: 14, appearance: 'none',
+            fontSize: 'max(16px, var(--fs-sm))', appearance: 'none',
             backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E")`,
             backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center',
           }}>
             <option value="">선택하세요</option>
             {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>
             지역 설정 시 더 정확한 청약·시세 알림을 받을 수 있어요
           </div>
         </div>
@@ -172,7 +172,7 @@ export default function OnboardingClient() {
         {/* 마케팅 동의 */}
         <label style={{
           display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 16,
-          cursor: 'pointer', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5,
+          cursor: 'pointer', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5,
         }}>
           <input type="checkbox" checked={marketingAgreed} onChange={e => setMarketingAgreed(e.target.checked)}
             style={{ marginTop: 2, accentColor: 'var(--brand)' }} />
@@ -184,9 +184,9 @@ export default function OnboardingClient() {
           <div style={{
             background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.15)',
             borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: 14,
-            fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7,
+            fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6,
           }}>
-            <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4, fontSize: 13 }}>
+            <div style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 4, fontSize: 'var(--fs-xs)' }}>
               📱 앱처럼 사용하기
             </div>
             하단 <strong style={{ color: 'var(--brand)' }}>공유(⬆️)</strong> → <strong style={{ color: 'var(--brand)' }}>&quot;홈 화면에 추가&quot;</strong>하면
@@ -196,7 +196,7 @@ export default function OnboardingClient() {
 
         <button onClick={() => handleFinish(false)} disabled={saving}
           style={{
-            width: '100%', padding: 14, borderRadius: 'var(--radius-card)', border: 'none', fontSize: 15, fontWeight: 500,
+            width: '100%', padding: 14, borderRadius: 'var(--radius-card)', border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)',
             background: 'var(--brand)', color: '#fff',
             cursor: saving ? 'not-allowed' : 'pointer',
             opacity: saving ? 0.7 : 1,
@@ -206,8 +206,8 @@ export default function OnboardingClient() {
 
         {/* 시작하기 버튼 아래 혜택 요약 */}
         {!saving && (
-          <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-tertiary)', marginTop: 8, lineHeight: 1.5 }}>
-            가입 즉시 <span style={{ color: 'var(--brand)', fontWeight: 600 }}>{benefitText}</span> 시작
+          <div style={{ textAlign: 'center', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8, lineHeight: 1.5 }}>
+            가입 즉시 <span style={{ color: 'var(--brand)', fontWeight: 'var(--fw-title)' }}>{benefitText}</span> 시작
           </div>
         )}
 
@@ -235,7 +235,7 @@ export default function OnboardingClient() {
           style={{
             width: '100%', marginTop: 10, padding: 8,
             background: 'none', border: 'none',
-            fontSize: 12, color: 'var(--text-tertiary)', cursor: 'pointer',
+            fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', cursor: 'pointer',
           }}
         >
           건너뛰기 (나중에 설정)

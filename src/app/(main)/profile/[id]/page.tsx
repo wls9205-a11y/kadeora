@@ -71,8 +71,8 @@ export default async function ProfilePage({ params }: Props) {
           { label: '출석', value: profile?.streak_days || 0 },
         ].map(s => (
           <div key={s.label} style={{ textAlign: 'center', padding: 8, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{s.value}</div>
-            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>{s.label}</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{s.value}</div>
+            <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 1 }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -81,7 +81,7 @@ export default async function ProfilePage({ params }: Props) {
     {/* 최근 활동 타임라인 */}
     {((posts && posts.length > 0) || (recentComments && recentComments.length > 0)) && (
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px 16px' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>최근 활동</div>
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 6 }}>최근 활동</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0, position: 'relative', paddingLeft: 16 }}>
           <div style={{ position: 'absolute', left: 5, top: 6, bottom: 6, width: 2, background: 'var(--border)', borderRadius: 1 }} />
           {[
@@ -97,10 +97,10 @@ export default async function ProfilePage({ params }: Props) {
             <a key={i} href={item.href} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '4px 0', textDecoration: 'none', color: 'inherit', position: 'relative' }}>
               <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.type === 'post' ? 'var(--brand)' : 'var(--accent-green)', border: '2px solid var(--bg-base)', flexShrink: 0, marginTop: 3, position: 'relative', zIndex: 1 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 11, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {item.emoji} {item.title}
                 </div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>
+                <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 1 }}>
                   {item.type === 'post' ? '글 작성' : '댓글'} · {new Date(item.date).toLocaleDateString('ko-KR')}
                 </div>
               </div>

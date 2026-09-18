@@ -56,8 +56,8 @@ export default function CalcHubPage() {
         })),
       }} />
     <div style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, marginBottom: 4, letterSpacing: '-0.5px' }}>무료 계산기 모음</h1>
-      <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 24 }}>세금 · 부동산 · 주식 · 대출 · 연금 — {CALC_REGISTRY.length}종 무료 제공</p>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', marginBottom: 4, letterSpacing: '-0.4px' }}>무료 계산기 모음</h1>
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 24 }}>세금 · 부동산 · 주식 · 대출 · 연금 — {CALC_REGISTRY.length}종 무료 제공</p>
 
       {CATEGORIES.map(cat => {
         const calcs = CALC_REGISTRY.filter(c => c.category === cat.id);
@@ -65,16 +65,16 @@ export default function CalcHubPage() {
         return (
           <div key={cat.id} style={{ marginBottom: 24 }}>
             <Link href={`/calc/${cat.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, textDecoration: 'none' }}>
-              <span style={{ fontSize: 20 }}>{cat.icon}</span>
-              <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>{cat.label}</span>
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{calcs.length}종 →</span>
+              <span style={{ fontSize: 'var(--fs-md)' }}>{cat.icon}</span>
+              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{cat.label}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>{calcs.length}종 →</span>
             </Link>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 6 }}>
               {calcs.map(c => (
                 <Link key={c.slug} href={`/calc/${c.category}/${c.slug}`} style={{
                   display: 'block', padding: '10px 12px', borderRadius: 'var(--radius-md)', textDecoration: 'none',
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                  fontSize: 13, fontWeight: 600, color: 'var(--text-primary)',
+                  fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)',
                 }}>
                   {c.titleShort}
                 </Link>

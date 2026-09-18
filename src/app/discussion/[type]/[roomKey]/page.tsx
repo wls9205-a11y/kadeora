@@ -9,7 +9,7 @@ export default function DiscussionRoomPage() {
   return (
     <>
       <meta name="robots" content="noindex, nofollow" />
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: 'var(--text-tertiary)', fontSize: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
         라운지로 이동 중...
       </div>
     </>

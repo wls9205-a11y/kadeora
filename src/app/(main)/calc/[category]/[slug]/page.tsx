@@ -163,18 +163,18 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
 
       {/* 헤더 */}
       <div style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6 }}>
+        <div style={{ display: 'flex', gap: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 6 }}>
           <Link href="/calc" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>계산기</Link>
           <span>›</span>
           <Link href={`/calc/${category}`} style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>{catMeta?.label}</Link>
         </div>
-        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, margin: 0, letterSpacing: '-0.5px' }}>
+        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', margin: 0, letterSpacing: '-0.4px' }}>
           <span style={{ marginRight: 6 }}>{calc.emoji}</span>{calc.title}
         </h1>
-        <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: '4px 0 0' }}>
+        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', margin: '4px 0 0' }}>
           {calc.description}
         </p>
-        <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '2px 0 0' }}>
+        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', margin: '2px 0 0' }}>
           {calc.legalBasis ? `${calc.legalBasis} 기준` : calc.categoryLabel} · v{calc.version} · 무료 · 회원가입 불필요
         </p>
       </div>
@@ -185,7 +185,7 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
       {/* 결과 공유 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 16, marginBottom: 8 }}>
         <ShareButtons title={`${calc.emoji} ${calc.title} — 카더라 무료 계산기`} content={calc.description} contentType="calc" contentRef={slug} />
-        <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>계산 결과를 공유해보세요</span>
+        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>계산 결과를 공유해보세요</span>
       </div>
 
       {/* r4-P9-4 — 부동산 맥락 계산기에만. 결과 직후, 다음 동선 위. */}
@@ -218,11 +218,11 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
       {/* 관련 계산기 */}
       {relatedCalcs.length > 0 && (
         <div style={{ marginTop: 24, marginBottom: 16 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>관련 계산기</div>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 8 }}>관련 계산기</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {relatedCalcs.map(rc => rc && (
               <Link key={rc.slug} href={`/calc/${rc.category}/${rc.slug}`} style={{
-                padding: '6px 12px', borderRadius: 'var(--radius-md)', textDecoration: 'none', fontSize: 12, fontWeight: 600,
+                padding: '6px 12px', borderRadius: 'var(--radius-md)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
                 background: 'var(--bg-surface)', color: 'var(--text-secondary)', border: '1px solid var(--border)',
               }}>
                 {rc.emoji} {rc.titleShort}
@@ -235,8 +235,8 @@ export default async function CalcPage({ params }: { params: Promise<{ category:
       {/* 회원가입 유도 — LoginGate 기능 게이팅 (세션 108) */}
       <LoginGate feature="calc_save" blurHeight={80}>
         <div style={{ padding: '8px 0' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>조건 A (3.8%, 30년)</span><span>139.8만/월</span></div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', color: 'var(--text-tertiary)' }}><span>조건 B (4.2%, 25년)</span><span>162.3만/월</span></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', padding: '4px 0', color: 'var(--text-tertiary)' }}><span>조건 A (3.8%, 30년)</span><span>139.8만/월</span></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', padding: '4px 0', color: 'var(--text-tertiary)' }}><span>조건 B (4.2%, 25년)</span><span>162.3만/월</span></div>
         </div>
       </LoginGate>
 

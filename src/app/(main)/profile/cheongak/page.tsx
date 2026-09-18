@@ -51,8 +51,8 @@ export default async function CheongakPage() {
   return (
     <article style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <header style={{ margin: '0 0 16px' }}>
-        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)' }}>내 청약 가점</h1>
-        <p style={{ marginTop: 8, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
+        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>내 청약 가점</h1>
+        <p style={{ marginTop: 8, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
           입력 즉시 자동 합산. 관심 지역에 매칭되는 청약이 열리면 알림으로 알려드립니다.
           <br />
           한국 표준 가점제: 무주택 32점 + 부양가족 35점 + 청약통장 17점 = <strong>84점 만점</strong>.

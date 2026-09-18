@@ -64,18 +64,18 @@ export default function CompareClient() {
   const CompareRow = ({ label, a, b, highlight }: { label: string; a: string; b: string; highlight?: 'a' | 'b' | null }) => (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 1fr', gap: 6, padding: '8px 0', borderBottom: '1px solid var(--border)', alignItems: 'center' }}>
       <div style={{
-        textAlign: 'right', fontSize: 13, fontWeight: highlight === 'a' ? 600 : 500,
+        textAlign: 'right', fontSize: 'var(--fs-xs)', fontWeight: highlight === 'a' ? 'var(--fw-title)' : 'var(--fw-body)',
         color: highlight === 'a' ? 'var(--brand)' : 'var(--text-primary)',
         background: highlight === 'a' ? 'rgba(59,123,246,0.06)' : 'transparent',
         padding: highlight === 'a' ? '2px 8px' : 0, borderRadius: 4,
-      }}>{a} {highlight === 'a' && <span style={{ fontSize: 10, color: 'var(--brand)' }}>WIN</span>}</div>
-      <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600 }}>{label}</div>
+      }}>{a} {highlight === 'a' && <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--brand)' }}>WIN</span>}</div>
+      <div style={{ textAlign: 'center', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)' }}>{label}</div>
       <div style={{
-        textAlign: 'left', fontSize: 13, fontWeight: highlight === 'b' ? 600 : 500,
+        textAlign: 'left', fontSize: 'var(--fs-xs)', fontWeight: highlight === 'b' ? 'var(--fw-title)' : 'var(--fw-body)',
         color: highlight === 'b' ? 'var(--brand)' : 'var(--text-primary)',
         background: highlight === 'b' ? 'rgba(59,123,246,0.06)' : 'transparent',
         padding: highlight === 'b' ? '2px 8px' : 0, borderRadius: 4,
-      }}>{highlight === 'b' && <span style={{ fontSize: 10, color: 'var(--brand)' }}>WIN </span>}{b}</div>
+      }}>{highlight === 'b' && <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--brand)' }}>WIN </span>}{b}</div>
     </div>
   );
 
@@ -84,7 +84,7 @@ export default function CompareClient() {
       {value ? (
         <div style={{ padding: '12px 16px', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>{value.name}</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{value.name}</div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{value.symbol} · {value.market}</div>
           </div>
           <button onClick={() => { onSelect(null); setSearch(''); }} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-lg)' }}>✕</button>
@@ -101,7 +101,7 @@ export default function CompareClient() {
                   background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)',
                   borderBottom: '1px solid var(--border)', textAlign: 'left',
                 }}>
-                  <span style={{ fontWeight: 600 }}>{s.name}</span>
+                  <span style={{ fontWeight: 'var(--fw-title)' }}>{s.name}</span>
                   <span style={{ color: 'var(--text-tertiary)' }}>{s.symbol}</span>
                 </button>
               ))}
@@ -115,14 +115,14 @@ export default function CompareClient() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
-      <Link href="/stock" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 주식 시세</Link>
-      <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', margin: '6px 0 6px' }}>종목 비교</h1>
+      <Link href="/stock" style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 주식 시세</Link>
+      <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '6px 0 6px' }}>종목 비교</h1>
       <div style={{ marginBottom: 12 }}><SectionShareButton section="stock-compare" label="종목 비교 — 주가·시총·등락률 비교 분석" pagePath="/stock/compare" /></div>
 
       {/* 종목 선택 */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 'var(--sp-lg)', alignItems: 'flex-start' }}>
         <SelectBox value={stockA} search={searchA} setSearch={setSearchA} onSelect={setStockA} placeholder="종목 A 검색..." />
-        <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-tertiary)', paddingTop: 10 }}>VS</div>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)', paddingTop: 10 }}>VS</div>
         <SelectBox value={stockB} search={searchB} setSearch={setSearchB} onSelect={setStockB} placeholder="종목 B 검색..." />
       </div>
 
@@ -132,13 +132,13 @@ export default function CompareClient() {
           {/* 헤더 */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 1fr', gap: 6, padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{stockA.name}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{stockA.symbol}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{stockA.name}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{stockA.symbol}</div>
             </div>
-            <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 500, color: 'var(--text-tertiary)' }}>항목</div>
+            <div style={{ textAlign: 'center', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)' }}>항목</div>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{stockB.name}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{stockB.symbol}</div>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{stockB.name}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{stockB.symbol}</div>
             </div>
           </div>
 
@@ -164,8 +164,8 @@ export default function CompareClient() {
           {/* 관련 블로그 */}
           <div style={{ marginTop: 'var(--sp-lg)' }}>
             <div style={{ display: 'flex', gap: 'var(--sp-sm)' }}>
-              <Link href={`/stock/${stockA.symbol}`} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>{stockA.name} 상세 →</Link>
-              <Link href={`/stock/${stockB.symbol}`} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>{stockB.name} 상세 →</Link>
+              <Link href={`/stock/${stockA.symbol}`} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)' }}>{stockA.name} 상세 →</Link>
+              <Link href={`/stock/${stockB.symbol}`} style={{ flex: 1, textAlign: 'center', padding: '10px 0', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)' }}>{stockB.name} 상세 →</Link>
             </div>
           </div>
 
@@ -187,15 +187,15 @@ export default function CompareClient() {
             return (
               <GatedStockSection sectionKey="compare_detailed" pageType="compare" fallbackTitle={`${stockA.name} × ${stockB.name} 상세 비교`}>
               <div style={{ marginTop: 'var(--sp-lg)', padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📈 30일 수익률 비교 (%)</div>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>📈 30일 수익률 비교 (%)</div>
                 <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: h }}>
                   <polyline points={toPoints(nA)} fill="none" stroke="var(--brand)" strokeWidth="2" />
                   <polyline points={toPoints(nB)} fill="none" stroke="var(--accent-orange)" strokeWidth="2" />
                   <line x1="0" y1={h - ((0 - min) / range) * h} x2={w} y2={h - ((0 - min) / range) * h} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="4" />
                 </svg>
-                <div style={{ display: 'flex', gap: 'var(--sp-lg)', marginTop: 6, fontSize: 11 }}>
-                  <span style={{ color: 'var(--brand)', fontWeight: 500 }}>● {stockA.name}</span>
-                  <span style={{ color: 'var(--accent-orange)', fontWeight: 500 }}>● {stockB.name}</span>
+                <div style={{ display: 'flex', gap: 'var(--sp-lg)', marginTop: 6, fontSize: 'var(--fs-xs)' }}>
+                  <span style={{ color: 'var(--brand)', fontWeight: 'var(--fw-body)' }}>● {stockA.name}</span>
+                  <span style={{ color: 'var(--accent-orange)', fontWeight: 'var(--fw-body)' }}>● {stockB.name}</span>
                 </div>
               </div>
               </GatedStockSection>
@@ -205,14 +205,14 @@ export default function CompareClient() {
       ) : (
         <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-tertiary)' }}>
           <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>⚔️</div>
-          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, marginBottom: 'var(--sp-sm)' }}>두 종목을 선택해서 비교하세요</div>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', marginBottom: 'var(--sp-sm)' }}>두 종목을 선택해서 비교하세요</div>
           <div style={{ fontSize: 'var(--fs-sm)' }}>시가총액, 등락률, 거래량 등을 한눈에 비교</div>
         </div>
       )}
 
       {/* 인기 비교 조합 */}
       <div style={{ marginTop: 14, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 12 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>인기 비교</div>
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>인기 비교</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-xs)' }}>
           {[
             ['삼성전자', 'SK하이닉스'], ['현대차', '기아'], ['NAVER', '카카오'],
@@ -224,7 +224,7 @@ export default function CompareClient() {
               if (sa) setStockA(sa);
               if (sb2) setStockB(sb2);
             }} style={{
-              padding: '4px 10px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600,
+              padding: '4px 10px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
               background: 'var(--bg-hover)', color: 'var(--text-secondary)',
               border: '1px solid var(--border)', cursor: 'pointer',
             }}>

@@ -48,7 +48,7 @@ export default function AttendancePage() {
 
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px' }}>
-      <h1 style={{ fontSize: 20, fontWeight: 600, margin: '0 0 20px', color: 'var(--text-primary)' }}>출석 체크</h1>
+      <h1 style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', margin: '0 0 20px', color: 'var(--text-primary)' }}>출석 체크</h1>
 
       {/* 스트릭 카드 */}
       <div style={{
@@ -56,18 +56,18 @@ export default function AttendancePage() {
         borderRadius: 'var(--radius-lg)', padding: 24, textAlign: 'center', marginBottom: 16,
       }}>
         <div style={{ fontSize: 48, marginBottom: 8 }}>🔥</div>
-        <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--brand)' }}>{data.streak}일</div>
-        <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>연속 출석</div>
+        <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 'var(--fw-num)', color: 'var(--brand)' }}>{data.streak}일</div>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 16 }}>연속 출석</div>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 20 }}>
           <div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{data.total_days}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>총 출석일</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)' }}>{data.total_days}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>총 출석일</div>
           </div>
           <div style={{ width: 1, background: 'var(--border)' }} />
           <div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>+10P</div>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>기본 보상</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)' }}>+10P</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>기본 보상</div>
           </div>
         </div>
 
@@ -75,7 +75,7 @@ export default function AttendancePage() {
           <div style={{
             padding: '14px 0', borderRadius: 'var(--radius-card)',
             background: 'var(--bg-hover)', color: 'var(--text-secondary)',
-            fontSize: 14, fontWeight: 600,
+            fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)',
           }}>
             ✅ 오늘 출석 완료!
           </div>
@@ -83,7 +83,7 @@ export default function AttendancePage() {
           <button onClick={handleCheck} disabled={checking} style={{
             width: '100%', padding: '14px 0', borderRadius: 'var(--radius-card)',
             border: 'none', background: 'var(--brand)', color: '#fff',
-            fontSize: 15, fontWeight: 600, cursor: checking ? 'not-allowed' : 'pointer',
+            fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', cursor: checking ? 'not-allowed' : 'pointer',
             opacity: checking ? 0.6 : 1,
           }}>
             {checking ? '출석 중...' : '출석 체크하기 🌱'}
@@ -93,7 +93,7 @@ export default function AttendancePage() {
         {reward && (
           <div style={{
             marginTop: 12, padding: 10, borderRadius: 'var(--radius-md)',
-            background: 'rgba(16,185,129,0.1)', color: 'var(--accent-green)', fontSize: 13, fontWeight: 600,
+            background: 'rgba(16,185,129,0.1)', color: 'var(--accent-green)', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
           }}>
             🎉 +{reward.points}P {reward.bonus && `(${reward.bonus})`}
           </div>
@@ -105,7 +105,7 @@ export default function AttendancePage() {
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
         borderRadius: 'var(--radius-lg)', padding: 16,
       }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 12 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 12 }}>
           연속 출석 보너스
         </div>
         {STREAK_REWARDS.map(r => {
@@ -118,7 +118,7 @@ export default function AttendancePage() {
             }}>
               <div style={{
                 width: 28, height: 28, borderRadius: '50%', display: 'flex',
-                alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600,
+                alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
                 background: done ? 'rgba(16,185,129,0.15)' : current ? 'rgba(59,123,246,0.15)' : 'var(--bg-hover)',
                 /* kd-brand-exempt: 출석 진행 색 체계(완료/오늘/예정). 위 AptScheduleTimeline 과 같은 계열이다. */
                 color: done ? '#10B981' : current ? 'var(--brand)' : 'var(--text-tertiary)',
@@ -126,13 +126,13 @@ export default function AttendancePage() {
                 {done ? '✓' : r.days}
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: done ? '#10B981' : 'var(--text-primary)' }}>{r.label}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: done ? '#10B981' : 'var(--text-primary)' }}>{r.label}</div>
               </div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: done ? '#10B981' : 'var(--brand)' }}>+{r.bonus}P</div>
+              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: done ? '#10B981' : 'var(--brand)' }}>+{r.bonus}P</div>
             </div>
           );
         })}
-        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 8 }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>
           매일 +10P 기본 보상 + 연속 보너스
         </div>
       </div>

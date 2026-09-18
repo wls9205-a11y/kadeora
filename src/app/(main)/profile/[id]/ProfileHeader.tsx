@@ -154,11 +154,11 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
         {editing ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
             <div>
-              <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', padding: '0 4px' }}>닉네임</label>
+              <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', padding: '0 4px' }}>닉네임</label>
               <input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="닉네임" maxLength={20} className="kd-input" style={{ width: '100%', boxSizing: 'border-box', fontSize: 'var(--fs-md)', padding: '10px 16px' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', padding: '0 4px' }}>자기소개</label>
+              <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', padding: '0 4px' }}>자기소개</label>
               <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="자기소개를 입력해주세요" maxLength={200} rows={3}
                 style={{ width: '100%', boxSizing: 'border-box', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '10px 16px', fontSize: 'var(--fs-sm)', resize: 'vertical', lineHeight: 1.5 }}
                 onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)')}
@@ -166,7 +166,7 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'right', marginTop: 'var(--sp-xs)', padding: '0 4px' }}>{bio.length}/200</div>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', padding: '0 4px' }}>📍 지역</label>
+              <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', padding: '0 4px' }}>📍 지역</label>
               <select value={regionText} onChange={e => {
                 const v = e.target.value;
                 setRegionText(v);
@@ -182,7 +182,7 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
             </div>
             {residenceCity && (SIGUNGU_MAP[residenceCity] || []).length > 0 && (
               <div>
-                <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', padding: '0 4px' }}>📍 시/군/구</label>
+                <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', padding: '0 4px' }}>📍 시/군/구</label>
                 <select value={residenceDistrict} onChange={e => setResidenceDistrict(e.target.value)}
                   style={{ width: '100%', boxSizing: 'border-box', padding: '10px 16px', fontSize: 'var(--fs-sm)', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', cursor: 'pointer' }}>
                   <option value="">시/군/구 선택</option>
@@ -193,7 +193,7 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
               </div>
             )}
             <div>
-              <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', padding: '0 4px' }}>🎂 연령대</label>
+              <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', padding: '0 4px' }}>🎂 연령대</label>
               <select value={ageGroup} onChange={e => setAgeGroup(e.target.value)}
                 style={{ width: '100%', boxSizing: 'border-box', padding: '10px 16px', fontSize: 'var(--fs-sm)', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', cursor: 'pointer' }}>
                 <option value="">미설정</option>
@@ -210,20 +210,20 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
         ) : (
           <>
             {/* 닉네임 */}
-            <h1 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, color: 'var(--text-primary)' }}>{displayName}</h1>
+            <h1 style={{ margin: '0 0 4px', fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{displayName}</h1>
             {/* 등급 + 버튼 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-card)', fontWeight: 500, background: `${gradeColor}20`, color: gradeColor, whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-card)', fontWeight: 'var(--fw-body)', background: `${gradeColor}20`, color: gradeColor, whiteSpace: 'nowrap' }}>
                 {gradeEmoji} {gradeTitle} Lv.{gradeNum}
               </span>
-              {profile.is_premium && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 'var(--radius-card)', background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 500, whiteSpace: 'nowrap' }}>👑 PREMIUM</span>}
+              {profile.is_premium && <span style={{ fontSize: 'var(--fs-2xs)', padding: '3px 8px', borderRadius: 'var(--radius-card)', background: 'var(--warning-bg)', color: 'var(--warning)', fontWeight: 'var(--fw-body)', whiteSpace: 'nowrap' }}>👑 PREMIUM</span>}
               <div style={{ display: 'flex', gap: 6, marginLeft: 'auto' }}>
                 {isOwner ? (
-                  <button onClick={() => setEditing(true)} className="kd-btn kd-btn-ghost" style={{ fontSize: 12, padding: '4px 10px' }}>✏️ 수정</button>
+                  <button onClick={() => setEditing(true)} className="kd-btn kd-btn-ghost" style={{ fontSize: 'var(--fs-xs)', padding: '4px 10px' }}>✏️ 수정</button>
                 ) : (
                   <button onClick={handleFollow} disabled={followLoading} aria-pressed={following}
                     className={following ? 'kd-btn kd-btn-ghost' : 'kd-btn kd-btn-primary'}
-                    style={{ fontSize: 12, padding: '4px 12px' }}>
+                    style={{ fontSize: 'var(--fs-xs)', padding: '4px 12px' }}>
                     {followLoading ? '...' : following ? '✓ 팔로잉' : '+ 팔로우'}
                   </button>
                 )}
@@ -233,27 +233,27 @@ export default function ProfileHeader({ profile, isOwner, followersCount, follow
                     try { await navigator.share({ title: `${profile.nickname} — 카더라`, url }); return; } catch {}
                   }
                   navigator.clipboard.writeText(url).then(() => success('프로필 링크가 복사됐어요!'));
-                }} style={{ padding: '4px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
+                }} style={{ padding: '4px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 'var(--fs-xs)', cursor: 'pointer', fontWeight: 'var(--fw-title)' }}>
                   공유
                 </button>
               </div>
             </div>
-            <p style={{ margin: '0 0 6px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+            <p style={{ margin: '0 0 6px', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
               {profile.bio || (isOwner ? '자기소개를 작성해보세요' : '자기소개가 없습니다')}
             </p>
-            <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--text-tertiary)', flexWrap: 'wrap', marginBottom: 10 }}>
+            <div style={{ display: 'flex', gap: 12, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexWrap: 'wrap', marginBottom: 10 }}>
               <span>{joinDate} 가입</span>
               {profile.region_text && <span>📍 {profile.region_text}{profile.residence_district ? ` ${profile.residence_district}` : ''}</span>}
             </div>
             <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>{followers}</span>
-                <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>팔로워</span>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{followers}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>팔로워</span>
               </div>
               <div style={{ width: 1, height: 20, background: 'var(--border)' }} />
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>{followingCount}</span>
-                <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>팔로잉</span>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{followingCount}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>팔로잉</span>
               </div>
             </div>
           </>

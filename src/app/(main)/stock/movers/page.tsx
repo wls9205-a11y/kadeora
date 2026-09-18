@@ -46,7 +46,7 @@ export default async function MoversPage() {
     .sort((a: any, b: any) => Number(a.price) / Number(a.low_52w) - Number(b.price) / Number(b.low_52w))
     .slice(0, 15);
 
-  const ct = { fontSize: 14, fontWeight: 600 as const, color: 'var(--text-primary)', margin: '24px 0 12px' };
+  const ct = { fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)' as const, color: 'var(--text-primary)', margin: '24px 0 12px' };
   const renderList = (stocks: any[], showPct = true, showVol = false) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {(stocks ?? []).map((s: any, i: number) => {
@@ -54,11 +54,11 @@ export default async function MoversPage() {
         const isUp = pct > 0;
         return (
           <Link key={s.symbol} href={`/stock/${s.symbol}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', textDecoration: 'none', color: 'inherit', borderRadius: 'var(--radius-xs)', background: i % 2 === 0 ? 'var(--bg-base)' : 'var(--bg-surface)' }}>
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-tertiary)', minWidth: 24 }}>{i + 1}</span>
-            <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
-            <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 70, textAlign: 'right' }}>{fmtPrice(s.price, s.currency)}</span>
-            {showPct && <span style={{ fontSize: 12, fontWeight: 700, minWidth: 60, textAlign: 'right', color: stockColor(pct, isKRMarket(s.market, s.currency)) }}>{isUp ? '+' : ''}{pct.toFixed(2)}%</span>}
-            {showVol && <span style={{ fontSize: 11, color: 'var(--text-tertiary)', minWidth: 70, textAlign: 'right' }}>{Number(s.volume).toLocaleString()}</span>}
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', minWidth: 24 }}>{i + 1}</span>
+            <span style={{ flex: 1, fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', minWidth: 70, textAlign: 'right' }}>{fmtPrice(s.price, s.currency)}</span>
+            {showPct && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', minWidth: 60, textAlign: 'right', color: stockColor(pct, isKRMarket(s.market, s.currency)) }}>{isUp ? '+' : ''}{pct.toFixed(2)}%</span>}
+            {showVol && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', minWidth: 70, textAlign: 'right' }}>{Number(s.volume).toLocaleString()}</span>}
           </Link>
         );
       })}
@@ -74,16 +74,16 @@ export default async function MoversPage() {
         { '@type': 'Question', name: '52주 신고가 종목 확인 방법은?', acceptedAnswer: { '@type': 'Answer', text: '카더라 급등락 페이지 하단에서 52주 신고가·신저가 종목 목록을 확인할 수 있습니다. 52주 최고가 갱신 종목은 강세 신호로 해석되기도 합니다.' } },
         { '@type': 'Question', name: '거래량 폭증 종목이란?', acceptedAnswer: { '@type': 'Answer', text: '평균 거래량 대비 당일 거래량이 급증한 종목입니다. 호재 공시, 테마 편입, 외국인·기관 매수 등의 원인이 있을 수 있으며 카더라에서 실시간으로 확인할 수 있습니다.' } },
       ]}} />
-      <nav style={{ fontSize: 12, color: 'var(--text-tertiary)', display: 'flex', gap: 4, marginBottom: 8 }}>
+      <nav style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', display: 'flex', gap: 4, marginBottom: 8 }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>›
         <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>›<span>급등락</span>
       </nav>
       <JsonLd data={{ '@context': 'https://schema.org', '@type': 'WebPage', name: TITLE, url: `${SITE_URL}/stock/movers`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'section'] } }} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>🔥 급등락 종목</h1>
+        <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: 0 }}>🔥 급등락 종목</h1>
         <ShareButtons title={TITLE} contentType="stock-page" contentRef="movers" />
       </div>
-      <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20 }}>KOSPI·KOSDAQ 등락률·거래량·52주 신고가/신저가 실시간 업데이트</p>
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 20 }}>KOSPI·KOSDAQ 등락률·거래량·52주 신고가/신저가 실시간 업데이트</p>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <div><h2 style={ct}>📈 급등 TOP 20</h2>{renderList(gainers)}</div>
@@ -99,16 +99,16 @@ export default async function MoversPage() {
       </div>
 
       <div style={{ marginTop: 32, display: 'flex', gap: 8 }}>
-        <Link href="/stock" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>전 종목 시세</Link>
-        <Link href="/stock/dividend" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>배당주 순위</Link>
+        <Link href="/stock" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' }}>전 종목 시세</Link>
+        <Link href="/stock/dividend" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' }}>배당주 순위</Link>
       </div>
       {/* SSR 서술형 분석 — Thin Content 해소 */}
       {(gainers ?? []).length > 0 && (() => {
         const topG = (gainers ?? []).slice(0, 3);
         const topL = (losers ?? []).slice(0, 3);
         return (
-          <section style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', lineHeight: 1.8, fontSize: 14, color: 'var(--text-secondary)' }}>
-            <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>오늘의 시장 동향</h2>
+          <section style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', lineHeight: 1.6, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
+            <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 8 }}>오늘의 시장 동향</h2>
             <p>오늘 국내 증시에서 가장 큰 상승률을 보인 종목은 <strong style={{ color: 'var(--accent-red)' }}>{topG[0]?.name}</strong>(+{topG[0]?.change_pct?.toFixed(2)}%)입니다.
             {topG[1]?.name}(+{topG[1]?.change_pct?.toFixed(2)}%), {topG[2]?.name}(+{topG[2]?.change_pct?.toFixed(2)}%)도 강세를 보이고 있습니다.</p>
             <p style={{ marginTop: 8 }}>반면 하락 종목 중에서는 <strong style={{ color: 'var(--accent-blue)' }}>{topL[0]?.name}</strong>({topL[0]?.change_pct?.toFixed(2)}%)이 가장 큰 낙폭을 기록했습니다.

@@ -73,14 +73,14 @@ function LoginForm({ redirect }: LoginFormProps) {
   return (
     <div style={{ width: '100%', maxWidth: 400 }}>
       <div style={{ textAlign: 'center', marginBottom: 40 }}>
-        <div style={{ fontSize: 36, fontWeight: 900, color: 'var(--brand)', fontFamily: 'var(--font-mono)', letterSpacing: '-1px', marginBottom: 'var(--sp-sm)' }}>
+        <div style={{ fontSize: 36, fontWeight: 'var(--fw-num)', color: 'var(--brand)', fontFamily: 'var(--font-mono)', letterSpacing: '-0.4px', marginBottom: 'var(--sp-sm)' }}>
           카더라
         </div>
         <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--fs-base)' }}>아는 사람만 아는 그 정보</p>
       </div>
 
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, padding: '36px 32px', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}>
-        <h2 style={{ margin: '0 0 8px', fontSize: 'var(--fs-xl)', fontWeight: 800, color: 'var(--text-primary)', textAlign: 'center' }}>로그인</h2>
+        <h2 style={{ margin: '0 0 8px', fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', textAlign: 'center' }}>로그인</h2>
         {(() => {
           const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
           const source = params?.get('source') || '';
@@ -122,8 +122,8 @@ function LoginForm({ redirect }: LoginFormProps) {
           if (!msg) return <p style={{ margin: '0 0 32px', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', textAlign: 'center', lineHeight: 1.5 }}>소셜 계정으로 간편하게 시작하세요</p>;
           return (
             <div style={{ margin: '0 0 24px', padding: '12px 16px', borderRadius: 12, background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.1)', textAlign: 'center' }}>
-              <div style={{ fontSize: 20, marginBottom: 4 }}>{msg.icon}</div>
-              <div style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 600, lineHeight: 1.5 }}>{msg.text}</div>
+              <div style={{ fontSize: 'var(--fs-md)', marginBottom: 4 }}>{msg.icon}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', fontWeight: 'var(--fw-title)', lineHeight: 1.5 }}>{msg.text}</div>
             </div>
           );
         })()}
@@ -131,7 +131,7 @@ function LoginForm({ redirect }: LoginFormProps) {
         <button
           onClick={() => login('kakao')}
           disabled={!!loading || !inApp.resolved}
-          style={{ width: '100%', padding: '14px 20px', marginBottom: 'var(--sp-md)', borderRadius: 'var(--radius-card)', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--kakao-bg)', color: 'var(--kakao-text)', fontWeight: 700, fontSize: 'var(--fs-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'google' ? 0.5 : 1, transition: 'all 0.15s' }}
+          style={{ width: '100%', padding: '14px 20px', marginBottom: 'var(--sp-md)', borderRadius: 'var(--radius-card)', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--kakao-bg)', color: 'var(--kakao-text)', fontWeight: 'var(--fw-num)', fontSize: 'var(--fs-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'google' ? 0.5 : 1, transition: 'all 0.15s' }}
         >
           {loading === 'kakao' ? (
             <div style={{ width: 24, height: 24, border: '2px solid var(--kakao-text)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -147,7 +147,7 @@ function LoginForm({ redirect }: LoginFormProps) {
           <button
             onClick={() => login('google')}
             disabled={!!loading || !inApp.resolved}
-            style={{ width: '100%', padding: '14px 20px', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontWeight: 700, fontSize: 'var(--fs-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'kakao' ? 0.5 : 1, transition: 'all 0.15s' }}
+            style={{ width: '100%', padding: '14px 20px', borderRadius: 'var(--radius-card)', border: '1px solid var(--border)', cursor: loading ? 'not-allowed' : 'pointer', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontWeight: 'var(--fw-num)', fontSize: 'var(--fs-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: loading === 'kakao' ? 0.5 : 1, transition: 'all 0.15s' }}
           >
             {loading === 'google' ? (
               <div style={{ width: 24, height: 24, border: '2px solid var(--text-primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />

@@ -155,7 +155,7 @@ export default async function FeedPage({ searchParams }: Props) {
       <FeedClient posts={posts} activeCategory={category} activeRegion={region} activeSort={validSort} />
       <LoginGate feature="feed_write" blurHeight={60}>
         <div style={{ padding: '8px 0', textAlign: 'center' }}>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>글쓰기 · 댓글 · 투표에 참여하세요</div>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>글쓰기 · 댓글 · 투표에 참여하세요</div>
         </div>
       </LoginGate>
       <Disclaimer type="feed" />

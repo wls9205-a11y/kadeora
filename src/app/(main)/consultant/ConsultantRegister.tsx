@@ -78,9 +78,9 @@ export default function ConsultantRegister() {
   if (!user) return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '40px 16px', textAlign: 'center' }}>
       <div style={{ fontSize: 48, marginBottom: 'var(--sp-lg)' }}>🏢</div>
-      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>분양 상담사 등록</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>분양 상담사 등록</h1>
       <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-2xl)' }}>로그인 후 분양 상담사로 등록하고, 프리미엄 리스팅으로 고객을 만나세요.</p>
-      <Link href="/login?redirect=/consultant" style={{ display: 'inline-block', padding: '12px 32px', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none', fontWeight: 500, fontSize: 'var(--fs-base)' }}>로그인하기</Link>
+      <Link href="/login?redirect=/consultant" style={{ display: 'inline-block', padding: '12px 32px', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none', fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-base)' }}>로그인하기</Link>
     </div>
   );
 
@@ -94,7 +94,7 @@ export default function ConsultantRegister() {
       {/* 헤더 */}
       <div style={{ textAlign: 'center', marginBottom: 'var(--sp-2xl)' }}>
         <div style={{ fontSize: 40, marginBottom: 'var(--sp-sm)' }}>🏢</div>
-        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px' }}>분양 상담사</h1>
+        <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 4px' }}>분양 상담사</h1>
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', margin: 0 }}>카더라에서 분양 고객을 만나세요</p>
       </div>
 
@@ -108,8 +108,8 @@ export default function ConsultantRegister() {
           return (
             <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
               {/* kd-brand-exempt: 위 `>= i` 진행 표시의 원 배경이다 — 선택이 아니다. */}
-              <div style={{ width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 600, background: active ? 'var(--brand)' : 'var(--bg-hover)', color: active ? 'var(--text-inverse)' : 'var(--text-tertiary)' }}>{i + 1}</div>
-              <span style={{ fontSize: 'var(--fs-xs)', color: active ? 'var(--text-primary)' : 'var(--text-tertiary)', fontWeight: active ? 600 : 400 }}>{s}</span>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', background: active ? 'var(--brand)' : 'var(--bg-hover)', color: active ? 'var(--text-inverse)' : 'var(--text-tertiary)' }}>{i + 1}</div>
+              <span style={{ fontSize: 'var(--fs-xs)', color: active ? 'var(--text-primary)' : 'var(--text-tertiary)', fontWeight: active ? 'var(--fw-title)' : 'var(--fw-quiet)' }}>{s}</span>
               {i < 2 && <span style={{ color: 'var(--text-tertiary)', margin: '0 4px' }}>→</span>}
             </div>
           );
@@ -120,7 +120,7 @@ export default function ConsultantRegister() {
       {step === 'register' && (
         <div>
           <div style={card}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-lg)' }}>기본 정보</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-lg)' }}>기본 정보</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-md)' }}>
               <div>
                 <label style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)', display: 'block' }}>이름 *</label>
@@ -151,11 +151,11 @@ export default function ConsultantRegister() {
           </div>
 
           <div style={card}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>담당 지역 (복수 선택)</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>담당 지역 (복수 선택)</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {REGIONS.map(r => (
                 <button key={r} onClick={() => toggleRegion(r)} style={{
-                  padding: '6px 12px', borderRadius: 'var(--radius-lg)', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
+                  padding: '6px 12px', borderRadius: 'var(--radius-lg)', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', cursor: 'pointer',
                   border: `1px solid ${regions.includes(r) ? 'var(--brand-navy)' : 'var(--border)'}`,
                   background: regions.includes(r) ? 'var(--brand-navy)' : 'transparent',
                   color: regions.includes(r) ? 'var(--text-inverse)' : 'var(--text-tertiary)',
@@ -168,7 +168,7 @@ export default function ConsultantRegister() {
             width: '100%', padding: '14px 0', borderRadius: 'var(--radius-md)', border: 'none', cursor: 'pointer',
             background: (!name.trim() || !phone.trim()) ? 'var(--bg-hover)' : 'var(--brand)',
             color: (!name.trim() || !phone.trim()) ? 'var(--text-tertiary)' : 'var(--text-inverse)',
-            fontSize: 'var(--fs-base)', fontWeight: 600,
+            fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)',
           }}>
             {saving ? '저장 중...' : profile ? '프로필 수정' : '상담사 등록'}
           </button>
@@ -179,7 +179,7 @@ export default function ConsultantRegister() {
       {step === 'pricing' && (
         <div>
           <div style={{ textAlign: 'center', marginBottom: 'var(--sp-xl)' }}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>프리미엄 리스팅 요금제</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>프리미엄 리스팅 요금제</div>
             <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-xs)' }}>분양중 탭에서 고객에게 직접 노출되세요</div>
           </div>
 
@@ -190,12 +190,12 @@ export default function ConsultantRegister() {
               borderWidth: i === 1 ? 2 : 1,
               position: 'relative',
             }}>
-              {i === 1 && <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '3px 12px', borderRadius: 'var(--radius-md)', background: tier.color, color: 'var(--text-inverse)' }}>인기</div>}
+              {i === 1 && <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', padding: '3px 12px', borderRadius: 'var(--radius-md)', background: tier.color, color: 'var(--text-inverse)' }}>인기</div>}
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-md)' }}>
                 <span style={{ fontSize: 'var(--fs-xl)' }}>{tier.icon}</span>
                 <div>
-                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: tier.color }}>{tier.name}</div>
-                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 700, color: 'var(--text-primary)' }}>월 {tier.price.toLocaleString()}<span style={{ fontSize: 'var(--fs-sm)', fontWeight: 400, color: 'var(--text-tertiary)' }}>원</span></div>
+                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: tier.color }}>{tier.name}</div>
+                  <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)' }}>월 {tier.price.toLocaleString()}<span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-quiet)', color: 'var(--text-tertiary)' }}>원</span></div>
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 'var(--sp-lg)' }}>
@@ -212,7 +212,7 @@ export default function ConsultantRegister() {
                 width: '100%', padding: '10px 0', borderRadius: 'var(--radius-sm)', border: `1px solid ${tier.color}`, cursor: 'pointer',
                 background: i === 1 ? tier.color : 'transparent',
                 color: i === 1 ? 'var(--text-inverse)' : tier.color,
-                fontSize: 'var(--fs-sm)', fontWeight: 600,
+                fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)',
               }}>
                 {tier.name} 시작하기
               </button>
@@ -224,7 +224,7 @@ export default function ConsultantRegister() {
           </div>
 
           <div style={{ ...card, marginTop: 'var(--sp-lg)', background: 'rgba(96,165,250,0.06)' }}>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--accent-blue)', marginBottom: 'var(--sp-sm)' }}>💡 왜 프리미엄 리스팅인가요?</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--accent-blue)', marginBottom: 'var(--sp-sm)' }}>💡 왜 프리미엄 리스팅인가요?</div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               분양 상담 1건 계약 시 수백~수천만 원의 수수료가 발생합니다.<br/>
               월 4.9만~29.9만 원으로 카더라의 분양 관심 유저에게 직접 노출되어,<br/>
@@ -239,15 +239,15 @@ export default function ConsultantRegister() {
         <div>
           <div style={card}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-md)' }}>
-              <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>내 프로필</div>
-              <button onClick={() => setStep('register')} style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>수정</button>
+              <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>내 프로필</div>
+              <button onClick={() => setStep('register')} style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'var(--fw-title)' }}>수정</button>
             </div>
             <div style={{ display: 'flex', gap: 'var(--sp-md)' }}>
-              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-inverse)', fontWeight: 500, fontSize: 'var(--fs-lg)' }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-inverse)', fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-lg)' }}>
                 {name.slice(0, 1)}
               </div>
               <div>
-                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>{name} {profile.is_verified && '✅'}</div>
+                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{name} {profile.is_verified && '✅'}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{company || '소속 미입력'} · {phone}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{regions.join(', ') || '지역 미설정'}</div>
               </div>
@@ -256,15 +256,15 @@ export default function ConsultantRegister() {
 
           {/* 리스팅 현황 */}
           <div style={card}>
-            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>📊 내 리스팅</div>
+            <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>📊 내 리스팅</div>
             {profile.premium_listings?.length > 0 ? profile.premium_listings.map((l: any) => (
               <div key={l.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: l.tier === 'premium' ? 'var(--accent-purple-bg)' : l.tier === 'pro' ? 'var(--accent-yellow-bg)' : 'var(--accent-blue-bg)', color: l.tier === 'premium' ? 'var(--accent-purple)' : l.tier === 'pro' ? 'var(--accent-yellow)' : 'var(--accent-blue)' }}>{l.tier.toUpperCase()}</span>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', marginLeft: 8 }}>{l.house_nm || '현장명'}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', padding: '1px 6px', borderRadius: 4, background: l.tier === 'premium' ? 'var(--accent-purple-bg)' : l.tier === 'pro' ? 'var(--accent-yellow-bg)' : 'var(--accent-blue-bg)', color: l.tier === 'premium' ? 'var(--accent-purple)' : l.tier === 'pro' ? 'var(--accent-yellow)' : 'var(--accent-blue)' }}>{l.tier.toUpperCase()}</span>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginLeft: 8 }}>{l.house_nm || '현장명'}</span>
                   </div>
-                  <span style={{ fontSize: 'var(--fs-xs)', color: l.is_active ? 'var(--accent-green)' : 'var(--accent-red)', fontWeight: 600 }}>{l.is_active ? '활성' : '만료'}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', color: l.is_active ? 'var(--accent-green)' : 'var(--accent-red)', fontWeight: 'var(--fw-title)' }}>{l.is_active ? '활성' : '만료'}</span>
                 </div>
                 <div style={{ display: 'flex', gap: 'var(--sp-lg)', marginTop: 6, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                   <span>👀 노출 {(l.impressions || 0).toLocaleString()}</span>
@@ -279,12 +279,12 @@ export default function ConsultantRegister() {
             )) : (
               <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-tertiary)' }}>
                 <div style={{ fontSize: 'var(--fs-sm)', marginBottom: 'var(--sp-sm)' }}>아직 활성 리스팅이 없어요</div>
-                <button onClick={() => setStep('pricing')} style={{ padding: '8px 20px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--brand)', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 500, cursor: 'pointer' }}>프리미엄 리스팅 시작</button>
+                <button onClick={() => setStep('pricing')} style={{ padding: '8px 20px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--brand)', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)', cursor: 'pointer' }}>프리미엄 리스팅 시작</button>
               </div>
             )}
           </div>
 
-          <button onClick={() => setStep('pricing')} style={{ width: '100%', padding: '12px 0', borderRadius: 'var(--radius-md)', border: '1px solid var(--brand)', background: 'transparent', color: 'var(--brand)', fontSize: 'var(--fs-base)', fontWeight: 500, cursor: 'pointer' }}>
+          <button onClick={() => setStep('pricing')} style={{ width: '100%', padding: '12px 0', borderRadius: 'var(--radius-md)', border: '1px solid var(--brand)', background: 'transparent', color: 'var(--brand)', fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-body)', cursor: 'pointer' }}>
             + 새 리스팅 추가
           </button>
         </div>
