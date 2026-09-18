@@ -46,6 +46,8 @@ jobs:
       - run: bash scripts/naver-openapi-gate.sh
       # R-5 — nowrap 이 ellipsis·overflow 없이 «새로» 늘면 실패(파일별 기준선 docs/gates/nowrap-baseline.txt)
       - run: npx tsx scripts/nowrap-gate.ts
+      # TY3(RULES#151) — 화면계 인라인 크기 사다리 밖 0 · 800+ 0 · 소형 음수 자간 0. 예외는 docs/ty/ 대장으로만.
+      - run: npx tsx scripts/type-audit.ts
 
   test:
     name: Unit & integration tests

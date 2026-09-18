@@ -367,3 +367,26 @@ MSYS_NO_PATHCONV=1 npx tsx scripts/search-overlay-audit.ts https://kadeora.app /
 (`eslint.config.mjs` 주석 참조). 굵기·크기·접근성이 한 화면 안에서 얽혀 있어서
 한 번에 손대면 무엇이 무엇을 깨뜨렸는지 못 가린다 — S4-3 인라인 스케일링 사고 이력.
 그래서 「화면 전환 동반 회수」라는 같은 형식을 굵기로 확장한다.
+
+> **TY3 회수 완료 (2026-09-18).** 위 「전수 일괄 치환 금지」는 «한 커밋에 전수» 를 막는 것이었다 — TY3 은 화면 묶음 11커밋
+> (T4-0~T4-8, 커밋마다 build·tsc·정적 자·13px 안전판·색 diff 게이트)으로 회수했고, 화면계 인라인 굵기 리터럴은 0 이다
+> (DS2 소관 칩·배지 헬퍼 제외). 이 조항의 «신규 인라인 굵기 선언 금지» 는 아래 5-9 가 게이트로 잇는다.
+
+### 5-8. 크기는 인라인 리터럴로 쓰지 않는다 — `var(--fs-*)` 만 (TY3 · 2026-09-18 초안)
+화면계 style 객체의 `fontSize` 는 `'var(--fs-*)'` 로만 쓴다. 숫자·`'Npx'` 리터럴 금지. 입력창은 `max(16px, var(--fs-*))`.
+예외는 대장 넷뿐이다: `docs/ty/exempt-paths.json`(satori·OG·이메일) · `prop-allowlist.json`(recharts·SVG 속성 숫자 — 값은
+사다리 합집합) · `fs13-holdouts.json`(13px 안전판) · `ledger.json` display(34px 초과·clamp·제목대 대역 밖).
+
+**왜** — 인라인 리터럴은 글씨 크기 설정 3상태에 반응하지 않아 globals.css 가 `[style*="font-size:Npx"]{…!important}` 로
+«증상 억제» 를 해 왔다. 그 가드 때문에 인라인 12px 가 14px 로 렌더되는 등 명목값과 렌더값이 갈라져 있었다(판정 증분-2).
+토큰 참조면 사다리가 네이티브로 반응한다. 게이트: `scripts/type-audit.ts` ①.
+
+### 5-9. 굵기는 토큰 참조 · 화면계 800+ 금지 (TY3 · 2026-09-18 초안)
+`fontWeight` 는 `var(--fw-quiet|body|title|num)` 로 쓴다(5-5 위계). 800/900 은 700 으로 캡한다 — SVG 속성 굵기 포함.
+satori·OG 생성기만 예외(exempt-paths). 게이트: `type-audit` ②(800+). 400~700 리터럴은 게이트가 아니라 codemod 부동점으로 드러난다.
+
+### 5-10. 테일윈드 브리지는 불변 — 유틸 크기는 사다리를 가리킨다 (TY3 · 2026-09-18 초안)
+`tailwind.config.ts` `theme.extend.fontSize` 7키(xs·sm→--fs-xs · base→sm · lg→base · xl→md · 2xl→xl · 3xl→2xl)는
+기본 스케일을 되살리지 않는다. `theme.fontSize` 통째 교체 금지(미매핑 키 파손), 임의 크기는 `text-[length:var(--fs-*)]` —
+`text-[Npx]` 는 게이트 ① 이 잡는다. 브리지 키를 바꾸면 그 키를 쓰는 유틸 전부가 한꺼번에 움직인다는 뜻이다(dom-census 로 잴 것).
+

@@ -42,3 +42,29 @@
 
 - 렌더 기준 → 명목 기준: `tools/ty-audit/codemod.ts` 의 `renderOf` 를 항등으로. (권장하지 않음 — 위 1 참조)
 - 행간 4단 재배열: `shared.ts` `LH_STEPS`. 브리지 매핑: `tailwind.config.ts` `theme.extend.fontSize`.
+
+## 종결 (2026-09-18 · TY-5)
+
+| 지표 | before | after |
+|---|---|---|
+| 화면계 인라인 fontSize px 리터럴 | 2,331 | 108 (가형 90 = display 대장 + DS2 헬퍼 · 나형 18 = prop-allowlist) |
+| 그 고유 px 종수 | 30 | 14 (전부 대장 좌표) |
+| `var(--fs-*)` 참조 | 1,536 | 3,697 |
+| 화면계 fontWeight 800+ | 47 | 1 (`components/ds/Badge.tsx` — DS2 소관 제외) |
+| 테일윈드 `text-[Npx]` | 20 | 0 |
+| 화면별 고유 조합(combos) — 데스크탑 | home 27 · apt 48 · apt-id 87 · complex 51 · daily 29 · blog 39 · blog-slug 84 · stock 42 · stock-symbol 44 · search 25 | 24 · 41 · 62 · 39 · 20 · 31 · 54 · 36 · 31 · 21 |
+| 화면별 고유 크기 — 데스크탑 | 10 · 13 · 11 · 10 · 7 · 13 · 16 · 11 · 7 · 6 | 7 · 8 · 8 · 8 · 6 · 6 · 12 · 6 · 7 · 5 |
+
+게이트 `scripts/type-audit.ts` 전수 ①0 ②0 ③0 — 초록으로 태어나 CI quality 잡에 등재(RULES#151).
+13px 안전판: T4-0 ~ T4-8 전 구간 신규 넘침·줄바꿈 0 → `fs13-holdouts.json` 0건.
+
+### 넘기는 것 (DS2 트랙)
+
+- **인라인 가드 존속.** globals.css `[style*="font-size:Npx"]{…!important}` 44줄은 아직 «사문» 이 아니다 — DS2 소관으로 건너뛴
+  칩·배지·스테이지 헬퍼에 9~16px 리터럴 26건이 남아 가드가 그들을 끌어올리고 있다(`census_20260918_after.json`).
+  DS2 가 그 26건을 토큰으로 옮기면 가드 44줄을 통째로 걷는다(본체 font-large-guard 는 존속).
+- `components/ds/Badge.tsx` 의 `fontWeight: 800` 1건 · 헬퍼 안 행간 1.35/1.4.
+
+### 사각 (정적 자로만 판정)
+
+- `/daily` 본문 — 게스트는 공유 잠금 화면만 본다. `/admin` — 307→/login. `/stock` — 장중 시세로 노드 키 대조율 ~73%.
