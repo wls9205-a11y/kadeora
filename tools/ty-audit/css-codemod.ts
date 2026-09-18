@@ -17,6 +17,26 @@ import { ROOT, FS_STEPS, snapFs, FW_TOKEN, snapLh, tyLetterSpacing } from './sha
 const SKIP_SEL = /\[style\*=|\.text-\\\[|html\.font-(large|small)|\binput\b|\bselect\b|\btextarea\b|\.kd-input/;
 const desk = (t: string) => FS_STEPS.find((s) => s.token === t)?.desktop ?? null;
 
+/** 모바일 전용 미디어 블록(max-width ≤ 767.98) 안인가 — 그 안의 값은 «모바일 사다리» 로 스냅해야 한다.
+ *  (blog.css 모바일 p 15px 를 데스크탑 기준으로 스냅하면 --fs-xs = 모바일 13 이 돼 본문이 −2 떨어진다.) */
+function inMobileMedia(n: any): boolean {
+  for (let p = n.parent; p; p = p.parent) {
+    if (p.type === 'atrule' && p.name === 'media') {
+      const m = String(p.params).match(/max-width:\s*(\d+(?:\.\d+)?)px/);
+      if (m && +m[1] < 768) return true;
+    }
+  }
+  return false;
+}
+/** 모바일 값 기준 최근접(동률 아래) · 제목대(≥22) 2px 대역 밖은 null. */
+function snapFsMobile(px: number): string | null {
+  if (px > 34) return null;
+  let best = FS_STEPS[0];
+  for (const s of FS_STEPS) if (Math.abs(s.mobile - px) < Math.abs(best.mobile - px)) best = s;
+  if (px >= 22 && Math.abs(best.mobile - px) > 2) return null;
+  return best.token;
+}
+
 export function transformCss(file: string, dry = false) {
   const abs = join(ROOT, file);
   const root = postcss.parse(readFileSync(abs, 'utf8'));
@@ -47,7 +67,8 @@ export function transformCss(file: string, dry = false) {
         const m = v.match(/^(\d*\.?\d+)px$/);
         if (!m) continue;
         // 13px 는 지시서 §4 TY-3 명시 귀속(--fs-xs · 모바일 13 유지). 동률 아래(2xs) 규칙보다 우선.
-        const tok = Math.round(+m[1]) === 13 ? 'xs' : snapFs(Math.round(+m[1]));
+        const px = Math.round(+m[1]);
+        const tok = px === 13 ? 'xs' : inMobileMedia(d) ? snapFsMobile(px) : snapFs(px);
         if (!tok) { ledger.push({ f: file, l: line, raw: v, note: 'display' }); continue; }
         d.value = `var(--fs-${tok})${imp(d)}`;
         d.important = false;

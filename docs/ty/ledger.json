@@ -97,6 +97,16 @@
     "f": "src/app/(main)/daily/[region]/DailyReportClient.tsx",
     "l": 1188,
     "raw": "1"
+   },
+   {
+    "f": "src/app/(main)/blog/[slug]/page.tsx",
+    "l": 943,
+    "raw": "'0.3px'"
+   },
+   {
+    "f": "src/app/(main)/blog/[slug]/page.tsx",
+    "l": 1006,
+    "raw": "'0.3px'"
    }
   ],
   "ls-unknown-size": [
