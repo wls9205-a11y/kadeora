@@ -126,7 +126,7 @@ export function MarketGroupPage({
         <span aria-hidden="true">›</span>
         <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>
         <span aria-hidden="true">›</span>
-        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{scope === 'domestic' ? '국내' : '해외'}</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{scope === 'domestic' ? '국내' : '해외'}</span>
       </nav>
 
       <HubHero
@@ -148,7 +148,7 @@ export function MarketGroupPage({
                   padding: '6px 12px',
                   borderRadius: 'var(--radius-pill)',
                   fontSize: 'var(--fs-xs)',
-                  fontWeight: 500,
+                  fontWeight: 'var(--fw-body)',
                   color: 'var(--text-secondary)',
                   background: 'var(--bg-hover)',
                   textDecoration: 'none',
@@ -164,7 +164,7 @@ export function MarketGroupPage({
                 padding: '6px 12px',
                 borderRadius: 'var(--radius-pill)',
                 fontSize: 'var(--fs-xs)',
-                fontWeight: 500,
+                fontWeight: 'var(--fw-body)',
                 color: 'var(--brand)',
                 background: 'var(--brand-bg)',
                 textDecoration: 'none',
@@ -202,7 +202,7 @@ export function MarketGroupPage({
         </div>
       </section>
 
-      <p style={{ marginTop: 'var(--sp-lg)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.7 }}>
+      <p style={{ marginTop: 'var(--sp-lg)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
         시세는 {STALE_DROP_DAYS}일 이내 갱신된 종목만 표시합니다. 그보다 오래된 종목은 목록에서 빠지지만 개별 종목
         페이지에서는 계속 확인할 수 있습니다. 투자 판단의 책임은 이용자 본인에게 있습니다.
       </p>

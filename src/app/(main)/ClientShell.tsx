@@ -130,8 +130,8 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
         <footer className="hidden md:block" style={{
           maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px',
         }}>
-          <div style={{borderTop:'1px solid var(--border)', paddingTop:16, fontSize: 'var(--fs-xs)', color:'var(--text-tertiary)', textAlign:'center', lineHeight:1.9}}>
-            <nav style={{display:'flex', justifyContent:'center', gap:16, flexWrap:'wrap', marginBottom:12, fontSize: 11}}>
+          <div style={{borderTop:'1px solid var(--border)', paddingTop:16, fontSize: 'var(--fs-xs)', color:'var(--text-tertiary)', textAlign:'center', lineHeight:1.6}}>
+            <nav style={{display:'flex', justifyContent:'center', gap:16, flexWrap:'wrap', marginBottom:12, fontSize: 'var(--fs-xs)'}}>
               <a href="/stock" style={{color:'var(--text-secondary)',textDecoration:'none'}}>주식</a>
               <a href="/stock/dividend" style={{color:'var(--text-secondary)',textDecoration:'none'}}>배당주</a>
               <a href="/stock/themes" style={{color:'var(--text-secondary)',textDecoration:'none'}}>테마주</a>
@@ -160,7 +160,7 @@ export default function ClientShell({ children, serverLoggedIn }: Props) {
               <a href="/privacy" style={{color:'var(--text-secondary)',textDecoration:'none'}}>개인정보처리방침</a>
             </nav>
             <p>문의: {CONTACT_EMAIL}</p>
-            <p style={{marginTop:4}}>© 2026 <a href="/about" style={{color:'var(--text-secondary)',textDecoration:'none',fontWeight:600}}>카더라</a>. All rights reserved.</p>
+            <p style={{marginTop:4}}>© 2026 <a href="/about" style={{color:'var(--text-secondary)',textDecoration:'none',fontWeight:'var(--fw-title)'}}>카더라</a>. All rights reserved.</p>
           </div>
         </footer>
       </AuthProvider>

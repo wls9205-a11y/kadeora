@@ -214,6 +214,18 @@
     "l": 5,
     "raw": "48",
     "note": "over-ladder"
+   },
+   {
+    "f": "src/app/global-error.tsx",
+    "l": 14,
+    "raw": "64",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/not-found.tsx",
+    "l": 12,
+    "raw": "64",
+    "note": "over-ladder"
    }
   ],
   "ls-positive-zeroed": [
@@ -386,6 +398,11 @@
     "f": "src/app/(main)/apt/[id]/page.tsx",
     "l": 2521,
     "raw": "0.5"
+   },
+   {
+    "f": "src/app/(main)/apt/page.tsx",
+    "l": 538,
+    "raw": "'.02em'"
    }
   ],
   "ls-unknown-size": [
@@ -450,6 +467,18 @@
     "l": 550,
     "raw": ".08em",
     "note": "ls-positive-zeroed"
+   },
+   {
+    "f": "src/app/styles/screens.css",
+    "l": 288,
+    "raw": "-0.4px",
+    "note": "ls-unknown-size"
+   },
+   {
+    "f": "src/app/styles/screens.css",
+    "l": 625,
+    "raw": "-0.4px",
+    "note": "ls-unknown-size"
    }
   ]
  },
