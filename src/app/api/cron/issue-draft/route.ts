@@ -722,7 +722,13 @@ async function finalizeArticle(sb: any, issue: any, config: any, article: GenRes
       tags: article.keywords,
       primary_keyword: (issue.detected_keywords || [])[0],
     });
-    seoEnriched = await appendRelatedHubFooter(getSupabaseAdmin(), seoRes.enriched.content, { category: seoCategory });
+    // BN §3-A — 푸터 현장은 글감 현장 + 본문에 걸린 현장만(appendRelatedHubFooter 가 활성 실존 확인).
+    let footerSiteSlug: string | null = null;
+    if (issue.apt_site_id) {
+      const { data: fs } = await (sb as any).from('apt_sites').select('slug').eq('id', issue.apt_site_id).maybeSingle();
+      footerSiteSlug = fs?.slug ?? null;
+    }
+    seoEnriched = await appendRelatedHubFooter(getSupabaseAdmin(), seoRes.enriched.content, { category: seoCategory, siteSlug: footerSiteSlug });
     seoMetaDesc = seoRes.enriched.meta_description;
     seoImageAlt = seoRes.enriched.image_alt;
 

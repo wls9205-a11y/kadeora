@@ -6,6 +6,8 @@
  *  /apt 같은 탑페이지로만 흐르는 문제 해결 (Topic Cluster 모델).
  */
 
+import { extractAptSiteSlugs } from '@/lib/blog-safe-insert';
+
 interface AptSite { slug: string; name: string }
 interface RedevProject { id: string; district_name: string }
 interface UnsoldApt { id: string; house_nm: string }
@@ -161,32 +163,66 @@ export async function injectInternalLinks(
   return out;
 }
 
+/** 현장이 없는 글의 푸터 — 카테고리 랜딩만. `/apt/<슬러그>` 가 아니라 §2-2 게이트·blog_site_links 에 잡히지 않는다. */
+const LANDING_FOOTER: Record<string, { label: string; url: string }[]> = {
+  apt: [
+    { label: '카더라 청약 일정', url: '/apt' },
+    { label: '카더라 부동산 블로그', url: '/blog?category=apt' },
+  ],
+  stock: [
+    { label: '카더라 주식 시세', url: '/stock' },
+    { label: '카더라 주식 블로그', url: '/blog?category=stock' },
+  ],
+  finance: [{ label: '카더라 재테크 블로그', url: '/blog?category=finance' }],
+  general: [{ label: '카더라 블로그', url: '/blog' }],
+};
+
+export interface FooterSite { slug: string; label: string }
+
 /**
- * 본문에 "## 관련 정보" 또는 "## 관련 페이지" 섹션이 없으면
- * resolve_hub_url RPC 로 hub 3개 추출해 footer 추가.
+ * 푸터 본문 조립(순수). 현장은 **호출자가 넘긴 것만** 싣는다.
+ *
+ * BN §3-A — 이전 구현은 `apt_sites` 를 정렬 없이 받아 `slice(0, 2)` 를 모든 글에 붙였다.
+ *   물리 저장 순서의 첫 행 = 글과 무관한 현장. 2026-09-18 실측:
+ *   issue-draft/issue_preempt 푸터 링크 2,667행(주식 782·재테크 184 포함) 전부 이 경로,
+ *   푸터 현장이 hub_apt_slug 로 승격된 글 184편, 현장 링크를 푸터에서만 얻어
+ *   §2-2 게이트를 통과한 apt 글 381편(60일).
+ * ⚠️ 여기서 현장을 «찾아 붙이지» 말 것. 모르면 랜딩만 단다.
+ */
+export function buildRelatedFooter(category: string | undefined, sites: FooterSite[]): string {
+  const picks: { label: string; url: string }[] = sites.slice(0, 3)
+    .map((s) => ({ label: s.label, url: `/apt/${s.slug}` }));
+  if (picks.length === 0) picks.push(...(LANDING_FOOTER[category ?? 'general'] ?? LANDING_FOOTER.general));
+  const lines = ['', '---', '', '## 관련 정보', ''];
+  for (const p of picks) lines.push(`- [${p.label} →](${p.url})`);
+  lines.push('');
+  return lines.join('\n');
+}
+
+/**
+ * 본문에 "## 관련 정보" 또는 "## 관련 페이지" 섹션이 없으면 footer 추가.
+ *
+ * 싣는 현장 = ① 글감 현장(`siteSlug`) ② 본문에 이미 걸린 `/apt/<슬러그>` — 둘 다 활성 실존만.
+ * 둘 다 없으면 현장 링크 없이 카테고리 랜딩만 단다(BN §3-A).
  */
 export async function appendRelatedHubFooter(
   sb: any,
   content: string,
-  opts: { category?: string; postId?: number | null } = {}
+  opts: { category?: string; postId?: number | null; siteSlug?: string | null } = {}
 ): Promise<string> {
   if (content.includes('## 관련 정보') || content.includes('## 관련 페이지')) return content;
 
-  const cache = await loadCache(sb);
-  const picks: { label: string; url: string }[] = [];
-
-  // 카테고리에 따라 hub 우선순위 다르게
-  if (opts.category === 'apt' || opts.category === 'unsold') {
-    for (const s of cache.apt.slice(0, 3)) picks.push({ label: s.name, url: `/apt/${s.slug}` });
-  } else {
-    for (const s of cache.apt.slice(0, 2)) picks.push({ label: s.name, url: `/apt/${s.slug}` });
-    if (cache.redev[0]) picks.push({ label: cache.redev[0].district_name, url: `/apt/redev/${cache.redev[0].id}` });
+  const wanted = [...new Set([opts.siteSlug, ...extractAptSiteSlugs(content)].filter((s): s is string => !!s))].slice(0, 20);
+  let sites: FooterSite[] = [];
+  if (wanted.length > 0) {
+    const { data } = await sb.from('apt_sites').select('slug, name, display_name').in('slug', wanted).eq('is_active', true);
+    const bySlug = new Map<string, any>((data ?? []).map((r: any) => [r.slug, r]));
+    sites = wanted.filter((s) => bySlug.has(s)).map((s) => {
+      const r = bySlug.get(s);
+      // display 규격 「{예정명} — {구역명}」 — 앞쪽만(issue-context buildSiteContext 와 같은 규칙)
+      const disp = String(r.display_name ?? '').split(' — ')[0].trim();
+      return { slug: s, label: disp || r.name || s };
+    });
   }
-
-  if (picks.length === 0) return content;
-
-  const lines = ['', '---', '', '## 관련 정보', ''];
-  for (const p of picks.slice(0, 3)) lines.push(`- [${p.label} →](${p.url})`);
-  lines.push('');
-  return content + '\n' + lines.join('\n');
+  return content + '\n' + buildRelatedFooter(opts.category, sites);
 }
