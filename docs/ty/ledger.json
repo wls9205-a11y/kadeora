@@ -208,6 +208,12 @@
     "l": 90,
     "raw": "40",
     "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/apt/[id]/error.tsx",
+    "l": 5,
+    "raw": "48",
+    "note": "over-ladder"
    }
   ],
   "ls-positive-zeroed": [
@@ -375,6 +381,11 @@
     "f": "src/components/ui/AIRelatedPanel.tsx",
     "l": 43,
     "raw": "1"
+   },
+   {
+    "f": "src/app/(main)/apt/[id]/page.tsx",
+    "l": 2521,
+    "raw": "0.5"
    }
   ],
   "ls-unknown-size": [
