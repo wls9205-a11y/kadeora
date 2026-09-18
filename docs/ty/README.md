@@ -60,7 +60,7 @@
 
 ### 넘기는 것 (DS2 트랙)
 
-- **인라인 가드 존속.** globals.css `[style*="font-size:Npx"]{…!important}` 44줄은 아직 «사문» 이 아니다 — DS2 소관으로 건너뛴
+- **인라인 가드 존속** (대장: `DS2_HANDOFF.md` — 가드 44줄 + 리터럴 26건 한 몸, 동반 회수). globals.css `[style*="font-size:Npx"]{…!important}` 44줄은 아직 «사문» 이 아니다 — DS2 소관으로 건너뛴
   칩·배지·스테이지 헬퍼에 9~16px 리터럴 26건이 남아 가드가 그들을 끌어올리고 있다(`census_20260918_after.json`).
   DS2 가 그 26건을 토큰으로 옮기면 가드 44줄을 통째로 걷는다(본체 font-large-guard 는 존속).
 - `components/ds/Badge.tsx` 의 `fontWeight: 800` 1건 · 헬퍼 안 행간 1.35/1.4.
