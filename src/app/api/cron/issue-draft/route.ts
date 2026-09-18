@@ -17,6 +17,7 @@ import { dbw } from '@/lib/cron-db-log';
 import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
 import { sortForGeneration } from '@/lib/content/realestate-priority';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
+import { reviewHoldOf, reviewSwitches, isReviewHoldReason } from '@/lib/content/review-hold';
 import { editOutNumbers, loadIssueContext, buildIssueAllow, verifyIssueDraft, type IssueContext } from '@/lib/content/issue-context';
 import { parseSalePeriod } from '@/lib/apt/sale-period';
 import { periodWindow } from '@/lib/apt/upcoming-sales';
@@ -559,7 +560,7 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     if (postIds.length > 0) {
       const { data: posts } = await (sb as any).from('blog_posts').select('id, is_published, auto_unpublished_reason').in('id', postIds);
       for (const bp of (posts ?? []) as Array<{ id: number; is_published: boolean; auto_unpublished_reason: string | null }>) {
-        if (bp.is_published || !bp.auto_unpublished_reason || bp.auto_unpublished_reason.startsWith('hold:bp_review')) livePosts.add(bp.id);
+        if (bp.is_published || !bp.auto_unpublished_reason || isReviewHoldReason(bp.auto_unpublished_reason)) livePosts.add(bp.id);
       }
     }
     const blocker = sib.find((x) =>
@@ -782,15 +783,11 @@ async function finalizeArticle(sb: any, issue: any, config: any, article: GenRes
 
   const check = factCheck(seoEnriched, issue.raw_data || {}, issue.category || 'general', locationLock);
 
-  // EX-A ④ — BP 글감(허브 발행 · BP70 문서 카드 이벤트)은 판독 전까지 «비공개 초안» 으로만 만든다.
-  //   app_config bp.hub_publish_enabled 가 정확히 true 일 때만 자동 발행 경로를 탄다(기본 보류).
-  const isBpIssue = issue.source_type === 'bp70_hub' || String(issue.raw_data?.doc ?? '').startsWith('BP70');
-  let bpPublishOn = false;
-  if (isBpIssue) {
-    const { data: sw } = await (sb as any).from('app_config').select('value').eq('namespace', 'bp').eq('key', 'hub_publish_enabled').maybeSingle();
-    bpPublishOn = sw?.value === true;
-  }
-  const canAutoPublish = (!isBpIssue || bpPublishOn) && config.auto_publish_enabled
+  // EX-A ④ · BN-1 ② — 판독 모드 글감(BP 허브 · BN 허브)은 판독 전까지 «비공개 초안» 으로만 만든다.
+  //   app_config <ns>.hub_publish_enabled 가 정확히 true 일 때만 자동 발행 경로를 탄다(기본 보류). review-hold.ts 참조.
+  const reviewHold = reviewHoldOf(issue);
+  const holdPublishOn = reviewHold ? (await reviewSwitches(sb))[reviewHold.namespace] : true;
+  const canAutoPublish = holdPublishOn && config.auto_publish_enabled
     && issue.final_score >= (config.auto_publish_min_score ?? 40)
     && !issue.block_reason && check.passed
     && !(config.auto_publish_blocked_categories || []).includes(issue.category);
@@ -848,6 +845,13 @@ async function finalizeArticle(sb: any, issue: any, config: any, article: GenRes
     } catch (e: any) {
       console.warn(`[issue-draft] forced update failed post=${blogPostId}:`, e?.message);
     }
+  }
+
+  // BN-1 ② — 판독 대기 초안에 사유 도장. DB 가드('hold:%')가 blog-auto-publish 등 모든 공개 경로를 막는다.
+  if (reviewHold?.stampReason && !holdPublishOn && blogPostId) {
+    dbw('issue-draft', 'blog_posts.update@review_hold', await (sb as any).from('blog_posts')
+      .update({ auto_unpublished_reason: reviewHold.reason, auto_publish_eligible: false })
+      .eq('id', blogPostId).eq('is_published', false));
   }
 
   // A2: 자동 발행 결정 시 blog_posts 반드시 공개 처리 (is_published 상태 무관)

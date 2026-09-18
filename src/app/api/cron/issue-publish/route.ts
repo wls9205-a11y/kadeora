@@ -28,6 +28,7 @@ import { withCronLogging } from '@/lib/cron-logger';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { SITE_URL } from '@/lib/constants';
 import { dbw } from '@/lib/cron-db-log';
+import { reviewHoldOf, reviewSwitches } from '@/lib/content/review-hold';
 
 export const maxDuration = 120;
 export const runtime = 'nodejs';
@@ -113,11 +114,12 @@ async function handler(_req: NextRequest) {
 
       // EX-B — BP 글감(허브 발행 · BP70 문서 카드)은 판독 모드. issue-draft 와 같은 스위치를 본다(이 경로가 모르고 초안을 공개할 뻔했다).
       //   DB 가드(trg_guard_hallucination_republish · 사유 hold:bp_review)가 한 겹 더 막는다.
-      const { data: bpSw } = await (sb as any).from('app_config').select('value').eq('namespace', 'bp').eq('key', 'hub_publish_enabled').maybeSingle();
-      const bpPublishOn = bpSw?.value === true;
+      //   BN-1 ② — BN 허브 글감도 같은 방식(review-hold.ts).
+      const switches = await reviewSwitches(sb);
       for (const issue of pending as any[]) {
         if (Date.now() - start > PREEMPT_MS) break;
-        if (!bpPublishOn && (issue.source_type === 'bp70_hub' || String(issue.raw_data?.doc ?? '').startsWith('BP70'))) continue;
+        const hold = reviewHoldOf(issue);
+        if (hold && !switches[hold.namespace]) continue;
         try {
           const postId = Number(issue.blog_post_id);
 
