@@ -82,3 +82,34 @@ WHERE b.cron_type IN ('issue-draft','issue_preempt')
 - BP70 교차: **반여4-재건축은 BP70 글감 1건 보유 → BN 제외**(§5-1). 대상 21곳.
 - price_source: 22곳 전부 NULL → 합성가 인용 위험 0(가격 무기재).
 - 서금사5·6 slug = `서금사재정비촉진5구역-재개발`·`서금사재정비촉진6구역-재개발`, 광안A = `광안a-재개발`(DL이앤씨).
+
+---
+
+# BN CC 2차 회신 — BN-1 판정 선행 3건 · C5 첫 배치 · 부속 (2026-09-18 저녁)
+
+## 선행 3건
+1. **배포 확인**: 3809d1ba = `dpl_DswVzzno2wP5xhHcSB7vJPu3QacF` READY(production). 이후 d801620d `dpl_H4GUjUPLiWEE6Cei3TnCtZ59wGaB` · 25523b4e `dpl_By3PgLcYGQUo376Q8had1Ngh3sTQ` READY. 배포 후 V3′ 신규 0행.
+2. **301 맵 DB모드 재생성**(d801620d): 465건(+2). 라이브 확인 — `/apt/광안5구역-재개발` → 301 `/apt/광안5-재개발`, `/apt/사직4구역-푸르지오-그라니엘` → 301 `/apt/사직4-재개발`.
+3. **BN hold**(d801620d): `src/lib/content/review-hold.ts` — source_type `bn_hub` 는 `bn.hub_publish_enabled`(app_config, false 등록) 가 정확히 true 가 아니면 비공개 초안 + 생성 즉시 `auto_unpublished_reason='hold:bn_review'` 도장(DB 가드가 blog-auto-publish 경로까지 차단). BP 는 도장 없음(해제 절차 불변).
+   ⚠️ 참고: `bp.hub_publish_enabled` 는 현재 **true** — BP 레일 글감은 판독 없이 곧장 발행된다. 그래서 C3 는 BP 레일이 아니라 BN hold 로 태웠다.
+   **해제 절차(BN-B 통과 시)**: 스위치 true + 판독 통과 초안의 사유 `hold:bn_review` 를 비운다(가드는 사유만 본다).
+
+## C5 첫 배치 (docs/bn/BN-B_batch1_20260918.sql, 글감 9)
+- 대상: 사직2·사직4·사직5·부곡2·범천4·괴정5·수영1 (1순위·명칭 T-B) + 감천2(T-B, preempt 111426 대체) + **C3 촉진3(아크로 라로체, BP70 산입)**.
+  1순위 중 광안5·사직3·사직1-5(T-C)·서금사5·6(명칭 근거 없음)은 2차.
+- 규격: issue_type `redevelopment`(apt_redev 템플릿 — 선점형 청약전략 섹션 없음) · apt_site_id 로 hub 고정 · raw_data.complex_name/zone_label/title_spec(25523b4e — 현장 블록 병기 지시, 「제안 단지명」 문형) · source_urls 비움(아래 수치 불일치 때문) · 가격 무기재.
+- **결과: 2/9 초안, 7/9 ai_failed**.
+  - 112514 부곡2 · 112515 사직4 — `hold:bn_review` ✓ · 미발행 ✓ · hub 정확 ✓ · 푸터 = 자기 현장 1개 ✓ · blog_site_links = 자기 현장만 ✓.
+  - **7건 실패 원인 = Anthropic API 크레딧 잔액 부족**(09:10Z~, Vercel 런타임 로그 원문 「Your credit balance is too low to access the Anthropic API」, llm_usage_logs `400:invalid_request_error`). BN 과 무관한 계정 공통 — 09:10 이후 **모든 LLM 생성 정지**. 충전 전 재큐잉은 재시도만 소진하므로 보류.
+  - 충전 후 재큐잉 1문(CC 또는 세션 A):
+    `update issue_alerts set publish_decision=null, fail_reason=null, retry_count=0, is_processed=false, processed_at=null where source_type='bn_hub' and publish_decision='ai_failed' returning id;`
+- **사전 판독 표시(112514 부곡2 — BN-B 판독 입력)**: ① 「**최근 5년간** 중위 실거래가」 — 데이터 창은 2026-03~09(기간 왜곡) ② 「관리비 **평당 월 8,000~12,000원 대**」 — 데이터 블록에 없는 추정 수치(수치 게이트 통과했음 — 게이트 누수). 분양가 인용 0 · 제도 상수(예치금·취득세) 인용은 상수 블록 출처.
+  제목은 규격(「단지명 — 구역명 … 총정리」)과 달리 「부산 금정구 부곡2구역 자이 더 센터니티 재개발 진행 현황」 — 병기는 충족, 형식 불일치.
+
+## 부속
+- **hub_cta_target**: 184편 전건 NULL — 잔존 없음. apt_site_id 보유 56편은 옛 hub 와 일치 0(푸터 기원 아님).
+- **merge_succession() 수치 차단**(48f41bde · 마이그레이션 적용): total_units·complex_units → 「⛔ 자동 승계 제외 · 검수 큐」. 롤백 프로브로 검증(광안5 survivor 비움 → complex_units 검수 큐 2058/∅, 원복 확인). GRANT service_role 유지.
+- **sa.py T-C 필터**(9662a033): 별칭이 그 현장 T-C 명칭의 부분 문자열이면 제외, T-B 갱신 시 자동 편입. 영향 6현장·22별칭(전부 BN) · BN 밖 0 · test_name_pool 전수 스윕(4,844) 통과. → §6 회전 금지는 코드로도 잠김.
+- **사직2 이중 판정(CC 의견: 병합)**: 부산일보 2023-04-19 — 사직2구역은 **재개발**로만 존재, 그때 정비구역 지정 완료. `부산-사직2-재건축`(2026-03-24 생성, redev_stage 「정비구역지정」)은 같은 사건의 오분류 수기 레코드로 판단. 공공자료에 별도 「사직2 재건축」 없음. dead 착지: 링크 0·글 0·글감 0. → dead=`부산-사직2-재건축` / survivor=`사직2-재개발`, merge_succession(수치 자동 차단) · dead address 「부산 동래구 사직동」 은 검수 큐.
+- **신규 결함 — 우동3 builder**: DB 「현대산업개발, 대우건설」 ↔ 실제 **현대건설 단독**(1.28조·2,503세대·「디에이치 아센테르」 제안 — 현대건설 뉴스룸 hdec.kr NewsSeq=645, 오피니언뉴스 idxno=73880). C3 아센테르 재생성은 세션 A builder 정정 후.
+- **수치 불일치 2(세션 A 확인 요청)**: 괴정5 complex_units 3,509 ↔ 수주 기사 3,102세대+오피스텔 144실 / 촉진3 3,545 ↔ 기사 3,554.

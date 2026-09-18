@@ -1,3 +1,9 @@
+## 2026-09-18 (저녁) — BN CC 2차: hold·301·첫 배치 적재 — Anthropic 크레딧 소진으로 7/9 정지
+
+- d801620d BN hold(review-hold.ts · bn.hub_publish_enabled=false · hold:bn_review 도장) + 301 맵 +2 · 25523b4e 단지명 병기(raw_data.complex_name/title_spec) · 9662a033 sa.py T-C 필터 · 48f41bde merge_succession 수치 승계 차단.
+- 첫 배치 글감 9(BN 8 + C3 촉진3): 초안 112514 부곡2 · 112515 사직4(hold ✓·hub ✓). 7건 ai_failed = **Anthropic API 크레딧 잔액 부족**(09:10Z~, 전 LLM 생성 정지). 충전 후 재큐잉 1문은 docs/bn/BN_CC_reply_20260918.md.
+- 신규: 우동3 builder 오기(현대건설 단독) · 사직2 이중은 병합 의견 · 괴정5/촉진3 세대수 불일치.
+
 ## 2026-09-18 — BN CC 1차: 푸터 링크 오염 원인·수리 · preempt 5 보류 · 근거 채집 (중단점 BN-A 대기)
 
 - C1(3809d1ba): blog_site_links 오염 원인 = issue-draft `appendRelatedHubFooter` 가 정렬 없는 apt_sites 첫 행을 모든 글에 부착. V3′ 2,667행·1,079편·206 slug · hub 오염 184편(발행 100) · §2-2 게이트 무력화 381편(60일). 수리: 글감 현장+본문 링크만.
