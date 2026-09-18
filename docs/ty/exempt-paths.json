@@ -1,0 +1,15 @@
+{
+  "_doc": "TY3 예외 원장 — 픽셀값 존치 경로(satori·ImageResponse·이메일 HTML). FINAL_TYFB_20260918 §0·§6. 판정 2026-09-18 CC 정적 실측: ImageResponse 실참조 12파일 + og 브랜드 상수 + 이메일 템플릿. SiteThumb·DealCards 는 «주석 속 satori 언급» 오탐 → 화면 컴포넌트(비예외). apt-card-build 는 ImageResponse 미참조(api 경로라 어차피 화면 밖).",
+  "paths": [
+    { "path": "src/app/api/**", "reason": "API 라우트 — 화면 밖. og 9종·apt-img·chart-image 의 ImageResponse(satori) 포함" },
+    { "path": "src/app/(main)/feed/[id]/opengraph-image.tsx", "reason": "ImageResponse(satori) — OG 생성기" },
+    { "path": "src/lib/og/**", "reason": "OG 브랜드 상수 — satori 전용(fontWeight 800 포함)" },
+    { "path": "src/lib/og-tokens.ts", "reason": "OG 색·치수 상수 — satori 전용" },
+    { "path": "src/lib/email-templates.ts", "reason": "이메일 HTML 문자열 — 메일 클라이언트 픽셀값" },
+    { "path": "src/lib/email-sender.ts", "reason": "이메일 HTML 문자열" }
+  ],
+  "false_positives": [
+    { "path": "src/components/apt/SiteThumb.tsx", "why": "satori 는 주석 언급뿐 — ImageResponse import 0" },
+    { "path": "src/components/home/DealCards.tsx", "why": "satori 는 주석 언급뿐 — ImageResponse import 0" }
+  ]
+}
