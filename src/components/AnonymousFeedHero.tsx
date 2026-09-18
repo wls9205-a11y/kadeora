@@ -89,9 +89,9 @@ export default function AnonymousFeedHero({ data }: { data: HomepageData | null 
             padding: 14, background: 'var(--bg-surface)', border: '1px solid var(--border)',
             borderRadius: 10, display: 'flex', alignItems: 'flex-start', gap: 10,
           }}>
-            <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>{p.icon}</span>
+            <span style={{ fontSize: 'var(--fs-lg)', lineHeight: 1, flexShrink: 0 }}>{p.icon}</span>
             <div>
-              <div style={{ fontSize: 'var(--fs-sm, 13px)', fontWeight: 600, color: 'var(--text-primary)' }}>{p.title}</div>
+              <div style={{ fontSize: 'var(--fs-sm, 13px)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{p.title}</div>
               <div style={{ marginTop: 2, fontSize: 'var(--fs-xs, 12px)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{p.desc}</div>
             </div>
           </div>
@@ -115,7 +115,7 @@ export default function AnonymousFeedHero({ data }: { data: HomepageData | null 
       {/* 4. 마감 임박 청약 (긴급성 부여) */}
       {upcomingApts.length > 0 && (
         <div>
-          <div style={{ fontSize: 'var(--fs-sm, 13px)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ fontSize: 'var(--fs-sm, 13px)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
             🔥 마감 임박 청약
           </div>
           <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
@@ -128,13 +128,13 @@ export default function AnonymousFeedHero({ data }: { data: HomepageData | null 
                   background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10,
                 }}
               >
-                <div style={{ fontSize: 11, color: 'var(--accent-red)', fontWeight: 500, marginBottom: 4 }}>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-red)', fontWeight: 'var(--fw-body)', marginBottom: 4 }}>
                   D-{apt.days_left} · {apt.region_nm}
                 </div>
-                <div style={{ fontSize: 'var(--fs-sm, 13px)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ fontSize: 'var(--fs-sm, 13px)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {apt.house_nm}
                 </div>
-                <div style={{ marginTop: 4, fontSize: 11, color: 'var(--text-tertiary)' }}>
+                <div style={{ marginTop: 4, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                   마감 {apt.rcept_endde}
                 </div>
               </Link>
@@ -146,7 +146,7 @@ export default function AnonymousFeedHero({ data }: { data: HomepageData | null 
       {/* 5. 인기 블로그 (콘텐츠 가치 증명) */}
       {hotBlogs.length > 0 && (
         <div>
-          <div style={{ fontSize: 'var(--fs-sm, 13px)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>
+          <div style={{ fontSize: 'var(--fs-sm, 13px)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 8 }}>
             📰 지금 인기 블로그
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -164,7 +164,7 @@ export default function AnonymousFeedHero({ data }: { data: HomepageData | null 
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 12 }}>
                   {b.title}
                 </span>
-                <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>
+                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>
                   👁 {b.view_count.toLocaleString('ko-KR')}
                 </span>
               </Link>
@@ -176,7 +176,7 @@ export default function AnonymousFeedHero({ data }: { data: HomepageData | null 
       {/* 6. 인기 계산기 토픽 (검색 의도 매칭) */}
       {hotTopics.length > 0 && (
         <div>
-          <div style={{ fontSize: 'var(--fs-sm, 13px)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>
+          <div style={{ fontSize: 'var(--fs-sm, 13px)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 8 }}>
             🧮 자주 찾는 계산기
           </div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -187,7 +187,7 @@ export default function AnonymousFeedHero({ data }: { data: HomepageData | null 
                 style={{
                   padding: '6px 12px', textDecoration: 'none',
                   background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 999,
-                  fontSize: 12, color: 'var(--text-secondary)',
+                  fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)',
                 }}
               >
                 {t.label}

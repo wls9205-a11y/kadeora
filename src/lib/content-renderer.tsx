@@ -110,7 +110,7 @@ export function renderContent(text: string, entities?: EntityMap): React.ReactNo
     } else if (mark.type === 'tag') {
       parts.push(
         <Link key={`t${key++}`} href={mark.href}
-          style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>
+          style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 'var(--fw-title)' }}>
           {mark.text}
         </Link>
       );

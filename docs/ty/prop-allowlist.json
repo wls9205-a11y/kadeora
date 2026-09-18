@@ -1,0 +1,174 @@
+{
+ "entries": {
+  "fontSize": [
+   {
+    "f": "src/components/apt/ComparablePriceChart.tsx",
+    "l": 43,
+    "raw": "11",
+    "note": "→ 11"
+   },
+   {
+    "f": "src/components/apt/ComparablePriceChart.tsx",
+    "l": 50,
+    "raw": "10",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/blog/BigEventCharts.tsx",
+    "l": 150,
+    "raw": "\"10\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/blog/BigEventCharts.tsx",
+    "l": 151,
+    "raw": "\"10\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/charts/AptPriceTrendChart.tsx",
+    "l": 159,
+    "raw": "9",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/charts/AptPriceTrendChart.tsx",
+    "l": 196,
+    "raw": "9",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/charts/CandlestickChart.tsx",
+    "l": 133,
+    "raw": "\"8\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/charts/CandlestickChart.tsx",
+    "l": 203,
+    "raw": "\"8\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/charts/MiniLineChart.tsx",
+    "l": 77,
+    "raw": "\"9\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/charts/MiniLineChart.tsx",
+    "l": 85,
+    "raw": "\"9\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/StockRadarChart.tsx",
+    "l": 103,
+    "raw": "\"7\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/StockTrendLine.tsx",
+    "l": 91,
+    "raw": "\"7\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/StockTrendLine.tsx",
+    "l": 96,
+    "raw": "\"7\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/StockTrendLine.tsx",
+    "l": 99,
+    "raw": "\"7\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/app/(main)/apt/complex/ComplexClient.tsx",
+    "l": 29,
+    "raw": "\"10\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/charts/AptPriceTrendChart.tsx",
+    "l": 159,
+    "raw": "10",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/charts/AptPriceTrendChart.tsx",
+    "l": 196,
+    "raw": "10",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/charts/CandlestickChart.tsx",
+    "l": 133,
+    "raw": "\"10\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/charts/CandlestickChart.tsx",
+    "l": 203,
+    "raw": "\"10\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/charts/MiniLineChart.tsx",
+    "l": 77,
+    "raw": "\"10\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/charts/MiniLineChart.tsx",
+    "l": 85,
+    "raw": "\"10\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/StockRadarChart.tsx",
+    "l": 103,
+    "raw": "\"10\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/StockTrendLine.tsx",
+    "l": 91,
+    "raw": "\"10\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/StockTrendLine.tsx",
+    "l": 96,
+    "raw": "\"10\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/components/StockTrendLine.tsx",
+    "l": 99,
+    "raw": "\"10\"",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/app/admin/signup-flow/SignupFlowClient.tsx",
+    "l": 551,
+    "raw": "9",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/app/admin/v4/sections/WatchlistWidget.tsx",
+    "l": 393,
+    "raw": "9",
+    "note": "→ 10"
+   },
+   {
+    "f": "src/app/admin/v4/sections/WatchlistWidget.tsx",
+    "l": 395,
+    "raw": "9",
+    "note": "→ 10"
+   }
+  ]
+ }
+}

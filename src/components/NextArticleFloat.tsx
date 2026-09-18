@@ -37,14 +37,14 @@ export default function NextArticleFloat({ nextSlug, nextTitle, category }: Prop
       <Link href={`/blog/${nextSlug}`} style={{
         flex: 1, textDecoration: 'none', color: 'inherit', minWidth: 0,
       }}>
-        <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)', marginBottom: 2 }}>다음 글</div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', color: 'var(--brand)', marginBottom: 2 }}>다음 글</div>
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {nextTitle}
         </div>
       </Link>
       <button onClick={() => setDismissed(true)} style={{
         background: 'none', border: 'none', color: 'var(--text-tertiary)',
-        cursor: 'pointer', fontSize: 16, padding: 4, flexShrink: 0,
+        cursor: 'pointer', fontSize: 'var(--fs-sm)', padding: 4, flexShrink: 0,
       }} aria-label="닫기">✕</button>
     </div>
   );

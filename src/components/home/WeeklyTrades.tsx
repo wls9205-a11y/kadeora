@@ -46,7 +46,7 @@ export default function WeeklyTrades({ data, selectedRegion }: { data: WeeklyTra
             그대로 제목에 박아 놓아, 사용자가 서울을 고른 화면에서도 부산·울산이라 말했다.
             ⚠️ 선택 지역이 집계에 «없으면» 그 사실을 정직하게 말한다 —
                있는 척 지역명만 바꾸면 없는 숫자를 그 지역 것이라 주장하게 된다. */}
-        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, letterSpacing: 0, color: 'var(--text-tertiary)' }}>
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', letterSpacing: 0, color: 'var(--text-tertiary)' }}>
           {selectedRegion && !covered
             ? `이번 주 실거래 · ${selectedRegion} 집계 준비 중`
             : `이번 주 실거래 · ${selectedRegion || label}`}
@@ -56,24 +56,24 @@ export default function WeeklyTrades({ data, selectedRegion }: { data: WeeklyTra
           {/* 700 — 희소한 수치에만 쓰는 굵기다. 이 화면에서 여기 하나뿐이다. */}
           <span
             style={{
-              fontSize: 26,
-              fontWeight: 700,
-              letterSpacing: -0.4,
-              lineHeight: 1.15,
+              fontSize: 'var(--fs-xl)',
+              fontWeight: 'var(--fw-num)',
+              letterSpacing: '-0.4px',
+              lineHeight: 1,
               color: 'var(--text-primary)',
             }}
           >
             {data.deals.toLocaleString('ko-KR')}
           </span>
-          <span style={{ fontSize: 13, fontWeight: 400, letterSpacing: 0, color: 'var(--text-secondary)' }}>건</span>
+          <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-quiet)', letterSpacing: 0, color: 'var(--text-secondary)' }}>건</span>
 
           {/* ⚠️ prevDeals 가 0이면 delta 가 null 이고 배지를 아예 안 낸다.
               「+∞%」나 「신규」로 때우지 않는다. */}
           {delta !== null && (
             <span
               style={{
-                fontSize: 12,
-                fontWeight: 500,
+                fontSize: 'var(--fs-xs)',
+                fontWeight: 'var(--fw-body)',
                 letterSpacing: 0,
                 padding: '2px 7px',
                 borderRadius: 'var(--radius-pill)',
@@ -106,8 +106,8 @@ export default function WeeklyTrades({ data, selectedRegion }: { data: WeeklyTra
                 style={{
                   padding: '4px 9px',
                   borderRadius: 'var(--radius-pill)',
-                  fontSize: 12,
-                  fontWeight: 400,
+                  fontSize: 'var(--fs-xs)',
+                  fontWeight: 'var(--fw-quiet)',
                   letterSpacing: 0,
                   background: 'var(--bg-hover)',
                   border: '1px solid var(--border)',
@@ -117,7 +117,7 @@ export default function WeeklyTrades({ data, selectedRegion }: { data: WeeklyTra
                 }}
               >
                 {r.region}{' '}
-                <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>
+                <span style={{ fontWeight: 'var(--fw-body)', color: 'var(--text-primary)' }}>
                   {r.deals.toLocaleString('ko-KR')}
                 </span>
               </Link>
@@ -127,7 +127,7 @@ export default function WeeklyTrades({ data, selectedRegion }: { data: WeeklyTra
 
         {/* ⚠️ 기준을 «밝히지 않으면» 이 숫자가 오늘 것으로 읽힌다.
             최신 신고일과 집계 상한이 다른 이유(신고 지연)까지 한 줄에 적는다. */}
-        <div style={{ fontSize: 11, fontWeight: 400, letterSpacing: 0, color: 'var(--text-tertiary)', marginTop: 8 }}>
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-quiet)', letterSpacing: 0, color: 'var(--text-tertiary)', marginTop: 8 }}>
           국토부 신고 기준{latest ? ` · 최신 신고 ${latest}` : ''}
           {cut ? ` · 신고 지연 반영해 ${cut}까지 집계` : ''}
         </div>

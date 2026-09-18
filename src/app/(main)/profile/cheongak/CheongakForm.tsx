@@ -89,22 +89,22 @@ export default function CheongakForm({ initial }: Props) {
     <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       {/* Score 카드 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 20, textAlign: 'center' }}>
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 500, letterSpacing: 1 }}>예상 가점 (실시간 미리보기)</div>
-        <div style={{ fontSize: 64, fontWeight: 700, color: scoreColor, letterSpacing: -2, marginTop: 6 }}>{scoreToShow}<span style={{ fontSize: 24, color: 'var(--text-tertiary)' }}> / 84</span></div>
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 6 }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-body)', letterSpacing: 0 }}>예상 가점 (실시간 미리보기)</div>
+        <div style={{ fontSize: 64, fontWeight: 'var(--fw-num)', color: scoreColor, letterSpacing: '-0.4px', marginTop: 6 }}>{scoreToShow}<span style={{ fontSize: 'var(--fs-xl)', color: 'var(--text-tertiary)' }}> / 84</span></div>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 6 }}>
           {scoreToShow >= 60 ? '수도권 인기 단지 당첨 가능권' : scoreToShow >= 40 ? '지역 단지 매칭 활발' : '추가 입력 권장'}
         </div>
-        {updatedAt && <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 6 }}>마지막 저장: {new Date(updatedAt).toLocaleString('ko-KR')}</div>}
+        {updatedAt && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 6 }}>마지막 저장: {new Date(updatedAt).toLocaleString('ko-KR')}</div>}
       </div>
 
       {/* 무주택 기간 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }}>
         <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>무주택 기간</span>
-          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--brand)' }}>{formatMonths(no_house)} <span style={{ color: 'var(--text-tertiary)', fontWeight: 600, fontSize: 12 }}>· {Math.min(32, Math.floor(no_house / 6))}점</span></span>
+          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>무주택 기간</span>
+          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: 'var(--brand)' }}>{formatMonths(no_house)} <span style={{ color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-xs)' }}>· {Math.min(32, Math.floor(no_house / 6))}점</span></span>
         </label>
         <input type="range" min={0} max={240} step={6} value={no_house} onChange={e => setNoHouse(Number(e.target.value))} style={{ width: '100%' }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>
           <span>0개월</span><span>20년+</span>
         </div>
       </div>
@@ -112,8 +112,8 @@ export default function CheongakForm({ initial }: Props) {
       {/* 부양가족 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }}>
         <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>부양가족 (본인 제외)</span>
-          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--brand)' }}>{deps}명 <span style={{ color: 'var(--text-tertiary)', fontWeight: 600, fontSize: 12 }}>· {Math.min(35, 5 + deps * 5)}점</span></span>
+          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>부양가족 (본인 제외)</span>
+          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: 'var(--brand)' }}>{deps}명 <span style={{ color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-xs)' }}>· {Math.min(35, 5 + deps * 5)}점</span></span>
         </label>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {[0, 1, 2, 3, 4, 5, 6].map(n => (
@@ -121,7 +121,7 @@ export default function CheongakForm({ initial }: Props) {
               key={n}
               type="button"
               onClick={() => setDeps(n)}
-              style={{ padding: '8px 14px', borderRadius: 999, fontSize: 13, fontWeight: 500, cursor: 'pointer', background: deps === n ? 'var(--brand)' : 'var(--bg-hover)', color: deps === n ? 'var(--text-inverse)' : 'var(--text-secondary)', border: `1px solid ${deps === n ? 'var(--brand)' : 'var(--border)'}` }}
+              style={{ padding: '8px 14px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', cursor: 'pointer', background: deps === n ? 'var(--brand)' : 'var(--bg-hover)', color: deps === n ? 'var(--text-inverse)' : 'var(--text-secondary)', border: `1px solid ${deps === n ? 'var(--brand)' : 'var(--border)'}` }}
             >{n}{n === 6 ? '+' : ''}</button>
           ))}
         </div>
@@ -130,19 +130,19 @@ export default function CheongakForm({ initial }: Props) {
       {/* 청약통장 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }}>
         <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>청약통장 가입 기간</span>
-          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--brand)' }}>{formatMonths(savings)} <span style={{ color: 'var(--text-tertiary)', fontWeight: 600, fontSize: 12 }}>· {Math.min(17, Math.floor(savings / 6))}점</span></span>
+          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>청약통장 가입 기간</span>
+          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: 'var(--brand)' }}>{formatMonths(savings)} <span style={{ color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-xs)' }}>· {Math.min(17, Math.floor(savings / 6))}점</span></span>
         </label>
         <input type="range" min={0} max={240} step={6} value={savings} onChange={e => setSavings(Number(e.target.value))} style={{ width: '100%' }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 4 }}>
           <span>0개월</span><span>20년+</span>
         </div>
       </div>
 
       {/* 관심 지역 */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>관심 지역</div>
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 10 }}>최대 10개. 선택한 시도에 청약이 열리면 가점 매칭 알림을 받습니다.</div>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 4 }}>관심 지역</div>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 10 }}>최대 10개. 선택한 시도에 청약이 열리면 가점 매칭 알림을 받습니다.</div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {REGIONS.map(r => {
             const on = regions.includes(r);
@@ -151,7 +151,7 @@ export default function CheongakForm({ initial }: Props) {
                 key={r}
                 type="button"
                 onClick={() => toggleRegion(r)}
-                style={{ padding: '6px 12px', borderRadius: 999, fontSize: 12, fontWeight: 500, cursor: 'pointer', background: on ? 'var(--brand)' : 'var(--bg-hover)', color: on ? 'var(--text-inverse)' : 'var(--text-secondary)', border: `1px solid ${on ? 'var(--brand)' : 'var(--border)'}` }}
+                style={{ padding: '6px 12px', borderRadius: 999, fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', cursor: 'pointer', background: on ? 'var(--brand)' : 'var(--bg-hover)', color: on ? 'var(--text-inverse)' : 'var(--text-secondary)', border: `1px solid ${on ? 'var(--brand)' : 'var(--border)'}` }}
               >{r}</button>
             );
           })}
@@ -164,10 +164,10 @@ export default function CheongakForm({ initial }: Props) {
           type="button"
           onClick={save}
           disabled={pending}
-          style={{ padding: '12px 24px', borderRadius: 999, background: pending ? 'var(--bg-hover)' : 'var(--brand)', color: pending ? 'var(--text-tertiary)' : 'var(--text-inverse)', fontWeight: 500, fontSize: 14, border: 'none', cursor: pending ? 'default' : 'pointer' }}
+          style={{ padding: '12px 24px', borderRadius: 999, background: pending ? 'var(--bg-hover)' : 'var(--brand)', color: pending ? 'var(--text-tertiary)' : 'var(--text-inverse)', fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-sm)', border: 'none', cursor: pending ? 'default' : 'pointer' }}
         >{pending ? '저장 중...' : '저장'}</button>
-        {msg && <span style={{ fontSize: 13, color: 'var(--success)', fontWeight: 600 }}>✓ {msg}</span>}
-        {err && <span style={{ fontSize: 13, color: 'var(--accent-red)', fontWeight: 600 }}>✗ {err}</span>}
+        {msg && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--success)', fontWeight: 'var(--fw-title)' }}>✓ {msg}</span>}
+        {err && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-red)', fontWeight: 'var(--fw-title)' }}>✗ {err}</span>}
       </div>
     </section>
   );

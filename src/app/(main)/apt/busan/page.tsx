@@ -164,8 +164,8 @@ export default async function BusanAptPage({
                   style={{
                     padding: '5px 12px',
                     borderRadius: 999,
-                    fontSize: 12,
-                    fontWeight: active ? 600 : 500,
+                    fontSize: 'var(--fs-xs)',
+                    fontWeight: active ? 'var(--fw-title)' : 'var(--fw-body)',
                     textDecoration: 'none',
                     border: '1px solid var(--border)',
                     background: active ? 'var(--brand-navy)' : 'var(--bg-surface)',
@@ -179,7 +179,7 @@ export default async function BusanAptPage({
           </div>
 
           {filtered.length === 0 ? (
-            <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: '0 0 12px' }}>
+            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', margin: '0 0 12px' }}>
               {tab} 현장이 아직 없습니다.
             </p>
           ) : (

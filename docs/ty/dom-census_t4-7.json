@@ -1,0 +1,310 @@
+{
+ "label": "t4-7",
+ "base": "http://localhost:3000",
+ "at": "2026-09-18T02:22:53.092Z",
+ "screens": {
+  "home@desktop": {
+   "textNodes": 136,
+   "combos": 24,
+   "sizes": 7,
+   "sizeHist": {
+    "12px": 32,
+    "14px": 69,
+    "16px": 22,
+    "18px": 4,
+    "21px": 2,
+    "24px": 5,
+    "44px": 2
+   },
+   "weights": 4,
+   "lineHeights": 13,
+   "letterSpacings": 4,
+   "gaps": 11,
+   "paddings": 26,
+   "pageOverflow": 0
+  },
+  "apt@desktop": {
+   "textNodes": 433,
+   "combos": 41,
+   "sizes": 8,
+   "sizeHist": {
+    "9.5px": 44,
+    "10px": 134,
+    "12px": 49,
+    "14px": 153,
+    "16px": 27,
+    "18px": 7,
+    "21px": 16,
+    "24px": 3
+   },
+   "weights": 5,
+   "lineHeights": 16,
+   "letterSpacings": 5,
+   "gaps": 10,
+   "paddings": 33,
+   "pageOverflow": 0
+  },
+  "blog@desktop": {
+   "textNodes": 236,
+   "combos": 31,
+   "sizes": 6,
+   "sizeHist": {
+    "9.5px": 29,
+    "10px": 48,
+    "12px": 34,
+    "14px": 102,
+    "16px": 16,
+    "18px": 7
+   },
+   "weights": 5,
+   "lineHeights": 12,
+   "letterSpacings": 3,
+   "gaps": 10,
+   "paddings": 39,
+   "pageOverflow": 0
+  },
+  "stock@desktop": {
+   "textNodes": 300,
+   "combos": 36,
+   "sizes": 6,
+   "sizeHist": {
+    "9.5px": 30,
+    "10px": 90,
+    "12px": 88,
+    "14px": 77,
+    "16px": 8,
+    "18px": 7
+   },
+   "weights": 5,
+   "lineHeights": 12,
+   "letterSpacings": 3,
+   "gaps": 10,
+   "paddings": 25,
+   "pageOverflow": 0
+  },
+  "toss-apt@desktop": {
+   "textNodes": 409,
+   "combos": 34,
+   "sizes": 8,
+   "sizeHist": {
+    "9.5px": 44,
+    "10px": 134,
+    "12px": 48,
+    "14px": 135,
+    "16px": 26,
+    "18px": 3,
+    "21px": 16,
+    "24px": 3
+   },
+   "weights": 5,
+   "lineHeights": 15,
+   "letterSpacings": 5,
+   "gaps": 8,
+   "paddings": 29,
+   "pageOverflow": 0
+  },
+  "home@mobile": {
+   "textNodes": 115,
+   "combos": 23,
+   "sizes": 6,
+   "sizeHist": {
+    "11px": 34,
+    "13px": 50,
+    "15px": 22,
+    "20px": 2,
+    "23px": 5,
+    "28.58px": 2
+   },
+   "weights": 4,
+   "lineHeights": 10,
+   "letterSpacings": 4,
+   "gaps": 10,
+   "paddings": 24,
+   "pageOverflow": 0
+  },
+  "apt@mobile": {
+   "textNodes": 404,
+   "combos": 38,
+   "sizes": 9,
+   "sizeHist": {
+    "9.5px": 39,
+    "10px": 130,
+    "11px": 53,
+    "13px": 124,
+    "15px": 34,
+    "16px": 1,
+    "17px": 3,
+    "20px": 16,
+    "23px": 4
+   },
+   "weights": 5,
+   "lineHeights": 15,
+   "letterSpacings": 5,
+   "gaps": 9,
+   "paddings": 31,
+   "pageOverflow": 0
+  },
+  "blog@mobile": {
+   "textNodes": 186,
+   "combos": 28,
+   "sizes": 7,
+   "sizeHist": {
+    "9.5px": 29,
+    "10px": 37,
+    "11px": 39,
+    "13px": 62,
+    "15px": 15,
+    "16px": 1,
+    "17px": 3
+   },
+   "weights": 5,
+   "lineHeights": 12,
+   "letterSpacings": 3,
+   "gaps": 9,
+   "paddings": 37,
+   "pageOverflow": 0
+  },
+  "stock@mobile": {
+   "textNodes": 237,
+   "combos": 32,
+   "sizes": 7,
+   "sizeHist": {
+    "9.5px": 30,
+    "10px": 86,
+    "11px": 68,
+    "13px": 42,
+    "15px": 7,
+    "16px": 1,
+    "17px": 3
+   },
+   "weights": 5,
+   "lineHeights": 11,
+   "letterSpacings": 3,
+   "gaps": 9,
+   "paddings": 24,
+   "pageOverflow": 0
+  },
+  "toss-apt@mobile": {
+   "textNodes": 398,
+   "combos": 34,
+   "sizes": 9,
+   "sizeHist": {
+    "9.5px": 39,
+    "10px": 130,
+    "11px": 48,
+    "13px": 124,
+    "15px": 33,
+    "16px": 1,
+    "17px": 3,
+    "20px": 16,
+    "23px": 4
+   },
+   "weights": 5,
+   "lineHeights": 15,
+   "letterSpacings": 5,
+   "gaps": 8,
+   "paddings": 29,
+   "pageOverflow": 0
+  },
+  "home@w768": {
+   "textNodes": 136,
+   "combos": 24,
+   "sizes": 7,
+   "sizeHist": {
+    "12px": 32,
+    "14px": 69,
+    "16px": 22,
+    "18px": 4,
+    "21px": 2,
+    "24px": 5,
+    "36.896px": 2
+   },
+   "weights": 4,
+   "lineHeights": 13,
+   "letterSpacings": 4,
+   "gaps": 11,
+   "paddings": 26,
+   "pageOverflow": 0
+  },
+  "apt@w768": {
+   "textNodes": 423,
+   "combos": 40,
+   "sizes": 8,
+   "sizeHist": {
+    "9.5px": 39,
+    "10px": 130,
+    "12px": 49,
+    "14px": 143,
+    "16px": 35,
+    "18px": 7,
+    "21px": 16,
+    "24px": 4
+   },
+   "weights": 5,
+   "lineHeights": 16,
+   "letterSpacings": 5,
+   "gaps": 10,
+   "paddings": 33,
+   "pageOverflow": 0
+  },
+  "blog@w768": {
+   "textNodes": 205,
+   "combos": 30,
+   "sizes": 6,
+   "sizeHist": {
+    "9.5px": 29,
+    "10px": 37,
+    "12px": 35,
+    "14px": 81,
+    "16px": 16,
+    "18px": 7
+   },
+   "weights": 5,
+   "lineHeights": 12,
+   "letterSpacings": 3,
+   "gaps": 10,
+   "paddings": 39,
+   "pageOverflow": 0
+  },
+  "stock@w768": {
+   "textNodes": 255,
+   "combos": 32,
+   "sizes": 6,
+   "sizeHist": {
+    "9.5px": 30,
+    "10px": 85,
+    "12px": 64,
+    "14px": 61,
+    "16px": 8,
+    "18px": 7
+   },
+   "weights": 5,
+   "lineHeights": 12,
+   "letterSpacings": 3,
+   "gaps": 10,
+   "paddings": 25,
+   "pageOverflow": 0
+  },
+  "toss-apt@w768": {
+   "textNodes": 399,
+   "combos": 33,
+   "sizes": 8,
+   "sizeHist": {
+    "9.5px": 39,
+    "10px": 130,
+    "12px": 48,
+    "14px": 125,
+    "16px": 34,
+    "18px": 3,
+    "21px": 16,
+    "24px": 4
+   },
+   "weights": 5,
+   "lineHeights": 15,
+   "letterSpacings": 5,
+   "gaps": 8,
+   "paddings": 29,
+   "pageOverflow": 0
+  }
+ }
+}

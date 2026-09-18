@@ -67,7 +67,7 @@ export default function CalcLeadCta({ category, slug }: Props) {
         style={{
           margin: 0,
           fontSize: 'var(--fs-xs)',
-          fontWeight: 600,
+          fontWeight: 'var(--fw-title)',
           color: 'var(--kd-accent)',
           lineHeight: 1.5,
           minWidth: 0,
@@ -86,7 +86,7 @@ export default function CalcLeadCta({ category, slug }: Props) {
           background: 'var(--kd-accent)',
           color: 'var(--text-inverse)',
           fontSize: 'var(--fs-xs)',
-          fontWeight: 500,
+          fontWeight: 'var(--fw-body)',
           textDecoration: 'none',
           whiteSpace: 'nowrap',
         }}

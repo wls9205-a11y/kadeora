@@ -74,23 +74,23 @@ export default function FeedPredictCard({ post }: { post: PostWithProfile }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-sm)' }}>
         <div style={{
           width: 30, height: 30, borderRadius: '50%', background: 'rgba(168,85,247,0.15)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)',
         }}>{GRADE_EMOJI[grade] ?? '🌱'}</div>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>{nickname}</span>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{nickname}</span>
             <span style={{
-              padding: '1px 5px', borderRadius: 4, fontSize: 9, fontWeight: 500,
+              padding: '1px 5px', borderRadius: 4, fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)',
               background: 'rgba(168,85,247,0.1)', color: 'var(--accent-purple)',
             }}>🔮 예측</span>
           </div>
-          <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
+          <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
         </div>
-        <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>👀{post.view_count}</span>
+        <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>👀{post.view_count}</span>
       </div>
 
       <Link href={`/feed/${post.slug || post.id}`} style={{ textDecoration: 'none' }}>
-        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6, lineHeight: 1.35 }}>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 6, lineHeight: 1.3 }}>
           {post.title}
         </div>
       </Link>
@@ -100,16 +100,16 @@ export default function FeedPredictCard({ post }: { post: PostWithProfile }) {
         padding: '4px 8px', borderRadius: 6, marginBottom: 'var(--sp-sm)',
         background: isUp ? 'rgba(34,197,94,0.06)' : 'rgba(239,68,68,0.06)',
       }}>
-        <span style={{ fontSize: 14 }}>{isUp ? '📈' : '📉'}</span>
-        <span style={{ fontSize: 12, fontWeight: 700, color: isUp ? 'var(--accent-green)' : 'var(--accent-red)' }}>{prediction.target}</span>
-        <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>· {prediction.deadline}까지</span>
+        <span style={{ fontSize: 'var(--fs-sm)' }}>{isUp ? '📈' : '📉'}</span>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: isUp ? 'var(--accent-green)' : 'var(--accent-red)' }}>{prediction.target}</span>
+        <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>· {prediction.deadline}까지</span>
       </div>
 
       {prediction.resolved ? (
         <div style={{
           padding: '10px 14px', borderRadius: 'var(--radius-sm)', marginTop: 4,
           background: prediction.result ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
-          textAlign: 'center', fontSize: 14, fontWeight: 600,
+          textAlign: 'center', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)',
           color: prediction.result ? 'var(--accent-green)' : 'var(--accent-red)',
         }}>
           {prediction.result ? '🎯 적중!' : '❌ 미적중'}
@@ -125,19 +125,19 @@ export default function FeedPredictCard({ post }: { post: PostWithProfile }) {
               background: myVote === o.agree ? `color-mix(in srgb, ${o.color} 10%, transparent)` : 'var(--bg-hover)',
               border: myVote === o.agree ? `1px solid ${o.color}` : '1px solid var(--border)',
               color: myVote === o.agree ? o.color : 'var(--text-secondary)',
-              fontSize: 12, fontWeight: 600, cursor: myVote !== null ? 'default' : 'pointer',
+              fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', cursor: myVote !== null ? 'default' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3,
             }}>
               {o.icon} {o.label}
               {myVote !== null && total > 0 && (
-                <span style={{ fontWeight: 700 }}>{Math.round((o.cnt / total) * 100)}%</span>
+                <span style={{ fontWeight: 'var(--fw-num)' }}>{Math.round((o.cnt / total) * 100)}%</span>
               )}
             </button>
           ))}
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 10, color: 'var(--text-tertiary)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>
         <span>{total.toLocaleString()}명 참여</span>
         <span>🏆 적중 시 +50P</span>
       </div>

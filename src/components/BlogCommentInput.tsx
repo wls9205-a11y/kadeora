@@ -59,7 +59,7 @@ export default function BlogCommentInput({ blogPostId }: { blogPostId: number })
         <div style={{ marginBottom: 6, display: 'inline-flex', position: 'relative' }}>
           <img src={commentImage} alt="첨부" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }} />
           <button onClick={() => setCommentImage(null)} aria-label="이미지 제거"
-            style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 10, color: 'var(--text-tertiary)', padding: 0 }}>✕</button>
+            style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', padding: 0 }}>✕</button>
         </div>
       )}
       <div style={{ display: 'flex', gap: 'var(--sp-sm)', alignItems: 'flex-end' }}>
@@ -75,7 +75,7 @@ export default function BlogCommentInput({ blogPostId }: { blogPostId: number })
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
         </button>
         <button onClick={handleSubmit} disabled={loading || (!content.trim() && !commentImage)}
-          style={{ padding: '10px 16px', borderRadius: 'var(--radius-card)', border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 500, background: (content.trim() || commentImage) ? 'var(--brand)' : 'var(--bg-hover)', color: (content.trim() || commentImage) ? 'white' : 'var(--text-tertiary)', cursor: (content.trim() || commentImage) && !loading ? 'pointer' : 'default', flexShrink: 0 }}>
+          style={{ padding: '10px 16px', borderRadius: 'var(--radius-card)', border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)', background: (content.trim() || commentImage) ? 'var(--brand)' : 'var(--bg-hover)', color: (content.trim() || commentImage) ? 'white' : 'var(--text-tertiary)', cursor: (content.trim() || commentImage) && !loading ? 'pointer' : 'default', flexShrink: 0 }}>
           {loading || uploadingImage ? '...' : '등록'}
         </button>
       </div>

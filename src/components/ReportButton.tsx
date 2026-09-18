@@ -113,7 +113,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
               margin: '0 16px',
             }}
           >
-            <h3 style={{ margin: '0 0 16px', fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>
+            <h3 style={{ margin: '0 0 16px', fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>
               신고하기
             </h3>
 
@@ -203,7 +203,7 @@ export default function ReportButton({ postId, commentId, messageId, style: cust
                   color: 'var(--text-inverse)',
                   cursor: loading || !reason ? 'not-allowed' : 'pointer',
                   opacity: loading || !reason ? 0.5 : 1,
-                  fontWeight: 600,
+                  fontWeight: 'var(--fw-title)',
                 }}
               >
                 {loading ? '처리 중...' : '신고하기'}

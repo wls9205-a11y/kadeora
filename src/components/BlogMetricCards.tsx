@@ -28,17 +28,17 @@ export default function BlogMetricCards({ metrics }: BlogMetricCardsProps) {
           padding: '12px 10px',
           textAlign: 'center',
         }}>
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4, fontWeight: 500 }}>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4, fontWeight: 'var(--fw-body)' }}>
             {m.label}
           </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>
+          <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', lineHeight: 1.3 }}>
             {m.value}
-            {m.suffix && <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-tertiary)', marginLeft: 2 }}>{m.suffix}</span>}
+            {m.suffix && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-quiet)', color: 'var(--text-tertiary)', marginLeft: 2 }}>{m.suffix}</span>}
           </div>
           {m.change !== null && m.change !== undefined && (
             <div style={{
-              fontSize: 11,
-              fontWeight: 600,
+              fontSize: 'var(--fs-xs)',
+              fontWeight: 'var(--fw-title)',
               marginTop: 2,
               color: m.change > 0 ? 'var(--accent-green)' : m.change < 0 ? 'var(--accent-red)' : 'var(--text-tertiary)',
             }}>

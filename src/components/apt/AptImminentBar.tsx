@@ -24,8 +24,8 @@ export default function AptImminentBar({ sites }: Props) {
       aria-label="청약 임박 D-7"
       style={{ maxWidth: 720, margin: '12px auto', padding: '0 var(--sp-lg)' }}
     >
-      <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
-        ⏰ 청약 임박 D-7 <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)' }}>· {sites.length}곳</span>
+      <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 8px' }}>
+        ⏰ 청약 임박 D-7 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)' }}>· {sites.length}곳</span>
       </h2>
       <div
         style={{
@@ -53,23 +53,23 @@ export default function AptImminentBar({ sites }: Props) {
                 <span style={{
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   padding: '4px 10px', borderRadius: 999,
-                  fontSize: 12, fontWeight: 500,
+                  fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
                   background: c.bg, color: c.fg,
                 }}>
                   D-{s.days_until_apply}
                 </span>
                 {s.popularity_score && s.popularity_score !== 100 && (
-                  <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--brand)' }}>★ {s.popularity_score}</span>
+                  <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', color: 'var(--brand)' }}>★ {s.popularity_score}</span>
                 )}
               </div>
               <div style={{
-                fontSize: 14, fontWeight: 600, color: 'var(--text-primary)',
+                fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)',
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 lineHeight: 1.3,
               }}>
                 {s.site_name || s.slug}
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', display: 'flex', justifyContent: 'space-between', gap: 6 }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', display: 'flex', justifyContent: 'space-between', gap: 6 }}>
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {[s.region, s.sigungu].filter(Boolean).join(' ')}
                 </span>

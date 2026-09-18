@@ -53,7 +53,7 @@ export default async function AptSidebar({ slug, builder, isLoggedIn = false }: 
   const siblings = ((siblingsRes as any)?.data ?? []) as SiblingRow[];
 
   const cardCss: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--card-p)', margin: '0 0 12px' };
-  const titleCss: React.CSSProperties = { fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: 0.5, marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
+  const titleCss: React.CSSProperties = { fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', letterSpacing: 0, marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
 
   return (
     <aside aria-label="단지 사이드바" className="apt-sidebar">
@@ -67,17 +67,17 @@ export default async function AptSidebar({ slug, builder, isLoggedIn = false }: 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
               {ALERT_TYPES.map(a => (
                 <div key={a.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 'var(--fs-xs)' }}>
-                  <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
+                  <span style={{ color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)' }}>
                     <span style={{ color: a.defaultOn ? 'var(--kd-accent)' : 'var(--text-tertiary)', marginRight: 6, fontSize: 'var(--fs-sm)' }}>{a.defaultOn ? '●' : '○'}</span>
                     {a.label}
                   </span>
-                  <span style={{ color: a.defaultOn ? 'var(--kd-accent)' : 'var(--text-tertiary)', fontWeight: 500, fontSize: 'var(--fs-xs)' }}>
+                  <span style={{ color: a.defaultOn ? 'var(--kd-accent)' : 'var(--text-tertiary)', fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-xs)' }}>
                     {a.defaultOn ? 'ON' : 'OFF'}
                   </span>
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 10, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>
+            <div style={{ marginTop: 10, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)' }}>
               마이페이지에서 변경
             </div>
           </>
@@ -87,7 +87,7 @@ export default async function AptSidebar({ slug, builder, isLoggedIn = false }: 
                  알림 «종류» 를 설명하는 문구인데 특정 숫자를 쓰면 이 현장의 상태로 읽힌다.
                  D-day 는 「일정」 섹션이 도래 전 최근접 1곳에만 붙인다(U-1b 판정). */}
             모델하우스 오픈 · 청약 D-day · 분양가 변동 알림을 받을 수 있습니다.{' '}
-            <Link href="/login" style={{ color: 'var(--kd-accent)', fontWeight: 500, textDecoration: 'none' }}>로그인 →</Link>
+            <Link href="/login" style={{ color: 'var(--kd-accent)', fontWeight: 'var(--fw-body)', textDecoration: 'none' }}>로그인 →</Link>
           </p>
         )}
       </section>
@@ -100,13 +100,13 @@ export default async function AptSidebar({ slug, builder, isLoggedIn = false }: 
         <section style={cardCss}>
           <div style={titleCss}>
             <span>{builder}</span>
-            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>다른 단지</span>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)' }}>다른 단지</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
             {siblings.map(s => (
               <Link key={s.sibling_slug} href={`/apt/${encodeURIComponent(s.sibling_slug)}`} style={{ textDecoration: 'none' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {s.sibling_name}
                   </span>
                   {s.sibling_sigungu && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>{s.sibling_sigungu}</span>}

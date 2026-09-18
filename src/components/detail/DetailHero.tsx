@@ -118,7 +118,7 @@ export default function DetailHero({
             letterSpacing: '.14em',
             textTransform: 'uppercase',
             color: 'var(--brand)',
-            fontWeight: 600,
+            fontWeight: 'var(--fw-title)',
             marginBottom: 3,
           }}
         >
@@ -130,9 +130,9 @@ export default function DetailHero({
         id={titleId}
         style={{
           fontSize: 'var(--fs-2xl)',
-          fontWeight: 600,
-          letterSpacing: '-.025em',
-          lineHeight: 1.25,
+          fontWeight: 'var(--fw-title)',
+          letterSpacing: '-0.4px',
+          lineHeight: 1.3,
           margin: 0,
           color: 'var(--text-primary)',
           wordBreak: 'keep-all',

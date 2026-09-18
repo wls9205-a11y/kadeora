@@ -92,7 +92,7 @@ export default function SiteJumpBar({ items, cta }: { items: JumpItem[]; cta?: J
               background: 'var(--bg-sunken)',
               color: 'var(--text-secondary)',
               fontSize: 'var(--fs-xs)',
-              fontWeight: 600,
+              fontWeight: 'var(--fw-title)',
               whiteSpace: 'nowrap',
               textDecoration: 'none',
             }}
@@ -117,7 +117,7 @@ export default function SiteJumpBar({ items, cta }: { items: JumpItem[]; cta?: J
             background: 'var(--kd-accent)',
             color: 'var(--text-inverse)',
             fontSize: 'var(--fs-xs)',
-            fontWeight: 800,
+            fontWeight: 'var(--fw-num)',
             whiteSpace: 'nowrap',
             textDecoration: 'none',
           }}

@@ -38,12 +38,12 @@ export default function DDayAlertCTA({
       aria-label="관심 단지 D-day 푸시 받기"
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <span aria-hidden style={{ fontSize: 18 }}>🔔</span>
+        <span aria-hidden style={{ fontSize: 'var(--fs-base)' }}>🔔</span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 12.5, fontWeight: 700, color: '#7F1D1D' }}>
+          <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-num)', color: '#7F1D1D' }}>
             관심 단지 D-day 푸시 받기
           </div>
-          <div style={{ fontSize: 11, color: '#991B1B', lineHeight: 1.4 }}>
+          <div style={{ fontSize: 'var(--fs-xs)', color: '#991B1B', lineHeight: 1.3 }}>
             로그인하면 마감 3일 전 카카오 알림
           </div>
         </div>
@@ -53,8 +53,8 @@ export default function DDayAlertCTA({
             color: '#FFFFFF',
             padding: '4px 10px',
             borderRadius: 4,
-            fontSize: 11.5,
-            fontWeight: 700,
+            fontSize: 'var(--fs-2xs)',
+            fontWeight: 'var(--fw-num)',
             whiteSpace: 'nowrap',
           }}
         >

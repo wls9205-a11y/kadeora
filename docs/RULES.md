@@ -1059,3 +1059,11 @@ Next 데이터 캐시(`unstable_cache`·`revalidateTag`) 사용처 0. 정정 반
 **Rule** — 이후 공개 RPC 는 생성 커밋에 GRANT EXECUTE 를 동봉한다 — 기본권한은 닫혀 있다(2026-09-17). 근거·대장: `docs/security/rpc_public_allowlist_2026-09-17.md`
 
 ---
+
+### RULES#151 — 타이포 게이트 `type-audit` 은 CI quality 잡에서 돈다. 예외는 대장으로만 연다 (2026-09-18 신설 · TY3)
+
+**Rule** — 화면계 인라인 크기는 사다리 밖 리터럴 0 · 800+ 0 · 소형(≤14px) 음수 자간 0 을 `scripts/type-audit.ts` 가 막는다.
+예외를 열 때는 코드 주석이 아니라 `docs/ty/` 대장(exempt-paths · prop-allowlist · fs13-holdouts · ledger display)에 좌표로 적는다.
+자(`tools/ty-audit/`)와 게이트는 한 정의(`shared.ts`)를 쓴다 — 사다리를 바꾸면 둘이 함께 움직인다. 근거: `docs/ty/README.md` · DS_RULES#5-8~5-10.
+
+---

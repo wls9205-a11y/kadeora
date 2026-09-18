@@ -52,7 +52,7 @@ export function ComparablePriceChart({
           />
           <Tooltip
             formatter={(v: any) => [`${v.toLocaleString('ko')}만원/평`, '평당가']}
-            contentStyle={{ borderRadius: 8, fontSize: 12 }}
+            contentStyle={{ borderRadius: 8, fontSize: 'var(--fs-xs)' }}
           />
           <Bar dataKey="pricePerPyeong" radius={[4, 4, 0, 0]}>
             {data.map((d, i) => (

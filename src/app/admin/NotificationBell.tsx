@@ -106,7 +106,7 @@ export default function NotificationBell() {
           justifyContent: 'center',
         }}
       >
-        <span style={{ fontSize: 14 }}>🔔</span>
+        <span style={{ fontSize: 'var(--fs-sm)' }}>🔔</span>
         {unread > 0 && (
           <span
             aria-hidden
@@ -122,8 +122,8 @@ export default function NotificationBell() {
         //    기존 토큰 --accent-red(#991B1B)로 8.31. 새 토큰은 만들지 않았다.
         background: 'var(--accent-red)',
               color: 'var(--text-inverse)',
-              fontSize: 9,
-              fontWeight: 500,
+              fontSize: 'var(--fs-2xs)',
+              fontWeight: 'var(--fw-body)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -153,29 +153,29 @@ export default function NotificationBell() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px', marginBottom: 4 }}>
-            <strong style={{ fontSize: 12, color: 'var(--text-primary)' }}>알림 {unread > 0 ? `(${unread})` : ''}</strong>
+            <strong style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-primary)' }}>알림 {unread > 0 ? `(${unread})` : ''}</strong>
             <button
               onClick={markAll}
               disabled={loading || unread === 0}
-              style={{ fontSize: 11, color: 'var(--accent-blue-light)', background: 'transparent', border: 'none', cursor: unread === 0 ? 'default' : 'pointer' }}
+              style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-blue-light)', background: 'transparent', border: 'none', cursor: unread === 0 ? 'default' : 'pointer' }}
             >
               모두 읽음
             </button>
           </div>
           {rows.length === 0 ? (
-            <div style={{ padding: 20, textAlign: 'center', fontSize: 12, color: '#64748b' }}>알림이 없습니다</div>
+            <div style={{ padding: 20, textAlign: 'center', fontSize: 'var(--fs-xs)', color: '#64748b' }}>알림이 없습니다</div>
           ) : (
             rows.map((r) => {
               const unreadRow = !r.read_at;
               const content = (
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                    <span style={{ fontSize: 12 }}>{TYPE_ICON[r.type] || '🔔'}</span>
-                    <strong style={{ fontSize: 12, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</strong>
+                    <span style={{ fontSize: 'var(--fs-xs)' }}>{TYPE_ICON[r.type] || '🔔'}</span>
+                    <strong style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</strong>
                     {unreadRow && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3B7BF6' }} />}
                   </div>
-                  {r.body ? <div style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.5, margin: '2px 0 4px' }}>{r.body}</div> : null}
-                  <div style={{ fontSize: 10, color: '#64748b' }}>{fmtTime(r.created_at)}</div>
+                  {r.body ? <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.5, margin: '2px 0 4px' }}>{r.body}</div> : null}
+                  <div style={{ fontSize: 'var(--fs-2xs)', color: '#64748b' }}>{fmtTime(r.created_at)}</div>
                 </>
               );
               const base: React.CSSProperties = {

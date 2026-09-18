@@ -50,8 +50,8 @@ export default function ProfileCompletionBar() {
       marginBottom: 12,
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>프로필 완성도 {pct}%</span>
-        <span style={{ fontSize: 11, color: 'var(--accent-green)', fontWeight: 600 }}>자기소개 작성하면 +200P 🎁</span>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>프로필 완성도 {pct}%</span>
+        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-green)', fontWeight: 'var(--fw-title)' }}>자기소개 작성하면 +200P 🎁</span>
       </div>
       <div style={{ height: 6, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden', marginBottom: 8 }}>
         <div style={{ height: '100%', width: `${pct}%`, background: pct === 100 ? '#10B981' : '#3B82F6', borderRadius: 4, transition: 'width 0.5s' }} />
@@ -61,7 +61,7 @@ export default function ProfileCompletionBar() {
           const isDone = s.check(profile);
           return isDone ? (
             <span key={s.key} style={{
-              padding: '3px 8px', borderRadius: 'var(--radius-md)', fontSize: 10, fontWeight: 600,
+              padding: '3px 8px', borderRadius: 'var(--radius-md)', fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)',
               background: 'rgba(16,185,129,0.1)', color: 'var(--accent-green)',
               border: '1px solid rgba(16,185,129,0.2)',
             }}>
@@ -69,7 +69,7 @@ export default function ProfileCompletionBar() {
             </span>
           ) : (
             <Link key={s.key} href={`/profile/${userId}?edit=1`} style={{
-              padding: '3px 8px', borderRadius: 'var(--radius-md)', fontSize: 10, fontWeight: 600,
+              padding: '3px 8px', borderRadius: 'var(--radius-md)', fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)',
               background: 'var(--bg-hover)', color: 'var(--text-tertiary)',
               border: '1px solid transparent', textDecoration: 'none',
               cursor: 'pointer',

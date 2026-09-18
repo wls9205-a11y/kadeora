@@ -55,7 +55,7 @@ export default function SectorHeatmap({ stocks, isKR }: { stocks: Stock[]; isKR:
 
   return (
     <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 16, marginBottom: 'var(--sp-lg)' }}>
-      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>🗺️ 섹터 히트맵</div>
+      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>🗺️ 섹터 히트맵</div>
 
       {/* 히트맵 그리드 */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 'var(--sp-md)' }}>
@@ -76,15 +76,15 @@ export default function SectorHeatmap({ stocks, isKR }: { stocks: Stock[]; isKR:
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '0.9'; }}
             >
               <div>
-                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-inverse)', lineHeight: 1.2 }}>{sec.name}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-inverse)', lineHeight: 1.3 }}>{sec.name}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.7)', marginTop: 1 }}>{sec.stocks.length}종목</div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-inverse)' }}>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: 'var(--text-inverse)' }}>
                   {sec.avgPct > 0 ? '+' : ''}{sec.avgPct.toFixed(1)}%
                 </span>
                 {topStock && (
-                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', maxWidth: '50%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: 'var(--fs-2xs)', color: 'rgba(255,255,255,0.6)', maxWidth: '50%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {topStock.name}
                   </span>
                 )}

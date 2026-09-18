@@ -75,13 +75,27 @@ test.describe("FB — 우하단 FAB 는 부정공 단톡방이다", () => {
     expect(src).toMatch(/href=\{KAKAO_TALK_URL\}/);
   });
 
-  test("5 피드 목록 상단 글쓰기 진입점이 있고 /write 로 보낸다", async ({ page }) => {
-    await gotoOk(page, "/feed");
-    const btn = page.getByRole("button", { name: "글쓰기" });
-    await expect(btn).toBeVisible();
-    await btn.click();
+  /* ⚠️ 판정 증분-2(2026-09-18) — 원 7항 5번 「피드 목록 상단 글쓰기」는 «전제 소멸».
+     /feed 는 next.config.ts 에서 /apt 로 영구 301 이다(피드 표면 폐쇄 — ea82bb54 계보).
+     FAB 브랜치(9/9 분기)가 FeedClient 에 단 버튼은 «도달 불가» 다. 그래서 이 항목은
+     원 의도 «FAB 교체로 작성 진입점이 0 이 되지 않는다» 로 잰다:
+       (a) /feed 가 여전히 닫혀 있다(열리면 이 항목을 원문으로 되돌린다)
+       (b) 게스트가 닿는 작성 진입점(/guide 「작성 →」)이 실존하고 동작한다
+       (c) 로그인 진입점(더보기 시트·데스크톱 메뉴)의 /write 링크가 소스에 살아 있다 */
+  test("5 작성 진입점은 0 이 되지 않는다 (피드 상단 버튼은 전제 소멸)", async ({ page, request }) => {
+    const feed = await request.get(url("/feed"), { maxRedirects: 0 });
+    expect([301, 308], "/feed 는 영구 이전 상태").toContain(feed.status());
+    expect(feed.headers()["location"]).toMatch(/\/apt$/);
+
+    await gotoOk(page, "/guide");
+    const entry = page.locator('a[href="/write"]').first();
+    await expect(entry).toBeVisible();
+    await entry.click();
     // 게스트는 /write 에서 로그인으로 넘어갈 수 있다 — 어느 쪽이든 «동작» 이다.
     await page.waitForURL(/\/(write|login)/, { timeout: 15_000 });
+
+    const nav = readFileSync(join(process.cwd(), "src/components/Navigation.tsx"), "utf8");
+    expect(nav.match(/href[=:]\s*['"{]*\/write['"}]*/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
   });
 
   test("6 현장 상세에서는 FAB 를 렌더하지 않는다", async ({ page }) => {

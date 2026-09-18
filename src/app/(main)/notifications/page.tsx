@@ -98,7 +98,7 @@ export default function NotificationsPage() {
     <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)' }}>
       <div style={{ fontSize: 40, marginBottom: 'var(--sp-md)' }}>🔔</div>
       <p>로그인이 필요합니다</p>
-      <a href="/login?redirect=/notifications" style={{ color: 'var(--brand)', fontWeight: 500 }}>로그인하기 →</a>
+      <a href="/login?redirect=/notifications" style={{ color: 'var(--brand)', fontWeight: 'var(--fw-body)' }}>로그인하기 →</a>
     </div>
   );
 
@@ -108,9 +108,9 @@ export default function NotificationsPage() {
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-lg)' }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
+          <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
             🔔 알림
-            <a href="/notifications/settings" style={{ fontSize: 14, color: 'var(--text-tertiary)', textDecoration: 'none' }} title="알림 설정">⚙️</a>
+            <a href="/notifications/settings" style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', textDecoration: 'none' }} title="알림 설정">⚙️</a>
           </h1>
           {unreadCount > 0 && (
             <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
@@ -123,7 +123,7 @@ export default function NotificationsPage() {
             <button onClick={deleteRead} style={{
               padding: '7px 14px', borderRadius: 'var(--radius-xl)', border: '1px solid rgba(248,113,113,0.3)',
               background: 'transparent', color: 'var(--accent-red)',
-              fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
+              fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', cursor: 'pointer',
             }}>
               읽은 알림 삭제
             </button>
@@ -132,7 +132,7 @@ export default function NotificationsPage() {
             <button onClick={markAllRead} style={{
               padding: '7px 14px', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)',
               background: 'transparent', color: 'var(--text-secondary)',
-              fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
+              fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', cursor: 'pointer',
             }}>
               모두 읽음
             </button>
@@ -149,7 +149,7 @@ export default function NotificationsPage() {
       ) : notifs.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
           <div style={{ fontSize: 40, marginBottom: 10 }}>🔔</div>
-          <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)' }}>아직 알림이 없어요</div>
+          <div style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-xs)' }}>아직 알림이 없어요</div>
           <div style={{ fontSize: 'var(--fs-sm)' }}>댓글, 좋아요, 팔로우 알림이 여기 표시돼요</div>
         </div>
       ) : (
@@ -169,7 +169,7 @@ export default function NotificationsPage() {
                 {TYPE_ICON[n.type] ?? '🔔'}
               </span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.4 }}>
+                <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.3 }}>
                   {n.message || n.content}
                 </div>
                 <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 'var(--sp-xs)' }}>

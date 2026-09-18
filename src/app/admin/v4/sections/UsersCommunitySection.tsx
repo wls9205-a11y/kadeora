@@ -25,8 +25,8 @@ export default function UsersCommunitySection({ data }: Props) {
 
   const share = data.share_7d ?? {};
   const subTitleStyle: React.CSSProperties = {
-    fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)',
-    textTransform: 'uppercase', marginTop: 14, marginBottom: 6, letterSpacing: 0.4,
+    fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)',
+    textTransform: 'uppercase', marginTop: 14, marginBottom: 6, letterSpacing: '0.14em',
   };
 
   return (
@@ -35,11 +35,11 @@ export default function UsersCommunitySection({ data }: Props) {
       background: 'var(--bg-elevated)', border: '1px solid var(--border)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+        <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: 0 }}>
           👥 사용자 & 커뮤니티
         </h2>
         <a href="/admin/users" style={{
-          marginLeft: 'auto', fontSize: 11, fontWeight: 500,
+          marginLeft: 'auto', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
           padding: '6px 10px', borderRadius: 6,
           background: 'var(--bg-surface)', color: 'var(--text-secondary)',
           border: '1px solid var(--border)', textDecoration: 'none',
@@ -66,7 +66,7 @@ export default function UsersCommunitySection({ data }: Props) {
       </div>
 
       <div style={subTitleStyle}>7일 공유</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(70px, 1fr))', gap: 6, fontSize: 11 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(70px, 1fr))', gap: 6, fontSize: 'var(--fs-xs)' }}>
         {[
           { k: 'total', label: '전체',   v: share.total ?? 0 },
           { k: 'kakao', label: '카카오', v: share.kakao ?? 0 },
@@ -78,8 +78,8 @@ export default function UsersCommunitySection({ data }: Props) {
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
             display: 'flex', flexDirection: 'column', gap: 2,
           }}>
-            <span style={{ color: 'var(--text-tertiary)', fontSize: 10, textTransform: 'uppercase', fontWeight: 500 }}>{it.label}</span>
-            <strong style={{ fontSize: 14, color: 'var(--text-primary)' }}>{it.v}</strong>
+            <span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-2xs)', textTransform: 'uppercase', fontWeight: 'var(--fw-body)' }}>{it.label}</span>
+            <strong style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)' }}>{it.v}</strong>
           </div>
         ))}
       </div>

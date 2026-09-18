@@ -439,8 +439,8 @@ export default function UniversalSearchBar({
             style={{
               flex: 1,
               // ⚠️ 16px 미만으로 내리지 말 것 (iOS 자동확대). 회전 문구도 이 자리에 들어간다.
-              fontSize: 17,
-              lineHeight: 1.2,
+              fontSize: 'var(--fs-sm)',
+              lineHeight: 1.3,
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -471,8 +471,8 @@ export default function UniversalSearchBar({
             <span
               style={{
                 width: "100%",
-                fontSize: 12,
-                fontWeight: 500,
+                fontSize: 'var(--fs-xs)',
+                fontWeight: 'var(--fw-body)',
                 letterSpacing: 0,
                 lineHeight: 1.3,
                 color: "var(--text-tertiary)",
@@ -499,9 +499,9 @@ export default function UniversalSearchBar({
                   padding: "5px 10px",
                   borderRadius: "var(--radius-pill)",
                   fontSize: "var(--fs-2xs)",
-                  fontWeight: 400,
+                  fontWeight: 'var(--fw-quiet)',
                   letterSpacing: 0,
-                  lineHeight: 1.2,
+                  lineHeight: 1.3,
                   // H5-1 «칩 단색» — 반투명(흰 0.14)은 그라디언트 밝은 끝에서 흰 글씨가
                   //   4.03:1 로 미달했다(실측). 네이비 단색이면 어느 위치에서도 13.48:1 이다.
                   // ⚠️ 다만 «칩 면 vs 배경» 경계가 1.27~2.61 로 3:1 에 못 미친다 —
@@ -536,7 +536,7 @@ export default function UniversalSearchBar({
         >
           <SearchIcon />
           <span className="line-clamp-1 flex-1 text-left">{placeholder}</span>
-          <kbd className="hidden rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] text-gray-500 sm:inline">
+          <kbd className="hidden rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[length:var(--fs-2xs)] text-gray-500 sm:inline">
             ⌘K
           </kbd>
         </button>
@@ -666,7 +666,7 @@ export default function UniversalSearchBar({
                     </div>
                   )}
                   {hasKeyboard && (
-                    <div className="px-1 pt-2 text-[11px] text-gray-400">
+                    <div className="px-1 pt-2 text-[length:var(--fs-xs)] text-gray-400">
                       ↑↓ 선택 · Enter 이동 · ESC 닫기
                     </div>
                   )}
@@ -722,7 +722,7 @@ function ResultsPanel({
     <div>
       {sections.map(({ key, items, meta }) => (
         <div key={key} className="mb-3">
-          <h3 className="mb-1 px-2 text-[11px] font-bold uppercase tracking-wide text-gray-500">
+          <h3 className="mb-1 px-2 text-[length:var(--fs-xs)] font-bold uppercase tracking-wide text-gray-500">
             <span className="mr-1">{meta.emoji}</span>
             {meta.label} <span className="font-normal opacity-50">({items.length})</span>
           </h3>
@@ -769,7 +769,7 @@ function ResultsPanel({
                     </span>
                     {item.dday !== undefined && item.dday !== null && (
                       <span className={[
-                        "ml-2 rounded px-1.5 py-0.5 text-[10px] font-bold tabular-nums",
+                        "ml-2 rounded px-1.5 py-0.5 text-[length:var(--fs-2xs)] font-bold tabular-nums",
                         item.dday <= 3 ? "bg-red-500 text-white"
                           : item.dday <= 7 ? "bg-amber-500 text-white"
                           : "bg-gray-200 text-gray-700",
@@ -778,7 +778,7 @@ function ResultsPanel({
                       </span>
                     )}
                     {item.count !== undefined && item.count > 0 && (
-                      <span className="ml-2 text-[10px] text-gray-400 tabular-nums">
+                      <span className="ml-2 text-[length:var(--fs-2xs)] text-gray-400 tabular-nums">
                         {item.count}건
                       </span>
                     )}

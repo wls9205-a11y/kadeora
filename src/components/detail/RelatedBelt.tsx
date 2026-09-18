@@ -52,9 +52,9 @@ export default function RelatedBelt({ items, limit = 6 }: RelatedBeltProps) {
               style={{
                 display: 'block',
                 fontSize: 'var(--fs-sm)',
-                fontWeight: 600,
+                fontWeight: 'var(--fw-title)',
                 color: 'var(--text-primary)',
-                lineHeight: 1.45,
+                lineHeight: 1.5,
                 wordBreak: 'keep-all',
               }}
             >

@@ -37,8 +37,8 @@ export default function AptCategoryGrid({ counts }: Props) {
     >
       <h2
         style={{
-          fontSize: 14,
-          fontWeight: 600,
+          fontSize: 'var(--fs-sm)',
+          fontWeight: 'var(--fw-title)',
           color: 'var(--text-primary)',
           margin: '0 0 8px',
           padding: '0 4px',
@@ -77,13 +77,13 @@ export default function AptCategoryGrid({ counts }: Props) {
                 aspectRatio: '1.4 / 1',
               }}
             >
-              <span aria-hidden style={{ fontSize: 20 }}>
+              <span aria-hidden style={{ fontSize: 'var(--fs-md)' }}>
                 {c.emoji}
               </span>
               <span
                 style={{
-                  fontSize: 12,
-                  fontWeight: 600,
+                  fontSize: 'var(--fs-xs)',
+                  fontWeight: 'var(--fw-title)',
                   color: 'var(--text-primary)',
                 }}
               >
@@ -92,8 +92,8 @@ export default function AptCategoryGrid({ counts }: Props) {
               {typeof cnt === 'number' && cnt > 0 && (
                 <span
                   style={{
-                    fontSize: 10,
-                    fontWeight: 500,
+                    fontSize: 'var(--fs-2xs)',
+                    fontWeight: 'var(--fw-body)',
                     color: 'var(--text-tertiary)',
                   }}
                 >

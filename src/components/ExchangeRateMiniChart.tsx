@@ -38,9 +38,9 @@ export default function ExchangeRateMiniChart() {
   return (
     <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
       <div>
-        <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>USD/KRW</div>
-        <div style={{ fontSize: 15, fontWeight: 700 }}>{latest?.rate?.toLocaleString()}원</div>
-        {change !== 0 && <div style={{ fontSize: 10, color: change > 0 ? '#E24B4A' : '#3B7BF6', fontWeight: 600 }}>{change > 0 ? '▲' : '▼'}{Math.abs(change).toFixed(1)}</div>}
+        <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)' }}>USD/KRW</div>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)' }}>{latest?.rate?.toLocaleString()}원</div>
+        {change !== 0 && <div style={{ fontSize: 'var(--fs-2xs)', color: change > 0 ? '#E24B4A' : '#3B7BF6', fontWeight: 'var(--fw-title)' }}>{change > 0 ? '▲' : '▼'}{Math.abs(change).toFixed(1)}</div>}
       </div>
       <canvas ref={canvasRef} style={{ flex: 1, height: 30 }} />
     </div>

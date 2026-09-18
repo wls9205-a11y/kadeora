@@ -50,11 +50,11 @@ export default function FirstMissionBanner() {
       position: 'relative',
     }}>
       <button onClick={() => { setDismissed(true); sessionStorage.setItem('kd_mission_dismissed', '1'); }}
-        style={{ position: 'absolute', top: 8, right: 10, background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 14, cursor: 'pointer' }}>×</button>
-      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
+        style={{ position: 'absolute', top: 8, right: 10, background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', cursor: 'pointer' }}>×</button>
+      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 4 }}>
         🎯 첫 미션 ({done}/{total})
       </div>
-      <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 10 }}>
+      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 10 }}>
         👇 아래 미션 클릭 → 바로 이동! 2개 완료하면 보너스 200P
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
@@ -65,19 +65,19 @@ export default function FirstMissionBanner() {
             background: progress[m.key as keyof MissionProgress]
               ? 'rgba(16,185,129,0.1)' : 'var(--bg-surface)',
             border: `1px solid ${progress[m.key as keyof MissionProgress] ? 'rgba(16,185,129,0.3)' : 'var(--border)'}`,
-            textDecoration: 'none', fontSize: 11,
+            textDecoration: 'none', fontSize: 'var(--fs-xs)',
             opacity: progress[m.key as keyof MissionProgress] ? 0.6 : 1,
           }}>
-            <span style={{ fontSize: 14 }}>{progress[m.key as keyof MissionProgress] ? '✅' : m.icon}</span>
+            <span style={{ fontSize: 'var(--fs-sm)' }}>{progress[m.key as keyof MissionProgress] ? '✅' : m.icon}</span>
             <div style={{ flex: 1 }}>
-              <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{m.label}</div>
-              <div style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>{m.desc}</div>
+              <div style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{m.label}</div>
+              <div style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-2xs)' }}>{m.desc}</div>
             </div>
           </Link>
         ))}
       </div>
       {allDone && (
-        <div style={{ marginTop: 8, padding: '6px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', fontSize: 11, color: 'var(--accent-green)', fontWeight: 600, textAlign: 'center' }}>
+        <div style={{ marginTop: 8, padding: '6px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', fontSize: 'var(--fs-xs)', color: 'var(--accent-green)', fontWeight: 'var(--fw-title)', textAlign: 'center' }}>
           🎉 보너스 200P 지급 완료!
         </div>
       )}

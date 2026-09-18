@@ -21,8 +21,8 @@ interface TrafficData {
 }
 
 const subTitleStyle: React.CSSProperties = {
-  fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)',
-  textTransform: 'uppercase', marginTop: 14, marginBottom: 6, letterSpacing: 0.4,
+  fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)',
+  textTransform: 'uppercase', marginTop: 14, marginBottom: 6, letterSpacing: '0.14em',
 };
 
 function decodePath(p: string): string {
@@ -72,7 +72,7 @@ export default function TrafficSection() {
       padding: 16, borderRadius: 'var(--radius-lg, 14px)',
       background: 'var(--bg-elevated)', border: '1px solid var(--border)',
     }}>
-      <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginTop: 0, marginBottom: 10 }}>
+      <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginTop: 0, marginBottom: 10 }}>
         🌐 실시간 트래픽
       </h2>
 
@@ -114,7 +114,7 @@ export default function TrafficSection() {
         <div>
           <div style={subTitleStyle}>인기 페이지 1시간 (TOP 10)</div>
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-xs)' }}>
               <thead>
                 <tr style={{ color: 'var(--text-tertiary)', textAlign: 'left' }}>
                   <th style={{ padding: 6 }}>경로</th>
@@ -128,7 +128,7 @@ export default function TrafficSection() {
                     <td style={{ padding: 6, maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       <code style={{ color: 'var(--text-secondary)' }}>{decodePath(p.path)}</code>
                     </td>
-                    <td style={{ padding: 6, textAlign: 'right', fontWeight: 700 }}>{p.pv}</td>
+                    <td style={{ padding: 6, textAlign: 'right', fontWeight: 'var(--fw-num)' }}>{p.pv}</td>
                     <td style={{ padding: 6, textAlign: 'right', color: 'var(--text-tertiary)' }}>{p.uv}</td>
                   </tr>
                 ))}
@@ -145,12 +145,12 @@ export default function TrafficSection() {
               const total = refs.reduce((a, b) => a + (b.cnt ?? 0), 0);
               const pct = total > 0 ? Math.round((r.cnt / total) * 100) : 0;
               return (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11 }}>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 'var(--fs-xs)' }}>
                   <span style={{ minWidth: 80, color: 'var(--text-secondary)' }}>{r.referrer}</span>
                   <div style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden' }}>
                     <div style={{ width: `${pct}%`, height: '100%', background: 'var(--brand)' }} />
                   </div>
-                  <span style={{ minWidth: 40, textAlign: 'right', color: 'var(--text-primary)', fontWeight: 700 }}>{r.cnt}</span>
+                  <span style={{ minWidth: 40, textAlign: 'right', color: 'var(--text-primary)', fontWeight: 'var(--fw-num)' }}>{r.cnt}</span>
                 </div>
               );
             })}
@@ -170,12 +170,12 @@ export default function TrafficSection() {
             ].map(it => {
               const pct = devTotal > 0 ? Math.round((it.v / devTotal) * 100) : 0;
               return (
-                <div key={it.k} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11 }}>
+                <div key={it.k} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 'var(--fs-xs)' }}>
                   <span style={{ minWidth: 60, color: 'var(--text-secondary)' }}>{it.label}</span>
                   <div style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden' }}>
                     <div style={{ width: `${pct}%`, height: '100%', background: it.color }} />
                   </div>
-                  <span style={{ minWidth: 60, textAlign: 'right', color: 'var(--text-primary)', fontWeight: 700 }}>{it.v} ({pct}%)</span>
+                  <span style={{ minWidth: 60, textAlign: 'right', color: 'var(--text-primary)', fontWeight: 'var(--fw-num)' }}>{it.v} ({pct}%)</span>
                 </div>
               );
             })}
@@ -188,10 +188,10 @@ export default function TrafficSection() {
               <div key={k} style={{
                 padding: '4px 10px', borderRadius: 6,
                 background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                fontSize: 11,
+                fontSize: 'var(--fs-xs)',
               }}>
                 <code style={{ color: 'var(--text-secondary)' }}>{k}</code>
-                <span style={{ marginLeft: 6, color: 'var(--text-primary)', fontWeight: 700 }}>{v}</span>
+                <span style={{ marginLeft: 6, color: 'var(--text-primary)', fontWeight: 'var(--fw-num)' }}>{v}</span>
               </div>
             ))}
           </div>

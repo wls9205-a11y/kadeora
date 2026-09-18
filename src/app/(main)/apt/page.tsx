@@ -379,9 +379,9 @@ export default async function AptPage({
              담는 척하지 않고, 이 섹션이 «선택분» 이라는 것을 제목으로 밝힌다. */}
       {selectedCodes.length > 0 && (
         <section style={{ margin: '0 0 var(--sp-lg)' }}>
-          <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, margin: '0 0 var(--sp-sm)' }}>
+          <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', margin: '0 0 var(--sp-sm)' }}>
             선택한 지역의 분양예정·분양중 현장
-            <span style={{ marginLeft: 'var(--sp-sm)', fontSize: 'var(--fs-2xs)', fontWeight: 500, color: 'var(--text-tertiary)' }}>
+            <span style={{ marginLeft: 'var(--sp-sm)', fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)' }}>
               {selectedSites.length}곳
             </span>
           </h2>
@@ -535,7 +535,7 @@ export default async function AptPage({
                 <p style={{
                   margin: 'var(--sp-md) 2px var(--sp-xs)',
                   fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
-                  color: 'var(--text-secondary)', letterSpacing: '.02em',
+                  color: 'var(--text-secondary)', letterSpacing: 0,
                 }}>
                   {g.label}{' '}
                   <span style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--text-tertiary)' }}>
@@ -616,10 +616,10 @@ export default async function AptPage({
             style={{
               margin: 'var(--sp-xs) 2px 0',
               fontSize: 'var(--fs-xs)',
-              fontWeight: 400,
+              fontWeight: 'var(--fw-quiet)',
               letterSpacing: 0,
               color: 'var(--text-tertiary)',
-              lineHeight: 1.45,
+              lineHeight: 1.5,
             }}
           >
             국토부 실거래 신고 기준. 가격은 그 단지에서 «가장 많이 거래된 평형» 하나를 고정해 낸

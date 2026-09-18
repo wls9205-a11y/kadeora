@@ -212,7 +212,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
     <div style={{
       width: size, height: size, borderRadius: '50%', flexShrink: 0,
       background: avc(nick), display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: size * 0.38, fontWeight: 500, color: 'var(--text-inverse)',
+      fontSize: size * 0.38, fontWeight: 'var(--fw-body)', color: 'var(--text-inverse)',
     }}>{nick[0]}</div>
   );
 
@@ -230,9 +230,9 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
           {renderAvatar(nick, isReply ? 28 : 36)}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-              <span style={{ fontWeight: 600, fontSize: 'var(--fs-sm)', color: 'var(--text-primary)' }}>{nick}</span>
+              <span style={{ fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-sm)', color: 'var(--text-primary)' }}>{nick}</span>
               <span style={{
-                fontSize: 'var(--fs-xs)', fontWeight: 600, padding: '1px 6px', borderRadius: 4,
+                fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', padding: '1px 6px', borderRadius: 4,
                 background: 'var(--bg-hover)', color: 'var(--text-tertiary)',
               }}>{GL(grade)}</span>
               {userId && userId !== c.author_id && (
@@ -241,7 +241,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                   border: `1px solid var(--brand)`,
                   background: followingIds.has(c.author_id) ? 'var(--brand)' : 'transparent',
                   color: followingIds.has(c.author_id) ? 'white' : 'var(--brand)',
-                  fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
+                  fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', cursor: 'pointer',
                 }}>
                   {followingIds.has(c.author_id) ? '팔로잉' : '팔로우'}
                 </button>
@@ -350,7 +350,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                       disabled={!(replyInputs[c.id] || '').trim()}
                       style={{
                         padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: 'none', fontSize: 'var(--fs-sm)',
-                        fontWeight: 500, cursor: 'pointer', flexShrink: 0,
+                        fontWeight: 'var(--fw-body)', cursor: 'pointer', flexShrink: 0,
                         background: 'var(--brand)', color: 'var(--text-inverse)',
                         opacity: (replyInputs[c.id] || '').trim() ? 1 : 0.5,
                       }}
@@ -367,7 +367,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
 
   return (
     <div>
-      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 14 }}>
+      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 14 }}>
         💬 {stockName} 한줄평
       </div>
 
@@ -378,7 +378,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
             key={key}
             onClick={() => setSort(key)}
             style={{
-              padding: '5px 14px', borderRadius: 'var(--radius-xl)', fontSize: 'var(--fs-sm)', fontWeight: 600,
+              padding: '5px 14px', borderRadius: 'var(--radius-xl)', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)',
               cursor: 'pointer', border: 'none',
               background: sort === key ? 'var(--brand)' : 'var(--bg-hover)',
               color: sort === key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
@@ -413,7 +413,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
                 disabled={sending || !input.trim()}
                 style={{
                   padding: '6px 16px', borderRadius: 'var(--radius-sm)', border: 'none', fontSize: 'var(--fs-sm)',
-                  fontWeight: 500, cursor: 'pointer',
+                  fontWeight: 'var(--fw-body)', cursor: 'pointer',
                   background: 'var(--brand)', color: 'var(--text-inverse)',
                   opacity: sending || !input.trim() ? 0.5 : 1,
                 }}
@@ -427,7 +427,7 @@ export default function StockComments({ symbol, stockName }: { symbol: string; s
           style={{
             display: 'block', textAlign: 'center', padding: '12px 0', marginBottom: 14,
             borderRadius: 'var(--radius-md)', border: '1px dashed var(--border)',
-            fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--brand)', textDecoration: 'none',
+            fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--brand)', textDecoration: 'none',
           }}
         >
           로그인하고 한줄평 남기기

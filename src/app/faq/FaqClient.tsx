@@ -17,7 +17,7 @@ export default function FaqClient() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 16px' }}>
-      <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>자주 묻는 질문</h1>
+      <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>자주 묻는 질문</h1>
       <p style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', marginBottom: 32 }}>카더라 사용에 관해 자주 묻는 질문들을 모았습니다</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-sm)' }}>
@@ -29,11 +29,11 @@ export default function FaqClient() {
                 width: '100%', padding: '16px 20px', background: 'transparent', border: 'none',
                 color: 'var(--text-primary)', textAlign: 'left', cursor: 'pointer',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--sp-md)',
-                fontSize: 'var(--fs-md)', fontWeight: 600, lineHeight: 1.4,
+                fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', lineHeight: 1.3,
               }}
             >
               <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ color: 'var(--brand)', fontWeight: 800, flexShrink: 0 }}>Q</span>
+                <span style={{ color: 'var(--brand)', fontWeight: 'var(--fw-num)', flexShrink: 0 }}>Q</span>
                 {faq.q}
               </span>
               <span style={{
@@ -44,8 +44,8 @@ export default function FaqClient() {
             </button>
             {open === i && (
               <div style={{ padding: '0 20px 16px', display: 'flex', gap: 10, alignItems: 'flex-start' }} className="animate-slideDown">
-                <span style={{ color: 'var(--success)', fontWeight: 800, flexShrink: 0, fontSize: 'var(--fs-md)' }}>A</span>
-                <p style={{ margin: 0, fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{faq.a}</p>
+                <span style={{ color: 'var(--success)', fontWeight: 'var(--fw-num)', flexShrink: 0, fontSize: 'var(--fs-md)' }}>A</span>
+                <p style={{ margin: 0, fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{faq.a}</p>
               </div>
             )}
           </div>
@@ -58,7 +58,7 @@ export default function FaqClient() {
           display: 'inline-flex', alignItems: 'center', gap: 6,
           padding: '10px 20px', borderRadius: 'var(--radius-sm)',
           background: 'var(--brand)', color: 'var(--text-inverse)',
-          textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: 600,
+          textDecoration: 'none', fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)',
         }}>📧 문의하기</a>
       </div>
     </div>

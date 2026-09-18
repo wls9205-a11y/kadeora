@@ -18,12 +18,12 @@ export default function KPIStrip({ items }: Props) {
       display: 'flex', gap: 14, flexWrap: 'wrap',
       padding: '6px 10px', borderRadius: 'var(--radius-md, 10px)',
       background: 'var(--bg-elevated)', border: '1px solid var(--border)',
-      fontSize: 12,
+      fontSize: 'var(--fs-xs)',
     }}>
       {items.map((it, i) => (
         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <span style={{ color: 'var(--text-tertiary)', fontWeight: 600 }}>{it.label}</span>
-          <span style={{ color: TONE_COLOR[it.tone ?? 'default'], fontWeight: 700 }}>{it.value}</span>
+          <span style={{ color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)' }}>{it.label}</span>
+          <span style={{ color: TONE_COLOR[it.tone ?? 'default'], fontWeight: 'var(--fw-num)' }}>{it.value}</span>
         </div>
       ))}
     </div>

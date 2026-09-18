@@ -120,7 +120,7 @@ function RegionSwitch({ current }: { current: string }) {
           key={r}
           href={`/apt/unsold/${encodeURIComponent(r)}`}
           style={{
-            padding: '6px 11px', fontSize: 12, fontWeight: 600, textDecoration: 'none',
+            padding: '6px 11px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', textDecoration: 'none',
             color: 'var(--text-secondary)', background: 'var(--bg-surface)',
             border: '1px solid var(--border)', borderRadius: 'var(--radius-pill, 999px)',
           }}
@@ -139,14 +139,14 @@ async function RegionUnsold({ region }: { region: string }) {
   return (
     <div className="space-y-4">
       <div>
-        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 8 }}>
+        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 8 }}>
           <Link href="/apt" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>부동산</Link>
           <span>›</span>
           <Link href="/apt/unsold" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>미분양</Link>
           <span>›</span>
-          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{region}</span>
+          <span style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{region}</span>
         </nav>
-        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)' }}>
+        <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>
           {region} 미분양 아파트·줍줍
         </h1>
         {/* 조건부는 조건부 — 못 읽은 화면에 「0건」을 적지 않는다. */}
@@ -162,9 +162,9 @@ async function RegionUnsold({ region }: { region: string }) {
           지금 목록을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.
         </p>
       ) : cards.length === 0 ? (
-        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
           지금 {region}에 등록된 미분양·선착순 현장이 없습니다.{' '}
-          <Link href={`/apt/region/${encodeURIComponent(region)}`} style={{ color: 'var(--brand)', fontWeight: 600 }}>
+          <Link href={`/apt/region/${encodeURIComponent(region)}`} style={{ color: 'var(--brand)', fontWeight: 'var(--fw-title)' }}>
             {region} 아파트 분양·청약 일정
           </Link>
           에서 진행 중인 현장을 확인해 보세요.

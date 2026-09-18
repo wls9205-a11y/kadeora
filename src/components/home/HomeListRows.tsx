@@ -56,9 +56,9 @@ export function HomeAptRow({ data }: { data: AptIssueScore }) {
         )}
       </span>
       <span className="kd-lrow-r">
-        {pyeong ?? <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>미공개</span>}
+        {pyeong ?? <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)' }}>미공개</span>}
         {data.households_count ? (
-          <span style={{ display: 'block', marginTop: 1, fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)' }}>
+          <span style={{ display: 'block', marginTop: 1, fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)' }}>
             {data.households_count.toLocaleString('ko-KR')}세대
           </span>
         ) : null}
@@ -95,7 +95,7 @@ export function HomeBlogRow({ post }: { post: HomeBlogItem }) {
           </span>
         )}
       </span>
-      <span className="kd-lrow-r" style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)' }}>
+      <span className="kd-lrow-r" style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)' }}>
         읽기 ›
       </span>
     </Link>

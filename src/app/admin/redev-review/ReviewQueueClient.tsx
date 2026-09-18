@@ -113,7 +113,7 @@ export default function ReviewQueueClient() {
 
   return (
     <main style={{ maxWidth: 1100, margin: '0 auto', padding: 'var(--sp-lg)' }}>
-      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, margin: '0 0 4px' }}>정비사업 공시 검수</h1>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', margin: '0 0 4px' }}>정비사업 공시 검수</h1>
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: '0 0 16px', lineHeight: 1.6 }}>
         자동 반영이 확신하지 못한 DART 공급계약 공시입니다. 승인하면 해당 현장이 <b>시공사 선정</b>으로 바뀝니다.
         <br />
@@ -130,7 +130,7 @@ export default function ReviewQueueClient() {
               border: tab === t.key ? '1px solid var(--brand)' : '1px solid var(--border)',
               background: tab === t.key ? 'var(--brand)' : 'transparent',
               color: tab === t.key ? 'var(--text-inverse)' : 'var(--text-primary)',
-              fontSize: 'var(--fs-sm)', fontWeight: 600,
+              fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)',
             }}
           >
             {t.label} {counts[t.key] ?? 0}
@@ -147,7 +147,7 @@ export default function ReviewQueueClient() {
       {loading && <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>불러오는 중…</p>}
 
       {!loading && items.length === 0 && (
-        <div style={{ padding: 20, border: '1px dashed var(--border)', borderRadius: 'var(--radius-card)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+        <div style={{ padding: 20, border: '1px dashed var(--border)', borderRadius: 'var(--radius-card)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
           {tab === 'pending'
             ? '대기 중인 건이 없습니다. 진짜 정비사업 공시는 하루 1~2건이라 비어 있는 게 정상입니다 — 철도·인프라 공급계약은 1차 필터가 걸러 여기까지 오지 않습니다.'
             : '해당하는 이력이 없습니다.'}
@@ -162,10 +162,10 @@ export default function ReviewQueueClient() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }} className="mc-g2">
               {/* 좌 — 공시 */}
               <div>
-                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, marginBottom: 4 }}>{item.corp_name ?? '—'}</div>
+                <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', marginBottom: 4 }}>{item.corp_name ?? '—'}</div>
                 <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 8 }}>{(item.report_nm ?? '').trim() || '—'}</div>
 
-                <div style={{ fontSize: 'var(--fs-xs)', lineHeight: 1.8, color: 'var(--text-secondary)' }}>
+                <div style={{ fontSize: 'var(--fs-xs)', lineHeight: 1.6, color: 'var(--text-secondary)' }}>
                   <div>
                     <b style={{ color: 'var(--text-primary)' }}>구역명 후보</b>{' '}
                     {zones.length > 0
@@ -191,9 +191,9 @@ export default function ReviewQueueClient() {
               <div>
                 {item.status === 'pending' ? (
                   <>
-                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, marginBottom: 6 }}>매칭 후보 현장</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', marginBottom: 6 }}>매칭 후보 현장</div>
                     {item.site_options.length === 0 ? (
-                      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: 10 }}>
+                      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 10 }}>
                         이름이 정확히 일치하는 활성 현장이 없습니다.
                         <br />
                         구역명을 <code>name_variants</code> 에 먼저 넣어야 붙습니다 — 여기서는 반려만 가능합니다.
@@ -208,7 +208,7 @@ export default function ReviewQueueClient() {
                               checked={chosen === o.id}
                               onChange={() => setPicked((p) => ({ ...p, [item.id]: o.id }))}
                             />
-                            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600 }}>{o.name}</span>
+                            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)' }}>{o.name}</span>
                             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>
                               {o.builder ?? '시공사 미상'} · {o.zone} 일치
                             </span>
@@ -221,21 +221,21 @@ export default function ReviewQueueClient() {
                       <button
                         disabled={busyId === item.id || item.site_options.length === 0}
                         onClick={() => act(item, 'approve')}
-                        style={{ flex: 1, minHeight: 44, borderRadius: 'var(--radius-sm)', border: 'none', background: item.site_options.length === 0 ? 'var(--bg-elevated)' : 'var(--brand)', color: item.site_options.length === 0 ? 'var(--text-tertiary)' : 'var(--text-inverse)', fontWeight: 500, fontSize: 'var(--fs-sm)', cursor: item.site_options.length === 0 ? 'not-allowed' : 'pointer' }}
+                        style={{ flex: 1, minHeight: 44, borderRadius: 'var(--radius-sm)', border: 'none', background: item.site_options.length === 0 ? 'var(--bg-elevated)' : 'var(--brand)', color: item.site_options.length === 0 ? 'var(--text-tertiary)' : 'var(--text-inverse)', fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-sm)', cursor: item.site_options.length === 0 ? 'not-allowed' : 'pointer' }}
                       >
                         맞음 — 시공사 선정 반영
                       </button>
                       <button
                         disabled={busyId === item.id}
                         onClick={() => act(item, 'reject')}
-                        style={{ flex: 1, minHeight: 44, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', fontWeight: 500, fontSize: 'var(--fs-sm)', cursor: 'pointer' }}
+                        style={{ flex: 1, minHeight: 44, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-sm)', cursor: 'pointer' }}
                       >
                         틀림
                       </button>
                     </div>
                   </>
                 ) : (
-                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                     <div><b style={{ color: 'var(--text-primary)' }}>상태</b> {item.status}</div>
                     <div><b style={{ color: 'var(--text-primary)' }}>처리자</b> {item.reviewed_by ?? '—'}</div>
                     {item.note && <div><b style={{ color: 'var(--text-primary)' }}>메모</b> {item.note}</div>}

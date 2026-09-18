@@ -1,0 +1,784 @@
+{
+ "entries": {
+  "display-tw": [
+   {
+    "f": "src/app/admin/(v4)/seo-measurement/page.tsx",
+    "l": 46,
+    "raw": "text-5xl",
+    "note": "tailwind 4xl/5xl — 브리지 밖·clamp 편입 안건"
+   },
+   {
+    "f": "src/app/payment/PaymentClient.tsx",
+    "l": 80,
+    "raw": "text-5xl",
+    "note": "tailwind 4xl/5xl — 브리지 밖·clamp 편입 안건"
+   },
+   {
+    "f": "src/app/payment/PaymentClient.tsx",
+    "l": 95,
+    "raw": "text-5xl",
+    "note": "tailwind 4xl/5xl — 브리지 밖·clamp 편입 안건"
+   },
+   {
+    "f": "src/app/payment/PaymentClient.tsx",
+    "l": 117,
+    "raw": "text-4xl",
+    "note": "tailwind 4xl/5xl — 브리지 밖·clamp 편입 안건"
+   }
+  ],
+  "display": [
+   {
+    "f": "src/app/(main)/daily/[region]/archive/page.tsx",
+    "l": 89,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/daily/[region]/DailyReportClient.tsx",
+    "l": 363,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/stock/[symbol]/page.tsx",
+    "l": 291,
+    "raw": "'clamp(28px, 8vw, 36px)'"
+   },
+   {
+    "f": "src/app/(main)/stock/[symbol]/vs/[target]/page.tsx",
+    "l": 58,
+    "raw": "'clamp(20px, 5vw, 28px)'"
+   },
+   {
+    "f": "src/app/(main)/apt/complex/ComplexClient.tsx",
+    "l": 170,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/apt/complex/[name]/error.tsx",
+    "l": 5,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/apt/complex/[name]/page.tsx",
+    "l": 711,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/apt/data/page.tsx",
+    "l": 139,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/apt/diagnose/DiagnoseClient.tsx",
+    "l": 138,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/apt/diagnose/DiagnoseClient.tsx",
+    "l": 152,
+    "raw": "56",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/apt/AptInsightsUnified.tsx",
+    "l": 48,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/apt/detail/AptDDayCard.tsx",
+    "l": 32,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/apt/home/AptHomeHero.tsx",
+    "l": 74,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/apt/SiteHero.tsx",
+    "l": 193,
+    "raw": "'clamp(48px, 12vw, 96px)'"
+   },
+   {
+    "f": "src/components/blog/RelatedBlogsSection.tsx",
+    "l": 116,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/calc/CalcEngine.tsx",
+    "l": 213,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/EmptyState.tsx",
+    "l": 15,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/ErrorBoundary.tsx",
+    "l": 28,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/GlobalPanorama.tsx",
+    "l": 82,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/GuideInstallButton.tsx",
+    "l": 91,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/GuideInstallButton.tsx",
+    "l": 104,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/GuideInstallButton.tsx",
+    "l": 131,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/GuideInstallButton.tsx",
+    "l": 138,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/GuideInstallButton.tsx",
+    "l": 155,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/InAppBrowserModal.tsx",
+    "l": 139,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/modals/ReportModal.tsx",
+    "l": 71,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/onboarding/MarketingConsentModal.tsx",
+    "l": 158,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/PortfolioSimulator.tsx",
+    "l": 172,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/signup/KakaoChannelAddModal.tsx",
+    "l": 167,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/SignupNudgeModal.tsx",
+    "l": 216,
+    "raw": "'clamp(18px, 5vw, 22px)'"
+   },
+   {
+    "f": "src/components/TossTeaser.tsx",
+    "l": 90,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/apt/[id]/error.tsx",
+    "l": 5,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/global-error.tsx",
+    "l": 14,
+    "raw": "64",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/not-found.tsx",
+    "l": 12,
+    "raw": "64",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(auth)/login/LoginClient.tsx",
+    "l": 76,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/attendance/page.tsx",
+    "l": 58,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/calc/error.tsx",
+    "l": 5,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/calc/topic/[keyword]/page.tsx",
+    "l": 151,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/calc/topic/[keyword]/page.tsx",
+    "l": 176,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/calc/[category]/[slug]/r/[shortId]/page.tsx",
+    "l": 120,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/consultant/ConsultantRegister.tsx",
+    "l": 80,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/consultant/ConsultantRegister.tsx",
+    "l": 96,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/consultant/page.tsx",
+    "l": 13,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/discuss/DiscussClient.tsx",
+    "l": 255,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/feed/FeedClient.tsx",
+    "l": 382,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/feed/FeedClient.tsx",
+    "l": 393,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/feed/FeedClient.tsx",
+    "l": 653,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/feed/[id]/page.tsx",
+    "l": 445,
+    "raw": "'clamp(18px, 4.5vw, 24px)'"
+   },
+   {
+    "f": "src/app/(main)/glossary/[slug]/page.tsx",
+    "l": 122,
+    "raw": "'28px'",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/notifications/page.tsx",
+    "l": 99,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/notifications/page.tsx",
+    "l": 151,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/notifications/settings/page.tsx",
+    "l": 131,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/notifications/settings/page.tsx",
+    "l": 185,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/notifications/settings/page.tsx",
+    "l": 208,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/notifications/settings/page.tsx",
+    "l": 220,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/notifications/settings/page.tsx",
+    "l": 234,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/profile/cheongak/CheongakForm.tsx",
+    "l": 93,
+    "raw": "64",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/profile/[id]/error.tsx",
+    "l": 9,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/settings/interests/page.tsx",
+    "l": 61,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/settings/region/page.tsx",
+    "l": 77,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/stock/compare/CompareClient.tsx",
+    "l": 207,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/stock/data/page.tsx",
+    "l": 118,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/stock/dividend/page.tsx",
+    "l": 85,
+    "raw": "'clamp(22px, 5vw, 30px)'"
+   },
+   {
+    "f": "src/app/(main)/stock/market/[code]/page.tsx",
+    "l": 68,
+    "raw": "'clamp(22px, 5vw, 28px)'"
+   },
+   {
+    "f": "src/app/(main)/stock/movers/page.tsx",
+    "l": 83,
+    "raw": "'clamp(22px, 5vw, 28px)'"
+   },
+   {
+    "f": "src/app/(main)/stock/search/SearchClient.tsx",
+    "l": 55,
+    "raw": "'clamp(22px, 5vw, 28px)'"
+   },
+   {
+    "f": "src/app/(main)/stock/short-selling/page.tsx",
+    "l": 160,
+    "raw": "'48px'",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/stock/signals/error.tsx",
+    "l": 5,
+    "raw": "'48px'",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/stock/signals/page.tsx",
+    "l": 144,
+    "raw": "'48px'",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/(main)/stock/themes/page.tsx",
+    "l": 66,
+    "raw": "'clamp(22px, 5vw, 28px)'"
+   },
+   {
+    "f": "src/app/payment/fail/page.tsx",
+    "l": 9,
+    "raw": "64",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/payment/PaymentClient.tsx",
+    "l": 140,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/app/payment/success/page.tsx",
+    "l": 9,
+    "raw": "64",
+    "note": "over-ladder"
+   }
+  ],
+  "ls-positive-zeroed": [
+   {
+    "f": "src/app/(main)/daily/[region]/DailyReportClient.tsx",
+    "l": 1188,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/(main)/blog/[slug]/page.tsx",
+    "l": 943,
+    "raw": "'0.3px'"
+   },
+   {
+    "f": "src/app/(main)/blog/[slug]/page.tsx",
+    "l": 1006,
+    "raw": "'0.3px'"
+   },
+   {
+    "f": "src/components/apt/AptBlogStack.tsx",
+    "l": 48,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/AptCompareTable.tsx",
+    "l": 112,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/AptFeedCard.tsx",
+    "l": 71,
+    "raw": "'0.3px'"
+   },
+   {
+    "f": "src/components/apt/AptHeroCard.tsx",
+    "l": 51,
+    "raw": "'0.3px'"
+   },
+   {
+    "f": "src/components/apt/AptHeroLarge.tsx",
+    "l": 163,
+    "raw": "1"
+   },
+   {
+    "f": "src/components/apt/AptInsightsUnified.tsx",
+    "l": 51,
+    "raw": "1"
+   },
+   {
+    "f": "src/components/apt/AptPriceTrendCard.tsx",
+    "l": 102,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/AptPriceTrendCard.tsx",
+    "l": 103,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/AptPriceTrendCard.tsx",
+    "l": 110,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/AptPriceTrendUnified.tsx",
+    "l": 102,
+    "raw": "1"
+   },
+   {
+    "f": "src/components/apt/AptQuickFilters.tsx",
+    "l": 94,
+    "raw": "1"
+   },
+   {
+    "f": "src/components/apt/AptQuickFilters.tsx",
+    "l": 109,
+    "raw": "1"
+   },
+   {
+    "f": "src/components/apt/AptQuickFilters.tsx",
+    "l": 125,
+    "raw": "1"
+   },
+   {
+    "f": "src/components/apt/AptSidebar.tsx",
+    "l": 56,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/CheongakMatchCard.tsx",
+    "l": 31,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/CheongakMatchCard.tsx",
+    "l": 78,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/CheongakMatchCard.tsx",
+    "l": 113,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/CheongakMatchCard.tsx",
+    "l": 118,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/CheongakMatchCard.tsx",
+    "l": 125,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/ComplexScale.tsx",
+    "l": 43,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/ComplexScale.tsx",
+    "l": 61,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/detail/AptKeyMetrics.tsx",
+    "l": 128,
+    "raw": "'.02em'"
+   },
+   {
+    "f": "src/components/apt/home/AptHomeHero.tsx",
+    "l": 65,
+    "raw": "0.3"
+   },
+   {
+    "f": "src/components/apt/LifecycleTimeline.tsx",
+    "l": 111,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/LifecycleTimeline.tsx",
+    "l": 112,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/SiteDetailRail.tsx",
+    "l": 60,
+    "raw": "'.08em'"
+   },
+   {
+    "f": "src/components/apt/SiteThumb.tsx",
+    "l": 188,
+    "raw": "1.2"
+   },
+   {
+    "f": "src/components/home/RecentlyViewed.tsx",
+    "l": 32,
+    "raw": "0.3"
+   },
+   {
+    "f": "src/components/NoticeBanner.tsx",
+    "l": 204,
+    "raw": "'0.03em'"
+   },
+   {
+    "f": "src/components/ui/AIRelatedPanel.tsx",
+    "l": 43,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/(main)/apt/[id]/page.tsx",
+    "l": 2521,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/app/(main)/apt/page.tsx",
+    "l": 538,
+    "raw": "'.02em'"
+   },
+   {
+    "f": "src/app/(main)/profile/cheongak/CheongakForm.tsx",
+    "l": 92,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/(main)/profile/[id]/InviteSection.tsx",
+    "l": 47,
+    "raw": "4"
+   },
+   {
+    "f": "src/app/admin/apt-stage/StageInputClient.tsx",
+    "l": 76,
+    "raw": "'.02em'"
+   },
+   {
+    "f": "src/app/admin/signup-flow/SignupFlowClient.tsx",
+    "l": 447,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/signup-flow/SignupFlowClient.tsx",
+    "l": 465,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/SignupFunnelWidget.tsx",
+    "l": 177,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/SignupFunnelWidget.tsx",
+    "l": 184,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/SignupFunnelWidget.tsx",
+    "l": 191,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/SignupFunnelWidget.tsx",
+    "l": 215,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/WatchlistWidget.tsx",
+    "l": 278,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/WatchlistWidget.tsx",
+    "l": 287,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/WatchlistWidget.tsx",
+    "l": 302,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/WatchlistWidget.tsx",
+    "l": 329,
+    "raw": "1"
+   },
+   {
+    "f": "src/app/admin/v4/sections/WatchlistWidget.tsx",
+    "l": 413,
+    "raw": "1"
+   }
+  ],
+  "ls-unknown-size": [
+   {
+    "f": "src/app/(main)/stock/[symbol]/page.tsx",
+    "l": 291,
+    "raw": "\"-.0125em\""
+   },
+   {
+    "f": "src/components/apt/SiteHero.tsx",
+    "l": 196,
+    "raw": "'-.05em'"
+   },
+   {
+    "f": "src/components/blog/BlogMentionCard.tsx",
+    "l": 466,
+    "raw": "'-1px'"
+   }
+  ],
+  "lh-unit": [
+   {
+    "f": "src/app/(main)/apt/map/MapClient.tsx",
+    "l": 194,
+    "raw": "'44px'"
+   },
+   {
+    "f": "src/app/(main)/apt/map/MapClient.tsx",
+    "l": 198,
+    "raw": "'54px'"
+   },
+   {
+    "f": "src/components/AdBanner.tsx",
+    "l": 89,
+    "raw": "'15px'"
+   },
+   {
+    "f": "src/components/apt/SiteFloatingActions.tsx",
+    "l": 212,
+    "raw": "'18px'"
+   },
+   {
+    "f": "src/components/blog/BlogHeroExtras.tsx",
+    "l": 39,
+    "raw": "'24px'"
+   }
+  ],
+  "css": [
+   {
+    "f": "src/app/globals.css",
+    "l": 852,
+    "raw": "-0.5px",
+    "note": "ls-unknown-size"
+   },
+   {
+    "f": "src/app/globals.css",
+    "l": 1640,
+    "raw": "28px",
+    "note": "display"
+   },
+   {
+    "f": "src/app/styles/components.css",
+    "l": 550,
+    "raw": ".08em",
+    "note": "ls-positive-zeroed"
+   },
+   {
+    "f": "src/app/styles/screens.css",
+    "l": 288,
+    "raw": "-0.4px",
+    "note": "ls-unknown-size"
+   },
+   {
+    "f": "src/app/styles/screens.css",
+    "l": 625,
+    "raw": "-0.4px",
+    "note": "ls-unknown-size"
+   }
+  ]
+ },
+ "_doc": "TY3 대장 — codemod 가 치환하지 않고 남긴 좌표(display·자간 0 스냅·단위 행간·크기 불명 자간). 게이트는 display 좌표를 예외로 본다. 파일 단위로 재생성된다."
+}

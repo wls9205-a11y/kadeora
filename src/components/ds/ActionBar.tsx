@@ -40,8 +40,8 @@ export const ACTION_SLOT: CSSProperties = {
   // 문구가 길어지면(큰 글씨 접근성 모드) 줄바꿈으로 흘러내리게 둔다.
   // nowrap 으로 자르면 「분양 정보 안내 신...」 이 된다.
   fontSize: 'var(--fs-sm)',
-  fontWeight: 600,
-  lineHeight: 1.15,
+  fontWeight: 'var(--fw-title)',
+  lineHeight: 1,
 };
 
 export interface ActionBarProps {

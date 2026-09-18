@@ -12,10 +12,10 @@ interface SectionsPayload {
 function SectionHeader({ title, href }: { title: string; href: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px', marginBottom: 8 }}>
-      <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{title}</span>
+      <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{title}</span>
       <Link
         href={href}
-        style={{ fontSize: 11, color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}
+        style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 'var(--fw-title)' }}
       >
         전체 보기 →
       </Link>

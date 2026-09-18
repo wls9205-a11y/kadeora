@@ -63,7 +63,7 @@ export default function AptHubRail({
                 background: r.region === region ? 'var(--brand)' : 'var(--bg-sunken)',
                 color: r.region === region ? 'var(--text-inverse)' : 'var(--text-secondary)',
                 fontSize: 'var(--fs-xs)',
-                fontWeight: r.region === region ? 600 : 500,
+                fontWeight: r.region === region ? 'var(--fw-title)' : 'var(--fw-body)',
                 textDecoration: 'none',
               }}
             >

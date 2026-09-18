@@ -35,9 +35,9 @@ export default function HeroCard({ tag, title, meta, stats, href }: Props) {
         gap: 'var(--kd-gap-sm)',
       }}
     >
-      <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--kd-accent)', letterSpacing: 1, textTransform: 'uppercase' }}>{tag}</span>
-      <h2 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: 'var(--kd-text-1)', letterSpacing: -0.5, lineHeight: 1.2, wordBreak: 'keep-all' }}>{title}</h2>
-      {meta && <div style={{ fontSize: 12, color: 'var(--kd-text-2)', fontWeight: 600, lineHeight: 1.5 }}>{meta}</div>}
+      <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-num)', color: 'var(--kd-accent)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>{tag}</span>
+      <h2 style={{ margin: 0, fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-num)', color: 'var(--kd-text-1)', letterSpacing: '-0.4px', lineHeight: 1.3, wordBreak: 'keep-all' }}>{title}</h2>
+      {meta && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--kd-text-2)', fontWeight: 'var(--fw-title)', lineHeight: 1.5 }}>{meta}</div>}
       {Array.isArray(stats) && stats.length > 0 && (
         <div
           style={{
@@ -51,8 +51,8 @@ export default function HeroCard({ tag, title, meta, stats, href }: Props) {
         >
           {stats.map((s, i) => (
             <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
-              <span style={{ fontSize: 18, fontWeight: 900, color: toneColor(s.tone), letterSpacing: -0.5, lineHeight: 1.1 }}>{s.value}</span>
-              <span style={{ fontSize: 10, color: 'var(--kd-text-3)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.label}</span>
+              <span style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', color: toneColor(s.tone), letterSpacing: '-0.2px', lineHeight: 1 }}>{s.value}</span>
+              <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--kd-text-3)', fontWeight: 'var(--fw-title)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.label}</span>
             </div>
           ))}
         </div>

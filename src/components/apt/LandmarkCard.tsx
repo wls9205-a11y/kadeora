@@ -51,8 +51,8 @@ export default function LandmarkCard({ row }: { row: LandmarkRow }) {
       >
         <span
           style={{
-            position: 'absolute', top: 5, left: 5, fontSize: 9, padding: '2px 6px',
-            borderRadius: 4, fontWeight: 500,
+            position: 'absolute', top: 5, left: 5, fontSize: 'var(--fs-2xs)', padding: '2px 6px',
+            borderRadius: 4, fontWeight: 'var(--fw-body)',
             // ⚠️ #FAC775 는 제 18% 틴트 위에서 대비 1.44 였다(썸네일 사진 위 배지라
             //    밝은 사진에서 최악). TY1-3 의 InterestRegisterHero 와 같은 건이다 —
             //    기존 토큰 --kd-accent(#7A4F0A)로 6.58. 새 토큰은 만들지 않았다.
@@ -64,8 +64,8 @@ export default function LandmarkCard({ row }: { row: LandmarkRow }) {
         {row.avg_price_100m && (
           <span
             style={{
-              position: 'absolute', bottom: 5, right: 5, fontSize: 10, padding: '2px 6px',
-              borderRadius: 4, fontWeight: 500,
+              position: 'absolute', bottom: 5, right: 5, fontSize: 'var(--fs-2xs)', padding: '2px 6px',
+              borderRadius: 4, fontWeight: 'var(--fw-body)',
               background: 'rgba(0,0,0,0.55)', color: '#fff',
             }}
           >
@@ -74,20 +74,20 @@ export default function LandmarkCard({ row }: { row: LandmarkRow }) {
         )}
       </div>
       <div style={{ padding: '7px 9px 9px' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {row.name}
         </div>
-        <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 2 }}>
+        <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-secondary)', marginTop: 2 }}>
           {subtitle}{row.built_year ? ` · ${row.built_year}년` : ''}
           {row.total_units ? ` · ${row.total_units.toLocaleString()}세대` : ''}
         </div>
         {row.description && (
           <div
             style={{
-              fontSize: 10,
+              fontSize: 'var(--fs-2xs)',
               color: 'var(--text-tertiary)',
               marginTop: 4,
-              lineHeight: 1.4,
+              lineHeight: 1.3,
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
@@ -103,12 +103,12 @@ export default function LandmarkCard({ row }: { row: LandmarkRow }) {
               <span
                 key={t}
                 style={{
-                  fontSize: 9,
+                  fontSize: 'var(--fs-2xs)',
                   padding: '1px 6px',
                   borderRadius: 999,
                   background: 'rgba(250,199,117,0.10)',
                   color: 'var(--kd-accent)',   // 위와 같은 건 — 10% 틴트 위 1.49 → 6.14
-                  fontWeight: 600,
+                  fontWeight: 'var(--fw-title)',
                 }}
               >
                 #{t}

@@ -195,26 +195,26 @@ export default async function ThemePage({ params, searchParams }: Props) {
       <JsonLd data={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '부동산', item: `${SITE_URL}/apt` }, { '@type': 'ListItem', position: 3, name: t.title }] }} />
       <JsonLd data={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }} />
 
-      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
         <Link href="/apt" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>부동산</Link><span>›</span>
-        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{t.title}</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{t.title}</span>
       </nav>
 
-      <h1 style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+      <h1 style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 8px' }}>
         {regionLabel}{t.title}
-        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-tertiary)', marginLeft: 8 }}>TOP {items.length}</span>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', marginLeft: 8 }}>TOP {items.length}</span>
       </h1>
 
       {/* 지역 필터 */}
       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 16 }}>
-        <Link href={`/apt/theme/${theme}`} style={{ padding: '4px 10px', borderRadius: 16, fontSize: 11, textDecoration: 'none', fontWeight: 600, background: !selectedRegion ? 'var(--accent-blue)' : 'var(--bg-surface)', color: !selectedRegion ? '#fff' : 'var(--text-secondary)', border: '1px solid var(--border)' }}>전국</Link>
+        <Link href={`/apt/theme/${theme}`} style={{ padding: '4px 10px', borderRadius: 16, fontSize: 'var(--fs-xs)', textDecoration: 'none', fontWeight: 'var(--fw-title)', background: !selectedRegion ? 'var(--accent-blue)' : 'var(--bg-surface)', color: !selectedRegion ? '#fff' : 'var(--text-secondary)', border: '1px solid var(--border)' }}>전국</Link>
         {REGIONS.map(r => (
-          <Link key={r} href={`/apt/theme/${theme}?region=${encodeURIComponent(r)}`} style={{ padding: '4px 10px', borderRadius: 16, fontSize: 11, textDecoration: 'none', fontWeight: 600, background: selectedRegion === r ? 'var(--accent-blue)' : 'var(--bg-surface)', color: selectedRegion === r ? '#fff' : 'var(--text-secondary)', border: '1px solid var(--border)' }}>{r}</Link>
+          <Link key={r} href={`/apt/theme/${theme}?region=${encodeURIComponent(r)}`} style={{ padding: '4px 10px', borderRadius: 16, fontSize: 'var(--fs-xs)', textDecoration: 'none', fontWeight: 'var(--fw-title)', background: selectedRegion === r ? 'var(--accent-blue)' : 'var(--bg-surface)', color: selectedRegion === r ? '#fff' : 'var(--text-secondary)', border: '1px solid var(--border)' }}>{r}</Link>
         ))}
       </div>
 
       {/* 분석 */}
-      <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--text-secondary)', marginBottom: 16, padding: '12px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+      <p style={{ fontSize: 'var(--fs-xs)', lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: 16, padding: '12px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
         {t.desc} {regionLabel}기준 <strong>{items.length}개</strong> 단지가 해당되며, 평균 매매가는 <strong>{fmtAmount(avgPrice)}</strong>입니다.
         {regionDist.length > 0 && ` 지역별로는 ${regionDist.slice(0, 3).map(([r, c]) => `${r}(${c}개)`).join(', ')} 순입니다.`}
         {` 데이터 출처: 국토교통부 실거래가 공개시스템.`}
@@ -226,15 +226,15 @@ export default async function ThemePage({ params, searchParams }: Props) {
           {items.map((p: any, i: number) => (
             <Link key={i} href={`/apt/complex/${encodeURIComponent(p.apt_name)}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: i < 3 ? 'var(--accent-blue)' : 'var(--text-tertiary)', width: 24, flexShrink: 0 }}>{i + 1}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: i < 3 ? 'var(--accent-blue)' : 'var(--text-tertiary)', width: 24, flexShrink: 0 }}>{i + 1}</span>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.apt_name}</div>
-                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{p.region_nm} {p.sigungu || ''} {p.dong || ''} · {p.age_group || ''}</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.apt_name}</div>
+                  <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{p.region_nm} {p.sigungu || ''} {p.dong || ''} · {p.age_group || ''}</div>
                 </div>
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 8 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{p.latest_sale_price ? fmtAmount(p.latest_sale_price) : '-'}</div>
-                <div style={{ fontSize: 10, color: theme.includes('price-up') ? 'var(--accent-green)' : theme.includes('price-down') ? 'var(--accent-red)' : 'var(--text-tertiary)' }}>{t.formatSub(p)}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)' }}>{p.latest_sale_price ? fmtAmount(p.latest_sale_price) : '-'}</div>
+                <div style={{ fontSize: 'var(--fs-2xs)', color: theme.includes('price-up') ? 'var(--accent-green)' : theme.includes('price-down') ? 'var(--accent-red)' : 'var(--text-tertiary)' }}>{t.formatSub(p)}</div>
               </div>
             </Link>
           ))}
@@ -243,26 +243,26 @@ export default async function ThemePage({ params, searchParams }: Props) {
 
       {/* FAQ */}
       <section style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px' }}>자주 묻는 질문</h2>
+        <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', margin: '0 0 10px' }}>자주 묻는 질문</h2>
         {faq.map((f, i) => (
           <details key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '10px 14px', marginBottom: 6 }}>
-            <summary style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', cursor: 'pointer' }}>{f.q}</summary>
-            <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>{f.a}</p>
+            <summary style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)', cursor: 'pointer' }}>{f.q}</summary>
+            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 8 }}>{f.a}</p>
           </details>
         ))}
       </section>
 
       {/* 다른 테마 */}
       <section style={{ marginBottom: 40 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px' }}>다른 테마 분석</h2>
+        <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', margin: '0 0 10px' }}>다른 테마 분석</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
           {Object.entries(THEMES).filter(([k]) => k !== theme).map(([k, v]) => (
-            <Link key={k} href={`/apt/theme/${k}${selectedRegion ? `?region=${encodeURIComponent(selectedRegion)}` : ''}`} style={{ padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>{v.title}</Link>
+            <Link key={k} href={`/apt/theme/${k}${selectedRegion ? `?region=${encodeURIComponent(selectedRegion)}` : ''}`} style={{ padding: '10px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)' }}>{v.title}</Link>
           ))}
         </div>
       </section>
 
-      <footer style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center', paddingBottom: 40 }}>데이터 출처: 국토교통부 실거래가 공개시스템 · 카더라</footer>
+      <footer style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', textAlign: 'center', paddingBottom: 40 }}>데이터 출처: 국토교통부 실거래가 공개시스템 · 카더라</footer>
     </article>
   );
 }

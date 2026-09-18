@@ -12,14 +12,14 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
       <body style={{ margin:0, fontFamily:'sans-serif', background:'var(--bg-base)', color:'var(--text-primary)', display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', textAlign:'center' }}>
         <div style={{ padding:'40px 20px' }}>
           <div style={{ fontSize: 64, marginBottom:20 }}>💥</div>
-          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight:800, marginBottom:12 }}>서비스에 문제가 발생했습니다</h1>
+          <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight:'var(--fw-num)', marginBottom:12 }}>서비스에 문제가 발생했습니다</h1>
           <p style={{ color:'var(--text-secondary)', marginBottom:8 }}>잠시 후 다시 시도해주세요</p>
-          {error.digest && <p style={{ fontSize: 12, color:'var(--text-tertiary)', marginBottom:24 }}>오류 코드: {error.digest}</p>}
-          <button onClick={reset} style={{ background:'var(--brand)', color:'var(--text-inverse)', border:'none', borderRadius:20, padding:'12px 32px', cursor:'pointer', fontWeight:700, fontSize: 16, marginRight:12 }}>
+          {error.digest && <p style={{ fontSize: 'var(--fs-xs)', color:'var(--text-tertiary)', marginBottom:24 }}>오류 코드: {error.digest}</p>}
+          <button onClick={reset} style={{ background:'var(--brand)', color:'var(--text-inverse)', border:'none', borderRadius:20, padding:'12px 32px', cursor:'pointer', fontWeight:'var(--fw-num)', fontSize: 'var(--fs-sm)', marginRight:12 }}>
             다시 시도
           </button>
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- global error boundary, router may be unavailable */}
-          <a href="/" style={{ color:'var(--brand)', textDecoration:'none', fontSize: 15 }}>홈으로</a>
+          <a href="/" style={{ color:'var(--brand)', textDecoration:'none', fontSize: 'var(--fs-sm)' }}>홈으로</a>
         </div>
       </body>
     </html>

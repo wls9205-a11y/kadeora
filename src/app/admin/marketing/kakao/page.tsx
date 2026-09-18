@@ -34,12 +34,12 @@ export default function KakaoMarketingPage() {
       >
         <Link
           href="/admin"
-          style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}
+          style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textDecoration: 'none' }}
         >
           ← 어드민
         </Link>
-        <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>📨 카카오 마케팅 허브</h1>
-        <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+        <h1 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', margin: 0 }}>📨 카카오 마케팅 허브</h1>
+        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
           세그먼트 빌더 · 발송 · 동의 만료 알림
         </span>
       </header>

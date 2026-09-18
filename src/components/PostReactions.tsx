@@ -88,8 +88,8 @@ export default function PostReactions({ postId, userId, initialLikes, compact }:
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, position: 'relative' }}>
         <button onClick={e => { e.preventDefault(); e.stopPropagation(); setShowPicker(!showPicker); }}
-          style={{ display: 'flex', alignItems: 'center', gap: 2, background: myReaction ? 'rgba(59,123,246,0.08)' : 'none', border: myReaction ? '1px solid rgba(59,123,246,0.2)' : '1px solid transparent', borderRadius: 99, padding: '3px 8px', cursor: 'pointer', fontSize: 11, color: myReaction ? REACTION_COLORS[myReaction] : 'var(--text-tertiary)' }}>
-          <span style={{ fontSize: 13 }}>{myReaction ? REACTIONS.find(r => r.key === myReaction)?.emoji : '👍'}</span>
+          style={{ display: 'flex', alignItems: 'center', gap: 2, background: myReaction ? 'rgba(59,123,246,0.08)' : 'none', border: myReaction ? '1px solid rgba(59,123,246,0.2)' : '1px solid transparent', borderRadius: 99, padding: '3px 8px', cursor: 'pointer', fontSize: 'var(--fs-xs)', color: myReaction ? REACTION_COLORS[myReaction] : 'var(--text-tertiary)' }}>
+          <span style={{ fontSize: 'var(--fs-xs)' }}>{myReaction ? REACTIONS.find(r => r.key === myReaction)?.emoji : '👍'}</span>
           {total > 0 && <span>{total}</span>}
         </button>
 
@@ -108,9 +108,9 @@ export default function PostReactions({ postId, userId, initialLikes, compact }:
             {REACTIONS.map(r => (
               <button key={r.key} onClick={e => { e.preventDefault(); e.stopPropagation(); handleReact(r.key); }}
                 title={r.label}
-                style={{ fontSize: 16, background: myReaction === r.key ? 'rgba(59,123,246,0.12)' : 'transparent', border: 'none', borderRadius: 'var(--radius-xs)', padding: '4px 6px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                style={{ fontSize: 'var(--fs-sm)', background: myReaction === r.key ? 'rgba(59,123,246,0.12)' : 'transparent', border: 'none', borderRadius: 'var(--radius-xs)', padding: '4px 6px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                 <span>{r.emoji}</span>
-                {(counts[r.key] || 0) > 0 && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{counts[r.key]}</span>}
+                {(counts[r.key] || 0) > 0 && <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{counts[r.key]}</span>}
               </button>
             ))}
           </div>

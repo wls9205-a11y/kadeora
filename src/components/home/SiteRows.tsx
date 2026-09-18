@@ -49,7 +49,7 @@ export default function SiteRows({ items }: { items: HomeRow[] }) {
                 <span
                   style={{
                     width: 16, flexShrink: 0, textAlign: 'center',
-                    fontSize: 12, fontWeight: 600, color: 'var(--text-tertiary)',
+                    fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)',
                   }}
                 >
                   {r.rank}
@@ -60,7 +60,7 @@ export default function SiteRows({ items }: { items: HomeRow[] }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span
                     style={{
-                      fontSize: 14, fontWeight: 600, lineHeight: 1.3,
+                      fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', lineHeight: 1.3,
                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       color: 'var(--text-primary)',
                     }}
@@ -70,7 +70,7 @@ export default function SiteRows({ items }: { items: HomeRow[] }) {
                   {stage && (
                     <span
                       style={{
-                        flexShrink: 0, fontSize: 10, fontWeight: 500,
+                        flexShrink: 0, fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)',
                         padding: '1px 6px', borderRadius: 'var(--radius-pill)',
                         background: 'var(--bg-hover)', color: 'var(--text-secondary)',
                         whiteSpace: 'nowrap',
@@ -80,7 +80,7 @@ export default function SiteRows({ items }: { items: HomeRow[] }) {
                     </span>
                   )}
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
                   {metaText(r)}
                 </div>
               </div>
@@ -89,7 +89,7 @@ export default function SiteRows({ items }: { items: HomeRow[] }) {
               {r.price && (
                 <span
                   style={{
-                    flexShrink: 0, fontSize: 12, fontWeight: 500,
+                    flexShrink: 0, fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
                     color: 'var(--text-secondary)', whiteSpace: 'nowrap',
                   }}
                 >
@@ -119,7 +119,7 @@ export function MoreLink({ href, label }: { href: string; label: string }) {
       href={href}
       style={{
         display: 'block', padding: '10px 3px 2px',
-        fontSize: 12, fontWeight: 500, color: 'var(--brand-dark)',
+        fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--brand-dark)',
         textDecoration: 'none',
       }}
     >

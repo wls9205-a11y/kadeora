@@ -26,7 +26,7 @@ export default function EmptyState({ icon = '📭', title, description, cta }: P
       <div style={{ fontSize: 'var(--fs-2xl)', color: 'var(--text-tertiary)', marginBottom: 8, lineHeight: 1 }}>
         {icon}
       </div>
-      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>
+      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>
         {title}
       </div>
       {description ? (
@@ -41,7 +41,7 @@ export default function EmptyState({ icon = '📭', title, description, cta }: P
             display: 'inline-block',
             marginTop: 10,
             fontSize: 'var(--fs-xs)',
-            fontWeight: 600,
+            fontWeight: 'var(--fw-title)',
             color: 'var(--brand)',
             textDecoration: 'none',
           }}

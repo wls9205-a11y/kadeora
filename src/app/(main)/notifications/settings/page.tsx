@@ -117,7 +117,7 @@ export default function NotificationSettingsPage() {
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-2xl)' }}>
         <Link href="/notifications" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', fontSize: 'var(--fs-base)' }}>← 알림</Link>
-        <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>알림 설정</h1>
+        <h1 style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: 0 }}>알림 설정</h1>
       </div>
 
       {pushState === 'loading' && (
@@ -129,7 +129,7 @@ export default function NotificationSettingsPage() {
       {pushState === 'on' && (
         <div style={boxStyle}>
           <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>🔔</div>
-          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--accent-green)', marginBottom: 6 }}>알림 활성화됨</div>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--accent-green)', marginBottom: 6 }}>알림 활성화됨</div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6, marginBottom: 'var(--sp-xl)' }}>
             댓글 · 좋아요 · 팔로우 · 청약 마감 · HOT 게시글<br />
             주식 급등/급락 · 출석 리마인더 · 이벤트 소식<br />
@@ -141,14 +141,14 @@ export default function NotificationSettingsPage() {
             style={{
               padding: '12px 24px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)',
               background: 'var(--bg-hover)', color: 'var(--text-secondary)',
-              fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
+              fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', cursor: 'pointer',
               opacity: loading ? 0.6 : 1,
             }}
           >
             {loading ? '처리 중...' : '알림 끄기'}
           </button>
           <div style={{ marginTop: 'var(--sp-lg)', padding: 12, background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)' }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>활성화된 알림</div>
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>활성화된 알림</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {[
                 { label: '💬 댓글' },
@@ -165,14 +165,14 @@ export default function NotificationSettingsPage() {
                 { label: '📅 출석' },
                 { label: '📧 이메일' },
               ].map(n => (
-                <span key={n.label} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600 }}>
+                <span key={n.label} style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 'var(--fw-title)' }}>
                   {n.label}
                 </span>
               ))}
             </div>
             <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>수신 채널</div>
-              <div style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
+              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 6 }}>수신 채널</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
                 웹 푸시 (3건/일, 무료) · 이메일 (주간 리포트) · 카카오 알림톡 (긴급만)
               </div>
             </div>
@@ -183,7 +183,7 @@ export default function NotificationSettingsPage() {
       {pushState === 'off' && (
         <div style={boxStyle}>
           <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>🔕</div>
-          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>알림이 꺼져 있어요</div>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 6 }}>알림이 꺼져 있어요</div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6, marginBottom: 'var(--sp-xl)' }}>
             청약 마감, 종목 알림, 댓글 알림 등을<br />
             실시간으로 받아보세요.
@@ -194,7 +194,7 @@ export default function NotificationSettingsPage() {
             style={{
               padding: '14px 32px', borderRadius: 'var(--radius-card)', border: 'none',
               background: 'var(--brand)', color: 'white',
-              fontSize: 'var(--fs-base)', fontWeight: 500, cursor: 'pointer',
+              fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-body)', cursor: 'pointer',
               width: '100%', opacity: loading ? 0.6 : 1,
             }}
           >
@@ -206,7 +206,7 @@ export default function NotificationSettingsPage() {
       {pushState === 'denied' && (
         <div style={boxStyle}>
           <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>🚫</div>
-          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--accent-red)', marginBottom: 6 }}>알림이 차단됨</div>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--accent-red)', marginBottom: 6 }}>알림이 차단됨</div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
             기기 설정에서 카더라 알림을 허용해주세요.<br /><br />
             <strong>iPhone:</strong> 설정 → 카더라 → 알림 → 허용<br />
@@ -218,7 +218,7 @@ export default function NotificationSettingsPage() {
       {pushState === 'not-pwa' && (
         <div style={boxStyle}>
           <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>📱</div>
-          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>앱 설치가 필요해요</div>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 6 }}>앱 설치가 필요해요</div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6, marginBottom: 'var(--sp-md)' }}>
             푸시 알림은 홈 화면에 추가한 앱에서만 사용 가능합니다.<br /><br />
             Safari 하단 <strong>공유 버튼(↑)</strong> → <strong>&quot;홈 화면에 추가&quot;</strong>를 눌러주세요.
@@ -232,7 +232,7 @@ export default function NotificationSettingsPage() {
       {pushState === 'unsupported' && (
         <div style={boxStyle}>
           <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>⚠️</div>
-          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>지원하지 않는 브라우저</div>
+          <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 6 }}>지원하지 않는 브라우저</div>
           <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
             이 브라우저에서는 푸시 알림을 지원하지 않습니다.<br />
             Chrome, Edge 또는 iPhone 홈 화면 앱을 이용해주세요.

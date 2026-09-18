@@ -34,7 +34,7 @@ export default function FeedbackButton() {
       <button onClick={() => setOpen(true)} style={{
         width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)',
         background: 'var(--bg-surface)', color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)',
-        fontWeight: 600, cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)',
+        fontWeight: 'var(--fw-title)', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)',
       }}>
         💬 건의 · 피드백 보내기
       </button>
@@ -59,7 +59,7 @@ export default function FeedbackButton() {
             width: '100%', padding: '13px', borderRadius: 'var(--radius-md)', border: 'none',
             background: message.trim() ? 'var(--brand)' : 'var(--bg-hover)',
             color: message.trim() ? '#fff' : 'var(--text-tertiary)',
-            fontSize: 'var(--fs-base)', fontWeight: 500,
+            fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-body)',
             cursor: message.trim() ? 'pointer' : 'not-allowed',
             opacity: submitting ? 0.5 : 1,
           }}>{submitting ? '전송 중...' : '보내기'}</button>

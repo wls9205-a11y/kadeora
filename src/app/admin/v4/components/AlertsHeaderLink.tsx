@@ -33,7 +33,7 @@ export default function AlertsHeaderLink() {
     <a
       href="/admin/alerts"
       style={{
-        fontSize: 11, fontWeight: 500,
+        fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
         padding: '6px 12px', borderRadius: 6,
         background: hot ? 'var(--accent-red-bg)' : 'transparent',
         color: hot ? 'var(--accent-red)' : 'var(--text-secondary)',

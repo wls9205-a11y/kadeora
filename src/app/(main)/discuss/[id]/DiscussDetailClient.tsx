@@ -135,7 +135,7 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
               textAlign: 'left', position: 'relative', overflow: 'hidden',
             }}>
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 'var(--fs-base)', fontWeight: myVote === opt.key ? 600 : 500, color: 'var(--text-primary)' }}>
+              <span style={{ fontSize: 'var(--fs-base)', fontWeight: myVote === opt.key ? 'var(--fw-title)' : 'var(--fw-body)', color: 'var(--text-primary)' }}>
                 {myVote === opt.key && '✓ '}{opt.label}
               </span>
             </div>
@@ -148,7 +148,7 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
 
       {/* Comments */}
       <section style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: 20, marginTop: 'var(--sp-lg)' }}>
-        <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 16px' }}>의견 {comments.length}개</h2>
+        <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 16px' }}>의견 {comments.length}개</h2>
 
         {/* ⛔ 의견 입력을 닫았다 — /discuss 는 읽기 전용 아카이브다(Node 판정 2026-08-31).
              실측: discussion_comments «역사상 0건». 남길 사람이 없던 자리다.
@@ -173,7 +173,7 @@ export default function DiscussDetailClient({ initialTopic, initialComments }: P
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 2 }}>
-                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{nick}</span>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{nick}</span>
                     <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
                   </div>
                   <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{c.content}</div>

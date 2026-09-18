@@ -26,7 +26,7 @@ export default function BlogBookmarkButton({ blogPostId }: { blogPostId: number 
         display: 'inline-flex', alignItems: 'center', gap: 6,
         padding: '6px 12px', borderRadius: 'var(--radius-md)',
         border: '1px solid var(--border)', background: 'var(--bg-surface)',
-        color: 'var(--text-secondary)', fontSize: 12, fontWeight: 600,
+        color: 'var(--text-secondary)', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
         textDecoration: 'none',
       }}>
         📌 저장
@@ -57,7 +57,7 @@ export default function BlogBookmarkButton({ blogPostId }: { blogPostId: number 
       border: saved ? '1px solid var(--brand)' : '1px solid var(--border)',
       background: saved ? 'rgba(59,123,246,0.08)' : 'var(--bg-surface)',
       color: saved ? 'var(--brand)' : 'var(--text-secondary)',
-      fontSize: 12, fontWeight: 600,
+      fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
       cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1,
     }}>
       {saved ? '📌 저장됨' : '📌 저장'}

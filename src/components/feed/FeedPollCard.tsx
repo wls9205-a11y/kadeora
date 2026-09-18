@@ -85,25 +85,25 @@ export default function FeedPollCard({ post }: { post: PostWithProfile }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-sm)' }}>
         <Link href={`/profile/${post.author_id}`} style={{
           width: 30, height: 30, borderRadius: '50%', background: 'rgba(34,197,94,0.15)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)',
           textDecoration: 'none',
         }}>{GRADE_EMOJI[grade] ?? '🌱'}</Link>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>{nickname}</span>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{nickname}</span>
             <span style={{
-              padding: '1px 5px', borderRadius: 4, fontSize: 9, fontWeight: 500,
+              padding: '1px 5px', borderRadius: 4, fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)',
               background: 'rgba(34,197,94,0.1)', color: 'var(--accent-green)',
             }}>📊 투표</span>
           </div>
-          <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
+          <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
         </div>
-        <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>👀{post.view_count}</span>
+        <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>👀{post.view_count}</span>
       </div>
 
       {/* Question */}
       <Link href={`/feed/${post.slug || post.id}`} style={{ textDecoration: 'none' }}>
-        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)', lineHeight: 1.35 }}>
+        <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)', lineHeight: 1.3 }}>
           {post.title}
         </div>
       </Link>
@@ -128,16 +128,16 @@ export default function FeedPollCard({ post }: { post: PostWithProfile }) {
                 transition: 'width 0.5s', borderRadius: 'var(--radius-sm)',
               }} />}
               <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 12, fontWeight: sel ? 600 : 400, color: sel ? 'var(--accent-green)' : 'var(--text-primary)' }}>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: sel ? 'var(--fw-title)' : 'var(--fw-quiet)', color: sel ? 'var(--accent-green)' : 'var(--text-primary)' }}>
                   {sel && '✓ '}{opt.label}
                 </span>
-                {show && <span style={{ fontSize: 11, fontWeight: 700, color: sel ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>{pct}%</span>}
+                {show && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: sel ? 'var(--accent-green)' : 'var(--text-tertiary)' }}>{pct}%</span>}
               </div>
             </button>
           );
         })}
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 10, color: 'var(--text-tertiary)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>
         <span>{total.toLocaleString()}명 참여</span>
         <span>참여 시 +5P</span>
       </div>

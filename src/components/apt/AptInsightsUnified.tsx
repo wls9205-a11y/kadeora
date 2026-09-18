@@ -20,7 +20,7 @@ export default function AptInsightsUnified({ region, aiPost, blogList }: Props) 
       aria-label={`${region} AI 분석 + 블로그`}
       style={{ maxWidth: 720, margin: '12px auto', padding: '0 var(--sp-lg)' }}
     >
-      <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+      <h2 style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 8px' }}>
         🤖 {region} AI 분석 & 블로그
       </h2>
 
@@ -48,18 +48,18 @@ export default function AptInsightsUnified({ region, aiPost, blogList }: Props) 
               <div style={{ width: 88, height: 88, borderRadius: 10, flexShrink: 0, background: 'rgba(139,92,246,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>🤖</div>
             )}
             <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <span style={{ fontSize: 10, fontWeight: 500, color: '#7C3AED', letterSpacing: 1 }}>
+              <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: '#7C3AED', letterSpacing: 0 }}>
                 AI 분석 · {region}
               </span>
-              <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.35, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              <h3 style={{ margin: 0, fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {aiPost.title}
               </h3>
               {aiPost.excerpt && (
-                <p style={{ margin: 0, fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                <p style={{ margin: 0, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                   {aiPost.excerpt.slice(0, 140)}
                 </p>
               )}
-              <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 'auto' }}>
+              <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 'auto' }}>
                 {fmtDate(aiPost.published_at)}
               </span>
             </div>
@@ -91,16 +91,16 @@ export default function AptInsightsUnified({ region, aiPost, blogList }: Props) 
                   style={{ width: '100%', height: 100, objectFit: 'cover', display: 'block', background: 'var(--bg-hover)' }}
                   loading="lazy" decoding="async" />
               ) : (
-                <div style={{ height: 100, background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, color: 'var(--text-tertiary)' }}>📰</div>
+                <div style={{ height: 100, background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-lg)', color: 'var(--text-tertiary)' }}>📰</div>
               )}
               <div style={{ padding: 10, display: 'flex', flexDirection: 'column', gap: 3 }}>
                 <h4 style={{
-                  margin: 0, fontSize: 12, fontWeight: 600, color: 'var(--text-primary)',
-                  display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.35,
+                  margin: 0, fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)',
+                  display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.3,
                 }}>
                   {p.title}
                 </h4>
-                <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
+                <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>
                   {p.reading_minutes ? `${p.reading_minutes}분` : ''}
                   {p.view_count != null && p.view_count > 0 && ` · 조회 ${p.view_count.toLocaleString()}`}
                 </span>

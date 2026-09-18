@@ -102,7 +102,7 @@ export default function StickySignupBar() {
         animation: 'kdStickyBarSlide .3s ease-out',
       }}
     >
-      <span style={{ fontSize: 13, fontWeight: 600, color: '#fff', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: '#fff', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         🔔 청약·주식 알림 무료
       </span>
       <button
@@ -114,8 +114,8 @@ export default function StickySignupBar() {
           borderRadius: 999,
           background: '#FEE500',
           color: '#191919',
-          fontSize: 13,
-          fontWeight: 500,
+          fontSize: 'var(--fs-xs)',
+          fontWeight: 'var(--fw-body)',
           textDecoration: 'none',
           whiteSpace: 'nowrap',
           border: 'none',
@@ -133,7 +133,7 @@ export default function StickySignupBar() {
           background: 'transparent',
           border: 'none',
           color: 'rgba(255,255,255,0.5)',
-          fontSize: 18,
+          fontSize: 'var(--fs-base)',
           cursor: 'pointer',
           padding: 0,
           lineHeight: 1,

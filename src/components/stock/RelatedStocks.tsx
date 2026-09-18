@@ -42,7 +42,7 @@ export default async function RelatedStocks({ symbol, sector, market, marketCap 
 
   return (
     <section style={{ marginBottom: '16px' }}>
-      <h2 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '10px' }}>
+      <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', marginBottom: '10px' }}>
         🔗 유사 종목
       </h2>
       <div style={{
@@ -67,20 +67,20 @@ export default async function RelatedStocks({ symbol, sector, market, marketCap 
                 border: '1px solid var(--border)',
               }}
             >
-              <span style={{ fontSize: '13px', fontWeight: 600, marginBottom: '2px' }}>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', marginBottom: '2px' }}>
                 {s.name}
               </span>
-              <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                 {s.symbol}
               </span>
               <span style={{
-                fontSize: '13px',
-                fontWeight: 600,
+                fontSize: 'var(--fs-xs)',
+                fontWeight: 'var(--fw-title)',
                 marginTop: '4px',
                 color: pct >= 0 ? 'var(--accent-red)' : 'var(--brand)',
               }}>
                 {Number(s.price).toLocaleString()}
-                <span style={{ fontSize: '11px', marginLeft: '4px' }}>
+                <span style={{ fontSize: 'var(--fs-xs)', marginLeft: '4px' }}>
                   {pct >= 0 ? '+' : ''}{pct.toFixed(1)}%
                 </span>
               </span>

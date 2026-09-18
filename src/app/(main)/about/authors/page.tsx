@@ -83,15 +83,15 @@ export default function AuthorListPage() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 16px' }}>
       <JsonLd data={jsonLd} />
-      <nav aria-label="breadcrumb" style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 16 }}>
+      <nav aria-label="breadcrumb" style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 16 }}>
         <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>홈</Link>
         <span style={{ margin: '0 6px', opacity: 0.5 }}>/</span>
         <Link href="/about" style={{ color: 'inherit', textDecoration: 'none' }}>소개</Link>
         <span style={{ margin: '0 6px', opacity: 0.5 }}>/</span>
         <span>편집부</span>
       </nav>
-      <h1 style={{ fontSize: 24, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>카더라 편집부</h1>
-      <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.7 }}>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 6 }}>카더라 편집부</h1>
+      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.6 }}>
         카더라 블로그는 분야별 편집팀이 공공데이터·공시·시장 자료를 기반으로 작성합니다.
         모든 분석 수치는 출처와 수집일을 명시하며, 투자자문이 아닌 정보 제공 목적입니다.
       </p>
@@ -106,18 +106,18 @@ export default function AuthorListPage() {
               border: '1px solid var(--border)',
             }}
           >
-            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>{t.name}</div>
-            <div style={{ fontSize: 12, color: 'var(--brand)', margin: '4px 0 8px', fontWeight: 600 }}>{t.focus}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{t.name}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', margin: '4px 0 8px', fontWeight: 'var(--fw-title)' }}>{t.focus}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               <strong style={{ color: 'var(--text-tertiary)' }}>데이터 출처:</strong> {t.sources}
             </div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, marginTop: 3 }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6, marginTop: 3 }}>
               <strong style={{ color: 'var(--text-tertiary)' }}>담당 범위:</strong> {t.scope}
             </div>
           </li>
         ))}
       </ul>
-      <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 24, lineHeight: 1.6 }}>
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 24, lineHeight: 1.6 }}>
         AI 자동 생성 글은 author_role에 &quot;(AI 자동 생성)&quot;로 명시됩니다. 데이터 기반 팩트체크 후 게시됩니다.
       </p>
     </div>

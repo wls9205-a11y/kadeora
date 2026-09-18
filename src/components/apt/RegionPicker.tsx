@@ -158,14 +158,14 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '14px 16px', borderBottom: '1px solid var(--border)',
         }}>
-          <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>지역 선택</span>
+          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>지역 선택</span>
           <button
             onClick={onClose}
             aria-label="닫기"
             style={{
               width: 32, height: 32, borderRadius: 8,
               border: '1px solid var(--border)', background: 'transparent',
-              fontSize: 14, color: 'var(--text-secondary)', cursor: 'pointer',
+              fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', cursor: 'pointer',
             }}
           >×</button>
         </div>
@@ -179,7 +179,7 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
             onChange={(e) => setSearch(e.target.value)}
             style={{
               width: '100%', padding: '10px 12px',
-              fontSize: 13, color: 'var(--text-primary)',
+              fontSize: 'max(16px, var(--fs-xs))', color: 'var(--text-primary)',
               background: 'var(--bg-hover)',
               border: '1px solid var(--border)', borderRadius: 10,
               outline: 'none',
@@ -207,12 +207,12 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
         {/* 본문 — 검색 모드 vs 시도/시군구 모드 */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '4px 16px 16px' }}>
           {loading && (
-            <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 12 }}>
+            <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>
               불러오는 중...
             </div>
           )}
           {error && (
-            <div style={{ padding: 12, background: 'var(--bg-hover)', borderRadius: 8, fontSize: 12, color: 'var(--text-tertiary)' }}>
+            <div style={{ padding: 12, background: 'var(--bg-hover)', borderRadius: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
               지역 데이터 로드 실패. 시도만 직접 선택 가능합니다.
             </div>
           )}
@@ -221,7 +221,7 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
           {!loading && search.trim() && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               {searchHits.length === 0 ? (
-                <div style={{ padding: 12, color: 'var(--text-tertiary)', fontSize: 12 }}>일치 없음</div>
+                <div style={{ padding: 12, color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>일치 없음</div>
               ) : searchHits.map((r) => (
                 <button
                   key={`${r.region}-${r.sigungu}`}
@@ -229,7 +229,7 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
                   style={rowBtnStyle()}
                 >
                   <span>{r.region} · {r.sigungu}</span>
-                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{(r.site_count ?? 0).toLocaleString()}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{(r.site_count ?? 0).toLocaleString()}</span>
                 </button>
               ))}
             </div>
@@ -246,8 +246,8 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
                     onClick={() => setActiveRegion(sido)}
                     style={tileStyle()}
                   >
-                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{sido}</span>
-                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{cnt.toLocaleString()}</span>
+                    <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{sido}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{cnt.toLocaleString()}</span>
                   </button>
                 );
               })}
@@ -260,7 +260,7 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '4px 0 8px' }}>
                 <button
                   onClick={() => setActiveRegion(null)}
-                  style={{ background: 'transparent', border: 'none', fontSize: 12, color: 'var(--text-tertiary)', cursor: 'pointer' }}
+                  style={{ background: 'transparent', border: 'none', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', cursor: 'pointer' }}
                 >‹ 시도 다시 선택</button>
                 <button
                   onClick={() => choose(activeRegion, null)}
@@ -269,7 +269,7 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
                 {sigunguList.length === 0 ? (
-                  <div style={{ gridColumn: '1 / -1', padding: 12, color: 'var(--text-tertiary)', fontSize: 12 }}>
+                  <div style={{ gridColumn: '1 / -1', padding: 12, color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>
                     시군구 데이터 없음 — {activeRegion} 전체 보기로 진입하세요.
                   </div>
                 ) : sigunguList.map((r) => (
@@ -279,7 +279,7 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
                     style={rowBtnStyle()}
                   >
                     <span>{r.sigungu}</span>
-                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{(r.site_count ?? 0).toLocaleString()}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{(r.site_count ?? 0).toLocaleString()}</span>
                   </button>
                 ))}
               </div>
@@ -294,7 +294,7 @@ export default function RegionPicker({ open, onClose, initialRegion }: Props) {
 function pillStyle(): React.CSSProperties {
   return {
     padding: '9px 14px', borderRadius: 999,
-    fontSize: 13, fontWeight: 500,
+    fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
     background: 'var(--bg-hover)', color: 'var(--text-secondary)',
     border: '1px solid var(--border)', cursor: 'pointer',
   };
@@ -314,7 +314,7 @@ function rowBtnStyle(): React.CSSProperties {
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
     padding: '12px 14px', borderRadius: 8,
     background: 'var(--bg-hover)', border: '1px solid var(--border)',
-    fontSize: 14, fontWeight: 600, color: 'var(--text-primary)',
+    fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)',
     cursor: 'pointer', textAlign: 'left',
   };
 }

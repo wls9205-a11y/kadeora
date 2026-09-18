@@ -125,7 +125,7 @@ export default async function AptMapPage() {
           <h1 style={{ position:"absolute", width:1, height:1, overflow:"hidden", clip:"rect(0,0,0,0)" }}>🗺️ 지역별 부동산 현황</h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
             <ShareButtons title="지역별 부동산 현황 — 청약·미분양 지도" contentType="page" contentRef="apt-map" />
-            <Link href="/apt" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
+            <Link href="/apt" style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textDecoration: 'none' }}>← 부동산</Link>
           </div>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 'var(--sp-sm)' }}>
@@ -138,13 +138,13 @@ export default async function AptMapPage() {
                 padding: 14, borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)', border: '1px solid var(--border)',
                 textDecoration: 'none', color: 'inherit', transition: 'border-color var(--transition-fast)',
               }}>
-                <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>{r}</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>{r}</div>
                 <div style={{ display: 'flex', gap: 'var(--sp-xs)', flexWrap: 'wrap' }}>
-                  {sub > 0 && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 600 }}>청약 {sub}</span>}
-                  {unsold > 0 && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, background: 'rgba(255,107,107,0.1)', color: 'var(--accent-red)', fontWeight: 600 }}>미분양 {unsold}</span>}
-                  {redev > 0 && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, background: 'rgba(255,159,67,0.1)', color: 'var(--accent-orange)', fontWeight: 600 }}>재개발 {redev}</span>}
-                  {(tradeByRegion[r] || 0) > 0 && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, background: 'rgba(96,165,250,0.1)', color: 'var(--accent-blue)', fontWeight: 600 }}>실거래 {tradeByRegion[r]}</span>}
-                  {sub === 0 && unsold === 0 && redev === 0 && (tradeByRegion[r] || 0) === 0 && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>데이터 준비 중</span>}
+                  {sub > 0 && <span style={{ fontSize: 'var(--fs-2xs)', padding: '3px 8px', borderRadius: 4, background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 'var(--fw-title)' }}>청약 {sub}</span>}
+                  {unsold > 0 && <span style={{ fontSize: 'var(--fs-2xs)', padding: '3px 8px', borderRadius: 4, background: 'rgba(255,107,107,0.1)', color: 'var(--accent-red)', fontWeight: 'var(--fw-title)' }}>미분양 {unsold}</span>}
+                  {redev > 0 && <span style={{ fontSize: 'var(--fs-2xs)', padding: '3px 8px', borderRadius: 4, background: 'rgba(255,159,67,0.1)', color: 'var(--accent-orange)', fontWeight: 'var(--fw-title)' }}>재개발 {redev}</span>}
+                  {(tradeByRegion[r] || 0) > 0 && <span style={{ fontSize: 'var(--fs-2xs)', padding: '3px 8px', borderRadius: 4, background: 'rgba(96,165,250,0.1)', color: 'var(--accent-blue)', fontWeight: 'var(--fw-title)' }}>실거래 {tradeByRegion[r]}</span>}
+                  {sub === 0 && unsold === 0 && redev === 0 && (tradeByRegion[r] || 0) === 0 && <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>데이터 준비 중</span>}
                 </div>
               </Link>
             );
@@ -157,7 +157,7 @@ export default async function AptMapPage() {
       {/* LoginGate 기능 게이팅 (세션 108) */}
       <LoginGate feature="apt_map_alert" blurHeight={80}>
         <div style={{ padding: "8px 0" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", color: "var(--text-tertiary)" }}><span>내 지역</span><span>알림 설정</span></div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 'var(--fs-xs)', padding: "4px 0", color: "var(--text-tertiary)" }}><span>내 지역</span><span>알림 설정</span></div>
         </div>
       </LoginGate>
     </>);

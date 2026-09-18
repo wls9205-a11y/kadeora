@@ -64,15 +64,15 @@ const CHIP: React.CSSProperties = {
   minHeight: 32,
   padding: '0 11px',
   borderRadius: 'var(--radius-pill)',
-  fontSize: 11.5,
-  fontWeight: 600,
+  fontSize: 'var(--fs-2xs)',
+  fontWeight: 'var(--fw-title)',
   textDecoration: 'none',
   border: '1px solid var(--border)',
   whiteSpace: 'nowrap',
 };
 const chipStyle = (active: boolean): React.CSSProperties =>
   active
-    ? { ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 500 }
+    ? { ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 'var(--fw-body)' }
     : { ...CHIP, background: 'var(--bg-surface)', color: 'var(--text-secondary)' };
 
 const ROW: React.CSSProperties = {
@@ -106,10 +106,10 @@ export default async function AptPipelinePage({ searchParams }: { searchParams?:
       <div className="kd-list-main">
         <h1 className="sr-only">{region} 공고 전 아파트 현장</h1>
 
-        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-tertiary)', padding: '0 6px', marginBottom: 10 }}>
+        <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', padding: '0 6px', marginBottom: 10 }}>
           <Link href="/apt" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>부동산</Link>
           <span aria-hidden>›</span>
-          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>공고 전 현장</span>
+          <span style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>공고 전 현장</span>
         </nav>
 
         <div role="group" aria-label="지역 선택" style={ROW}>
@@ -128,7 +128,7 @@ export default async function AptPipelinePage({ searchParams }: { searchParams?:
             meta={meta}
           />
 
-          <p style={{ fontSize: 11.5, lineHeight: 1.6, color: 'var(--text-secondary)', margin: '0 0 10px' }}>
+          <p style={{ fontSize: 'var(--fs-2xs)', lineHeight: 1.6, color: 'var(--text-secondary)', margin: '0 0 10px' }}>
             {DESCRIBE} 진행 이력·시공사·세대수·위치 중 2개 이상이 확인된 현장만 싣습니다.
           </p>
 
@@ -160,11 +160,11 @@ export default async function AptPipelinePage({ searchParams }: { searchParams?:
                 ← 이전
               </Link>
             ) : null}
-            <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>
               {data.page} / {data.total_pages}
             </span>
             {data.page < data.total_pages ? (
-              <Link href={href(region, data.page + 1)} style={{ ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 500, minHeight: 40, padding: '0 16px' }}>
+              <Link href={href(region, data.page + 1)} style={{ ...CHIP, background: 'var(--brand)', borderColor: 'var(--brand)', color: '#FFFFFF', fontWeight: 'var(--fw-body)', minHeight: 40, padding: '0 16px' }}>
                 다음 →
               </Link>
             ) : null}

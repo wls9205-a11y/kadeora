@@ -32,7 +32,7 @@ export default function YMYLBanner({ category, dataDate, sourceRef, authorName, 
         borderRadius: 'var(--radius-md)',
         background: 'var(--warning-bg)',
         border: '1px solid var(--border)',
-        fontSize: 12,
+        fontSize: 'var(--fs-xs)',
         color: 'var(--text-secondary)',
         lineHeight: 1.6,
       }}

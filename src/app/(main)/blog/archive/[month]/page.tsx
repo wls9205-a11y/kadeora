@@ -108,7 +108,7 @@ export default async function BlogArchiveMonth({ params }: Props) {
         <span aria-hidden="true">›</span>
         <Link href="/blog" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>블로그</Link>
         <span aria-hidden="true">›</span>
-        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{y}년 {Number(m)}월</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{y}년 {Number(m)}월</span>
       </nav>
 
       <HubHero

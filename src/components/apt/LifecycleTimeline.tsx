@@ -108,8 +108,8 @@ export default function LifecycleTimeline({ current }: Props) {
       style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px', margin: '0 0 12px', position: 'relative' }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-        <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: 0.5 }}>단지 진행 단계</span>
-        <span style={{ fontSize: 9, fontWeight: 500, color: 'var(--kd-accent)', padding: '2px 8px', borderRadius: 999, background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)', letterSpacing: 0.5 }}>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', letterSpacing: 0 }}>단지 진행 단계</span>
+        <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: 'var(--kd-accent)', padding: '2px 8px', borderRadius: 999, background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)', letterSpacing: 0 }}>
           KADEORA ONLY
         </span>
       </div>
@@ -119,10 +119,10 @@ export default function LifecycleTimeline({ current }: Props) {
 
       {nextHint && (
         <div style={{ marginTop: 'var(--kd-gap-md)', padding: '10px 12px', background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)', borderRadius: 'var(--kd-radius-card)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--kd-gap-sm)' }}>
-          <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600, lineHeight: 1.5 }}>
-            다음 단계: <span style={{ color: 'var(--kd-accent)', fontWeight: 600 }}>{nextHint}</span>
+          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)', lineHeight: 1.5 }}>
+            다음 단계: <span style={{ color: 'var(--kd-accent)', fontWeight: 'var(--fw-title)' }}>{nextHint}</span>
           </span>
-          <span style={{ fontSize: 12, color: 'var(--kd-accent)', fontWeight: 600, whiteSpace: 'nowrap' }}>알림 받기 →</span>
+          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--kd-accent)', fontWeight: 'var(--fw-title)', whiteSpace: 'nowrap' }}>알림 받기 →</span>
         </div>
       )}
 

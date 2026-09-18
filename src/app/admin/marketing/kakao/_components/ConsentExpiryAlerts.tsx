@@ -69,15 +69,15 @@ export default function ConsentExpiryAlerts() {
         flexWrap: 'wrap',
       }}
     >
-      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-yellow)' }}>
+      <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: 'var(--accent-yellow)' }}>
         ⚠ {expiring.toLocaleString()}명이 14일 안에 마케팅 동의 2년 만료
       </span>
       <button
         onClick={onSend}
         disabled={busy}
         style={{
-          fontSize: 12,
-          fontWeight: 600,
+          fontSize: 'var(--fs-xs)',
+          fontWeight: 'var(--fw-title)',
           padding: '6px 12px',
           borderRadius: 6,
           cursor: busy ? 'wait' : 'pointer',
@@ -89,7 +89,7 @@ export default function ConsentExpiryAlerts() {
       >
         {busy ? '발송 중…' : '재확인 메시지 발송'}
       </button>
-      {msg && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{msg}</span>}
+      {msg && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{msg}</span>}
     </section>
   );
 }

@@ -55,27 +55,27 @@ export default function AptFeedCard({ item }: { item: FeedItem }) {
         height: 72,
         background: item.image_url ? `url(${item.image_url}) center/cover` : style.bg,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: style.color, fontSize: 22,
+        color: style.color, fontSize: 'var(--fs-lg)',
       }}>
         {!item.image_url && <span style={{ opacity: 0.7 }}>{categoryIcon(item.section)}</span>}
         <div style={{ position: 'absolute', top: 5, left: 5 }}>
           <span style={{
-            fontSize: 9.5, padding: '1.5px 5px', borderRadius: 3, fontWeight: 500,
+            fontSize: 'var(--fs-3xs)', padding: '1.5px 5px', borderRadius: 3, fontWeight: 'var(--fw-body)',
             background: 'rgba(255,255,255,0.92)', color: badgeColor,
           }}>{item.badge_label}</span>
         </div>
         {item.is_new && (
           <div style={{ position: 'absolute', top: 5, right: 5 }}>
             <span style={{
-              fontSize: 8.5, padding: '1.5px 4px', borderRadius: 3, fontWeight: 500,
-              background: '#1D9E75', color: 'white', letterSpacing: '0.3px',
+              fontSize: 'var(--fs-3xs)', padding: '1.5px 4px', borderRadius: 3, fontWeight: 'var(--fw-body)',
+              background: '#1D9E75', color: 'white', letterSpacing: 0,
             }}>NEW</span>
           </div>
         )}
         {item.dday !== null && item.dday !== undefined && (
           <div style={{ position: 'absolute', bottom: 5, right: 5 }}>
             <span style={{
-              fontSize: 9, padding: '1.5px 5px', borderRadius: 3, fontWeight: 500,
+              fontSize: 'var(--fs-2xs)', padding: '1.5px 5px', borderRadius: 3, fontWeight: 'var(--fw-body)',
               background: item.is_urgent ? '#E24B4A' : 'rgba(0,0,0,0.7)',
               color: 'white',
             }}>
@@ -86,19 +86,19 @@ export default function AptFeedCard({ item }: { item: FeedItem }) {
       </div>
       <div style={{ padding: '6px 8px 8px' }}>
         <div style={{
-          fontSize: 11.5, fontWeight: 500, lineHeight: 1.25,
+          fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', lineHeight: 1.3,
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           color: 'var(--text-primary)',
           marginBottom: 2,
         }}>{item.title}</div>
         {item.region && (
           <div style={{
-            fontSize: 10, color: 'var(--text-secondary)', marginBottom: 2,
+            fontSize: 'var(--fs-2xs)', color: 'var(--text-secondary)', marginBottom: 2,
           }}>{item.region}</div>
         )}
         {item.meta && (
           <div style={{
-            fontSize: 11, fontWeight: 500, color: 'var(--text-primary)',
+            fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)',
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>{item.meta}</div>
         )}

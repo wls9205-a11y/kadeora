@@ -103,7 +103,7 @@ export default function AdminShellV4() {
         <a
           href="/admin/signup-flow"
           style={{
-            fontSize: 11, fontWeight: 500,
+            fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
             padding: '6px 12px', borderRadius: 6,
             background: 'transparent', color: 'var(--text-secondary)',
             border: '1px solid var(--border)', textDecoration: 'none',
@@ -112,7 +112,7 @@ export default function AdminShellV4() {
         <a
           href="/admin/marketing/kakao"
           style={{
-            fontSize: 11, fontWeight: 500,
+            fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
             padding: '6px 12px', borderRadius: 6,
             background: 'transparent', color: 'var(--text-secondary)',
             border: '1px solid var(--border)', textDecoration: 'none',
@@ -127,7 +127,7 @@ export default function AdminShellV4() {
           { href: '/admin/seo-measurement',     label: '🎯 SEO 측정' },
         ].map(m => (
           <a key={m.href} href={m.href} style={{
-            fontSize: 11, fontWeight: 500,
+            fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
             padding: '6px 12px', borderRadius: 6,
             background: 'transparent', color: 'var(--text-secondary)',
             border: '1px solid var(--border)', textDecoration: 'none',
@@ -152,14 +152,14 @@ export default function AdminShellV4() {
           { href: '/admin/design',           label: '🎨 디자인 프리뷰' },
         ].map(m => (
           <a key={m.href} href={m.href} style={{
-            fontSize: 11, fontWeight: 500,
+            fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
             padding: '6px 12px', borderRadius: 6,
             background: 'transparent', color: 'var(--text-secondary)',
             border: '1px solid var(--border)', textDecoration: 'none',
           }}>{m.label}</a>
         ))}
         <button onClick={fetchData} style={{
-          fontSize: 11, fontWeight: 500,
+          fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
           padding: '6px 12px', borderRadius: 6, cursor: 'pointer',
           background: 'transparent', color: 'var(--text-secondary)',
           border: '1px solid var(--border)',
@@ -182,7 +182,7 @@ export default function AdminShellV4() {
         <div style={{
           padding: 14, borderRadius: 'var(--radius-md, 10px)',
           background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.4)',
-          color: 'var(--accent-red)', fontSize: 12,
+          color: 'var(--accent-red)', fontSize: 'var(--fs-xs)',
         }}>
           데이터 가져오기 실패: {err}
         </div>
@@ -202,7 +202,7 @@ export default function AdminShellV4() {
           <TrafficSection />
 
           <div style={{
-            padding: '6px 10px', fontSize: 10, color: 'var(--text-tertiary)',
+            padding: '6px 10px', fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)',
             textAlign: 'right',
           }}>
             생성 시각: {data.generated_at ?? '—'}

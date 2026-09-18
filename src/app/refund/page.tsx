@@ -22,25 +22,25 @@ export default function RefundPage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 16px' }}>
-      <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>환불정책</h1>
+      <h1 style={{ fontSize: 'var(--fs-2xl)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>환불정책</h1>
       <p style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', marginBottom: 32 }}>최종 수정일: 2026년 3월 24일</p>
       {sections.map(([title, content]) => (
         <div key={title} style={{ marginBottom: 28 }}>
-          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>{title}</h2>
-          <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', lineHeight: 1.8, whiteSpace: 'pre-line' }}>{content}</p>
+          <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>{title}</h2>
+          <p style={{ fontSize: 'var(--fs-base)', color: 'var(--text-secondary)', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{content}</p>
         </div>
       ))}
 
       <div style={{ marginTop: 40, padding: '20px 24px', borderRadius: 'var(--radius-card)', backgroundColor: 'var(--bg-sunken)', border: '1px solid var(--border)' }}>
-        <p style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>환불 문의</p>
-        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.8, margin: 0 }}>
+        <p style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>환불 문의</p>
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
           이메일: kadeora.app@gmail.com{'\n'}
           운영시간: 평일 10:00 ~ 18:00 (공휴일 제외)
         </p>
       </div>
 
       <div style={{ marginTop: 'var(--sp-lg)', padding: '16px 24px', borderRadius: 'var(--radius-card)', backgroundColor: 'var(--bg-sunken)', border: '1px solid var(--border)' }}>
-        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.7, margin: 0 }}>
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6, margin: 0 }}>
           본 환불정책은 전자상거래 등에서의 소비자보호에 관한 법률에 근거합니다.{'\n'}
           정책 변경 시 서비스 내 공지를 통해 안내합니다.
         </p>

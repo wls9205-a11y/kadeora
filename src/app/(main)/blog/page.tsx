@@ -603,7 +603,7 @@ export default async function BlogPage({ searchParams }: Props) {
         {sort !== 'latest' && <input type="hidden" name="sort" value={sort} />}
         <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-tertiary)' }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input name="q" defaultValue={q} placeholder="블로그 검색" style={{
-          width: '100%', minHeight: 'var(--touch-min)', padding: '0 var(--sp-md) 0 38px', fontSize: 'var(--fs-xs)', fontWeight: 500,
+          width: '100%', minHeight: 'var(--touch-min)', padding: '0 var(--sp-md) 0 38px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
           borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-surface)',
           color: 'var(--text-primary)', boxSizing: 'border-box', outline: 'none',
         }} />
@@ -655,7 +655,7 @@ export default async function BlogPage({ searchParams }: Props) {
                 minHeight: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 padding: '5px var(--sp-md)',
                 borderRadius: 'var(--radius-pill)',
-                fontSize: 'var(--fs-xs)', fontWeight: 500, letterSpacing: 0,
+                fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', letterSpacing: 0,
                 // ⚠️ 선택색을 인라인으로 주지 않는다 — 인라인은 모든 @layer 를 이겨
                 //    screens.css 의 네이비 규칙이 안 먹는다. 클래스에 맡긴다.
                 background: on ? undefined : 'var(--bg-surface)',
@@ -812,7 +812,7 @@ export default async function BlogPage({ searchParams }: Props) {
 
                 <span className="kd-lrow-r">
                   {dateStr}
-                  <span style={{ display: 'block', marginTop: 1, fontSize: 'var(--fs-3xs)', fontWeight: 600, color: 'var(--text-tertiary)' }}>
+                  <span style={{ display: 'block', marginTop: 1, fontSize: 'var(--fs-3xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)' }}>
                     {readMin}분
                   </span>
                 </span>
@@ -832,7 +832,7 @@ export default async function BlogPage({ searchParams }: Props) {
           style={{
             cursor: 'pointer', listStyle: 'revert',
             padding: 'var(--sp-sm) 2px',
-            fontSize: 'var(--fs-xs)', fontWeight: 500, letterSpacing: 0,
+            fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', letterSpacing: 0,
             color: 'var(--text-secondary)',
           }}
         >
@@ -850,7 +850,7 @@ export default async function BlogPage({ searchParams }: Props) {
           <Link href={`/blog?category=${category}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
             aria-current={!sub ? 'true' : undefined}
             style={{
-              padding: 'var(--sp-xs) var(--sp-md)', minHeight: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: !sub ? 600 : 500,
+              padding: 'var(--sp-xs) var(--sp-md)', minHeight: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: !sub ? 'var(--fw-title)' : 'var(--fw-body)',
               background: !sub ? undefined : 'var(--bg-hover)',
               color: !sub ? undefined : 'var(--text-tertiary)',
               textDecoration: 'none', flexShrink: 0, border: '1px solid var(--border)',
@@ -861,7 +861,7 @@ export default async function BlogPage({ searchParams }: Props) {
             <Link key={sc.key} href={`/blog?category=${category}&sub=${sc.key}${sort !== 'latest' ? `&sort=${sort}` : ''}${q ? `&q=${q}` : ''}`}
               aria-current={sub === sc.key ? 'true' : undefined}
               style={{
-                padding: 'var(--sp-xs) var(--sp-md)', minHeight: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: sub === sc.key ? 600 : 500,
+                padding: 'var(--sp-xs) var(--sp-md)', minHeight: 'var(--touch-min)', display: 'inline-flex', alignItems: 'center', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: sub === sc.key ? 'var(--fw-title)' : 'var(--fw-body)',
                 background: sub === sc.key ? undefined : 'var(--bg-hover)',
                 color: sub === sc.key ? undefined : 'var(--text-tertiary)',
                 textDecoration: 'none', flexShrink: 0, border: '1px solid var(--border)',
@@ -883,7 +883,7 @@ export default async function BlogPage({ searchParams }: Props) {
             <Link key={s.key} href={`/blog?${category !== 'all' ? `category=${category}&` : ''}sort=${s.key}${q ? `&q=${q}` : ''}`}
               style={{
                 minHeight: 44, display: 'inline-flex', alignItems: 'center',
-                padding: 'var(--sp-xs) var(--sp-md)', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-2xs)', fontWeight: 600,
+                padding: 'var(--sp-xs) var(--sp-md)', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)',
                 background: sort === s.key ? 'var(--brand)' : 'transparent',
                 color: sort === s.key ? 'var(--text-inverse)' : 'var(--text-tertiary)',
                 textDecoration: 'none', border: sort === s.key ? 'none' : '1px solid var(--border)',
@@ -923,21 +923,21 @@ export default async function BlogPage({ searchParams }: Props) {
           display: 'flex', alignItems: 'center', gap: 10,
         }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)' }}>매일 투자 분석 받아보기</div>
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>매일 투자 분석 받아보기</div>
             <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-secondary)' }}>가입하면 전체 글 무제한 · 알림까지 무료</div>
           </div>
           <Link href="/login?redirect=/blog" style={{
             padding: 'var(--sp-sm) var(--sp-lg)', borderRadius: 'var(--radius-pill)',
             background: 'var(--kakao-bg)', color: 'var(--kakao-text)',
-            fontWeight: 500, fontSize: 'var(--fs-2xs)', textDecoration: 'none', flexShrink: 0,
+            fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-2xs)', textDecoration: 'none', flexShrink: 0,
           }}>가입</Link>
         </div>
       )}
       {topSeries.length > 0 && (
         <div style={{ marginTop: 'var(--sp-2xl)', padding: 'var(--sp-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
-            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>글이 많은 시리즈</span>
-            <Link href="/blog/series" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>전체 보기 →</Link>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>글이 많은 시리즈</span>
+            <Link href="/blog/series" style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 'var(--fw-title)' }}>전체 보기 →</Link>
           </div>
           <div style={{ display: 'flex', gap: 'var(--sp-sm)', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
             {topSeries.map(s => (
@@ -946,7 +946,7 @@ export default async function BlogPage({ searchParams }: Props) {
                 background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)', textDecoration: 'none',
                 border: '1px solid var(--border)', transition: 'border-color var(--transition-fast)',
               }}>
-                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-xs)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.post_count}편</div>
               </Link>
             ))}
@@ -959,7 +959,7 @@ export default async function BlogPage({ searchParams }: Props) {
 
       {/* 관련 서비스 (내부 링크 — SEO 교차 참조) */}
       <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', marginTop: 'var(--sp-md)' }}>
-        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>카더라 서비스</div>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>카더라 서비스</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {[
             { href: '/apt', label: '부동산 청약' },
@@ -969,7 +969,7 @@ export default async function BlogPage({ searchParams }: Props) {
             { href: '/daily/서울', label: '📰 데일리 리포트' },
             { href: '/apt/diagnose', label: '🎯 가점 계산기' },
           ].map(l => (
-            <Link key={l.href} href={l.href} style={{ padding: '5px var(--sp-md)', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-xs)', fontWeight: 500, background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', border: '1px solid var(--border)' }}>
+            <Link key={l.href} href={l.href} style={{ padding: '5px var(--sp-md)', borderRadius: 'var(--radius-xs)', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', textDecoration: 'none', border: '1px solid var(--border)' }}>
               {l.label}
             </Link>
           ))}
@@ -980,14 +980,14 @@ export default async function BlogPage({ searchParams }: Props) {
       <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--sp-sm)', marginTop: 'var(--sp-xl)', marginBottom: 'var(--sp-xl)' }}>
         {pageNum > 1 && (
           <Link href={`/blog?${category !== 'all' ? `category=${category}&` : ''}${sort !== 'latest' ? `sort=${sort}&` : ''}${q ? `q=${q}&` : ''}page=${pageNum - 1}`}
-            style={{ padding: '8px 18px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>
+            style={{ padding: '8px 18px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)' }}>
             ← 이전
           </Link>
         )}
         <span style={{ padding: '8px 14px', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>{pageNum} 페이지</span>
         {hasMore && (
           <Link href={`/blog?${category !== 'all' ? `category=${category}&` : ''}${sort !== 'latest' ? `sort=${sort}&` : ''}${q ? `q=${q}&` : ''}page=${pageNum + 1}`}
-            style={{ padding: '8px 18px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>
+            style={{ padding: '8px 18px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--brand)', color: 'var(--text-inverse)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)' }}>
             다음 →
           </Link>
         )}
@@ -1026,14 +1026,14 @@ export default async function BlogPage({ searchParams }: Props) {
                     border: '1px solid var(--border)',
                     background: 'var(--bg-sunken)',
                     color: 'var(--text-secondary)',
-                    fontSize: 11,
-                    fontWeight: 600,
+                    fontSize: 'var(--fs-xs)',
+                    fontWeight: 'var(--fw-title)',
                     textDecoration: 'none',
                     borderBottom: '1px solid var(--border)',
                   }}
                 >
                   #{t.tag}
-                  <span style={{ fontSize: 9.5, opacity: 0.6 }}>{t.cnt}</span>
+                  <span style={{ fontSize: 'var(--fs-3xs)', opacity: 0.6 }}>{t.cnt}</span>
                 </Link>
               ))}
             </div>

@@ -63,7 +63,7 @@ export default function GichukActivity({ items }: { items: GichukRow[] }) {
                     style={{
                       display: 'block',
                       fontSize: 'var(--fs-xs)',
-                      fontWeight: 500,
+                      fontWeight: 'var(--fw-body)',
                       color: 'var(--text-tertiary)',
                       lineHeight: 1.3,
                     }}
@@ -72,7 +72,7 @@ export default function GichukActivity({ items }: { items: GichukRow[] }) {
                   </span>
                 </>
               ) : (
-                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--text-tertiary)' }}>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)' }}>
                   평형 표본 부족
                 </span>
               )}

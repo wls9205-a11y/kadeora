@@ -56,8 +56,8 @@ const panel: React.CSSProperties = {
 
 const panelTitle: React.CSSProperties = {
   fontSize: 'var(--fs-xs)',
-  fontWeight: 500,
-  letterSpacing: '.08em',
+  fontWeight: 'var(--fw-body)',
+  letterSpacing: 0,
   color: 'var(--text-tertiary)',
   margin: '0 0 8px',
 };
@@ -85,7 +85,7 @@ export default function SiteDetailRail({
            실제로 안 읽혔다). 반투명 카드는 어떤 배경 위에 놓일지 보장할 수 없다.
            brand 색은 «테두리로만» 남긴다 — 정체성은 유지하고 가독성은 배경이 책임진다. */
         <div ref={leadRef} style={{ ...panel, borderColor: 'var(--brand)', background: 'var(--bg-surface)' }}>
-          <p style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px', lineHeight: 1.4, wordBreak: 'keep-all' }}>
+          <p style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 4px', lineHeight: 1.3, wordBreak: 'keep-all' }}>
             {siteName} {leadCopy(lifecycleStage, '', { redev: isRedev }).band.replace(' · 무료', '')}
           </p>
           <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: '0 0 10px', lineHeight: 1.5, wordBreak: 'keep-all' }}>
@@ -98,7 +98,7 @@ export default function SiteDetailRail({
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               minHeight: 44, borderRadius: 'var(--radius-sm)',
               background: 'var(--brand)', color: '#FFFFFF',
-              fontSize: 'var(--fs-sm)', fontWeight: 500, textDecoration: 'none',
+              fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)', textDecoration: 'none',
             }}
           >
             안내 신청하기
@@ -132,10 +132,10 @@ export default function SiteDetailRail({
           </svg>
         </span>
         <span style={{ minWidth: 0 }}>
-          <span style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.35 }}>
+          <span style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', lineHeight: 1.3 }}>
             부정공 카톡방
           </span>
-          <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.45, wordBreak: 'keep-all' }}>
+          <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.5, wordBreak: 'keep-all' }}>
             공고 전 소식·잔여 동호수를 카톡으로
           </span>
         </span>
@@ -154,7 +154,7 @@ export default function SiteDetailRail({
                 borderBottom: '1px solid var(--border)',
               }}
             >
-              <span style={{ display: 'block', fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span style={{ display: 'block', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {ns.name}
               </span>
               <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

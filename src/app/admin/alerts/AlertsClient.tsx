@@ -38,7 +38,7 @@ function fmt(iso: string): string {
 }
 
 const btn: React.CSSProperties = {
-  fontSize: 12, fontWeight: 500, padding: '6px 12px', borderRadius: 'var(--radius-sm)',
+  fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', padding: '6px 12px', borderRadius: 'var(--radius-sm)',
   border: '1px solid var(--border)', background: 'var(--bg-surface)',
   color: 'var(--text-secondary)', cursor: 'pointer', minHeight: 32,
 };
@@ -107,8 +107,8 @@ export default function AlertsClient() {
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(12px, 3vw, 24px)', color: 'var(--text-primary)' }}>
-      <h1 style={{ fontSize: 20, fontWeight: 600, margin: '0 0 4px' }}>경보함</h1>
-      <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: '0 0 14px', lineHeight: 1.6 }}>
+      <h1 style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', margin: '0 0 4px' }}>경보함</h1>
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', margin: '0 0 14px', lineHeight: 1.6 }}>
         트리아지 기준은 <strong>아카이브</strong>입니다. 읽음 표시는 쓰지 않습니다(전량 미읽음이라 신호가 되지 못합니다).
         14일 경과분은 크론이 자동으로 아카이브합니다.
       </p>
@@ -123,8 +123,8 @@ export default function AlertsClient() {
             ['정보', counts.info, LEVEL_STYLE.info.color, LEVEL_STYLE.info.bg],
           ] as const).map(([label, n, color, bg]) => (
             <div key={label} style={{ padding: '8px 14px', borderRadius: 'var(--radius-md)', background: bg, border: '1px solid var(--border)', minWidth: 92 }}>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{label}</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color }}>{n}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{label}</div>
+              <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', color }}>{n}</div>
             </div>
           ))}
         </div>
@@ -155,7 +155,7 @@ export default function AlertsClient() {
       </div>
 
       {err && (
-        <div style={{ padding: 12, marginBottom: 12, borderRadius: 'var(--radius-md)', background: 'var(--accent-red-bg)', border: '1px solid var(--accent-red)', color: 'var(--accent-red)', fontSize: 12 }}>
+        <div style={{ padding: 12, marginBottom: 12, borderRadius: 'var(--radius-md)', background: 'var(--accent-red-bg)', border: '1px solid var(--accent-red)', color: 'var(--accent-red)', fontSize: 'var(--fs-xs)' }}>
           {err}
         </div>
       )}
@@ -163,7 +163,7 @@ export default function AlertsClient() {
       {loading && <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary)' }}>로드 중…</div>}
 
       {!loading && rows.length === 0 && (
-        <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 13 }}>
+        <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>
           해당하는 경보가 없습니다.
         </div>
       )}
@@ -179,25 +179,25 @@ export default function AlertsClient() {
                 padding: '10px 12px',
                 borderTop: i === 0 ? 'none' : '1px solid var(--border)',
               }}>
-                <span style={{ flexShrink: 0, fontSize: 11, color: 'var(--text-tertiary)', width: 82, paddingTop: 3, fontVariantNumeric: 'tabular-nums' }}>
+                <span style={{ flexShrink: 0, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', width: 82, paddingTop: 3, fontVariantNumeric: 'tabular-nums' }}>
                   {fmt(r.created_at)}
                 </span>
                 <span style={{
-                  flexShrink: 0, fontSize: 11, fontWeight: 500, padding: '2px 8px',
+                  flexShrink: 0, fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', padding: '2px 8px',
                   borderRadius: 'var(--radius-sm)', background: st.bg, color: st.color, marginTop: 1,
                 }}>{st.label}</span>
                 <span style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', wordBreak: 'break-word' }}>
+                  <span style={{ display: 'block', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', wordBreak: 'break-word' }}>
                     {r.title}
                   </span>
-                  <span style={{ display: 'block', fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>
+                  <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 1 }}>
                     {r.type}{r.severity ? ` · ${r.severity}` : ''}
                   </span>
                   {r.message && (
                     <span style={{
                       display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden', fontSize: 12, color: 'var(--text-secondary)',
-                      lineHeight: 1.55, marginTop: 3, wordBreak: 'break-word',
+                      overflow: 'hidden', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)',
+                      lineHeight: 1.5, marginTop: 3, wordBreak: 'break-word',
                     }}>{r.message}</span>
                   )}
                 </span>
@@ -227,10 +227,10 @@ export default function AlertsClient() {
             onClick={e => e.stopPropagation()}
             style={{ maxWidth: 420, width: '100%', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 18 }}
           >
-            <h2 id="kd-alert-confirm-title" style={{ fontSize: 15, fontWeight: 600, margin: '0 0 8px' }}>
+            <h2 id="kd-alert-confirm-title" style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', margin: '0 0 8px' }}>
               살아있는 경보 {counts?.total ?? 0}건을 모두 아카이브합니다
             </h2>
-            <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 16px' }}>
+            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 16px' }}>
               삭제가 아니라 <code>archived</code> 플래그만 켭니다. 다만 화면에서 한 번에 사라지므로
               아직 확인하지 않은 진짜 신호가 섞여 있는지 먼저 보세요.
               되돌리려면 DB 에서 <code>archived = false</code> 로 바꿔야 합니다.

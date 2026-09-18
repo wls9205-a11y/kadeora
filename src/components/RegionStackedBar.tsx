@@ -66,7 +66,7 @@ function MiniDonut({ sub, ongoing, unsold, redev, name, total, size = 34, active
       })}
       {/* kd-brand-exempt: 도넛 «중앙 수치» 다. 차트 안의 강조이지 고른 항목의 표시가 아니다 —
           고른 항목은 아래 KPI 버튼의 테두리(네이비 · aria-current)가 진다. */}
-      <text x={cx} y={cx + size * 0.08} textAnchor="middle" style={{ fontSize: size * 0.28, fill: active ? 'var(--brand)' : 'var(--text-primary)', fontWeight: 600 }}>{name}</text>
+      <text x={cx} y={cx + size * 0.08} textAnchor="middle" style={{ fontSize: size * 0.28, fill: active ? 'var(--brand)' : 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{name}</text>
     </svg>
   );
 }
@@ -116,10 +116,10 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 border: `1px solid ${isAct ? 'var(--brand-navy)' : 'var(--border)'}`,
                 transition: 'all 0.15s',
               }}>
-              <div style={{ fontSize: 16, fontWeight: 800, color: k.c, fontVariantNumeric: 'tabular-nums', lineHeight: 1.2 }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: k.c, fontVariantNumeric: 'tabular-nums', lineHeight: 1.3 }}>
                 {typeof kv[k.key] === 'number' ? (kv[k.key] as number).toLocaleString() : kv[k.key]}
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2, fontWeight: 500 }}>{k.label}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 2, fontWeight: 'var(--fw-body)' }}>{k.label}</div>
             </button>
           );
         })}
@@ -156,8 +156,8 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
           animation: 'kd-fadeIn 0.2s ease',
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{exp.name}</span>
-            <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>총 {exp.total.toLocaleString()}건</span>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)' }}>{exp.name}</span>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>총 {exp.total.toLocaleString()}건</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 4 }}>
             {([
@@ -173,8 +173,8 @@ export default function RegionStackedBar({ apts, ongoingApts, unsold, redevelopm
                 border: activeTab === item.tab ? '1px solid var(--brand-navy)' : '1px solid transparent',
                 cursor: 'pointer', transition: 'all 0.12s',
               }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: item.c }}>{item.v.toLocaleString()}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{item.l}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: item.c }}>{item.v.toLocaleString()}</div>
+                <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-secondary)' }}>{item.l}</div>
               </button>
             ))}
           </div>

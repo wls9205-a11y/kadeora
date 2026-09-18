@@ -72,12 +72,12 @@ export default function AptMainGrid(props: Props) {
         style={{ maxWidth: 720, margin: '12px auto', padding: '0 var(--sp-lg)' }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{CATEGORY_TITLE[category]}</h2>
+          <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: 0 }}>{CATEGORY_TITLE[category]}</h2>
         </div>
         <div style={{
           padding: '32px 16px', textAlign: 'center',
           background: 'var(--bg-surface)', border: '1px dashed var(--border)', borderRadius: 12,
-          fontSize: 13, color: 'var(--text-tertiary)',
+          fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)',
         }}>
           {label} 에 해당 카테고리의 단지가 없습니다.
         </div>
@@ -91,16 +91,16 @@ export default function AptMainGrid(props: Props) {
       style={{ maxWidth: 720, margin: '12px auto', padding: '0 var(--sp-lg)' }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+        <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: 0 }}>
           {CATEGORY_TITLE[category]}{' '}
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)' }}>· {label}</span>
+          <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)' }}>· {label}</span>
         </h2>
         <select
           value={sort}
           onChange={(e) => router.replace(buildHref(props, { sort: e.target.value, page: 1 }))}
           aria-label="정렬"
           style={{
-            padding: '6px 10px', fontSize: 11, fontWeight: 500,
+            padding: '6px 10px', fontSize: 'max(16px, var(--fs-xs))', fontWeight: 'var(--fw-body)',
             background: 'var(--bg-hover)', color: 'var(--text-secondary)',
             border: '1px solid var(--border)', borderRadius: 999,
             cursor: 'pointer', outline: 'none',
@@ -144,13 +144,13 @@ export default function AptMainGrid(props: Props) {
                     loading="lazy" decoding="async"
                   />
                 ) : (
-                  <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)', fontSize: 22 }}>🏢</div>
+                  <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--fs-lg)' }}>🏢</div>
                 )}
                 {caption && (
                   <span style={{
                     position: 'absolute', top: 8, right: 8,
                     padding: '3px 8px', borderRadius: 999,
-                    fontSize: 9, fontWeight: 500,
+                    fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)',
                     background: 'var(--brand)', color: 'var(--text-inverse)',
                   }}>
                     {caption}
@@ -158,14 +158,14 @@ export default function AptMainGrid(props: Props) {
                 )}
               </div>
               <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>
                   {s.name}
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {sub || '-'}
                 </div>
                 {price && (
-                  <div style={{ marginTop: 'auto', fontSize: 13, fontWeight: 700, color: 'var(--brand)' }}>{price}</div>
+                  <div style={{ marginTop: 'auto', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: 'var(--brand)' }}>{price}</div>
                 )}
               </div>
             </Link>
@@ -180,7 +180,7 @@ export default function AptMainGrid(props: Props) {
             onClick={() => router.replace(buildHref(props, { page: page + 1 }))}
             style={{
               padding: '10px 22px', borderRadius: 999,
-              fontSize: 13, fontWeight: 600,
+              fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
               background: 'var(--bg-hover)', color: 'var(--text-secondary)',
               border: '1px solid var(--border)', cursor: 'pointer',
             }}

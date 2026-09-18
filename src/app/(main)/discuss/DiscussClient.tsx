@@ -52,10 +52,10 @@ function TopicCard({ topic }: { topic: Topic }) {
         borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-sm)',
       }}>
         <div style={{ display: 'flex', gap: 6, marginBottom: 'var(--sp-sm)', alignItems: 'center' }}>
-          <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-pill)', fontWeight: 500, background: cat.bg, color: cat.color }}>{cat.label}</span>
-          {topic.is_hot && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-pill)', fontWeight: 500, background: 'var(--error)', color: 'var(--text-inverse)' }}>🔥 HOT</span>}
+          <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-pill)', fontWeight: 'var(--fw-body)', background: cat.bg, color: cat.color }}>{cat.label}</span>
+          {topic.is_hot && <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-pill)', fontWeight: 'var(--fw-body)', background: 'var(--error)', color: 'var(--text-inverse)' }}>🔥 HOT</span>}
         </div>
-        <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px', lineHeight: 1.4 }}>{topic.title}</h3>
+        <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 12px', lineHeight: 1.3 }}>{topic.title}</h3>
         {/* ⛔ 결과(퍼센트·막대)를 내렸다 — 실체가 없다(2026-08-31 실측).
              카운터 vote_a+vote_b 합계 2,002 대 discussion_votes 실행 «2건»(전부 시드) — 1,001배.
              ✅ 선택지 문구(option_a/b)는 «실제 콘텐츠» 라 남긴다. 걷는 것은 «결과» 뿐이다.
@@ -64,7 +64,7 @@ function TopicCard({ topic }: { topic: Topic }) {
           <div style={{ marginBottom: 'var(--sp-md)', display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-sm)' }}>
             {[topic.option_a, topic.option_b].filter(Boolean).map((label, i) => (
               <span key={i} style={{
-                fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--text-secondary)',
+                fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)', color: 'var(--text-secondary)',
                 padding: '4px 10px', borderRadius: 'var(--radius-pill)',
                 background: 'var(--bg-hover)', border: '1px solid var(--border)',
               }}>{label}</span>
@@ -170,12 +170,12 @@ export default function DiscussClient() {
     <div style={containerStyle}>
       <div style={{ flexShrink: 0, marginBottom: isChat ? 8 : 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--sp-sm)' }}>
-          <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)' }}>💬 라운지</h1>
+          <h1 style={{ margin: 0, fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>💬 라운지</h1>
           <SectionShareButton section="discuss" label="실시간 토론 라운지 — 주식·부동산·경제 이슈" pagePath="/discuss" />
         </div>
         <p style={{ margin: '4px 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)' }}>지금 뜨거운 이야기들
           {activeUsers > 0 && (
-            <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 500, marginLeft: 8 }}>
+            <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'rgba(52,211,153,0.1)', color: 'var(--accent-green)', fontWeight: 'var(--fw-body)', marginLeft: 8 }}>
               🟢 {activeUsers}명 참여중
             </span>
           )}
@@ -191,7 +191,7 @@ export default function DiscussClient() {
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} aria-pressed={tab === t.key} style={{
             padding: '7px 14px', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer', flexShrink: 0,
-            fontWeight: 600, fontSize: 'var(--fs-sm)',
+            fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-sm)',
             background: tab === t.key ? 'var(--brand)' : 'transparent',
             color: tab === t.key ? 'var(--text-inverse)' : 'var(--text-secondary)',
           }}>{t.label}</button>
@@ -208,7 +208,7 @@ export default function DiscussClient() {
           <div style={{ display: 'flex', gap: 'var(--sp-xs)', marginBottom: 10, overflowX: 'auto', scrollbarWidth: 'none' }}>
             {POLL_CATS.map(c => (
               <button key={c.key} onClick={() => setPollCat(c.key)} aria-pressed={pollCat === c.key} style={{
-                padding: '5px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer', flexShrink: 0,
+                padding: '5px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', border: 'none', cursor: 'pointer', flexShrink: 0,
                 background: pollCat === c.key ? 'var(--text-primary)' : 'var(--bg-hover)',
                 color: pollCat === c.key ? 'var(--bg-base)' : 'var(--text-secondary)',
               }}>{c.label}</button>
@@ -219,7 +219,7 @@ export default function DiscussClient() {
           <button onClick={() => user ? setShowCreate(!showCreate) : router.push(`/login?redirect=${encodeURIComponent(pathname)}`)} style={{
             width: '100%', padding: '12px', marginBottom: 'var(--sp-md)', borderRadius: 'var(--radius-card)',
             border: '1px dashed var(--border)', background: 'var(--bg-surface)',
-            color: 'var(--text-secondary)', fontSize: 'var(--fs-base)', fontWeight: 600, cursor: 'pointer',
+            color: 'var(--text-secondary)', fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', cursor: 'pointer',
           }}>✍️ 새 토론 만들기</button>
 
           {showCreate && (
@@ -227,7 +227,7 @@ export default function DiscussClient() {
               <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
                 {['stock', 'apt', 'economy', 'free'].map(c => (
                   <button key={c} onClick={() => setNewCat(c)} style={{
-                    padding: '5px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-sm)', fontWeight: 600, border: 'none', cursor: 'pointer',
+                    padding: '5px 12px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', border: 'none', cursor: 'pointer',
                     background: newCat === c ? 'var(--brand)' : 'var(--bg-hover)',
                     color: newCat === c ? 'var(--text-inverse)' : 'var(--text-secondary)',
                   }}>{(CAT_STYLE[c] || CAT_STYLE.free).label}</button>
@@ -243,7 +243,7 @@ export default function DiscussClient() {
                   className="kd-input" style={{ flex: 1, fontSize: 'var(--fs-sm)' }} />
               </div>
               <button onClick={handleCreate} disabled={creating} style={{
-                width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-base)', fontWeight: 500, cursor: creating ? 'not-allowed' : 'pointer', opacity: creating ? 0.6 : 1,
+                width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--brand)', color: 'var(--text-inverse)', fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-body)', cursor: creating ? 'not-allowed' : 'pointer', opacity: creating ? 0.6 : 1,
               }}>{creating ? '생성 중...' : '토론 시작하기'}</button>
             </div>
           )}
@@ -259,7 +259,7 @@ export default function DiscussClient() {
             <>
               {hotTopics.length > 0 && (
                 <div style={{ marginBottom: 'var(--sp-sm)' }}>
-                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>🔥 HOT 토론</div>
+                  <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>🔥 HOT 토론</div>
                   {hotTopics.map(t => <TopicCard key={t.id} topic={t} />)}
                 </div>
               )}

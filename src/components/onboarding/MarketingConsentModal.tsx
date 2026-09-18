@@ -158,12 +158,12 @@ export default function MarketingConsentModal({ userId, isOpen, onClose }: Props
             <div style={{ fontSize: 40, marginBottom: 4 }}>🎁</div>
             <div
               id="kd-mc-title"
-              style={{ color: '#fff', fontSize: 18, fontWeight: 600, lineHeight: 1.3, marginBottom: 6, wordBreak: 'keep-all' }}
+              style={{ color: '#fff', fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', lineHeight: 1.3, marginBottom: 6, wordBreak: 'keep-all' }}
             >
               놓치면 아쉬운 알림,<br />
               <span style={{ color: '#FEE500' }}>한번에 받기</span>
             </div>
-            <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, lineHeight: 1.5 }}>
+            <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: 'var(--fs-xs)', lineHeight: 1.5 }}>
               청약·실거래 핵심 알림 + 마케팅 혜택<br />
               해지는 마이페이지에서 언제든 가능
             </div>
@@ -187,10 +187,10 @@ export default function MarketingConsentModal({ userId, isOpen, onClose }: Props
               style={{ marginTop: 2, accentColor: '#FEE500' }}
             />
             <div style={{ flex: 1 }}>
-              <div style={{ color: '#fff', fontSize: 13, fontWeight: 500, marginBottom: 2 }}>
-                마케팅 정보 수신 동의 <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>(광고)</span>
+              <div style={{ color: '#fff', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', marginBottom: 2 }}>
+                마케팅 정보 수신 동의 <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 'var(--fw-quiet)' }}>(광고)</span>
               </div>
-              <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, lineHeight: 1.5 }}>
+              <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 'var(--fs-xs)', lineHeight: 1.5 }}>
                 할인·이벤트·맞춤 추천 알림 받기
               </div>
             </div>
@@ -214,10 +214,10 @@ export default function MarketingConsentModal({ userId, isOpen, onClose }: Props
               style={{ marginTop: 2, accentColor: '#FEE500' }}
             />
             <div style={{ flex: 1 }}>
-              <div style={{ color: '#fff', fontSize: 13, fontWeight: 500, marginBottom: 2 }}>
+              <div style={{ color: '#fff', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', marginBottom: 2 }}>
                 💬 카카오 채널 친구 추가
               </div>
-              <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, lineHeight: 1.5 }}>
+              <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: 'var(--fs-xs)', lineHeight: 1.5 }}>
                 동의 시 카카오톡으로 즉시 알림 받기
               </div>
             </div>
@@ -238,7 +238,7 @@ export default function MarketingConsentModal({ userId, isOpen, onClose }: Props
               onChange={(e) => setNight(e.target.checked)}
               style={{ accentColor: '#FEE500' }}
             />
-            <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>
+            <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 'var(--fs-xs)' }}>
               야간(21~08시) 알림도 받기
             </span>
           </label>
@@ -248,7 +248,7 @@ export default function MarketingConsentModal({ userId, isOpen, onClose }: Props
             disabled={submitting}
             style={{
               width: '100%', background: '#FEE500', color: '#191919',
-              padding: '14px', borderRadius: 12, fontSize: 15, fontWeight: 600,
+              padding: '14px', borderRadius: 12, fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)',
               border: 'none', cursor: submitting ? 'not-allowed' : 'pointer',
               opacity: submitting ? 0.6 : 1,
               marginBottom: 8,
@@ -263,7 +263,7 @@ export default function MarketingConsentModal({ userId, isOpen, onClose }: Props
             disabled={submitting}
             style={{
               width: '100%', background: 'transparent',
-              color: 'rgba(255,255,255,0.5)', fontSize: 12,
+              color: 'rgba(255,255,255,0.5)', fontSize: 'var(--fs-xs)',
               padding: 8, border: 'none',
               cursor: submitting ? 'not-allowed' : 'pointer',
             }}

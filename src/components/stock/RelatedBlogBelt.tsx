@@ -42,12 +42,12 @@ export default async function RelatedBlogBelt({ symbol, stockName }: Props) {
   return (
     <section style={{ marginBottom: '16px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-        <h2 style={{ fontSize: '15px', fontWeight: 600, margin: 0 }}>
+        <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', margin: 0 }}>
           📰 관련 분석 글
         </h2>
         <Link
           href={`/blog?q=${encodeURIComponent(stockName)}`}
-          style={{ fontSize: '12px', color: 'var(--brand)', textDecoration: 'none' }}
+          style={{ fontSize: 'var(--fs-xs)', color: 'var(--brand)', textDecoration: 'none' }}
         >
           더보기 →
         </Link>
@@ -90,10 +90,10 @@ export default async function RelatedBlogBelt({ symbol, stockName }: Props) {
             )}
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{
-                fontSize: '13px',
-                fontWeight: 600,
+                fontSize: 'var(--fs-xs)',
+                fontWeight: 'var(--fw-title)',
                 margin: 0,
-                lineHeight: 1.4,
+                lineHeight: 1.3,
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: 'vertical',
@@ -102,7 +102,7 @@ export default async function RelatedBlogBelt({ symbol, stockName }: Props) {
                 {post.title}
               </p>
               {post.published_at && (
-                <time style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '2px', display: 'block' }}>
+                <time style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: '2px', display: 'block' }}>
                   {new Date(post.published_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
                 </time>
               )}

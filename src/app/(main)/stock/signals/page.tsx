@@ -103,10 +103,10 @@ export default async function SignalsPage() {
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '16px' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '8px' }}>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', marginBottom: '8px' }}>
         ⚡ 수급 시그널
       </h1>
-      <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '24px', lineHeight: 1.6 }}>
+      <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', marginBottom: '24px', lineHeight: 1.6 }}>
         외국인·기관·개인 수급 데이터에서 AI가 매일 자동으로 탐지하는 조합 신호입니다.
         단순 순매수 수치가 아닌, 여러 조건이 동시에 충족되는 종목만 선별합니다.
       </p>
@@ -143,25 +143,25 @@ export default async function SignalsPage() {
         }}>
           <p style={{ fontSize: '48px', marginBottom: '12px' }}>📡</p>
           <p>현재 감지된 시그널이 없습니다.</p>
-          <p style={{ fontSize: '13px' }}>매일 장 마감 후 16시에 자동 업데이트됩니다.</p>
+          <p style={{ fontSize: 'var(--fs-xs)' }}>매일 장 마감 후 16시에 자동 업데이트됩니다.</p>
         </div>
       ) : (
         Object.entries(grouped).map(([type, items]) => {
           const meta = SIGNAL_LABELS[type] || { label: type, emoji: '📊', description: '' };
           return (
             <section key={type} style={{ marginBottom: '32px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>
+              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', marginBottom: '4px' }}>
                 {meta.emoji} {meta.label}
                 <span style={{
-                  fontSize: '13px',
-                  fontWeight: 400,
+                  fontSize: 'var(--fs-xs)',
+                  fontWeight: 'var(--fw-quiet)',
                   color: 'var(--text-tertiary)',
                   marginLeft: '8px',
                 }}>
                   {items.length}건
                 </span>
               </h2>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+              <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: '12px' }}>
                 {meta.description}
               </p>
 
@@ -188,23 +188,23 @@ export default async function SignalsPage() {
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                        <span style={{ fontWeight: 600, fontSize: '15px' }}>
+                        <span style={{ fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-sm)' }}>
                           {stock?.name || signal.symbol}
                         </span>
                         <span style={{
-                          fontSize: '12px',
+                          fontSize: 'var(--fs-xs)',
                           padding: '2px 8px',
                           borderRadius: '12px',
                           background: signal.strength >= 7 ? 'rgba(239,68,68,0.1)' : 'rgba(59,130,246,0.1)',
                           color: signal.strength >= 7 ? 'var(--accent-red)' : 'var(--brand)',
-                          fontWeight: 600,
+                          fontWeight: 'var(--fw-title)',
                         }}>
                           강도 {signal.strength}/10
                         </span>
                       </div>
 
                       {stock && (
-                        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 6px' }}>
+                        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: '0 0 6px' }}>
                           {stock.price?.toLocaleString()}원
                           <span style={{ color: Number(stock.change_pct) >= 0 ? 'var(--accent-red)' : 'var(--brand)', marginLeft: '6px' }}>
                             {Number(stock.change_pct) >= 0 ? '+' : ''}{Number(stock.change_pct).toFixed(1)}%
@@ -213,7 +213,7 @@ export default async function SignalsPage() {
                       )}
 
                       {signal.interpretation_ko && (
-                        <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', margin: 0, lineHeight: 1.5 }}>
+                        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', margin: 0, lineHeight: 1.5 }}>
                           {signal.interpretation_ko.slice(0, 120)}
                         </p>
                       )}

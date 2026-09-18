@@ -109,8 +109,8 @@ export default function DealCards({ items }: { items: DealSite[] }) {
                     position: 'absolute',
                     top: 6,
                     left: 6,
-                    fontSize: 10,
-                    fontWeight: 500,
+                    fontSize: 'var(--fs-2xs)',
+                    fontWeight: 'var(--fw-body)',
                     padding: '2px 7px',
                     borderRadius: 'var(--radius-pill)',
                     background: tag.bg,
@@ -126,8 +126,8 @@ export default function DealCards({ items }: { items: DealSite[] }) {
             <div style={{ padding: '8px 10px 10px' }}>
               <div
                 style={{
-                  fontSize: 13,
-                  fontWeight: 600,
+                  fontSize: 'var(--fs-xs)',
+                  fontWeight: 'var(--fw-title)',
                   lineHeight: 1.3,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -137,8 +137,8 @@ export default function DealCards({ items }: { items: DealSite[] }) {
               >
                 {row.name}
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 3 }}>{where}</div>
-              <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)', marginTop: 2 }}>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 3 }}>{where}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-secondary)', marginTop: 2 }}>
                 {priceLine(row)}
               </div>
             </div>

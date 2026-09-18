@@ -27,7 +27,7 @@ export default function AptLocationMini({ address, latitude, longitude, nearbySt
           📍
         </div>
       )}
-      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', fontWeight: 600 }}>{address}</div>
+      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{address}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-sm)' }}>
         {nearbyStation && (
           <span style={{ fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-xl)', background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>

@@ -50,7 +50,7 @@ export default function MiniLineChart({
 
   return (
     <div>
-      {title && <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#1e293b', marginBottom: 6 }}>{title}</div>}
+      {title && <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: '#1e293b', marginBottom: 6 }}>{title}</div>}
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height }}>
         {/* Grid lines */}
         {[0.25, 0.5, 0.75].map(pct => (
@@ -74,7 +74,7 @@ export default function MiniLineChart({
         ))}
         {/* Values */}
         {showValues && points.map((p, i) => (
-          <text key={i} x={p.x} y={p.y - 8} textAnchor="middle" fontSize="9" fill="#7D8DA3">
+          <text key={i} x={p.x} y={p.y - 8} textAnchor="middle" fontSize="10" fill="#7D8DA3">
             {data[i].value.toLocaleString()}
           </text>
         ))}
@@ -82,7 +82,7 @@ export default function MiniLineChart({
         {showLabels && data.map((d, i) => {
           if (data.length > 8 && i % 2 !== 0 && i !== data.length - 1) return null;
           return (
-            <text key={i} x={points[i].x} y={H - 2} textAnchor="middle" fontSize="9" fill="#94A8C4">
+            <text key={i} x={points[i].x} y={H - 2} textAnchor="middle" fontSize="10" fill="#94A8C4">
               {d.label}
             </text>
           );

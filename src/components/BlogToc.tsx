@@ -94,7 +94,7 @@ export default function BlogToc({ toc }: { toc: TocItem[] }) {
               data-toc-id={item.id}
               onClick={() => scrollTo(item.id)}
               style={{
-                padding: '6px 12px', borderRadius: 'var(--radius-xl)', fontSize: 11, fontWeight: isActive ? 700 : 500,
+                padding: '6px 12px', borderRadius: 'var(--radius-xl)', fontSize: 'var(--fs-xs)', fontWeight: isActive ? 'var(--fw-num)' : 'var(--fw-body)',
                 background: isActive ? 'var(--brand-navy)' : 'var(--bg-surface)',
                 color: isActive ? '#fff' : 'var(--text-secondary)',
                 border: isActive ? 'none' : '1px solid var(--border)',
@@ -103,7 +103,7 @@ export default function BlogToc({ toc }: { toc: TocItem[] }) {
                 transition: 'all var(--transition-fast)',
               }}
             >
-              <span style={{ fontSize: 10, fontWeight: 800, opacity: 0.7 }}>{i + 1}</span>
+              <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-num)', opacity: 0.7 }}>{i + 1}</span>
               {cleanText.length > 14 ? cleanText.slice(0, 14) + '\u2026' : cleanText}
             </button>
           );

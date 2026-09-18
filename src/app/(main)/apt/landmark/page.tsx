@@ -54,14 +54,14 @@ export default async function AptLandmarkPage({ searchParams }: { searchParams?:
   return (
     <>
       <header style={{ padding: '12px 4px 4px' }}>
-        <h1 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>🏆 랜드마크 단지</h1>
-        <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 0' }}>
+        <h1 style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', margin: 0 }}>🏆 랜드마크 단지</h1>
+        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: '4px 0 0' }}>
           {region ? `${region} · ` : ''}{total.toLocaleString()}개 단지 · {page}/{totalPages} 페이지
         </p>
       </header>
 
       {rows.length === 0 ? (
-        <section style={{ marginTop: 16, padding: 24, textAlign: 'center', color: 'var(--text-secondary)', fontSize: 12, background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 12 }}>
+        <section style={{ marginTop: 16, padding: 24, textAlign: 'center', color: 'var(--text-secondary)', fontSize: 'var(--fs-xs)', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 12 }}>
           표시할 단지가 없습니다.
         </section>
       ) : (

@@ -83,9 +83,9 @@ export default function ListThumb({ src, name, height = SIZE }: ListThumbProps) 
             justifyContent: 'center',
             width: '100%',
             height: '100%',
-            fontSize: 17,
-            fontWeight: 600,
-            letterSpacing: '-.012em',
+            fontSize: 'var(--fs-sm)',
+            fontWeight: 'var(--fw-title)',
+            letterSpacing: '-0.2px',
             color: tone.fg,
           }}
         >

@@ -28,9 +28,9 @@ export default function LiveActivityIndicator() {
   if (activeVisitors <= 0) return null;
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
       <span className="kd-pulse-dot" style={{ width: 5, height: 5, background: '#22C55E' }} />
-      <span style={{ color: 'var(--accent-green)', fontWeight: 600 }}>{activeVisitors}명</span> 활동 중
+      <span style={{ color: 'var(--accent-green)', fontWeight: 'var(--fw-title)' }}>{activeVisitors}명</span> 활동 중
     </div>
   );
 }

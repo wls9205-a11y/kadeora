@@ -55,10 +55,10 @@ export default function KakaoBottomSheet({ open, onClose, feature = 'star', titl
       }}>
         <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.1)', margin: '0 auto 16px' }} />
 
-        <div style={{ fontSize: 16, fontWeight: 500, color: '#ddd8d0', marginBottom: 4, textAlign: 'center' }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)', color: '#ddd8d0', marginBottom: 4, textAlign: 'center' }}>
           {title || '회원 전용 기능이에요'}
         </div>
-        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 20, textAlign: 'center' }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.35)', marginBottom: 20, textAlign: 'center' }}>
           {description || '로그인하면 바로 이용할 수 있습니다'}
         </div>
 
@@ -75,12 +75,12 @@ export default function KakaoBottomSheet({ open, onClose, feature = 'star', titl
           <svg style={{ position: 'absolute', left: 16 }} width="18" height="18" viewBox="0 0 512 512" fill="rgba(0,0,0,0.9)">
             <path d="M255.5 48C141.1 48 48 126.1 48 222.4c0 62.2 38.7 116.7 97 149.8l-24.1 89.7c-2.1 7.9 6.8 14.4 13.7 9.9l101.2-65.2c7.2 1 14.6 1.5 22.2 1.5 114.4 0 207.5-78.1 207.5-174.4S369.9 48 255.5 48z" />
           </svg>
-          <span style={{ fontSize: 15, color: 'rgba(0,0,0,0.85)', fontWeight: 500 }}>
+          <span style={{ fontSize: 'var(--fs-sm)', color: 'rgba(0,0,0,0.85)', fontWeight: 'var(--fw-body)' }}>
             카카오톡으로 로그인
           </span>
         </button>
 
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.16)', textAlign: 'center', marginTop: 12 }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.16)', textAlign: 'center', marginTop: 12 }}>
           <button
             type="button"
             onClick={() => trackCtaAndNavigate({ href: altUrl, ctaName: `kakao_sheet_${feature}_alt`, pagePath: pathname, router })}

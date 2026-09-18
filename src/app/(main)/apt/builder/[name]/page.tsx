@@ -84,14 +84,14 @@ export default async function BuilderPage({ params }: Props) {
       <JsonLd data={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }} />
       <JsonLd data={{ '@context': 'https://schema.org', '@type': 'Organization', name: builder, url: `${SITE_URL}/apt/builder/${encodeURIComponent(builder)}`, description: `${builder} — ${sites.length}개 아파트 분양 현장`, numberOfEmployees: { '@type': 'QuantitativeValue', value: sites.length, unitText: '분양 현장' } }} />
 
-      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
+      <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-md)' }}>
         <Link href="/apt" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>부동산</Link><span>›</span>
-        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{shortName}</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{shortName}</span>
       </nav>
 
-      <h1 style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+      <h1 style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 8px' }}>
         {shortName} 분양 아파트
-        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-tertiary)', marginLeft: 8 }}>{sites.length}개 현장</span>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', marginLeft: 8 }}>{sites.length}개 현장</span>
       </h1>
 
       {/* KPI */}
@@ -102,14 +102,14 @@ export default async function BuilderPage({ params }: Props) {
           { l: '평균 분양가', v: avgPriceMin > 0 ? fmtAmount(avgPriceMin) : '-' },
         ].map((k, i) => (
           <div key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 10, textAlign: 'center' }}>
-            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{k.l}</div>
-            <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>{k.v}</div>
+            <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{k.l}</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{k.v}</div>
           </div>
         ))}
       </div>
 
       {/* 유니크 분석 */}
-      <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--text-secondary)', marginBottom: 16, padding: '12px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+      <p style={{ fontSize: 'var(--fs-xs)', lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: 16, padding: '12px 14px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
         <strong>{builder}</strong>은 현재 <strong>{sites.length}개</strong> 분양 현장을 운영 중이며,
         {` ${regions.slice(0, 5).join(', ')} 등 ${regions.length}개 지역에 진출해 있습니다.`}
         {avgPriceMin > 0 && ` 평균 분양가(최소)는 ${fmtAmount(avgPriceMin)}이며,`}
@@ -120,10 +120,10 @@ export default async function BuilderPage({ params }: Props) {
       {/* 지역별 분포 */}
       {regionDist.length > 0 && (
         <section style={{ marginBottom: 16 }}>
-          <h2 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px' }}>지역별 현장 수</h2>
+          <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', margin: '0 0 10px' }}>지역별 현장 수</h2>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {regionDist.map(([r, c]) => (
-              <Link key={r} href={`/apt/region/${encodeURIComponent(r)}`} style={{ padding: '6px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 12, color: 'var(--text-secondary)' }}>{r} <strong>{c}</strong></Link>
+              <Link key={r} href={`/apt/region/${encodeURIComponent(r)}`} style={{ padding: '6px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 20, textDecoration: 'none', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>{r} <strong>{c}</strong></Link>
             ))}
           </div>
         </section>
@@ -131,7 +131,7 @@ export default async function BuilderPage({ params }: Props) {
 
       {/* 현장 목록 */}
       <section style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px' }}>{shortName} 분양 현장</h2>
+        <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', margin: '0 0 10px' }}>{shortName} 분양 현장</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {sites.map((s, i) => {
             const thumb = Array.isArray((s as any).images) && (s as any).images[0]
@@ -147,12 +147,12 @@ export default async function BuilderPage({ params }: Props) {
                   style={{ width: 56, height: 42, objectFit: 'cover', borderRadius: 'var(--radius-sm)', background: '#162035', flexShrink: 0 }}
                 />
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
-                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{s.region} {s.sigungu || ''} · {tLabel[s.site_type] || ''}{s.total_units ? ` · ${s.total_units}세대` : ''}</div>
+                  <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+                  <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{s.region} {s.sigungu || ''} · {tLabel[s.site_type] || ''}{s.total_units ? ` · ${s.total_units}세대` : ''}</div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 8 }}>
-                  {s.price_min ? <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{fmtAmount(s.price_min)}~</div> : null}
-                  {s.status && <div style={{ fontSize: 10, color: s.status === '분양중' ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>{s.status}</div>}
+                  {s.price_min ? <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)' }}>{fmtAmount(s.price_min)}~</div> : null}
+                  {s.status && <div style={{ fontSize: 'var(--fs-2xs)', color: s.status === '분양중' ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>{s.status}</div>}
                 </div>
               </Link>
             );
@@ -163,17 +163,17 @@ export default async function BuilderPage({ params }: Props) {
 
       {/* FAQ */}
       <section style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px' }}>자주 묻는 질문</h2>
+        <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', margin: '0 0 10px' }}>자주 묻는 질문</h2>
         {faq.map((f, i) => (
           <details key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '10px 14px', marginBottom: 6 }}>
-            <summary style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', cursor: 'pointer' }}>{f.q}</summary>
-            <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>{f.a}</p>
+            <summary style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)', cursor: 'pointer' }}>{f.q}</summary>
+            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 8 }}>{f.a}</p>
           </details>
         ))}
       </section>
 
-      <Link href="/apt" style={{ display: 'block', textAlign: 'center', padding: '14px', marginBottom: 40, borderRadius: 'var(--radius-lg)', fontWeight: 500, textDecoration: 'none', fontSize: 13, background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', color: '#fff' }}>🏗️ 전체 분양 정보 보기 →</Link>
-      <footer style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center', paddingBottom: 40 }}>데이터 출처: 국토교통부 · 청약홈 · 카더라</footer>
+      <Link href="/apt" style={{ display: 'block', textAlign: 'center', padding: '14px', marginBottom: 40, borderRadius: 'var(--radius-lg)', fontWeight: 'var(--fw-body)', textDecoration: 'none', fontSize: 'var(--fs-xs)', background: 'linear-gradient(135deg, #0F1B3E 0%, #2563EB 100%)', color: '#fff' }}>🏗️ 전체 분양 정보 보기 →</Link>
+      <footer style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', textAlign: 'center', paddingBottom: 40 }}>데이터 출처: 국토교통부 · 청약홈 · 카더라</footer>
     </article>
   );
 }

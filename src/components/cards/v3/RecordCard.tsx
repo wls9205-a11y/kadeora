@@ -50,8 +50,8 @@ export default function RecordCard({ href, title, meta, rows, caption }: RecordC
           style={{
             margin: 0,
             fontSize: 'var(--fs-sm)',
-            fontWeight: 600,
-            lineHeight: 1.4,
+            fontWeight: 'var(--fw-title)',
+            lineHeight: 1.3,
             color: 'var(--text-primary)',
             wordBreak: 'keep-all',
           }}
@@ -81,7 +81,7 @@ export default function RecordCard({ href, title, meta, rows, caption }: RecordC
                 style={{
                   margin: '2px 0 0',
                   fontSize: 'var(--fs-md)',
-                  fontWeight: 700,
+                  fontWeight: 'var(--fw-num)',
                   fontVariantNumeric: 'tabular-nums',
                   color: r.tone ? TONE_COLOR[r.tone] : 'var(--text-primary)',
                 }}

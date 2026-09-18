@@ -47,7 +47,7 @@ const WatermarkSm = () => (
       <circle cx="36" cy="36" r="7" fill="rgba(255,255,255,0.8)" />
       <circle cx="54" cy="36" r="7" fill="rgba(255,255,255,0.8)" />
     </svg>
-    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>kadeora.app</span>
+    <span style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.7)', fontWeight: 'var(--fw-body)' }}>kadeora.app</span>
   </div>
 );
 
@@ -123,8 +123,8 @@ export default function AptImageGallery({ images, name, region, badges }: {
         background: 'var(--bg-elevated)',
       }}>
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '12px 14px' }}>
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>{region}</div>
-          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.2, wordBreak: 'keep-all' }}>{name}</div>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>{region}</div>
+          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', lineHeight: 1.3, wordBreak: 'keep-all' }}>{name}</div>
         </div>
         {badges}
       </div>
@@ -166,13 +166,13 @@ export default function AptImageGallery({ images, name, region, badges }: {
                   <span style={{
                     position: 'absolute', bottom: 8, right: 8,
                     background: 'rgba(0,0,0,0.6)', color: '#fff',
-                    fontSize: 11, padding: '3px 10px', borderRadius: 'var(--radius-card)', zIndex: 1,
+                    fontSize: 'var(--fs-xs)', padding: '3px 10px', borderRadius: 'var(--radius-card)', zIndex: 1,
                   }}>{i + 1} / {total}</span>
                 </div>
                 {img.caption && (
                   <div style={{
                     padding: '6px 12px', background: 'rgba(0,0,0,0.4)',
-                    color: 'rgba(255,255,255,0.7)', fontSize: 11,
+                    color: 'rgba(255,255,255,0.7)', fontSize: 'var(--fs-xs)',
                     whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                   }}>{img.caption}</div>
                 )}
@@ -294,8 +294,8 @@ export default function AptImageGallery({ images, name, region, badges }: {
                     position: 'absolute', bottom: 12, right: 12,
                     background: 'rgba(0,0,0,0.7)', color: '#fff',
                     border: '1px solid rgba(255,255,255,0.2)',
-                    fontSize: 13, padding: '8px 14px', borderRadius: 'var(--radius-card)',
-                    fontWeight: 600, cursor: 'pointer', zIndex: 2,
+                    fontSize: 'var(--fs-xs)', padding: '8px 14px', borderRadius: 'var(--radius-card)',
+                    fontWeight: 'var(--fw-title)', cursor: 'pointer', zIndex: 2,
                   }}
                 >
                   전체보기 ({total})

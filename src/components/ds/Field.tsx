@@ -34,7 +34,7 @@ export default function Field({ label, hint, error, required, ...input }: FieldP
     <div data-ds="field" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       <label
         htmlFor={id}
-        style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--text-secondary)' }}
+        style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-secondary)' }}
       >
         {label}
         {required && (

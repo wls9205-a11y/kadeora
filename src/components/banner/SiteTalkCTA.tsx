@@ -96,14 +96,14 @@ export default function SiteTalkCTA(props: SiteTalkCTAProps) {
         </span>
 
         <span style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ display: 'block', fontSize: 13, fontWeight: 700, lineHeight: 1.35, color: 'var(--text-primary)' }}>
+          <span style={{ display: 'block', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', lineHeight: 1.3, color: 'var(--text-primary)' }}>
             부정공 카톡방
           </span>
           <span
             style={{
               display: 'block',
-              fontSize: 11.5,
-              lineHeight: 1.45,
+              fontSize: 'var(--fs-2xs)',
+              lineHeight: 1.5,
               color: 'var(--text-tertiary)',
               wordBreak: 'keep-all',
               marginTop: 1,
@@ -113,7 +113,7 @@ export default function SiteTalkCTA(props: SiteTalkCTAProps) {
           </span>
         </span>
 
-        <span aria-hidden="true" style={{ flexShrink: 0, fontSize: 13, color: 'var(--text-tertiary)' }}>›</span>
+        <span aria-hidden="true" style={{ flexShrink: 0, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>›</span>
       </a>
     </div>
   );

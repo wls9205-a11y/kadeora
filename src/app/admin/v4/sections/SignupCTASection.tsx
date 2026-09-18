@@ -26,13 +26,13 @@ interface Props {
 }
 
 const sectionTitleStyle: React.CSSProperties = {
-  fontSize: 14, fontWeight: 600, color: 'var(--text-primary)',
+  fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)',
   marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8,
 };
 
 const subTitleStyle: React.CSSProperties = {
-  fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)',
-  textTransform: 'uppercase', marginTop: 14, marginBottom: 6, letterSpacing: 0.4,
+  fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)',
+  textTransform: 'uppercase', marginTop: 14, marginBottom: 6, letterSpacing: '0.14em',
 };
 
 export default function SignupCTASection({ data, ctrAvg }: Props) {
@@ -71,8 +71,8 @@ export default function SignupCTASection({ data, ctrAvg }: Props) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {(broken.items ?? []).slice(0, 6).map(c => (
             <div key={c.cta_name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '6px 8px', borderRadius: 6, background: 'rgba(0,0,0,0.2)' }}>
-              <code style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent-red)' }}>{c.cta_name}</code>
-              <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+              <code style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--accent-red)' }}>{c.cta_name}</code>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>
                 노출 <strong>{c.views_24h ?? 0}</strong> · 클릭 <strong>{c.clicks_24h ?? 0}</strong>
               </span>
             </div>
@@ -81,10 +81,10 @@ export default function SignupCTASection({ data, ctrAvg }: Props) {
       </AlertCard>
 
       <details style={{ marginTop: 12 }}>
-        <summary style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)', cursor: 'pointer' }}>
+        <summary style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-secondary)', cursor: 'pointer' }}>
           저조 CTA ({weak.count ?? 0}) ▼
         </summary>
-        <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4, fontSize: 11 }}>
+        <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4, fontSize: 'var(--fs-xs)' }}>
           {(weak.items ?? []).slice(0, 12).map(c => (
             <div key={c.cta_name} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 8px', borderRadius: 4, background: 'rgba(0,0,0,0.2)' }}>
               <code style={{ color: 'var(--text-secondary)' }}>{c.cta_name}</code>
@@ -100,11 +100,11 @@ export default function SignupCTASection({ data, ctrAvg }: Props) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {stages.map((s, i) => (
           <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', borderRadius: 6, background: 'rgba(0,0,0,0.18)' }}>
-            <div style={{ width: 16, fontSize: 10, color: 'var(--text-tertiary)' }}>{i + 1}</div>
-            <code style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-secondary)', flex: 1 }}>{s.label}</code>
-            <strong style={{ fontSize: 13, color: 'var(--text-primary)', minWidth: 40, textAlign: 'right' }}>{s.value ?? 0}</strong>
+            <div style={{ width: 16, fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{i + 1}</div>
+            <code style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-secondary)', flex: 1 }}>{s.label}</code>
+            <strong style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', minWidth: 40, textAlign: 'right' }}>{s.value ?? 0}</strong>
             {i > 0 && s.drop != null && s.drop > 0 && (
-              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-red)' }}>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: 'var(--accent-red)' }}>
                 -{s.drop} {s.dropLabel}
               </span>
             )}
@@ -114,7 +114,7 @@ export default function SignupCTASection({ data, ctrAvg }: Props) {
 
       <div style={subTitleStyle}>출처 × 제공사 매트릭스 (상위 12)</div>
       <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-xs)' }}>
           <thead>
             <tr style={{ color: 'var(--text-tertiary)', textAlign: 'left' }}>
               <th style={{ padding: 6 }}>출처</th>

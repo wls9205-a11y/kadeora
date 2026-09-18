@@ -30,14 +30,14 @@ function Breadth({ label, b }: { label: string; b: MarketBreadth }) {
   const total = b.up + b.down + b.flat;
   return (
     <div style={CELL}>
-      <div style={{ fontSize: 'var(--fs-3xs)', fontWeight: 500, color: 'var(--text-tertiary)', marginBottom: 3 }}>
+      <div style={{ fontSize: 'var(--fs-3xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', marginBottom: 3 }}>
         {label}
       </div>
       {total === 0 ? (
         <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>—</div>
       ) : (
         <>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, fontSize: 'var(--fs-2xs)', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-num)', fontVariantNumeric: 'tabular-nums' }}>
             <span style={{ color: 'var(--accent-red)' }}>▲{b.up}</span>
             <span style={{ color: 'var(--accent-blue)' }}>▼{b.down}</span>
           </div>
@@ -69,10 +69,10 @@ export default function StockIndexStrip({ data }: { data: StripData }) {
       <Breadth label="코스피 등락" b={data.kospi} />
       <Breadth label="코스닥 등락" b={data.kosdaq} />
       <div style={{ ...CELL, borderRight: 0 }}>
-        <div style={{ fontSize: 'var(--fs-3xs)', fontWeight: 500, color: 'var(--text-tertiary)', marginBottom: 3 }}>
+        <div style={{ fontSize: 'var(--fs-3xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', marginBottom: 3 }}>
           원/달러
         </div>
-        <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+        <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
           {data.usdkrw ? data.usdkrw.toLocaleString('ko-KR', { maximumFractionDigits: 1 }) : '—'}
         </div>
         {data.usdkrwAt && (

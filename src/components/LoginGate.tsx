@@ -82,7 +82,7 @@ export default function LoginGate({ children, feature, title, description, blurH
       <span style={{ display: 'inline-block', fontSize: 'var(--fs-xs)', padding: '2px 7px', borderRadius: 'var(--radius-sm)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.28)', marginBottom: 8 }}>
         회원 전용
       </span>
-      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: '#ccc7bf', marginBottom: 3 }}>
+      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)', color: '#ccc7bf', marginBottom: 3 }}>
         {title || d.title}
       </div>
       <div style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.25)', marginBottom: 12 }}>
@@ -115,7 +115,7 @@ export default function LoginGate({ children, feature, title, description, blurH
         <svg style={{ position: 'absolute', left: 16 }} width="18" height="18" viewBox="0 0 512 512" fill="rgba(0,0,0,0.9)">
           <path d="M255.5 48C141.1 48 48 126.1 48 222.4c0 62.2 38.7 116.7 97 149.8l-24.1 89.7c-2.1 7.9 6.8 14.4 13.7 9.9l101.2-65.2c7.2 1 14.6 1.5 22.2 1.5 114.4 0 207.5-78.1 207.5-174.4S369.9 48 255.5 48z" />
         </svg>
-        <span style={{ fontSize: 'var(--fs-sm)', color: 'rgba(0,0,0,0.85)', fontWeight: 500, letterSpacing: '-0.2px' }}>
+        <span style={{ fontSize: 'var(--fs-sm)', color: 'rgba(0,0,0,0.85)', fontWeight: 'var(--fw-body)', letterSpacing: '-0.2px' }}>
           카카오톡으로 3초 만에 가입하기
         </span>
       </button>

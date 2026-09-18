@@ -70,8 +70,8 @@ export default function KakaoFunnel({
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <h2 style={{ fontSize: 13, fontWeight: 600, margin: 0 }}>퍼널</h2>
-        {err && <span style={{ fontSize: 11, color: 'var(--accent-red)' }}>로드 실패: {err}</span>}
+        <h2 style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', margin: 0 }}>퍼널</h2>
+        {err && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-red)' }}>로드 실패: {err}</span>}
       </div>
       <div
         style={{
@@ -99,8 +99,8 @@ export default function KakaoFunnel({
                 gap: 4,
               }}
             >
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{c.label}</span>
-              <span style={{ fontSize: 22, fontWeight: 700 }}>
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{c.label}</span>
+              <span style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-num)' }}>
                 {v == null ? '—' : v.toLocaleString()}
               </span>
             </button>

@@ -62,7 +62,7 @@ export function DetailSection({ id, title, eyebrow, meta, children }: DetailSect
                 letterSpacing: '.14em',
                 textTransform: 'uppercase',
                 color: 'var(--brand)',
-                fontWeight: 600,
+                fontWeight: 'var(--fw-title)',
                 marginBottom: 3,
               }}
             >
@@ -73,8 +73,8 @@ export function DetailSection({ id, title, eyebrow, meta, children }: DetailSect
             id={id}
             style={{
               fontSize: 'var(--fs-lg)',
-              fontWeight: 700,
-              letterSpacing: '-.02em',
+              fontWeight: 'var(--fw-num)',
+              letterSpacing: '-0.4px',
               lineHeight: 1.3,
               margin: 0,
               color: 'var(--text-primary)',
@@ -157,7 +157,7 @@ export default function DetailShell({
           paddingTop: 'var(--sp-lg)',
           borderTop: '1px solid var(--border)',
           fontSize: 'var(--fs-xs)',
-          lineHeight: 1.7,
+          lineHeight: 1.6,
           color: 'var(--text-tertiary)',
         }}
       >

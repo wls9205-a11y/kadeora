@@ -119,14 +119,14 @@ export default function SendModal({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h2 style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>📤 카카오 발송</h2>
+          <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', margin: 0 }}>📤 카카오 발송</h2>
           <button
             onClick={onClose}
             style={{
               background: 'transparent',
               color: 'var(--text-tertiary)',
               border: 'none',
-              fontSize: 18,
+              fontSize: 'var(--fs-base)',
               cursor: 'pointer',
             }}
           >
@@ -142,8 +142,8 @@ export default function SendModal({
               background: 'rgba(248,113,113,0.12)',
               border: '1px solid rgba(248,113,113,0.5)',
               color: 'var(--accent-red)',
-              fontSize: 12,
-              fontWeight: 500,
+              fontSize: 'var(--fs-xs)',
+              fontWeight: 'var(--fw-body)',
             }}
           >
             ⚠ 야간 동의 사용자만 발송됩니다 (21:00–07:59)
@@ -151,12 +151,12 @@ export default function SendModal({
         )}
 
         <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>제목</span>
+          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>제목</span>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             style={{
-              fontSize: 13,
+              fontSize: 'max(16px, var(--fs-xs))',
               padding: '8px 10px',
               borderRadius: 6,
               background: 'var(--bg-base)',
@@ -167,13 +167,13 @@ export default function SendModal({
         </label>
 
         <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>본문</span>
+          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>본문</span>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={5}
             style={{
-              fontSize: 13,
+              fontSize: 'max(16px, var(--fs-xs))',
               padding: '8px 10px',
               borderRadius: 6,
               background: 'var(--bg-base)',
@@ -193,11 +193,11 @@ export default function SendModal({
             border: '1px solid var(--border)',
           }}
         >
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4 }}>미리보기</div>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>미리보기</div>
           <pre
             style={{
               margin: 0,
-              fontSize: 12,
+              fontSize: 'var(--fs-xs)',
               whiteSpace: 'pre-wrap',
               wordBreak: 'break-word',
               fontFamily: 'inherit',
@@ -209,7 +209,7 @@ export default function SendModal({
         </div>
 
         {err && (
-          <div style={{ fontSize: 12, color: 'var(--accent-red)' }}>발송 실패: {err}</div>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-red)' }}>발송 실패: {err}</div>
         )}
 
         {result && (
@@ -219,7 +219,7 @@ export default function SendModal({
               borderRadius: 8,
               background: 'rgba(34,197,94,0.08)',
               border: '1px solid rgba(34,197,94,0.4)',
-              fontSize: 12,
+              fontSize: 'var(--fs-xs)',
               display: 'flex',
               flexDirection: 'column',
               gap: 4,
@@ -243,8 +243,8 @@ export default function SendModal({
           <button
             onClick={onClose}
             style={{
-              fontSize: 12,
-              fontWeight: 600,
+              fontSize: 'var(--fs-xs)',
+              fontWeight: 'var(--fw-title)',
               padding: '8px 14px',
               borderRadius: 6,
               cursor: 'pointer',
@@ -259,8 +259,8 @@ export default function SendModal({
             onClick={onConfirm}
             disabled={busy}
             style={{
-              fontSize: 12,
-              fontWeight: 600,
+              fontSize: 'var(--fs-xs)',
+              fontWeight: 'var(--fw-title)',
               padding: '8px 14px',
               borderRadius: 6,
               cursor: busy ? 'wait' : 'pointer',

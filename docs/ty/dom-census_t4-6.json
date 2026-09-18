@@ -1,0 +1,70 @@
+{
+ "label": "t4-6",
+ "base": "http://localhost:3000",
+ "at": "2026-09-18T02:18:53.221Z",
+ "screens": {
+  "apt-id@desktop": {
+   "textNodes": 683,
+   "combos": 63,
+   "sizes": 8,
+   "sizeHist": {
+    "10px": 21,
+    "12px": 20,
+    "14px": 500,
+    "16px": 121,
+    "18px": 8,
+    "21px": 4,
+    "24px": 6,
+    "32px": 3
+   },
+   "weights": 4,
+   "lineHeights": 21,
+   "letterSpacings": 5,
+   "gaps": 9,
+   "paddings": 62,
+   "pageOverflow": 0
+  },
+  "apt-id@mobile": {
+   "textNodes": 631,
+   "combos": 72,
+   "sizes": 8,
+   "sizeHist": {
+    "10px": 24,
+    "11px": 24,
+    "13px": 441,
+    "15px": 112,
+    "16px": 12,
+    "17px": 8,
+    "23px": 7,
+    "30px": 3
+   },
+   "weights": 4,
+   "lineHeights": 22,
+   "letterSpacings": 5,
+   "gaps": 9,
+   "paddings": 58,
+   "pageOverflow": 0
+  },
+  "apt-id@w768": {
+   "textNodes": 676,
+   "combos": 64,
+   "sizes": 8,
+   "sizeHist": {
+    "10px": 21,
+    "12px": 20,
+    "14px": 489,
+    "16px": 124,
+    "18px": 8,
+    "21px": 4,
+    "24px": 7,
+    "32px": 3
+   },
+   "weights": 4,
+   "lineHeights": 21,
+   "letterSpacings": 5,
+   "gaps": 9,
+   "paddings": 62,
+   "pageOverflow": 0
+  }
+ }
+}

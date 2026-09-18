@@ -35,8 +35,8 @@ export default function AptRecentTradeList({ region, sigungu, trades }: Props) {
       aria-label="최근 실거래"
       style={{ maxWidth: 720, margin: '12px auto', padding: '0 var(--sp-lg)' }}
     >
-      <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
-        📊 {label} 최근 실거래 <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)' }}>· {trades.length}건</span>
+      <h2 style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 8px' }}>
+        📊 {label} 최근 실거래 <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)' }}>· {trades.length}건</span>
       </h2>
       <div style={{
         background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12,
@@ -55,19 +55,19 @@ export default function AptRecentTradeList({ region, sigungu, trades }: Props) {
             }}
           >
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {t.apt_name}
               </div>
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
+              <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
                 {[t.dong || t.sigungu || '', fmtArea(t.exclusive_area), t.floor ? `${t.floor}층` : null].filter(Boolean).join(' · ')}
                 {t.built_year && <span> · {t.built_year}</span>}
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
+              <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)' }}>
                 {fmtAmount(t.deal_amount)}
               </div>
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
+              <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
                 {t.price_per_pyeong ? `평당 ${t.price_per_pyeong.toLocaleString()}만` : ''}
                 {t.deal_date && <span> · {fmtDate(t.deal_date)}</span>}
               </div>

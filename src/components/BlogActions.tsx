@@ -63,7 +63,7 @@ export default function BlogActions({ blogPostId, initialHelpfulCount }: Props) 
         border: '1px solid var(--border)',
         background: isHelpful ? 'var(--accent-blue-bg, rgba(59,130,246,0.1))' : 'var(--bg-hover)',
         color: isHelpful ? 'var(--accent-blue)' : 'var(--text-tertiary)',
-        cursor: userId ? 'pointer' : 'default', fontSize: 13, fontWeight: 600,
+        cursor: userId ? 'pointer' : 'default', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
         opacity: busy ? 0.6 : 1, transition: 'all var(--transition-fast)',
       }}>
         👍 도움이 됐어요{helpfulCount > 0 && ` ${helpfulCount}`}
@@ -73,7 +73,7 @@ export default function BlogActions({ blogPostId, initialHelpfulCount }: Props) 
         border: '1px solid var(--border)',
         background: isBookmarked ? 'var(--accent-green-bg, rgba(52,211,153,0.1))' : 'var(--bg-hover)',
         color: isBookmarked ? 'var(--accent-green)' : 'var(--text-tertiary)',
-        cursor: userId ? 'pointer' : 'default', fontSize: 13, fontWeight: 600,
+        cursor: userId ? 'pointer' : 'default', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
         opacity: busy ? 0.6 : 1, transition: 'all var(--transition-fast)',
       }}>
         {isBookmarked ? '🔖 저장됨' : '📑 저장'}

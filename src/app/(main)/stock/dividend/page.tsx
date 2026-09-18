@@ -36,9 +36,9 @@ export default async function DividendPage() {
     .gt('dividend_yield', 0).gt('price', 0)
     .order('dividend_yield', { ascending: false }).limit(30);
 
-  const ct = { fontSize: 14, fontWeight: 600 as const, color: 'var(--text-primary)', margin: '24px 0 12px' };
-  const th = { padding: '8px 10px', fontSize: 11, fontWeight: 600 as const, color: 'var(--text-tertiary)', borderBottom: '2px solid var(--border)', textAlign: 'left' as const };
-  const td = { padding: '8px 10px', fontSize: 12, borderBottom: '1px solid var(--border)', color: 'var(--text-primary)' };
+  const ct = { fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)' as const, color: 'var(--text-primary)', margin: '24px 0 12px' };
+  const th = { padding: '8px 10px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' as const, color: 'var(--text-tertiary)', borderBottom: '2px solid var(--border)', textAlign: 'left' as const };
+  const td = { padding: '8px 10px', fontSize: 'var(--fs-xs)', borderBottom: '1px solid var(--border)', color: 'var(--text-primary)' };
 
   const renderTable = (stocks: any[], isKR: boolean) => (
     <div style={{ overflowX: 'auto', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
@@ -51,12 +51,12 @@ export default async function DividendPage() {
           {(stocks ?? []).map((s: any, i: number) => (
             <tr key={s.symbol} style={{ background: i % 2 === 0 ? 'var(--bg-base)' : 'var(--bg-surface)' }}>
               <td style={td}>{i + 1}</td>
-              <td style={td}><Link href={`/stock/${s.symbol}`} style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>{s.name}</Link></td>
-              <td style={{ ...td, fontWeight: 700, color: 'var(--stock-positive)' }}>{Number(s.dividend_yield).toFixed(1)}%</td>
+              <td style={td}><Link href={`/stock/${s.symbol}`} style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 'var(--fw-title)' }}>{s.name}</Link></td>
+              <td style={{ ...td, fontWeight: 'var(--fw-num)', color: 'var(--stock-positive)' }}>{Number(s.dividend_yield).toFixed(1)}%</td>
               <td style={td}>{fmtPrice(s.price, s.currency)}</td>
               <td style={td}>{s.per ? `${Number(s.per).toFixed(1)}` : '-'}</td>
               <td style={td}>{fmtCap(Number(s.market_cap), s.currency)}</td>
-              <td style={{ ...td, fontSize: 11, color: 'var(--text-secondary)' }}>{s.sector || '-'}</td>
+              <td style={{ ...td, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>{s.sector || '-'}</td>
             </tr>
           ))}
         </tbody>
@@ -74,7 +74,7 @@ export default async function DividendPage() {
 
       <JsonLd data={{ '@context': 'https://schema.org', '@type': 'WebPage', name: TITLE, url: `${SITE_URL}/stock/dividend`, speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'section'] } }} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <nav style={{ fontSize: 12, color: 'var(--text-tertiary)', display: 'flex', gap: 4 }}>
+        <nav style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', display: 'flex', gap: 4 }}>
           <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>›
           <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>›
           <span>배당주</span>
@@ -82,8 +82,8 @@ export default async function DividendPage() {
         <ShareButtons title={TITLE} contentType="stock-page" contentRef="dividend" />
       </div>
 
-      <h1 style={{ fontSize: 'clamp(22px, 5vw, 30px)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>📊 고배당주 순위 2026</h1>
-      <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.7 }}>
+      <h1 style={{ fontSize: 'clamp(22px, 5vw, 30px)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 8 }}>📊 고배당주 순위 2026</h1>
+      <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.6 }}>
         배당수익률이 높은 종목을 국내·해외로 나누어 정리합니다. 배당수익률은 최근 연간 배당금 기준이며, 투자 판단은 배당 지속성과 재무 건전성을 함께 고려해야 합니다.
       </p>
 
@@ -100,8 +100,8 @@ export default async function DividendPage() {
         const avgYield = ((krStocks ?? []).reduce((s: number, x: any) => s + (x.dividend_yield || 0), 0) / (krStocks ?? []).length).toFixed(2);
         const sectors = [...new Set((krStocks ?? []).map((s: any) => s.sector).filter(Boolean))].slice(0, 5);
         return (
-          <section style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', lineHeight: 1.8, fontSize: 14, color: 'var(--text-secondary)' }}>
-            <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>배당주 시장 분석</h2>
+          <section style={{ marginTop: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', lineHeight: 1.6, fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
+            <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 8 }}>배당주 시장 분석</h2>
             <p>현재 국내 고배당주 1위는 <strong style={{ color: 'var(--text-primary)' }}>{top3[0]?.name}</strong>으로 배당수익률 {top3[0]?.dividend_yield?.toFixed(2)}%를 기록하고 있습니다.
             2위 {top3[1]?.name}({top3[1]?.dividend_yield?.toFixed(2)}%), 3위 {top3[2]?.name}({top3[2]?.dividend_yield?.toFixed(2)}%)가 뒤를 잇고 있습니다.</p>
             <p style={{ marginTop: 8 }}>상위 {(krStocks ?? []).length}개 종목의 평균 배당수익률은 <strong style={{ color: 'var(--text-primary)' }}>{avgYield}%</strong>이며, 주요 업종은 {sectors.join(', ')} 등으로 분포되어 있습니다.
@@ -111,8 +111,8 @@ export default async function DividendPage() {
       })()}
 
       <div style={{ marginTop: 24, display: 'flex', gap: 8 }}>
-        <Link href="/stock" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>전 종목 시세</Link>
-        <Link href="/stock/compare" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>종목 비교</Link>
+        <Link href="/stock" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' }}>전 종목 시세</Link>
+        <Link href="/stock/compare" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' }}>종목 비교</Link>
       </div>
 
       <Disclaimer type="stock" />

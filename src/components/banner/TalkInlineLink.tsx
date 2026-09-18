@@ -40,7 +40,7 @@ export default function TalkInlineLink({
         color: 'var(--text-link)',
         textDecoration: 'underline',
         textUnderlineOffset: 2,
-        fontWeight: 600,
+        fontWeight: 'var(--fw-title)',
         whiteSpace: 'nowrap',
       }}
     >

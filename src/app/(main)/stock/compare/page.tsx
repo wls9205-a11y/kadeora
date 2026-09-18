@@ -37,15 +37,15 @@ export default async function StockComparePage() {
         <h1 style={{ position:'absolute', width:1, height:1, overflow:'hidden', clip:'rect(0,0,0,0)' }}>
           주식 종목 비교
         </h1>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16, lineHeight: 1.7 }}>
+        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 16, lineHeight: 1.6 }}>
           KOSPI, KOSDAQ, NYSE, NASDAQ 종목의 시가총액, PER, PBR, 배당수익률 등 핵심 지표를 한눈에 비교하세요.
           두 종목을 선택하면 가격 추이 차트와 재무 지표를 나란히 비교할 수 있습니다.
         </p>
 
         {/* SSR 종목 목록 — 크롤러용 (JS 없이도 콘텐츠 노출) */}
         <noscript>
-          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>시가총액 상위 20 종목</h2>
-          <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+          <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', marginBottom: 8 }}>시가총액 상위 20 종목</h2>
+          <table style={{ width: '100%', fontSize: 'var(--fs-xs)', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
                 <th style={{ textAlign: 'left', padding: 6 }}>종목</th>

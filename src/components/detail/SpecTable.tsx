@@ -89,7 +89,7 @@ export default function SpecTable({
                   textAlign: 'left',
                   verticalAlign: 'top',
                   padding: 'var(--sp-sm) var(--sp-md)',
-                  fontWeight: 600,
+                  fontWeight: 'var(--fw-title)',
                   color: 'var(--text-secondary)',
                   background: 'var(--bg-sunken)',
                   wordBreak: 'keep-all',

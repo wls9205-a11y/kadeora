@@ -38,14 +38,14 @@ export default function HealthRing({ score, size = 64, label = '헬스 점수' }
         <div style={{
           position: 'absolute', inset: 0, display: 'flex',
           alignItems: 'center', justifyContent: 'center',
-          fontSize: 16, fontWeight: 700, color: color,
+          fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: color,
         }}>
           {pct}
         </div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', letterSpacing: 0.3, textTransform: 'uppercase' }}>{label}</span>
-        <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>/ 100</span>
+        <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>{label}</span>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)' }}>/ 100</span>
       </div>
     </div>
   );

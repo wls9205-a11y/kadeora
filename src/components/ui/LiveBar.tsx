@@ -20,9 +20,9 @@ export default function LiveBar({ text, variant = 'default' }: Props) {
         background: 'var(--kd-bg-soft)',
         border: '1px solid var(--kd-border)',
         borderRadius: 'var(--kd-radius)',
-        fontSize: isCompact ? 11 : 12,
+        fontSize: isCompact ? 'var(--fs-xs)' : 'var(--fs-xs)',
         color: 'var(--kd-text-2)',
-        fontWeight: 600,
+        fontWeight: 'var(--fw-title)',
         lineHeight: 1.5,
       }}
     >

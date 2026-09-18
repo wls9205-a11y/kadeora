@@ -50,7 +50,7 @@ export default function FAQBlock({ items, emitJsonLd = true }: FAQBlockProps) {
             <dt
               style={{
                 fontSize: 'var(--fs-sm)',
-                fontWeight: 600,
+                fontWeight: 'var(--fw-title)',
                 color: 'var(--text-primary)',
                 lineHeight: 1.5,
                 wordBreak: 'keep-all',
@@ -63,7 +63,7 @@ export default function FAQBlock({ items, emitJsonLd = true }: FAQBlockProps) {
                 margin: 'var(--sp-xs) 0 0',
                 fontSize: 'var(--fs-sm)',
                 color: 'var(--text-secondary)',
-                lineHeight: 1.7,
+                lineHeight: 1.6,
                 wordBreak: 'keep-all',
               }}
             >

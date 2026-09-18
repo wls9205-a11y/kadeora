@@ -81,12 +81,12 @@ export default function PollWidget({ postId, isAuthor = false }: Props) {
     }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-        <span style={{ fontSize: 13 }}>🗳️</span>
-        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', flex: 1 }}>
+        <span style={{ fontSize: 'var(--fs-xs)' }}>🗳️</span>
+        <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', flex: 1 }}>
           {poll.question}
         </span>
         {poll.expired && (
-          <span style={{ fontSize: 10, color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '3px 8px', borderRadius: 4 }}>
+          <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', background: 'var(--bg-hover)', padding: '3px 8px', borderRadius: 4 }}>
             마감
           </span>
         )}
@@ -124,12 +124,12 @@ export default function PollWidget({ postId, isAuthor = false }: Props) {
                   borderRadius: 'var(--radius-xs)',
                 }} />
               )}
-              <span style={{ position: 'relative', fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', fontWeight: isMine ? 600 : 400 }}>
+              <span style={{ position: 'relative', fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', fontWeight: isMine ? 'var(--fw-title)' : 'var(--fw-quiet)' }}>
                 {isMine && <span style={{ marginRight: 4 }}>✓</span>}
                 {opt}
               </span>
               {showResults && (
-                <span style={{ position: 'relative', fontSize: 'var(--fs-xs)', color: isMine ? 'var(--brand)' : 'var(--text-tertiary)', fontWeight: 600, flexShrink: 0 }}>
+                <span style={{ position: 'relative', fontSize: 'var(--fs-xs)', color: isMine ? 'var(--brand)' : 'var(--text-tertiary)', fontWeight: 'var(--fw-title)', flexShrink: 0 }}>
                   {pct}% ({count})
                 </span>
               )}
@@ -139,7 +139,7 @@ export default function PollWidget({ postId, isAuthor = false }: Props) {
       </div>
 
       {/* 푸터 */}
-      <div style={{ marginTop: 'var(--sp-sm)', fontSize: 10, color: 'var(--text-tertiary)', display: 'flex', gap: 'var(--sp-sm)' }}>
+      <div style={{ marginTop: 'var(--sp-sm)', fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', display: 'flex', gap: 'var(--sp-sm)' }}>
         <span>총 {poll.total}명 참여</span>
         {poll.ends_at && !poll.expired && (
           <span>· {new Date(poll.ends_at).toLocaleDateString('ko-KR')} 마감</span>

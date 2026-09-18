@@ -76,7 +76,7 @@ export default function DealHeroCard({ item }: { item: HomeRow }) {
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span
             style={{
-              fontSize: 15, fontWeight: 600, lineHeight: 1.3, letterSpacing: -0.2,
+              fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', lineHeight: 1.3, letterSpacing: '-0.2px',
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               color: 'var(--text-primary)',
             }}
@@ -86,7 +86,7 @@ export default function DealHeroCard({ item }: { item: HomeRow }) {
           {stage && (
             <span
               style={{
-                flexShrink: 0, fontSize: 10, fontWeight: 500, letterSpacing: 0,
+                flexShrink: 0, fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', letterSpacing: 0,
                 padding: '1px 6px', borderRadius: 'var(--radius-pill)',
                 background: 'var(--bg-hover)', color: 'var(--text-secondary)',
                 whiteSpace: 'nowrap',
@@ -97,7 +97,7 @@ export default function DealHeroCard({ item }: { item: HomeRow }) {
           )}
         </span>
         {where && (
-          <span style={{ display: 'block', fontSize: 11, letterSpacing: 0, color: 'var(--text-tertiary)', marginTop: 2 }}>
+          <span style={{ display: 'block', fontSize: 'var(--fs-xs)', letterSpacing: 0, color: 'var(--text-tertiary)', marginTop: 2 }}>
             {where}
           </span>
         )}

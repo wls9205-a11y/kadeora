@@ -75,8 +75,8 @@ export default function SubscriptionAlertButton({ aptName, redirect, compact = f
           gap: 4,
           padding: compact ? '5px 9px' : '7px 12px',
           borderRadius: 6,
-          fontSize: compact ? 11.5 : 12.5,
-          fontWeight: 500,
+          fontSize: compact ? 'var(--fs-2xs)' : 'var(--fs-2xs)',
+          fontWeight: 'var(--fw-body)',
           cursor: state === 'done' ? 'default' : 'pointer',
           whiteSpace: 'nowrap',
           border: '1px solid',
@@ -90,7 +90,7 @@ export default function SubscriptionAlertButton({ aptName, redirect, compact = f
       </button>
 
       {errMsg ? (
-        <span role="status" style={{ fontSize: 11, color: '#b91c1c', marginLeft: 6 }}>
+        <span role="status" style={{ fontSize: 'var(--fs-xs)', color: '#b91c1c', marginLeft: 6 }}>
           {errMsg}
         </span>
       ) : null}
@@ -182,7 +182,7 @@ function KakaoSignupModal({
             color: 'rgba(255,255,255,0.5)',
             background: 'transparent',
             border: 'none',
-            fontSize: 18,
+            fontSize: 'var(--fs-base)',
             cursor: 'pointer',
             padding: 0,
           }}
@@ -197,10 +197,10 @@ function KakaoSignupModal({
               background: 'rgba(254,229,0,0.1)',
               border: '1px solid rgba(254,229,0,0.3)',
               color: '#fee500',
-              fontSize: 11,
+              fontSize: 'var(--fs-xs)',
               padding: '4px 12px',
               borderRadius: 999,
-              fontWeight: 500,
+              fontWeight: 'var(--fw-body)',
             }}
           >
             청약 알림
@@ -212,9 +212,9 @@ function KakaoSignupModal({
           style={{
             textAlign: 'center',
             color: '#fff',
-            fontSize: 19,
-            fontWeight: 500,
-            lineHeight: 1.35,
+            fontSize: 'var(--fs-md)',
+            fontWeight: 'var(--fw-body)',
+            lineHeight: 1.3,
             marginBottom: 10,
             wordBreak: 'keep-all',
           }}
@@ -228,8 +228,8 @@ function KakaoSignupModal({
           style={{
             textAlign: 'center',
             color: 'rgba(255,255,255,0.65)',
-            fontSize: 13,
-            lineHeight: 1.55,
+            fontSize: 'var(--fs-xs)',
+            lineHeight: 1.5,
             marginBottom: 18,
             wordBreak: 'keep-all',
           }}
@@ -249,8 +249,8 @@ function KakaoSignupModal({
             textAlign: 'center',
             padding: 14,
             borderRadius: 12,
-            fontSize: 15,
-            fontWeight: 500,
+            fontSize: 'var(--fs-sm)',
+            fontWeight: 'var(--fw-body)',
             textDecoration: 'none',
             marginBottom: 10,
             boxShadow: '0 4px 16px rgba(254,229,0,0.18)',
@@ -263,7 +263,7 @@ function KakaoSignupModal({
           style={{
             textAlign: 'center',
             color: 'rgba(255,255,255,0.4)',
-            fontSize: 10,
+            fontSize: 'var(--fs-2xs)',
             lineHeight: 1.6,
           }}
         >

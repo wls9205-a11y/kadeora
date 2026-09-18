@@ -30,7 +30,7 @@ export default function ContentHealthSection({ data }: Props) {
       padding: 16, borderRadius: 'var(--radius-lg, 14px)',
       background: 'var(--bg-elevated)', border: '1px solid var(--border)',
     }}>
-      <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginTop: 0, marginBottom: 10 }}>
+      <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginTop: 0, marginBottom: 10 }}>
         📚 콘텐츠 위생
       </h2>
 
@@ -42,13 +42,13 @@ export default function ContentHealthSection({ data }: Props) {
       </div>
 
       <div style={{
-        marginTop: 12, fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)',
-        textTransform: 'uppercase', letterSpacing: 0.4,
+        marginTop: 12, fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)',
+        textTransform: 'uppercase', letterSpacing: '0.14em',
       }}>
         카테고리별 허브 매핑
       </div>
       <div style={{ overflowX: 'auto', marginTop: 6 }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-xs)' }}>
           <thead>
             <tr style={{ color: 'var(--text-tertiary)' }}>
               <th style={{ padding: 6, textAlign: 'left' }}>카테고리</th>
@@ -67,7 +67,7 @@ export default function ContentHealthSection({ data }: Props) {
                   <td style={{ padding: 6 }}><code style={{ color: 'var(--text-secondary)' }}>{c}</code></td>
                   <td style={{ padding: 6, textAlign: 'right' }}>{(b.mapped ?? 0).toLocaleString()}</td>
                   <td style={{ padding: 6, textAlign: 'right', color: 'var(--text-tertiary)' }}>{(b.total ?? 0).toLocaleString()}</td>
-                  <td style={{ padding: 6, textAlign: 'right', color, fontWeight: 700 }}>{pct}%</td>
+                  <td style={{ padding: 6, textAlign: 'right', color, fontWeight: 'var(--fw-num)' }}>{pct}%</td>
                 </tr>
               );
             })}

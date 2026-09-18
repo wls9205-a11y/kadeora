@@ -35,6 +35,23 @@ const config: Config = {
           4: 'var(--surface-4)',
         },
       },
+      /* TY3 T4-0 테일윈드 브리지 (FINAL_TYFB_20260918 §4 · 판정 증분-2).
+         기본 스케일(xs 12 · sm 14 · base 16 …)이 --fs 사다리와 «제3 체계» 로 병존했다.
+         사용 실측 7키만 사다리로 재정의해 유틸 ~360건을 무치환 수렴시킨다.
+         ⛔ theme.fontSize 통째 교체 금지 — 미매핑 기본 키(4xl·5xl 등)가 사라진다. extend 만 쓴다.
+         ⚠️ 매핑은 «렌더 기준» 이다. text-xs 는 globals.css 가드가 14px 로 끌어올리고 있었다
+            (그래서 --fs-2xs 가 아니라 --fs-xs). 그 가드 줄은 이 커밋에서 같이 걷었다.
+         각 키는 [크기, { lineHeight }] 튜플 — 기본 lh 동봉이 사라지지 않게 행간 사다리
+         {1, 1.3, 1.5, 1.6} 의 최근접 값을 싣는다(기본 lh 비율 기준). */
+      fontSize: {
+        xs: ['var(--fs-xs)', { lineHeight: '1.3' }],
+        sm: ['var(--fs-xs)', { lineHeight: '1.5' }],
+        base: ['var(--fs-sm)', { lineHeight: '1.5' }],
+        lg: ['var(--fs-base)', { lineHeight: '1.6' }],
+        xl: ['var(--fs-md)', { lineHeight: '1.3' }],
+        '2xl': ['var(--fs-xl)', { lineHeight: '1.3' }],
+        '3xl': ['var(--fs-2xl)', { lineHeight: '1.3' }],
+      },
       fontFamily: {
         pretendard: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },

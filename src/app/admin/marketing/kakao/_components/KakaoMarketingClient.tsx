@@ -57,8 +57,8 @@ export default function KakaoMarketingClient() {
         <button
           onClick={() => setSendOpen(true)}
           style={{
-            fontSize: 12,
-            fontWeight: 500,
+            fontSize: 'var(--fs-xs)',
+            fontWeight: 'var(--fw-body)',
             padding: '8px 14px',
             borderRadius: 6,
             cursor: 'pointer',

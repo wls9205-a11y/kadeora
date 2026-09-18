@@ -109,18 +109,18 @@ export default async function AptCompareTable({ slug, currentSite }: Props) {
       style={{ margin: '0 0 12px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}
     >
       <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: 0.5 }}>인근 단지 비교</span>
-        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600 }}>총 {rows.length}곳</span>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', letterSpacing: 0 }}>인근 단지 비교</span>
+        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)' }}>총 {rows.length}곳</span>
       </div>
       {/* ⚠️ R-2: <768 은 통째로 숨지만 768 근처에서 긴 단지명·분양가 범위가 섹션 overflow:hidden 에 잘린다. */}
       <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-xs)' }}>
         <thead>
           <tr style={{ background: 'var(--bg-hover)' }}>
-            <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 500, color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>단지</th>
-            <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 500, color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>분양가</th>
-            <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 500, color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>세대</th>
-            <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 500, color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>등급</th>
+            <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>단지</th>
+            <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>분양가</th>
+            <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>세대</th>
+            <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>등급</th>
           </tr>
         </thead>
         <tbody>
@@ -130,9 +130,9 @@ export default async function AptCompareTable({ slug, currentSite }: Props) {
             const cell: React.CSSProperties = { padding: '10px 12px', borderTop: i > 0 ? '1px solid var(--border)' : 'none' };
             return (
               <tr key={r.slug + i} style={{ background: bg }}>
-                <td style={{ ...cell, fontWeight: r.isCurrent ? 600 : 500, color: 'var(--text-primary)' }}>
+                <td style={{ ...cell, fontWeight: r.isCurrent ? 'var(--fw-title)' : 'var(--fw-body)', color: 'var(--text-primary)' }}>
                   {r.isCurrent ? (
-                    <span>{r.name} <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--kd-accent)', marginLeft: 4 }}>★ 현재</span></span>
+                    <span>{r.name} <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--kd-accent)', marginLeft: 4 }}>★ 현재</span></span>
                   ) : (
                     <Link href={`/apt/${encodeURIComponent(r.slug)}`} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>
                       {r.name}
@@ -141,7 +141,7 @@ export default async function AptCompareTable({ slug, currentSite }: Props) {
                 </td>
                 <td style={{ ...cell, textAlign: 'right', color: 'var(--text-secondary)' }}>{fmtPriceRange(r.price_min, r.price_max)}</td>
                 <td style={{ ...cell, textAlign: 'right', color: 'var(--text-secondary)' }}>{r.total_units ? `${r.total_units.toLocaleString()}` : '—'}</td>
-                <td style={{ ...cell, textAlign: 'right', color: 'var(--text-primary)', fontWeight: 500 }}>{grade}</td>
+                <td style={{ ...cell, textAlign: 'right', color: 'var(--text-primary)', fontWeight: 'var(--fw-body)' }}>{grade}</td>
               </tr>
             );
           })}

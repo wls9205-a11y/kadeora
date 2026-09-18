@@ -39,7 +39,7 @@ const CONF_ORDER = ['rumor', 'estimated', 'confirmed', 'verified'] as const;
 function Row({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
   return (
     <section style={{ marginBottom: 'var(--sp-2xl)' }}>
-      <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
+      <h2 style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 6 }}>
         {title}
       </h2>
       {note && (
@@ -55,7 +55,7 @@ function Row({ title, note, children }: { title: string; note?: string; children
 export default function DesignPreviewPage() {
   return (
     <main style={{ maxWidth: 'var(--container-read)', margin: '0 auto', padding: 'var(--sp-lg)' }}>
-      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 4 }}>
         디자인 시스템 프리뷰
       </h1>
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-2xl)', lineHeight: 1.6 }}>
@@ -96,12 +96,12 @@ export default function DesignPreviewPage() {
         {CONF_ORDER.map((c) => (
           <span key={c} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
             <VerifiedBadge confidence={c} />
-            <code style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{c}</code>
+            <code style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{c}</code>
           </span>
         ))}
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           <VerifiedBadge confidence={null} />
-          <code style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>null</code>
+          <code style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>null</code>
         </span>
       </Row>
 
@@ -247,7 +247,7 @@ export default function DesignPreviewPage() {
         </div>
       </Row>
 
-      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-2xl)', lineHeight: 1.7 }}>
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-2xl)', lineHeight: 1.6 }}>
         표준 8종 완성. 다음은 <strong>DS-2d — 뽀짝 A안 스케일 적용</strong>(라운드 8/12/16 · 촘촘 리듬,
         예외 하단 CTA 바 48px). 토큰 «값만» 바꾸고 약 2,200곳이 따라오는지가 이 트랙의 성공 판정이다.
         <br />

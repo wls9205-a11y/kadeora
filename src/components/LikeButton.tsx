@@ -70,7 +70,7 @@ export function LikeButton({ postId, initialCount, initialLiked = false }: LikeB
         color: liked ? 'var(--accent-red)' : 'var(--text-secondary)',
         cursor: loading ? 'not-allowed' : 'pointer',
         transition: 'all var(--transition-fast)',
-        fontSize: 'var(--fs-sm)', fontWeight: 600,
+        fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)',
         opacity: loading ? 0.7 : 1,
       }}
     >

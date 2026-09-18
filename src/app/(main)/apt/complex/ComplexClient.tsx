@@ -26,7 +26,7 @@ function Gauge({ ratio, size = 40 }: { ratio: number; size?: number }) {
         strokeDasharray={`${circ * pct} ${circ * (1 - pct)}`} strokeLinecap="round"
         transform={`rotate(-90 ${size / 2} ${size / 2})`}
         style={{ transition: 'stroke-dasharray 0.5s' }} />
-      <text x={size / 2} y={size / 2 + 4} textAnchor="middle" fill={color} fontSize="10" fontWeight="800">{ratio}%</text>
+      <text x={size / 2} y={size / 2 + 4} textAnchor="middle" fill={color} fontSize="10" fontWeight="700">{ratio}%</text>
     </svg>
   );
 }
@@ -87,7 +87,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
           <>
         <button aria-label="닫기" onClick={() => setSelectedAge(null)} style={{
           padding: '4px 10px', borderRadius: 'var(--radius-xs)', cursor: 'pointer',
-          fontSize: 10, fontWeight: !selectedAge ? 600 : 500,
+          fontSize: 'var(--fs-2xs)', fontWeight: !selectedAge ? 'var(--fw-title)' : 'var(--fw-body)',
           background: !selectedAge ? 'rgba(59,123,246,0.2)' : 'transparent',
           color: !selectedAge ? 'var(--brand-navy)' : 'var(--text-tertiary)',
           border: !selectedAge ? '1px solid rgba(59,123,246,0.4)' : '1px solid var(--border)',
@@ -98,7 +98,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
           return (
             <button key={g} onClick={() => setSelectedAge(active ? null : g)} style={{
               padding: '4px 10px', borderRadius: 'var(--radius-xs)', cursor: 'pointer',
-              fontSize: 10, fontWeight: active ? 600 : 500,
+              fontSize: 'var(--fs-2xs)', fontWeight: active ? 'var(--fw-title)' : 'var(--fw-body)',
               background: active ? `${c}20` : 'transparent',
               color: active ? c : 'var(--text-tertiary)',
               border: active ? `1px solid ${c}50` : '1px solid var(--border)',
@@ -109,7 +109,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
         })()}
         <select value={sortBy} onChange={(e: any) => setSortBy(e.target.value)} style={{
           marginLeft: 'auto', padding: '4px 8px', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border)',
-          background: 'var(--bg-surface)', color: 'var(--text-secondary)', fontSize: 10, cursor: 'pointer',
+          background: 'var(--bg-surface)', color: 'var(--text-secondary)', fontSize: 'max(16px, var(--fs-2xs))', cursor: 'pointer',
         }}>
           <option value="saleCount">거래순</option>
           <option value="lastPrice">매매가순</option>
@@ -134,8 +134,8 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
                 border: on ? `1px solid ${c}60` : '1px solid var(--border)',
                 boxShadow: on ? `0 0 10px ${c}25` : 'none',
               }}>
-                <div style={{ fontSize: 10, color: on ? c : 'var(--text-tertiary)', fontWeight: 600 }}>{a.group}</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: on ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{a.avg > 0 ? fmtAmount(a.avg) : '—'}</div>
+                <div style={{ fontSize: 'var(--fs-2xs)', color: on ? c : 'var(--text-tertiary)', fontWeight: 'var(--fw-title)' }}>{a.group}</div>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: on ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{a.avg > 0 ? fmtAmount(a.avg) : '—'}</div>
                 <div style={{ height: 4, background: 'var(--border)', borderRadius: 4, margin: '3px 3px 0', overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${max > 0 ? (a.avg / max) * 100 : 0}%`, borderRadius: 4,
                     background: on ? `linear-gradient(90deg, ${c}, ${c}90)` : `${c}40`,
@@ -158,8 +158,8 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
           loading={searching}
           style={{ flex: '1 1 200px' }}
         />
-        <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600, flexShrink: 0 }}>
-          <span style={{ color: 'var(--brand)', fontWeight: 600 }}>{filtered.length}</span>개
+        <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)', flexShrink: 0 }}>
+          <span style={{ color: 'var(--brand)', fontWeight: 'var(--fw-title)' }}>{filtered.length}</span>개
         </span>
       </div>
 
@@ -168,8 +168,8 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
         {filtered.length === 0 && (
           <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px 20px', color: 'var(--text-tertiary)' }}>
             <div style={{ fontSize: 40, marginBottom: 'var(--sp-sm)' }}>🔍</div>
-            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 'var(--sp-xs)' }}>검색 결과가 없습니다</div>
-            <div style={{ fontSize: 12 }}>다른 검색어나 필터를 시도해보세요</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', marginBottom: 'var(--sp-xs)' }}>검색 결과가 없습니다</div>
+            <div style={{ fontSize: 'var(--fs-xs)' }}>다른 검색어나 필터를 시도해보세요</div>
           </div>
         )}
         {filtered.map((c: any, i: number) => {
@@ -191,12 +191,12 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
                   <div className="hero-chip">
                     <span className="hero-badge" style={{
                       background: i === 0 ? 'rgba(245,158,11,0.9)' : i === 1 ? 'rgba(148,163,184,0.9)' : 'rgba(205,127,50,0.9)',
-                      color: '#fff', letterSpacing: 0.3,
+                      color: '#fff', letterSpacing: 0,
                     }}>TOP {i + 1}</span>
                   </div>
                 )}
                 <div className="hero-overlay">
-                  <div className="hero-name" style={{ fontSize: 14 }}>{c.aptName}</div>
+                  <div className="hero-name" style={{ fontSize: 'var(--fs-sm)' }}>{c.aptName}</div>
                   <div className="hero-addr">{[c.region, c.sigungu, c.dong].filter(Boolean).join(' ')}{c.builtYear > 0 ? ` · ${c.builtYear}년` : ''}</div>
                 </div>
               </div>
@@ -204,8 +204,8 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
               {/* 매매 크게 + 원형 게이지 */}
               <div style={{ padding: '10px 12px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>매매</div>
-                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: -0.5 }}>{c.lastPrice > 0 ? fmtAmount(c.lastPrice) : '—'}</div>
+                  <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)' }}>매매</div>
+                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', letterSpacing: '-0.4px' }}>{c.lastPrice > 0 ? fmtAmount(c.lastPrice) : '—'}</div>
                 </div>
                 {c.jeonseRatio ? <Gauge ratio={c.jeonseRatio} size={42} /> : null}
               </div>
@@ -221,16 +221,16 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
                   { label: '월세', value: c.monthlyRent > 0 ? `${c.monthlyRent}만` : '—', color: 'var(--text-secondary)' },
                 ].map(p => (
                   <div key={p.label} style={{ textAlign: 'center', padding: '4px 2px', background: 'var(--bg-surface)' }}>
-                    <div style={{ fontSize: 7, color: 'var(--text-tertiary)' }}>{p.label}</div>
-                    <div style={{ fontSize: 10, fontWeight: 500, color: p.color }}>{p.value}</div>
+                    <div style={{ fontSize: 'var(--fs-3xs)', color: 'var(--text-tertiary)' }}>{p.label}</div>
+                    <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: p.color }}>{p.value}</div>
                   </div>
                 ))}
               </div>
 
               {/* 하단 */}
-              <div style={{ borderTop: '1px solid var(--border)', padding: '6px 12px', fontSize: 10, color: 'var(--text-tertiary)', display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ borderTop: '1px solid var(--border)', padding: '6px 12px', fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', display: 'flex', justifyContent: 'space-between' }}>
                 <span>거래 <b style={{ color: 'var(--text-secondary)' }}>{(c.saleCount + (c.rentCount || 0)).toLocaleString()}</b>건</span>
-                <span style={{ color: 'var(--brand)', fontWeight: 600 }}>상세 →</span>
+                <span style={{ color: 'var(--brand)', fontWeight: 'var(--fw-title)' }}>상세 →</span>
               </div>
             </Link>
           );
@@ -240,7 +240,7 @@ export default function ComplexClient({ complexes, ageGroups, regions, initialRe
       {/* LoginGate 기능 게이팅 (세션 108) */}
       <LoginGate feature="apt_complex_track" title="관심 단지 시세 추적" description="여러 단지를 비교하고 시세 변동을 추적" blurHeight={100}>
         <div style={{ padding: "8px 0" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", color: "var(--text-tertiary)" }}><span>알림 대상</span><span>변동 예정</span></div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 'var(--fs-xs)', padding: "4px 0", color: "var(--text-tertiary)" }}><span>알림 대상</span><span>변동 예정</span></div>
         </div>
       </LoginGate>
     </>

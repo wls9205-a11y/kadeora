@@ -55,7 +55,7 @@ export default async function SimilarAptsSection({ aptSiteId, limit = 6 }: Props
         marginBottom: 'var(--sp-md)',
       }}
     >
-      <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 10px' }}>
+      <h2 style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 10px' }}>
         🏘 비슷한 단지
       </h2>
       <div
@@ -97,8 +97,8 @@ export default async function SimilarAptsSection({ aptSiteId, limit = 6 }: Props
               <div style={{ padding: '8px 10px' }}>
                 <div
                   style={{
-                    fontSize: 12,
-                    fontWeight: 600,
+                    fontSize: 'var(--fs-xs)',
+                    fontWeight: 'var(--fw-title)',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
@@ -107,7 +107,7 @@ export default async function SimilarAptsSection({ aptSiteId, limit = 6 }: Props
                   {r.name}
                 </div>
                 {regionLabel && (
-                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{regionLabel}</div>
+                  <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{regionLabel}</div>
                 )}
               </div>
             </Link>

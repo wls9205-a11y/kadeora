@@ -26,7 +26,7 @@ export default function AptBookmarkButton({ aptId, aptName }: { aptId: string; a
         display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-sm)',
         padding: '7px 14px', borderRadius: 'var(--radius-xl)',
         border: '1px solid var(--border)', background: 'var(--bg-surface)',
-        color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600,
+        color: 'var(--text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)',
         textDecoration: 'none', cursor: 'pointer',
       }}>
         ☆ 관심단지
@@ -57,7 +57,7 @@ export default function AptBookmarkButton({ aptId, aptName }: { aptId: string; a
       border: saved ? '1px solid var(--brand)' : '1px solid var(--border)',
       background: saved ? 'rgba(59,123,246,0.08)' : 'var(--bg-surface)',
       color: saved ? 'var(--brand)' : 'var(--text-secondary)',
-      fontSize: 'var(--fs-sm)', fontWeight: 600,
+      fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)',
       cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.6 : 1,
     }}>
       {saved ? '⭐ 관심단지' : '☆ 관심단지 (+5P)'}

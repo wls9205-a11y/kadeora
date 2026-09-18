@@ -62,7 +62,7 @@ export default async function UnsoldPage({
               key={r}
               href={`/apt/unsold/${encodeURIComponent(r)}`}
               style={{
-                padding: '9px 10px', fontSize: 12, fontWeight: 600, textAlign: 'center', textDecoration: 'none',
+                padding: '9px 10px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', textAlign: 'center', textDecoration: 'none',
                 color: 'var(--text-secondary)', background: 'var(--bg-surface)',
                 border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
               }}

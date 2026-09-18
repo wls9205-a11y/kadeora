@@ -73,7 +73,7 @@ export default function CtaPanel({ kind, title, lede, action, band }: CtaPanelPr
         <div
           style={{
             fontSize: 'var(--fs-xs)',
-            fontWeight: 600,
+            fontWeight: 'var(--fw-title)',
             color: `var(${isLead ? '--brand' : '--text-tertiary'})`,
             marginBottom: 6,
           }}
@@ -81,7 +81,7 @@ export default function CtaPanel({ kind, title, lede, action, band }: CtaPanelPr
           {band}
         </div>
       )}
-      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.35 }}>
+      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', lineHeight: 1.3 }}>
         {title}
       </div>
       {lede && (
@@ -108,7 +108,7 @@ export function KakaoActionButton({ children, href, onClick }: { children: React
     color: 'var(--kakao-text)',
     border: 'none',
     fontSize: 'var(--fs-sm)',
-    fontWeight: 600,
+    fontWeight: 'var(--fw-title)',
     textDecoration: 'none',
     cursor: 'pointer',
   } as const;

@@ -31,9 +31,9 @@ export default function BlogTocList({ toc }: { toc: TocItem[] }) {
               style={{
                 display: 'block',
                 padding: item.level === 3 ? '6px 0 6px 14px' : '7px 0',
-                fontSize: item.level === 3 ? 11.5 : 12.5,
-                fontWeight: item.level === 3 ? 500 : 600,
-                lineHeight: 1.45,
+                fontSize: item.level === 3 ? 'var(--fs-2xs)' : 'var(--fs-2xs)',
+                fontWeight: item.level === 3 ? 'var(--fw-body)' : 'var(--fw-title)',
+                lineHeight: 1.5,
                 color: item.level === 3 ? 'var(--text-secondary)' : 'var(--text-primary)',
                 textDecoration: 'none',
                 wordBreak: 'keep-all',

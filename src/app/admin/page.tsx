@@ -27,10 +27,10 @@ export default function AdminPage() {
       {/* ADDENDUM §2 — 손으로 들어가는 문. 링크가 없으면 URL 을 아는 사람만 쓰게 된다.
           검수 큐는 아무도 안 열면 존재하지 않는 것과 같다. */}
       <div style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <a href="/admin/redev-review" style={{ padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', fontWeight: 500 }}>
+        <a href="/admin/redev-review" style={{ padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)' }}>
           정비사업 공시 검수 →
         </a>
-        <a href="/admin/apt-stage" style={{ padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', fontWeight: 500 }}>
+        <a href="/admin/apt-stage" style={{ padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)' }}>
           현장 단계 한 줄 입력 →
         </a>
       </div>
@@ -38,7 +38,7 @@ export default function AdminPage() {
         <CronUnifiedPanel />
       </div>
       <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
-        <h2 style={{ fontSize: 12, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>참조 데이터</h2>
+        <h2 style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: 12 }}>참조 데이터</h2>
         <NorthStarCard />
         <CtaPerformanceTable windowDays={30} />
         <AbExperimentViewer windowDays={14} />

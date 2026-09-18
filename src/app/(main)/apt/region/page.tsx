@@ -80,12 +80,12 @@ function RegionCard({
         color: current ? 'var(--bg-base)' : 'var(--text-primary)',
       }}
     >
-      <span style={{ fontSize: 13.5, fontWeight: 600 }}>{name}</span>
+      <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' }}>{name}</span>
       {hasLive ? (
         <span
           style={{
-            fontSize: 11,
-            fontWeight: 500,
+            fontSize: 'var(--fs-xs)',
+            fontWeight: 'var(--fw-body)',
             color: current ? 'var(--bg-base)' : 'var(--accent-red)',
             opacity: current ? 0.8 : 1,
           }}
@@ -95,7 +95,7 @@ function RegionCard({
       ) : recent > 0 ? (
         <span
           style={{
-            fontSize: 10.5,
+            fontSize: 'var(--fs-3xs)',
             color: current ? 'var(--bg-base)' : 'var(--text-tertiary)',
             opacity: current ? 0.7 : 1,
           }}
@@ -103,7 +103,7 @@ function RegionCard({
           최근 {recent}
         </span>
       ) : (
-        <span style={{ fontSize: 10.5, color: 'var(--text-tertiary)' }}>—</span>
+        <span style={{ fontSize: 'var(--fs-3xs)', color: 'var(--text-tertiary)' }}>—</span>
       )}
     </Link>
   );
@@ -140,10 +140,10 @@ export default async function RegionListPage({
   return (
     // paddingBottom: 글쓰기 FAB 이 마지막 줄을 가리던 문제 — 레이아웃의 72px 위에 더 얹는다
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '16px var(--sp-lg) 88px' }}>
-      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 600, margin: '0 0 6px', color: 'var(--text-primary)' }}>
+      <h1 style={{ fontSize: 'var(--fs-xl)', fontWeight: 'var(--fw-title)', margin: '0 0 6px', color: 'var(--text-primary)' }}>
         지역 선택
       </h1>
-      <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 16px' }}>
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', margin: '0 0 16px' }}>
         {liveTotal > 0
           ? `전국 17개 시·도 중 ${openRegions.length}곳에서 청약 ${liveTotal}건 접수중`
           : '지금 접수중인 청약이 없습니다. 곧 열리는 지역을 확인해 보세요.'}
@@ -161,7 +161,7 @@ export default async function RegionListPage({
 
       {openRegions.length > 0 ? (
         <section style={{ marginBottom: 22 }}>
-          <h2 style={{ fontSize: 13, fontWeight: 600, margin: '0 0 8px', color: 'var(--text-primary)' }}>
+          <h2 style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', margin: '0 0 8px', color: 'var(--text-primary)' }}>
             접수중인 지역
           </h2>
           <div style={gridStyle}>
@@ -180,10 +180,10 @@ export default async function RegionListPage({
       ) : null}
 
       <section>
-        <h2 style={{ fontSize: 13, fontWeight: 600, margin: '0 0 4px', color: 'var(--text-primary)' }}>
+        <h2 style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', margin: '0 0 4px', color: 'var(--text-primary)' }}>
           그 외 지역
         </h2>
-        <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '0 0 8px' }}>
+        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', margin: '0 0 8px' }}>
           접수중인 청약은 없지만 최근 60일 내 공고가 있던 지역이 앞에 옵니다
         </p>
         <div style={gridStyle}>

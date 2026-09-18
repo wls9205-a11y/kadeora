@@ -43,7 +43,7 @@ export default function EmptyState({ kind = 'empty', title, action, hint }: Empt
         background: 'var(--bg-surface)',
       }}
     >
-      <p style={{ margin: 0, fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.5 }}>
+      <p style={{ margin: 0, fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)', lineHeight: 1.5 }}>
         {title}
       </p>
       {hint && (

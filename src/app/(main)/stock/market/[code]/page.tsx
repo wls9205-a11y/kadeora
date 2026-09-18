@@ -60,22 +60,22 @@ export default async function MarketPage({ params }: Props) {
   return (
     <article style={{ maxWidth: 'var(--container-max)', margin: '0 auto', padding: '0 var(--sp-lg)' }}>
       <JsonLd data={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '카더라', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: '주식', item: `${SITE_URL}/stock` }, { '@type': 'ListItem', position: 3, name: m.name }] }} />
-      <nav style={{ fontSize: 12, color: 'var(--text-tertiary)', display: 'flex', gap: 4, marginBottom: 8 }}>
+      <nav style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', display: 'flex', gap: 4, marginBottom: 8 }}>
         <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>홈</Link>›
         <Link href="/stock" style={{ textDecoration: 'none', color: 'var(--text-tertiary)' }}>주식</Link>›<span>{m.name}</span>
       </nav>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{m.flag} {m.name} 종목 목록</h1>
+        <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: 0 }}>{m.flag} {m.name} 종목 목록</h1>
         <ShareButtons title={`${m.name} 종목 목록`} contentType="stock-market" contentRef={code} />
       </div>
-      <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 16 }}>
         총 {totalCount?.toLocaleString()}종목 | 상승 {upCount} · 하락 {downCount} · {sectors.length}개 섹터
       </p>
 
       {/* 시장 내비 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 20, overflowX: 'auto' }}>
         {Object.entries(MARKETS).map(([k, v]) => (
-          <Link key={k} href={`/stock/market/${k}`} style={{ padding: '6px 14px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: k === code.toLowerCase() ? 600 : 500, background: k === code.toLowerCase() ? 'var(--brand)' : 'var(--bg-hover)', color: k === code.toLowerCase() ? '#fff' : 'var(--text-secondary)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          <Link key={k} href={`/stock/market/${k}`} style={{ padding: '6px 14px', borderRadius: 'var(--radius-pill)', fontSize: 'var(--fs-xs)', fontWeight: k === code.toLowerCase() ? 'var(--fw-title)' : 'var(--fw-body)', background: k === code.toLowerCase() ? 'var(--brand)' : 'var(--bg-hover)', color: k === code.toLowerCase() ? '#fff' : 'var(--text-secondary)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
             {v.flag} {v.name}
           </Link>
         ))}
@@ -86,7 +86,7 @@ export default async function MarketPage({ params }: Props) {
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 640 }}>
           <thead><tr style={{ background: 'var(--bg-surface)' }}>
             {['#','종목','현재가','등락률','시총','PER','배당','섹터'].map(h => (
-              <th key={h} style={{ padding: '8px 10px', fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', borderBottom: '2px solid var(--border)', textAlign: 'left' }}>{h}</th>
+              <th key={h} style={{ padding: '8px 10px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)', borderBottom: '2px solid var(--border)', textAlign: 'left' }}>{h}</th>
             ))}
           </tr></thead>
           <tbody>
@@ -95,14 +95,14 @@ export default async function MarketPage({ params }: Props) {
               const isKR = s.currency !== 'USD';
               return (
                 <tr key={s.symbol} style={{ background: i % 2 === 0 ? 'var(--bg-base)' : 'var(--bg-surface)' }}>
-                  <td style={{ padding: '7px 10px', fontSize: 12, borderBottom: '1px solid var(--border)', color: 'var(--text-tertiary)' }}>{i + 1}</td>
-                  <td style={{ padding: '7px 10px', fontSize: 12, borderBottom: '1px solid var(--border)' }}><Link href={`/stock/${s.symbol}`} style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>{s.name}</Link></td>
-                  <td style={{ padding: '7px 10px', fontSize: 12, borderBottom: '1px solid var(--border)', fontWeight: 600 }}>{fmtPrice(s.price, s.currency)}</td>
-                  <td style={{ padding: '7px 10px', fontSize: 12, borderBottom: '1px solid var(--border)', fontWeight: 700, color: stockColor(pct, isKR) }}>{pct > 0 ? '+' : ''}{pct.toFixed(2)}%</td>
-                  <td style={{ padding: '7px 10px', fontSize: 12, borderBottom: '1px solid var(--border)' }}>{fmtCap(Number(s.market_cap), s.currency)}</td>
-                  <td style={{ padding: '7px 10px', fontSize: 12, borderBottom: '1px solid var(--border)' }}>{s.per ? Number(s.per).toFixed(1) : '-'}</td>
-                  <td style={{ padding: '7px 10px', fontSize: 12, borderBottom: '1px solid var(--border)' }}>{s.dividend_yield ? `${Number(s.dividend_yield).toFixed(1)}%` : '-'}</td>
-                  <td style={{ padding: '7px 10px', fontSize: 11, borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)' }}>{s.sector || '-'}</td>
+                  <td style={{ padding: '7px 10px', fontSize: 'var(--fs-xs)', borderBottom: '1px solid var(--border)', color: 'var(--text-tertiary)' }}>{i + 1}</td>
+                  <td style={{ padding: '7px 10px', fontSize: 'var(--fs-xs)', borderBottom: '1px solid var(--border)' }}><Link href={`/stock/${s.symbol}`} style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 'var(--fw-title)' }}>{s.name}</Link></td>
+                  <td style={{ padding: '7px 10px', fontSize: 'var(--fs-xs)', borderBottom: '1px solid var(--border)', fontWeight: 'var(--fw-title)' }}>{fmtPrice(s.price, s.currency)}</td>
+                  <td style={{ padding: '7px 10px', fontSize: 'var(--fs-xs)', borderBottom: '1px solid var(--border)', fontWeight: 'var(--fw-num)', color: stockColor(pct, isKR) }}>{pct > 0 ? '+' : ''}{pct.toFixed(2)}%</td>
+                  <td style={{ padding: '7px 10px', fontSize: 'var(--fs-xs)', borderBottom: '1px solid var(--border)' }}>{fmtCap(Number(s.market_cap), s.currency)}</td>
+                  <td style={{ padding: '7px 10px', fontSize: 'var(--fs-xs)', borderBottom: '1px solid var(--border)' }}>{s.per ? Number(s.per).toFixed(1) : '-'}</td>
+                  <td style={{ padding: '7px 10px', fontSize: 'var(--fs-xs)', borderBottom: '1px solid var(--border)' }}>{s.dividend_yield ? `${Number(s.dividend_yield).toFixed(1)}%` : '-'}</td>
+                  <td style={{ padding: '7px 10px', fontSize: 'var(--fs-xs)', borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)' }}>{s.sector || '-'}</td>
                 </tr>
               );
             })}
@@ -111,9 +111,9 @@ export default async function MarketPage({ params }: Props) {
       </div>
 
       <div style={{ marginTop: 32, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <Link href="/stock" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>전 종목 시세</Link>
-        <Link href="/stock/dividend" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>배당주</Link>
-        <Link href="/stock/movers" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>급등락</Link>
+        <Link href="/stock" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: '#fff', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' }}>전 종목 시세</Link>
+        <Link href="/stock/dividend" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' }}>배당주</Link>
+        <Link href="/stock/movers" style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-primary)', textDecoration: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' }}>급등락</Link>
       </div>
       <Disclaimer type="stock" />
     </article>

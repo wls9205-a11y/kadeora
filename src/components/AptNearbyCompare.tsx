@@ -35,28 +35,28 @@ export default function AptNearbyCompare({ aptName, sigungu, region }: { aptName
 
   return (
     <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-card)', padding: '14px 16px', marginBottom: 12 }}>
-      <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>🏘️ {sigungu} 주변 단지 비교</div>
+      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', marginBottom: 10 }}>🏘️ {sigungu} 주변 단지 비교</div>
       <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, minWidth: 400 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-xs)', minWidth: 400 }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border)' }}>
-              <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, color: 'var(--text-tertiary)', fontSize: 11 }}>단지</th>
-              <th style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 600, color: 'var(--text-tertiary)', fontSize: 11 }}>최근 매매</th>
-              <th style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 600, color: 'var(--text-tertiary)', fontSize: 11 }}>평당가</th>
-              <th style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 600, color: 'var(--text-tertiary)', fontSize: 11 }}>변동률</th>
-              <th style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 600, color: 'var(--text-tertiary)', fontSize: 11 }}>거래</th>
+              <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>단지</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>최근 매매</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>평당가</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>변동률</th>
+              <th style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>거래</th>
             </tr>
           </thead>
           <tbody>
             {data.map((a, i) => (
               <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={{ padding: '8px', fontWeight: 600 }}>
+                <td style={{ padding: '8px', fontWeight: 'var(--fw-title)' }}>
                   <Link href={`/apt/complex/${encodeURIComponent(a.apt_name)}`} style={{ color: 'var(--brand)', textDecoration: 'none' }}>{a.apt_name}</Link>
-                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 400 }}>{a.built_year}년</div>
+                  <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-quiet)' }}>{a.built_year}년</div>
                 </td>
-                <td style={{ padding: '8px', textAlign: 'right', fontWeight: 600 }}>{fmtP(a.latest_sale_price)}</td>
+                <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'var(--fw-title)' }}>{fmtP(a.latest_sale_price)}</td>
                 <td style={{ padding: '8px', textAlign: 'right', color: 'var(--text-secondary)' }}>{fmtP(a.avg_sale_price_pyeong)}/평</td>
-                <td style={{ padding: '8px', textAlign: 'right', fontWeight: 600, color: priceChangeDirection(a) === 'up' ? 'var(--accent-red)' : priceChangeDirection(a) === 'down' ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
+                <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'var(--fw-title)', color: priceChangeDirection(a) === 'up' ? 'var(--accent-red)' : priceChangeDirection(a) === 'down' ? 'var(--accent-blue)' : 'var(--text-tertiary)' }}>
                   {priceChangeCompact(a) || '-'}
                 </td>
                 <td style={{ padding: '8px', textAlign: 'right', color: 'var(--text-tertiary)' }}>{a.sale_count_1y}건</td>

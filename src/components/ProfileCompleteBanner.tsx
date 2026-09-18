@@ -43,17 +43,17 @@ export default function ProfileCompleteBanner() {
       border: '1px solid rgba(59,123,246,0.15)',
       display: 'flex', alignItems: 'center', gap: 10,
     }}>
-      <span style={{ fontSize: 24 }}>🔔</span>
+      <span style={{ fontSize: 'var(--fs-xl)' }}>🔔</span>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>관심 지역·종목을 설정하면 맞춤 알림을 받을 수 있어요</div>
-        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>10초면 설정 완료! 시세 변동, 청약 마감 알림을 무료로</div>
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>관심 지역·종목을 설정하면 맞춤 알림을 받을 수 있어요</div>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>10초면 설정 완료! 시세 변동, 청약 마감 알림을 무료로</div>
       </div>
       <Link href="/onboarding" style={{
         padding: '6px 14px', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: '#fff',
-        fontSize: 12, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap',
+        fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', textDecoration: 'none', whiteSpace: 'nowrap',
       }}>설정하기</Link>
       <button onClick={() => { localStorage.setItem(DISMISS_KEY, String(Date.now())); setShow(false); }}
-        style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 16, cursor: 'pointer', padding: 4 }}>×</button>
+        style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', cursor: 'pointer', padding: 4 }}>×</button>
     </div>
   );
 }

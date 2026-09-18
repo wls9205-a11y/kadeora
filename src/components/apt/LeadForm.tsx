@@ -258,7 +258,7 @@ const fieldStyle: CSSProperties = {
 const labelStyle: CSSProperties = {
   display: 'block',
   fontSize: 'var(--fs-xs)',
-  fontWeight: 600,
+  fontWeight: 'var(--fw-title)',
   color: 'var(--text-secondary)',
   marginBottom: 6,
 };
@@ -692,9 +692,9 @@ export default function LeadForm({
         <p
           style={{
             fontSize: 'var(--fs-sm)',
-            fontWeight: 600,
+            fontWeight: 'var(--fw-title)',
             color: 'var(--text-primary)',
-            lineHeight: 1.7,
+            lineHeight: 1.6,
             margin: 0,
             padding: '20px 14px',
           }}
@@ -718,7 +718,7 @@ export default function LeadForm({
           background: 'var(--kd-accent-bg)',
           color: 'var(--kd-accent)',
           fontSize: 'var(--fs-sm)',
-          fontWeight: 500,
+          fontWeight: 'var(--fw-body)',
           padding: '7px 14px',
           borderBottom: '1px solid var(--kd-accent-border)',
         }}
@@ -728,7 +728,7 @@ export default function LeadForm({
 
       <div style={{ padding: '14px' }}>
         <SectionHeader eyebrow="CONTACT" title={copy.cta} />
-        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 14px' }}>
+        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 14px' }}>
           {variant === 'blog' && siteName
             ? `이 글에서 다룬 ${siteName}의 분양 정보를 담당자가 안내해 드립니다.`
             : copy.lede}
@@ -844,14 +844,14 @@ export default function LeadForm({
           {pilotArm === 'exp' && pilotOn && (
             <div className="kd-lead-grid" style={{ marginBottom: 12 }}>
               <div>
-                <label htmlFor="kd-lead-budget" style={labelStyle}>예산 범위 <span style={{ fontWeight: 400 }}>(선택)</span></label>
+                <label htmlFor="kd-lead-budget" style={labelStyle}>예산 범위 <span style={{ fontWeight: 'var(--fw-quiet)' }}>(선택)</span></label>
                 <select id="kd-lead-budget" value={budgetRange} onChange={e => setBudgetRange(e.target.value)} style={fieldStyle}>
                   <option value="">선택 안 함</option>
                   {BUDGET_CHOICES.map(b => <option key={b} value={b}>{b}</option>)}
                 </select>
               </div>
               <div>
-                <label htmlFor="kd-lead-calltime" style={labelStyle}>통화 가능 시간 <span style={{ fontWeight: 400 }}>(선택)</span></label>
+                <label htmlFor="kd-lead-calltime" style={labelStyle}>통화 가능 시간 <span style={{ fontWeight: 'var(--fw-quiet)' }}>(선택)</span></label>
                 <select id="kd-lead-calltime" value={callTime} onChange={e => setCallTime(e.target.value)} style={fieldStyle}>
                   <option value="">선택 안 함</option>
                   {CALL_TIME_CHOICES.map(t => <option key={t} value={t}>{t}</option>)}

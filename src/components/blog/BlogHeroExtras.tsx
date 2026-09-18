@@ -36,12 +36,12 @@ export default function BlogHeroExtras({ tldr, keyPoints, readingMinutes, readin
             alignItems: 'flex-start',
           }}
         >
-          <span aria-hidden style={{ fontSize: 18, lineHeight: '24px' }}>💡</span>
-          <div style={{ flex: 1, fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6 }}>{tldr}</div>
+          <span aria-hidden style={{ fontSize: 'var(--fs-base)', lineHeight: '24px' }}>💡</span>
+          <div style={{ flex: 1, fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.6 }}>{tldr}</div>
           {min && (
             <span style={{
               whiteSpace: 'nowrap',
-              fontSize: 11, fontWeight: 500,
+              fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
               background: 'rgba(251,191,36,0.2)', color: '#FBBF24',
               padding: '3px 8px', borderRadius: 999,
             }}>⏱ {min}분</span>
@@ -56,7 +56,7 @@ export default function BlogHeroExtras({ tldr, keyPoints, readingMinutes, readin
           padding: 14,
           background: 'var(--bg-surface)',
         }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 10, letterSpacing: '-0.3px' }}>
+          <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 10, letterSpacing: 0 }}>
             📌 한눈에 보기
           </div>
           <div style={{
@@ -72,7 +72,7 @@ export default function BlogHeroExtras({ tldr, keyPoints, readingMinutes, readin
                   padding: '8px 10px',
                   background: 'rgba(255,255,255,0.03)',
                   borderRadius: 6,
-                  fontSize: 13,
+                  fontSize: 'var(--fs-xs)',
                   color: 'var(--text-primary)',
                   lineHeight: 1.5,
                 }}
@@ -81,7 +81,7 @@ export default function BlogHeroExtras({ tldr, keyPoints, readingMinutes, readin
                   flexShrink: 0,
                   width: 18, height: 18, borderRadius: '50%',
                   background: '#8b5cf6', color: '#fff',
-                  fontSize: 10, fontWeight: 500,
+                  fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   marginTop: 2,
                 }}>{i + 1}</span>

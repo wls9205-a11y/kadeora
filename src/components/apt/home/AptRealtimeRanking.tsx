@@ -24,8 +24,8 @@ export default function AptRealtimeRanking({ sites }: Props) {
     >
       <h2
         style={{
-          fontSize: 14,
-          fontWeight: 600,
+          fontSize: 'var(--fs-sm)',
+          fontWeight: 'var(--fw-title)',
           color: 'var(--text-primary)',
           margin: '0 0 8px',
           padding: '0 4px',
@@ -84,11 +84,11 @@ export default function AptRealtimeRanking({ sites }: Props) {
                   style={{
                     flexShrink: 0,
                     width: 22,
-                    fontSize: 16,
-                    fontWeight: 600,
+                    fontSize: 'var(--fs-sm)',
+                    fontWeight: 'var(--fw-title)',
                     color: i < 3 ? 'var(--brand)' : 'var(--text-tertiary)',
                     textAlign: 'center',
-                    letterSpacing: -0.5,
+                    letterSpacing: '-0.2px',
                   }}
                 >
                   {i + 1}
@@ -112,8 +112,8 @@ export default function AptRealtimeRanking({ sites }: Props) {
                 <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <span
                     style={{
-                      fontSize: 13,
-                      fontWeight: 600,
+                      fontSize: 'var(--fs-xs)',
+                      fontWeight: 'var(--fw-title)',
                       color: 'var(--text-primary)',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -124,7 +124,7 @@ export default function AptRealtimeRanking({ sites }: Props) {
                   </span>
                   <span
                     style={{
-                      fontSize: 10,
+                      fontSize: 'var(--fs-2xs)',
                       color: 'var(--text-tertiary)',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -138,8 +138,8 @@ export default function AptRealtimeRanking({ sites }: Props) {
                   {dday !== null && (
                     <span
                       style={{
-                        fontSize: 10,
-                        fontWeight: 500,
+                        fontSize: 'var(--fs-2xs)',
+                        fontWeight: 'var(--fw-body)',
                         padding: '2px 6px',
                         borderRadius: 999,
                         background: 'rgba(220,38,38,0.15)',
@@ -150,15 +150,15 @@ export default function AptRealtimeRanking({ sites }: Props) {
                     </span>
                   )}
                   {change && (
-                    <span style={{ fontSize: 10, fontWeight: 600, color: change.color }}>
+                    <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', color: change.color }}>
                       {change.label}
                     </span>
                   )}
                   {pop != null && pop > 0 && pop !== 100 && (
                     <span
                       style={{
-                        fontSize: 11,
-                        fontWeight: 500,
+                        fontSize: 'var(--fs-xs)',
+                        fontWeight: 'var(--fw-body)',
                         color: 'var(--brand)',
                       }}
                     >

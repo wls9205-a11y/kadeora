@@ -181,7 +181,7 @@ export default function SiteActionBar({ siteSlug, showLeadForm = false, lifecycl
             }}
           >
             {/* --text-inverse(#FFFFFF) on --brand(#2563EB) = 5.17:1 */}
-            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, lineHeight: 1.15 }}>{copy.button ?? copy.cta}</span>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', lineHeight: 1 }}>{copy.button ?? copy.cta}</span>
           </button>
         )}
 
@@ -208,7 +208,7 @@ export default function SiteActionBar({ siteSlug, showLeadForm = false, lifecycl
               d="M12 3C6.9 3 2.8 6.3 2.8 10.3c0 2.6 1.7 4.9 4.3 6.2l-1 3.7c-.1.3.3.6.6.4l4.4-2.9c.3 0 .6.1.9.1 5.1 0 9.2-3.3 9.2-7.5S17.1 3 12 3z"
             />
           </svg>
-          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, lineHeight: 1.15 }}>{TALK_LABEL}</span>
+          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', lineHeight: 1 }}>{TALK_LABEL}</span>
         </a>
       </div>
     </>

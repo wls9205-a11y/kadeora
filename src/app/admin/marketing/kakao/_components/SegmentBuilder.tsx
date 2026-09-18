@@ -106,13 +106,13 @@ export default function SegmentBuilder({
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h2 style={{ fontSize: 13, fontWeight: 600, margin: 0 }}>세그먼트 빌더</h2>
+        <h2 style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', margin: 0 }}>세그먼트 빌더</h2>
         <input
           value={segmentName}
           onChange={(e) => onSegmentNameChange(e.target.value)}
           placeholder="세그먼트 이름"
           style={{
-            fontSize: 12,
+            fontSize: 'max(16px, var(--fs-xs))',
             padding: '6px 10px',
             borderRadius: 6,
             background: 'var(--bg-base)',
@@ -193,17 +193,17 @@ export default function SegmentBuilder({
           border: '1px solid var(--border)',
         }}
       >
-        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 6 }}>
           매칭 결과
           {loading && <span style={{ marginLeft: 8 }}>로드 중…</span>}
           {err && <span style={{ marginLeft: 8, color: 'var(--accent-red)' }}>실패: {err}</span>}
         </div>
-        <div style={{ fontSize: 22, fontWeight: 700 }}>
+        <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-num)' }}>
           {preview?.count == null ? '—' : preview.count.toLocaleString()}명
         </div>
         {sample.length > 0 && (
           <div style={{ marginTop: 8, overflow: 'auto', maxHeight: 220 }}>
-            <table style={{ width: '100%', fontSize: 11, borderCollapse: 'collapse' }}>
+            <table style={{ width: '100%', fontSize: 'var(--fs-xs)', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>
                   {sampleCols.map((c) => (
@@ -258,7 +258,7 @@ export default function SegmentBuilder({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{label}</span>
+      <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{label}</span>
       {children}
     </div>
   );
@@ -320,7 +320,7 @@ function Toggle({
         type="button"
         onClick={() => onChange(true)}
         style={{
-          fontSize: 11,
+          fontSize: 'var(--fs-xs)',
           padding: '5px 10px',
           borderRadius: 999,
           cursor: 'pointer',
@@ -335,7 +335,7 @@ function Toggle({
         type="button"
         onClick={() => onChange(false)}
         style={{
-          fontSize: 11,
+          fontSize: 'var(--fs-xs)',
           padding: '5px 10px',
           borderRadius: 999,
           cursor: 'pointer',
@@ -352,8 +352,8 @@ function Toggle({
 
 function btnStyle(variant: 'primary' | 'default'): React.CSSProperties {
   return {
-    fontSize: 12,
-    fontWeight: 500,
+    fontSize: 'var(--fs-xs)',
+    fontWeight: 'var(--fw-body)',
     padding: '8px 14px',
     borderRadius: 6,
     cursor: 'pointer',

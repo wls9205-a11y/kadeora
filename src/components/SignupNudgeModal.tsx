@@ -203,7 +203,7 @@ export default function SignupNudgeModal() {
             position: 'absolute', top: 12, right: 12,
             width: 32, height: 32, borderRadius: '50%', border: 'none',
             background: 'transparent', cursor: 'pointer',
-            color: 'var(--text-tertiary)', fontSize: 20, lineHeight: 1,
+            color: 'var(--text-tertiary)', fontSize: 'var(--fs-md)', lineHeight: 1,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >
@@ -212,8 +212,8 @@ export default function SignupNudgeModal() {
 
         {/* 헤더 */}
         <div style={{ textAlign: 'center', marginBottom: 20 }}>
-          <div style={{ fontSize: 32, marginBottom: 8 }}>🚀</div>
-          <h2 id="signup-nudge-title" style={{ margin: 0, fontSize: 'clamp(18px, 5vw, 22px)', fontWeight: 900, color: 'var(--text-primary)' }}>
+          <div style={{ fontSize: 'var(--fs-2xl)', marginBottom: 8 }}>🚀</div>
+          <h2 id="signup-nudge-title" style={{ margin: 0, fontSize: 'clamp(18px, 5vw, 22px)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)' }}>
             저장·알림은 로그인 후 이용할 수 있습니다
           </h2>
           <p style={{ margin: '8px 0 0', fontSize: 'var(--fs-sm, 13px)', color: 'var(--text-secondary)' }}>
@@ -230,7 +230,7 @@ export default function SignupNudgeModal() {
             borderRadius: 12, border: 'none',
             cursor: loginLoading ? 'not-allowed' : 'pointer',
             background: 'var(--kakao-bg)', color: '#191919',
-            fontWeight: 800, fontSize: 'var(--fs-md, 15px)',
+            fontWeight: 'var(--fw-num)', fontSize: 'var(--fs-md, 15px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
             opacity: loginLoading === 'google' ? 0.5 : 1,
             transition: 'transform 0.15s, box-shadow 0.15s',
@@ -240,7 +240,7 @@ export default function SignupNudgeModal() {
           {loginLoading === 'kakao' ? (
             <span style={{ width: 20, height: 20, border: '2px solid #191919', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'kdNudgeSpin 0.8s linear infinite' }} />
           ) : (
-            <span style={{ fontSize: 18 }}>💬</span>
+            <span style={{ fontSize: 'var(--fs-base)' }}>💬</span>
           )}
           {loginLoading === 'kakao' ? '로그인 중...' : '카카오로 로그인'}
         </button>
@@ -255,7 +255,7 @@ export default function SignupNudgeModal() {
               borderRadius: 12, border: '1px solid var(--border)',
               cursor: loginLoading ? 'not-allowed' : 'pointer',
               background: 'var(--bg-hover)', color: 'var(--text-primary)',
-              fontWeight: 600, fontSize: 'var(--fs-sm, 13px)',
+              fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-sm, 13px)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               opacity: loginLoading === 'kakao' ? 0.5 : 1,
             }}
@@ -283,9 +283,9 @@ export default function SignupNudgeModal() {
         <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           {valueProps.map((p, i) => (
             <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 'var(--fs-sm, 13px)', color: 'var(--text-secondary)' }}>
-              <span style={{ fontSize: 18, lineHeight: 1.2, flexShrink: 0 }}>{p.icon}</span>
+              <span style={{ fontSize: 'var(--fs-base)', lineHeight: 1.3, flexShrink: 0 }}>{p.icon}</span>
               <span>
-                <strong style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{p.title}</strong>
+                <strong style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-num)' }}>{p.title}</strong>
                 <span style={{ display: 'block', marginTop: 2, fontSize: 'var(--fs-xs, 12px)', opacity: 0.85 }}>{p.desc}</span>
               </span>
             </li>

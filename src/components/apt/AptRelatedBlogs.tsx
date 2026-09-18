@@ -50,8 +50,8 @@ export default function AptRelatedBlogs({ posts }: { posts: RelatedBlogPost[] })
                   WebkitBoxOrient: 'vertical',
                   overflow: 'hidden',
                   fontSize: 'var(--fs-xs)',
-                  fontWeight: 600,
-                  lineHeight: 1.45,
+                  fontWeight: 'var(--fw-title)',
+                  lineHeight: 1.5,
                   wordBreak: 'keep-all',
                 }}
               >

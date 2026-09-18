@@ -75,20 +75,20 @@ export default function RegionSettingsPage() {
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '40px 16px', textAlign: 'center' }}>
         <div style={{ fontSize: 36, marginBottom: 12 }}>📍</div>
-        <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>로그인이 필요합니다</div>
-        <a href="/login?redirect=/settings/region" style={{ color: 'var(--brand)', fontWeight: 600 }}>로그인하기</a>
+        <div style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 8 }}>로그인이 필요합니다</div>
+        <a href="/login?redirect=/settings/region" style={{ color: 'var(--brand)', fontWeight: 'var(--fw-title)' }}>로그인하기</a>
       </div>
     );
   }
 
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px' }}>
-      <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 14, marginBottom: 16, padding: 0 }}>
+      <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-sm)', marginBottom: 16, padding: 0 }}>
         ← 뒤로
       </button>
 
-      <h1 style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>📍 우리동네 설정</h1>
-      <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 24 }}>
+      <h1 style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 4 }}>📍 우리동네 설정</h1>
+      <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 24 }}>
         같은 동네 이웃들과 부동산·생활 정보를 나눌 수 있어요
       </p>
 
@@ -98,20 +98,20 @@ export default function RegionSettingsPage() {
           background: 'rgba(59,123,246,0.06)', border: '1px solid rgba(59,123,246,0.15)',
           marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8,
         }}>
-          <span style={{ fontSize: 16 }}>📍</span>
+          <span style={{ fontSize: 'var(--fs-sm)' }}>📍</span>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>현재 설정: {currentRegion}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>아래에서 변경할 수 있어요</div>
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>현재 설정: {currentRegion}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>아래에서 변경할 수 있어요</div>
           </div>
         </div>
       )}
 
       {/* 시/도 선택 */}
-      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>시/도</label>
+      <label style={{ display: 'block', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 6 }}>시/도</label>
       <select value={city} onChange={e => { setCity(e.target.value); setDistrict(''); }} style={{
         width: '100%', padding: '12px 14px', borderRadius: 'var(--radius-sm)',
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        color: 'var(--text-primary)', fontSize: 14, outline: 'none', marginBottom: 16,
+        color: 'var(--text-primary)', fontSize: 'max(16px, var(--fs-sm))', outline: 'none', marginBottom: 16,
         appearance: 'none',
       }}>
         <option value="">선택하세요</option>
@@ -119,11 +119,11 @@ export default function RegionSettingsPage() {
       </select>
 
       {/* 구/군 선택 */}
-      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>구/군</label>
+      <label style={{ display: 'block', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 6 }}>구/군</label>
       <select value={district} onChange={e => setDistrict(e.target.value)} disabled={!city} style={{
         width: '100%', padding: '12px 14px', borderRadius: 'var(--radius-sm)',
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        color: city ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 14, outline: 'none', marginBottom: 24,
+        color: city ? 'var(--text-primary)' : 'var(--text-tertiary)', fontSize: 'max(16px, var(--fs-sm))', outline: 'none', marginBottom: 24,
         opacity: city ? 1 : 0.5, appearance: 'none',
       }}>
         <option value="">{city ? '선택하세요' : '시/도를 먼저 선택하세요'}</option>
@@ -134,13 +134,13 @@ export default function RegionSettingsPage() {
         width: '100%', padding: '14px 0', borderRadius: 'var(--radius-md)',
         background: city && district ? 'var(--brand)' : 'var(--bg-hover)',
         color: city && district ? '#fff' : 'var(--text-tertiary)',
-        border: 'none', fontSize: 15, fontWeight: 600, cursor: city && district ? 'pointer' : 'default',
+        border: 'none', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', cursor: city && district ? 'pointer' : 'default',
         opacity: saving ? 0.6 : 1,
       }}>
         {saving ? '저장 중...' : '설정하기'}
       </button>
 
-      <div style={{ marginTop: 20, padding: '12px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
+      <div style={{ marginTop: 20, padding: '12px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-hover)', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
         💡 우리동네 기능은 피드에서 &quot;우리동네&quot; 탭을 통해 같은 지역 이웃들의 글만 모아볼 수 있어요. 지역 정보는 언제든 변경할 수 있습니다.
       </div>
     </div>

@@ -106,7 +106,7 @@ export default function AptCardCompact({
               return (
                 <span
                   key={t}
-                  className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${TAG_TONE_CLASS[meta.tone] ?? TAG_TONE_CLASS.gray}`}
+                  className={`rounded px-1.5 py-0.5 text-[length:var(--fs-2xs)] font-medium ${TAG_TONE_CLASS[meta.tone] ?? TAG_TONE_CLASS.gray}`}
                 >
                   {meta.label}
                 </span>
