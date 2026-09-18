@@ -227,7 +227,9 @@ ${titleHint ? `6. 제목에 다음 토큰 중 최소 2개 포함 (다양성 ↑,
 
 응답 형식 (JSON만, 다른 텍스트 없이):
 {
-  "title": "${issue.category === 'apt'
+  "title": "${issue.raw_data?.title_spec
+    ? String(issue.raw_data.title_spec)
+    : issue.category === 'apt'
     ? `검색어형 제목 25~30자 — 「{지역 지명} {현장명} {분양일정|분양가|조합원분양|시공사|입주예정}」. 하이픈 절단 금지`
     : 'SEO 최적화 제목 (40~60자, | 구분자)'}${titleHint ? `, 반드시 [${titleHint}] 중 2개 이상 포함` : ''}",
   "slug": "url-safe-slug-한글가능",

@@ -223,7 +223,16 @@ export interface IssueContext { siteContext: string; sourceText: string; constan
 /** 글감 1건의 입력 문맥 전부(생성 프롬프트와 게이트가 «같은 것» 을 본다). */
 export async function loadIssueContext(sb: any, issue: any): Promise<IssueContext> {
   const bigEventContext = await fetchBigEventContext(sb, issue);
-  const siteContext = await buildSiteContext(sb, issue.apt_site_id);
+  let siteContext = await buildSiteContext(sb, issue.apt_site_id);
+  // BN §5-3 — 단지명 병기. display 승격 금지(T-C 규율)라 현장 블록의 「표기할 이름」은 구역명이다.
+  //   글감이 원장(site_name_candidates)에서 가져온 단지명을 실어 오면 병기 지시를 덧붙인다. 없으면 기존 동작.
+  const cn = String(issue.raw_data?.complex_name ?? '').trim();
+  if (cn && siteContext) {
+    const zone = String(issue.raw_data?.zone_label ?? '').trim();
+    siteContext += `\n- 단지명: 「${cn}」(시공사 제안 단지명 — 보도 확인${issue.raw_data?.complex_name_src ? `: ${issue.raw_data.complex_name_src}` : ''}). `
+      + `제목과 본문 첫 언급은 「${cn}${zone ? ` — ${zone}` : ''}」로 병기하고 이후 「${cn}」로 부른다. `
+      + '조합 총회 확정 여부는 단정하지 않는다(「제안 단지명」 문형)';
+  }
   const sourceText = await loadSourceText(sb, issue);
   const constantsBlock = issue.category === 'apt' ? await loadPolicyConstants(sb) : '';
   return { siteContext, sourceText, constantsBlock, bigEventContext };
