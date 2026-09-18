@@ -145,8 +145,20 @@ SELECT slug, name, region, sigungu, total_units, content_score, builder, builder
                              'mgmt_approved','constructor_selected')                   THEN 'E_정비사업'
     ELSE 'F_기축'
   END AS cat,
+  -- ⛔ BN §5-6 · 금지 8 — T-C 명칭(보도 확인 전 단지명)은 광고 키워드로 등록하지 않는다.
+  --    별칭이 그 현장의 T-C 후보 명칭(공백 제거)의 부분 문자열이면 뺀다 — 「인피니원」·「사직역자이」 같은
+  --    파생형까지 잡는다. 같은 명칭에 T-B 이상 행이 생기면(tier 갱신) 자동으로 다시 들어온다.
+  --    ⚠️ LIKE 대신 strpos — 이 SQL 은 psycopg2 로 가서 '%' 를 '%%' 로 적어야 한다.
   CASE WHEN jsonb_typeof(name_variants) = 'array'
-       THEN ARRAY(SELECT jsonb_array_elements_text(name_variants))
+       THEN ARRAY(SELECT v FROM jsonb_array_elements_text(name_variants) AS x(v)
+                  WHERE NOT EXISTS (
+                    SELECT 1 FROM site_name_candidates c
+                    WHERE c.site_id = apt_sites.id AND c.tier = 'T-C' AND c.resolution = 'applied'
+                      AND length(replace(v, ' ', '')) > 0
+                      AND strpos(replace(c.proposed_name, ' ', ''), replace(v, ' ', '')) > 0
+                      AND NOT EXISTS (SELECT 1 FROM site_name_candidates c2
+                                      WHERE c2.site_id = c.site_id AND c2.proposed_name = c.proposed_name
+                                        AND c2.tier IN ('T-A', 'T-B'))))
        ELSE ARRAY[]::text[] END AS variants
 FROM apt_sites
 WHERE is_active
