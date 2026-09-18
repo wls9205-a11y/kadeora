@@ -68,3 +68,13 @@
 ### 사각 (정적 자로만 판정)
 
 - `/daily` 본문 — 게스트는 공유 잠금 화면만 본다. `/admin` — 307→/login. `/stock` — 장중 시세로 노드 키 대조율 ~73%.
+
+## 사고 기록 — FB 선행 유출 (2026-09-18)
+
+- **현상:** `git push -u origin feat/tyfb-20260918` 가 `feat/tyfb-20260918 -> main` 으로 나가 FB 2커밋(21794e76·a9eb6a08)이 프로덕션 배포. TY 유출 0. 사후 7/7 로 유지 승인.
+- **원인(설정 프로브 실측):** 래퍼·alias·훅·`remote.origin.push` 전부 없음(git 2.53.0.windows.2, `/mingw64/bin/git`). 유일 변수는 공유
+  `.git/config` 의 **`push.default=upstream`**(세션 B `ds→main` 용). 메커니즘 실명: **dst 없는 refspec(`git push origin X`)은
+  `push.default=upstream` 아래서 `branch.X.merge` 를 목적지로 채운다** — `git worktree add -b X … origin/main` 이 `branch.X.merge=refs/heads/main`
+  을 자동 설정(branch.autoSetupMerge 기본값)했으므로 X→main. 샌드박스 재현: 맨 `git push`·`git push origin X`(현재 브랜치가 X 가 아니어도,
+  `-u` 무관) → `X -> main` / `push.default=simple` 이면 `X -> X` / 콜론 refspec `X:refs/heads/X` 는 설정과 무관하게 `X -> X`.
+- **재발 방지:** origin/main 에서 딸 때 `--no-track`, push 는 항상 콜론 refspec(`X:refs/heads/X`, main 은 `HEAD:refs/heads/main`), push 전 `git branch -vv`.
