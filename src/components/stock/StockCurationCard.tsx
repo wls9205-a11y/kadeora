@@ -38,25 +38,25 @@ export default function StockCurationCard({ data }: { data: StockIssueScore }) {
         <span className={display >= 80 ? 'kd-lrow-k is-hot' : 'kd-lrow-k'} style={{ width: 'auto', padding: '4px 9px', fontSize: 'var(--fs-2xs)' }}>
           {display}
         </span>
-        <span style={{ fontSize: 'var(--fs-3xs)', fontWeight: 600, color: 'var(--text-tertiary)' }}>이슈 점수</span>
+        <span style={{ fontSize: 'var(--fs-3xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)' }}>이슈 점수</span>
         <WarningLabel warning={data.warning} />
       </div>
 
       <Link
         href={`/stock/${data.symbol}`}
         style={{
-          display: 'block', fontSize: 14, fontWeight: 600, lineHeight: 1.35,
-          letterSpacing: '-.02em', color: 'var(--text-primary)', textDecoration: 'none', marginBottom: 3,
+          display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', lineHeight: 1.3,
+          letterSpacing: '-0.2px', color: 'var(--text-primary)', textDecoration: 'none', marginBottom: 3,
         }}
       >
         {data.name}
       </Link>
 
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 9 }}>
-        <span style={{ fontSize: 13, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: 'var(--text-primary)' }}>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', fontVariantNumeric: 'tabular-nums', color: 'var(--text-primary)' }}>
           {data.price != null ? Number(data.price).toLocaleString() : '-'}
         </span>
-        <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: chipFg }}>
+        <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-num)', color: chipFg }}>
           {formatChangePct(data.change_pct)}
         </span>
       </div>
@@ -66,7 +66,7 @@ export default function StockCurationCard({ data }: { data: StockIssueScore }) {
         <ul style={{ margin: 'auto 0 0', padding: 0, listStyle: 'none', display: 'grid', gap: 4 }}>
           {grounds.map(g => (
             <li key={g.tag} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-3xs)', color: 'var(--text-tertiary)' }}>
-              <span style={{ flexShrink: 0, width: 34, fontWeight: 500, color: 'var(--text-secondary)' }}>
+              <span style={{ flexShrink: 0, width: 34, fontWeight: 'var(--fw-body)', color: 'var(--text-secondary)' }}>
                 {REASON_LABELS[g.tag]}
               </span>
               <span style={{ flex: 1, height: 4, borderRadius: 'var(--radius-pill)', background: 'var(--bg-sunken)', overflow: 'hidden' }}>

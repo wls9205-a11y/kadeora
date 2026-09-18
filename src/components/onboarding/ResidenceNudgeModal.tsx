@@ -75,11 +75,11 @@ export default function ResidenceNudgeModal() {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ fontSize: 32, marginBottom: 8 }}>📍</div>
-        <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+        <div style={{ fontSize: 'var(--fs-2xl)', marginBottom: 8 }}>📍</div>
+        <h3 style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 8px' }}>
           거주지를 알려주세요
         </h3>
-        <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 0 20px', lineHeight: 1.5 }}>
+        <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', margin: '0 0 20px', lineHeight: 1.5 }}>
           동네 청약 마감일·가격 변동·재개발 진행 알림을 보내드릴게요.<br />
           <strong style={{ color: 'var(--brand)' }}>30초면 끝나요.</strong>
         </p>
@@ -88,7 +88,7 @@ export default function ResidenceNudgeModal() {
           type="button"
           style={{
             width: '100%', padding: '14px', background: 'var(--brand)', color: 'white',
-            border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 500, cursor: 'pointer',
+            border: 'none', borderRadius: 12, fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)', cursor: 'pointer',
           }}
         >
           거주지 설정하기 →
@@ -98,7 +98,7 @@ export default function ResidenceNudgeModal() {
           type="button"
           style={{
             width: '100%', padding: '12px', marginTop: 8, background: 'transparent',
-            color: 'var(--text-tertiary)', border: 'none', fontSize: 13, cursor: 'pointer',
+            color: 'var(--text-tertiary)', border: 'none', fontSize: 'var(--fs-xs)', cursor: 'pointer',
           }}
         >
           나중에

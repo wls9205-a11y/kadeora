@@ -109,7 +109,7 @@ export default function RegionSelect({
   return (
     <div style={{ maxWidth: 880, margin: '0 auto', padding: '0 var(--sp-md) var(--sp-lg)' }}>
       <div style={{ textAlign: 'center', marginBottom: 'var(--sp-lg)' }}>
-        <h2 style={{ fontSize: 'var(--fs-lg)', letterSpacing: '-0.02em', margin: 0 }}>어디 분양 소식을 찾으세요?</h2>
+        <h2 style={{ fontSize: 'var(--fs-lg)', letterSpacing: '-0.4px', margin: 0 }}>어디 분양 소식을 찾으세요?</h2>
         <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', margin: '2px 0 0' }}>
           전국 {REGION_TREE.length}개 시·도, 시·군·구 단위로 골라 보세요
         </p>
@@ -156,7 +156,7 @@ export default function RegionSelect({
                   borderBottom: '1px solid var(--border)', textAlign: 'left', background: 'none',
                 }}
               >
-                <span style={{ fontWeight: 600 }}>{h.node ? h.node.short : h.sidoName}</span>
+                <span style={{ fontWeight: 'var(--fw-title)' }}>{h.node ? h.node.short : h.sidoName}</span>
                 <span style={{ color: 'var(--text-tertiary)', fontSize: 'var(--fs-2xs)' }}>
                   {h.node ? h.sidoName : '시·도 전체'}
                 </span>
@@ -198,12 +198,12 @@ export default function RegionSelect({
                 ? { ...cell, borderColor: 'var(--brand-navy)', background: 'var(--brand-light)', boxShadow: 'inset 0 0 0 1px var(--brand-navy)' }
                 : cell}
             >
-              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'var(--text-primary)' }}>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)' }}>
                 {s.name}
-                {n > 0 && <span style={{ color: 'var(--brand-navy)', fontWeight: 800 }}> · {n}</span>}
+                {n > 0 && <span style={{ color: 'var(--brand-navy)', fontWeight: 'var(--fw-num)' }}> · {n}</span>}
               </span>
               <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>
-                예정 <b style={{ color: 'var(--kd-accent)', fontWeight: 700 }}>{num(t ? t.total.upcoming : 0)}</b>
+                예정 <b style={{ color: 'var(--kd-accent)', fontWeight: 'var(--fw-num)' }}>{num(t ? t.total.upcoming : 0)}</b>
               </span>
             </button>
           );
@@ -215,10 +215,10 @@ export default function RegionSelect({
           marginTop: 'var(--sp-md)', padding: 'var(--sp-md)', background: 'var(--bg-surface)',
           border: '1px solid var(--brand-navy)', borderRadius: 'var(--radius-md)',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)', fontSize: 'var(--fs-xs)', fontWeight: 800 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-sm)', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)' }}>
             {openNode.name} 시·군·구
             <button type="button" className="touch-target" onClick={() => toggleSidoAll(openNode)}
-              style={{ marginLeft: 'auto', fontSize: 'var(--fs-2xs)', color: 'var(--brand-navy)', fontWeight: 700, background: 'none' }}>
+              style={{ marginLeft: 'auto', fontSize: 'var(--fs-2xs)', color: 'var(--brand-navy)', fontWeight: 'var(--fw-num)', background: 'none' }}>
               {openNode.sigungus.flatMap((n) => n.codes).every((c) => picked.has(c)) ? '전체 해제' : '전체 선택'}
             </button>
           </div>
@@ -261,7 +261,7 @@ export default function RegionSelect({
           초기화
         </button>
         <button type="button" className="touch-target" onClick={apply}
-          style={{ height: 36, padding: '0 var(--sp-xl)', borderRadius: 'var(--radius-sm)', background: 'var(--brand-navy)', color: 'var(--text-inverse)', fontWeight: 800 }}>
+          style={{ height: 36, padding: '0 var(--sp-xl)', borderRadius: 'var(--radius-sm)', background: 'var(--brand-navy)', color: 'var(--text-inverse)', fontWeight: 'var(--fw-num)' }}>
           이 조건으로 보기
         </button>
       </div>

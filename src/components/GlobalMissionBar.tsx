@@ -58,12 +58,12 @@ export default function GlobalMissionBar() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '8px 12px', marginBottom: 8, borderRadius: 'var(--radius-md)',
         background: 'linear-gradient(135deg, rgba(16,185,129,0.08), rgba(59,123,246,0.06))',
-        border: '1px solid rgba(16,185,129,0.15)', fontSize: 13,
+        border: '1px solid rgba(16,185,129,0.15)', fontSize: 'var(--fs-xs)',
       }}>
         <span style={{ color: 'var(--text-secondary)' }}>📅 오늘 출석하고 <strong style={{ color: 'var(--brand)' }}>+10P</strong> 받기</span>
         <button onClick={handleAttend} disabled={checking} style={{
           padding: '4px 14px', borderRadius: 'var(--radius-sm)', border: 'none',
-          background: 'var(--brand)', color: '#fff', fontSize: 12, fontWeight: 500,
+          background: 'var(--brand)', color: '#fff', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
           cursor: checking ? 'not-allowed' : 'pointer', opacity: checking ? 0.6 : 1,
         }}>체크!</button>
       </div>
@@ -79,7 +79,7 @@ export default function GlobalMissionBar() {
       <div style={{
         marginBottom: 8, borderRadius: 'var(--radius-md)',
         background: 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(59,123,246,0.06))',
-        border: '1px solid rgba(251,191,36,0.15)', fontSize: 13, overflow: 'hidden',
+        border: '1px solid rgba(251,191,36,0.15)', fontSize: 'var(--fs-xs)', overflow: 'hidden',
       }}>
         {/* 헤더 — s188: 진행도 도트 추가 (collapsed 시에도 시각적 피드백) */}
         <div
@@ -101,11 +101,11 @@ export default function GlobalMissionBar() {
               ))}
             </span>
             <strong style={{ color: 'var(--brand)' }}>{done}/{total}</strong>
-            <span style={{ fontSize: 11, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {done >= 2 ? '보너스 수령 완료!' : '2개 완료 시 +200P'}
             </span>
           </span>
-          <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>{expanded ? '▲' : '▼'}</span>
+          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>{expanded ? '▲' : '▼'}</span>
         </div>
 
         {/* 미션 목록 (확장 시) */}
@@ -132,17 +132,17 @@ export default function GlobalMissionBar() {
                     opacity: isDone ? 0.6 : 1,
                   }}
                 >
-                  <span style={{ fontSize: 13 }}>
+                  <span style={{ fontSize: 'var(--fs-xs)' }}>
                     {isDone ? '완료 · ' : ''}{m.label}
                   </span>
-                  <span style={{ fontSize: 12, color: isDone ? 'var(--accent-green)' : 'var(--brand)', fontWeight: 600 }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', color: isDone ? 'var(--accent-green)' : 'var(--brand)', fontWeight: 'var(--fw-title)' }}>
                     {isDone ? '완료' : `+${m.reward}P`}
                   </span>
                 </Link>
               );
             })}
 
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', marginTop: 2 }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: 2 }}>
               2개 이상 완료 시 보너스 +200P 추가 지급!
             </div>
           </div>

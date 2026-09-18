@@ -51,7 +51,7 @@ export default function KakaoHeroCTA() {
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             background: 'rgba(52,211,153,0.12)', color: '#34D399',
-            fontSize: 11, fontWeight: 700, padding: '5px 12px', borderRadius: 'var(--radius-lg)',
+            fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', padding: '5px 12px', borderRadius: 'var(--radius-lg)',
             marginBottom: 14,
           }}>
             <span style={{
@@ -63,8 +63,8 @@ export default function KakaoHeroCTA() {
 
           {/* 타이틀 */}
           <h2 style={{
-            fontSize: 22, fontWeight: 800, color: '#F0F4F8',
-            lineHeight: 1.35, letterSpacing: '-0.03em', marginBottom: 8,
+            fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-num)', color: '#F0F4F8',
+            lineHeight: 1.3, letterSpacing: '-0.4px', marginBottom: 8,
           }}>
             내 관심 지역·종목의<br />
             <span style={{ color: '#FEE500' }}>가격 변동 알림</span>을<br />
@@ -73,7 +73,7 @@ export default function KakaoHeroCTA() {
 
           {/* 설명 */}
           <p style={{
-            fontSize: 13, color: 'rgba(224,232,240,0.45)', lineHeight: 1.6,
+            fontSize: 'var(--fs-xs)', color: 'rgba(224,232,240,0.45)', lineHeight: 1.6,
             marginBottom: 18,
           }}>
             청약 마감 D-day, 실거래가 변동, 관심 종목 급등/급락까지.
@@ -95,8 +95,8 @@ export default function KakaoHeroCTA() {
                 padding: '10px 8px', textAlign: 'center',
                 border: '1px solid rgba(255,255,255,0.04)',
               }}>
-                <div style={{ fontSize: 15, fontWeight: 800, color: '#F0F4F8', letterSpacing: '-0.02em' }}>{s.n}</div>
-                <div style={{ fontSize: 10, color: 'rgba(224,232,240,0.3)', marginTop: 2, fontWeight: 500 }}>{s.l}</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: '#F0F4F8', letterSpacing: '-0.2px' }}>{s.n}</div>
+                <div style={{ fontSize: 'var(--fs-2xs)', color: 'rgba(224,232,240,0.3)', marginTop: 2, fontWeight: 'var(--fw-body)' }}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -108,7 +108,7 @@ export default function KakaoHeroCTA() {
             style={{
               display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 10,
               background: '#FEE500', color: '#191919', borderRadius: 'var(--radius-card)',
-              padding: '14px 0', fontSize: 15, fontWeight: 700, textDecoration: 'none',
+              padding: '14px 0', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', textDecoration: 'none',
               boxShadow: '0 0 24px rgba(254,229,0,0.15)',
               transition: 'transform 0.15s',
               border: 'none', cursor: 'pointer',
@@ -119,7 +119,7 @@ export default function KakaoHeroCTA() {
           </button>
 
           {/* 이메일 대안 */}
-          <div style={{ textAlign: 'center', marginTop: 10, fontSize: 12, color: 'rgba(224,232,240,0.2)' }}>
+          <div style={{ textAlign: 'center', marginTop: 10, fontSize: 'var(--fs-xs)', color: 'rgba(224,232,240,0.2)' }}>
             또는 <a href={loginUrl} style={{ color: 'rgba(224,232,240,0.4)', textDecoration: 'underline', textUnderlineOffset: 2 }}>이메일로 가입</a>
           </div>
 
@@ -128,7 +128,7 @@ export default function KakaoHeroCTA() {
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16,
             marginTop: 14, paddingTop: 14,
             borderTop: '1px solid rgba(255,255,255,0.05)',
-            fontSize: 10, color: 'rgba(224,232,240,0.22)',
+            fontSize: 'var(--fs-2xs)', color: 'rgba(224,232,240,0.22)',
           }}>
             <span>스팸 없음</span>
             <span>10초 설정</span>

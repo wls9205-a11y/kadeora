@@ -64,7 +64,7 @@ export default function AptCurationCard({ item, today }: { item: AptHubItem; tod
         <span className={chip.tone ? `kd-lrow-k ${chip.tone}` : 'kd-lrow-k'} style={{ width: 'auto', padding: '4px 8px' }}>
           {chip.label}
         </span>
-        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-tertiary)' }}>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)' }}>
           {statusLabel(item.status)}
         </span>
       </div>
@@ -72,15 +72,15 @@ export default function AptCurationCard({ item, today }: { item: AptHubItem; tod
       <Link
         href={aptHref(item)}
         style={{
-          display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, lineHeight: 1.35,
-          letterSpacing: '-.0125em', color: 'var(--text-primary)', textDecoration: 'none',
+          display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', lineHeight: 1.3,
+          letterSpacing: '-0.2px', color: 'var(--text-primary)', textDecoration: 'none',
           wordBreak: 'keep-all', marginBottom: 4,
         }}
       >
         {name}
       </Link>
 
-      <p style={{ margin: '0 0 9px', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.45 }}>
+      <p style={{ margin: '0 0 9px', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
         {[
           formatRegionShortSafe(item.region_nm),
           item.builder,
@@ -114,7 +114,7 @@ export default function AptCurationCard({ item, today }: { item: AptHubItem; tod
       </div>
 
       {item.thumb_url && (
-        <p style={{ margin: '8px 0 0', fontSize: 'var(--fs-xs)', lineHeight: 1.4, color: 'var(--text-tertiary)' }}>
+        <p style={{ margin: '8px 0 0', fontSize: 'var(--fs-xs)', lineHeight: 1.3, color: 'var(--text-tertiary)' }}>
           {thumbKind(item.thumb_url) === 'hero'
             ? '조감도 제공 · 시행사 (수령 출처는 상세에 표기)'
             : '항공 이미지 · 국토교통부 공간정보 오픈플랫폼(VWorld)'}

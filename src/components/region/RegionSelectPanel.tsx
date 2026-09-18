@@ -36,7 +36,7 @@ export default function RegionSelectPanel(props: RegionSelectPanelProps) {
         }}
       >
         <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{props.summary}</span>
-        <span style={{ color: 'var(--text-tertiary)', fontWeight: 500 }}>{open ? '닫기' : '지역 고르기'}</span>
+        <span style={{ color: 'var(--text-tertiary)', fontWeight: 'var(--fw-body)' }}>{open ? '닫기' : '지역 고르기'}</span>
       </button>
       {open && (
         <div style={{ marginTop: 'var(--sp-md)' }}>

@@ -61,7 +61,7 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
         background: myAlerts.length > 0 ? 'rgba(251,191,36,0.1)' : 'var(--bg-hover)',
         border: myAlerts.length > 0 ? '1px solid rgba(251,191,36,0.3)' : '1px solid var(--border)',
         color: myAlerts.length > 0 ? 'var(--accent-yellow)' : 'var(--text-secondary)',
-        fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer',
+        fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', cursor: 'pointer',
       }}>
         🔔 알림 {myAlerts.length > 0 ? `(${myAlerts.length})` : '설정'}
       </button>
@@ -70,7 +70,7 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
         <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-lg)', marginTop: -8 }}>현재가 {fmtPrice(currentPrice)}</div>
         {myAlerts.length > 0 && (
           <div style={{ marginBottom: 'var(--sp-lg)' }}>
-            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>활성 알림</div>
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 6 }}>활성 알림</div>
             {myAlerts.map(a => (
               <div key={a.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
                 <span style={{ fontSize: 'var(--fs-sm)', color: a.is_triggered ? 'var(--accent-green)' : 'var(--text-primary)' }}>
@@ -82,11 +82,11 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
             ))}
           </div>
         )}
-        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>새 알림 추가</div>
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', marginBottom: 'var(--sp-sm)' }}>새 알림 추가</div>
         <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
           {[{ key: 'above' as const, label: '📈 이상 도달' }, { key: 'below' as const, label: '📉 이하 도달' }].map(t => (
             <button key={t.key} onClick={() => setAlertType(t.key)} style={{
-              flex: 1, padding: '8px 0', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-sm)', fontWeight: 600,
+              flex: 1, padding: '8px 0', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)',
               background: alertType === t.key ? 'var(--brand)' : 'var(--bg-hover)',
               color: alertType === t.key ? 'var(--text-inverse)' : 'var(--text-secondary)',
               border: alertType === t.key ? 'none' : '1px solid var(--border)', cursor: 'pointer',
@@ -99,7 +99,7 @@ export default function StockAlertButton({ symbol, stockName, currentPrice, curr
             style={{ flex: 1, padding: 'var(--sp-md) var(--card-p)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', outline: 'none' }} />
           <button onClick={addAlert} disabled={saving || !threshold} style={{
             padding: 'var(--sp-md) var(--sp-xl)', borderRadius: 'var(--radius-sm)', background: 'var(--brand)', color: 'var(--text-inverse)',
-            fontSize: 'var(--fs-sm)', fontWeight: 500, border: 'none', cursor: 'pointer',
+            fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)', border: 'none', cursor: 'pointer',
             opacity: saving || !threshold ? 0.5 : 1,
           }}>{saving ? '...' : '추가'}</button>
         </div>

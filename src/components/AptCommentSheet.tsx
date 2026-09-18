@@ -70,7 +70,7 @@ export default function AptCommentSheet({ houseKey, houseNm, houseType, open, on
           {comments.map((c: Record<string, any>) => (
             <div key={c.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 2 }}>
-                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--brand)' }}>{c.nickname}</span>
+                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: 'var(--brand)' }}>{c.nickname}</span>
                 <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{timeAgo(c.created_at)}</span>
               </div>
               <div style={{ fontSize: 'var(--fs-base)', color: 'var(--text-primary)', lineHeight: 1.5 }}>{c.content}</div>
@@ -84,7 +84,7 @@ export default function AptCommentSheet({ houseKey, houseNm, houseType, open, on
                 style={{ width: '100%', padding: '10px 12px', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)', fontSize: 'var(--fs-base)', resize: 'none', boxSizing: 'border-box' }} />
               <span style={{ position: 'absolute', right: 10, bottom: 8, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{text.length}/200</span>
             </div>
-            <button onClick={submit} disabled={sending || !text.trim()} style={{ marginTop: 'var(--sp-sm)', width: '100%', padding: '10px 0', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-base)', fontWeight: 700, cursor: 'pointer', opacity: !text.trim() ? 0.5 : 1 }}>
+            <button onClick={submit} disabled={sending || !text.trim()} style={{ marginTop: 'var(--sp-sm)', width: '100%', padding: '10px 0', background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', cursor: 'pointer', opacity: !text.trim() ? 0.5 : 1 }}>
               {sending ? '등록 중...' : '등록'}
             </button>
           </div>

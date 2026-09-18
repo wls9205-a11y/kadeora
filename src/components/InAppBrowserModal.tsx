@@ -137,10 +137,10 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
         }}
       >
         <div style={{ fontSize: 36, textAlign: 'center', marginBottom: 6 }}>⚠️</div>
-        <div style={{ fontSize: 16, fontWeight: 600, textAlign: 'center', marginBottom: 8, lineHeight: 1.45 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', textAlign: 'center', marginBottom: 8, lineHeight: 1.5 }}>
           {label} 에서는 카카오·구글 로그인이<br />차단되어 있어요
         </div>
-        <p style={{ fontSize: 12, color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.6, margin: '0 0 18px' }}>
+        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.6, margin: '0 0 18px' }}>
           외부 브라우저(크롬/사파리)에서 열어주시면<br />3초 안에 가입을 완료할 수 있어요.
         </p>
 
@@ -150,7 +150,7 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
           disabled={opening}
           style={{
             width: '100%', padding: '13px 18px', borderRadius: 10, border: 'none',
-            background: '#FEE500', color: '#191919', fontWeight: 500, fontSize: 14,
+            background: '#FEE500', color: '#191919', fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-sm)',
             cursor: opening ? 'wait' : 'pointer', marginBottom: 8,
           }}
         >
@@ -163,15 +163,15 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
             width: '100%', padding: '11px 18px', borderRadius: 10,
             border: '1px solid var(--border)',
             background: 'transparent', color: 'var(--text-primary)',
-            fontWeight: 500, fontSize: 13, cursor: 'pointer',
+            fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-xs)', cursor: 'pointer',
           }}
         >
           {copied ? '✅ 주소 복사 완료' : '📋 현재 주소 복사하기'}
         </button>
 
         <div style={{ marginTop: 14, padding: '10px 12px', borderRadius: 8, background: 'var(--bg-base)', border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4, fontWeight: 600 }}>대안</div>
-          <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4, fontWeight: 'var(--fw-title)' }}>대안</div>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
             우상단 &quot;…&quot; 메뉴 → &quot;외부 브라우저로 열기&quot; 또는 &quot;Chrome/Safari 에서 열기&quot; 선택
           </div>
         </div>
@@ -181,7 +181,7 @@ export default function InAppBrowserModal({ type, onClose, href }: Props) {
             onClick={onClose}
             style={{
               marginTop: 12, width: '100%', padding: '8px 0', border: 'none', background: 'transparent',
-              color: 'var(--text-tertiary)', fontSize: 11, cursor: 'pointer',
+              color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', cursor: 'pointer',
               textDecoration: 'underline', textUnderlineOffset: 2,
             }}
           >

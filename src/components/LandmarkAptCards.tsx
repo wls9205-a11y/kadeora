@@ -12,7 +12,7 @@ export default function LandmarkAptCards() {
   if (!apts.length) return null;
   return (
     <div style={{ marginBottom: 8 }}>
-      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 800, marginBottom: 8 }}>🏙️ 지역 대장 아파트</div>
+      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 'var(--fw-num)', marginBottom: 8 }}>🏙️ 지역 대장 아파트</div>
       <div className="apt-pill-scroll kd-scroll-row" style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
         {apts.slice(0, 8).map((a, i) => (
           <Link href={`/apt/complex/${encodeURIComponent(a.name)}`} key={i} style={{
@@ -25,10 +25,10 @@ export default function LandmarkAptCards() {
               </div>
             )}
             <div style={{ padding: '8px 12px' }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{a.region} {a.district}</div>
-              {a.avg_price_100m && <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent-red)', marginTop: 4 }}>{a.avg_price_100m}</div>}
-              {a.nearby_station && <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>🚇 {a.nearby_station}</div>}
+              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{a.region} {a.district}</div>
+              {a.avg_price_100m && <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--accent-red)', marginTop: 4 }}>{a.avg_price_100m}</div>}
+              {a.nearby_station && <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>🚇 {a.nearby_station}</div>}
             </div>
           </Link>
         ))}

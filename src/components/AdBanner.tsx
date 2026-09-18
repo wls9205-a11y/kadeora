@@ -86,22 +86,22 @@ export default function AdBanner() {
             <div style={{ flex: 1, padding: '12px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                 <span style={{
-                  fontSize: 10, fontWeight: 600, borderRadius: 4, padding: '1px 6px', lineHeight: '15px',
+                  fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', borderRadius: 4, padding: '1px 6px', lineHeight: '15px',
                   color: bs.color, background: bs.bg,
                 }}>{ad.badge}</span>
                 {ad.region && (
-                  <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-secondary)' }}>{ad.region}</span>
+                  <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-secondary)' }}>{ad.region}</span>
                 )}
               </div>
               <p style={{
-                fontSize: 14, fontWeight: 600, color: 'var(--text-primary)',
-                margin: '0 0 6px', lineHeight: 1.35,
+                fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)',
+                margin: '0 0 6px', lineHeight: 1.3,
                 whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
               }}>{ad.title}</p>
               <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                 {ad.subtitle.split(' · ').map((s, i) => (
                   <span key={i} style={{
-                    fontSize: 10, padding: '3px 8px', borderRadius: 'var(--radius-sm)', fontWeight: 500,
+                    fontSize: 'var(--fs-2xs)', padding: '3px 8px', borderRadius: 'var(--radius-sm)', fontWeight: 'var(--fw-body)',
                     color: i === 0 ? 'var(--info)' : i === 1 ? 'var(--success)' : 'var(--text-tertiary)',
                     background: i === 0 ? 'var(--info-bg)' : i === 1 ? 'var(--success-bg)' : 'var(--bg-hover)',
                   }}>{s}</span>

@@ -79,8 +79,8 @@ function StatusPill({ status }: { status: string | null }) {
         padding: '3px 9px',
         borderRadius: 4,
         fontSize: 'var(--fs-xs)',
-        fontWeight: 500,
-        lineHeight: 1.4,
+        fontWeight: 'var(--fw-body)',
+        lineHeight: 1.3,
         whiteSpace: 'nowrap',
         color: 'var(--text-inverse)',
         background: statusColor(status),
@@ -147,7 +147,7 @@ export default function SiteCard({ site }: { site: CuratedSite }) {
                 padding: '3px 9px',
                 borderRadius: 4,
                 fontSize: 'var(--fs-xs)',
-                fontWeight: 600,
+                fontWeight: 'var(--fw-title)',
                 whiteSpace: 'nowrap',
                 background: 'var(--bg-surface-translucent)',
                 color: 'var(--text-secondary)',
@@ -164,9 +164,9 @@ export default function SiteCard({ site }: { site: CuratedSite }) {
           className="site-card-title"
           style={{
             fontSize: 'var(--fs-lg)',
-            fontWeight: 600,
+            fontWeight: 'var(--fw-title)',
             lineHeight: 1.3,
-            letterSpacing: '-.02em',
+            letterSpacing: '-0.4px',
             color: 'var(--text-primary)',
             wordBreak: 'keep-all',
           }}
@@ -185,7 +185,7 @@ export default function SiteCard({ site }: { site: CuratedSite }) {
             style={{
               fontSize: 'var(--fs-xs)',
               color: 'var(--text-tertiary)',
-              lineHeight: 1.55,
+              lineHeight: 1.5,
               margin: '5px 0 0',
               wordBreak: 'keep-all',
             }}
@@ -195,7 +195,7 @@ export default function SiteCard({ site }: { site: CuratedSite }) {
         ) : null}
 
         {price ? (
-          <div style={{ ...MONO, fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', marginTop: 9 }}>
+          <div style={{ ...MONO, fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginTop: 9 }}>
             {price}
           </div>
         ) : null}
@@ -263,7 +263,7 @@ export function SiteRow({ site }: { site: CuratedSite }) {
         <div
           style={{
             fontSize: 'var(--fs-sm)',
-            fontWeight: 600,
+            fontWeight: 'var(--fw-title)',
             color: 'var(--text-primary)',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -277,7 +277,7 @@ export function SiteRow({ site }: { site: CuratedSite }) {
         ) : null}
       </div>
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
-        <div style={{ ...MONO, fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>
+        <div style={{ ...MONO, fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>
           {price ?? '분양가 미공개'}
         </div>
         {site.total_units ? (

@@ -53,8 +53,8 @@ export default function SubscriptionResults({ items }: { items: AptHubItem[] }) 
                 <div
                   style={{
                     fontSize: 'var(--fs-xs)',
-                    fontWeight: 600,
-                    lineHeight: 1.4,
+                    fontWeight: 'var(--fw-title)',
+                    lineHeight: 1.3,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
@@ -71,7 +71,7 @@ export default function SubscriptionResults({ items }: { items: AptHubItem[] }) 
               {hasNumbers ? (
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
                   {it.competition_rate != null ? (
-                    <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#b91c1c' }}>
+                    <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: '#b91c1c' }}>
                       {Number(it.competition_rate).toFixed(1)}대 1
                     </div>
                   ) : null}

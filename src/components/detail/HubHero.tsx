@@ -49,7 +49,7 @@ export default function HubHero({
           letterSpacing: '.14em',
           textTransform: 'uppercase',
           color: 'var(--brand)',
-          fontWeight: 600,
+          fontWeight: 'var(--fw-title)',
           marginBottom: 3,
         }}
       >
@@ -60,9 +60,9 @@ export default function HubHero({
         id={titleId}
         style={{
           fontSize: 'var(--fs-xl)',
-          fontWeight: 600,
-          letterSpacing: '-.025em',
-          lineHeight: 1.25,
+          fontWeight: 'var(--fw-title)',
+          letterSpacing: '-0.4px',
+          lineHeight: 1.3,
           margin: 0,
           color: 'var(--text-primary)',
           wordBreak: 'keep-all',
@@ -76,7 +76,7 @@ export default function HubHero({
           style={{
             margin: 'var(--sp-xs) 0 0',
             fontSize: 'var(--fs-sm)',
-            lineHeight: 1.7,
+            lineHeight: 1.6,
             color: 'var(--text-secondary)',
             wordBreak: 'keep-all',
           }}
@@ -105,7 +105,7 @@ export default function HubHero({
                 style={{
                   margin: '2px 0 0',
                   fontSize: 'var(--fs-md)',
-                  fontWeight: 600,
+                  fontWeight: 'var(--fw-title)',
                   color: 'var(--text-primary)',
                   fontVariantNumeric: 'tabular-nums',
                 }}

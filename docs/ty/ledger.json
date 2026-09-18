@@ -24,12 +24,6 @@
     "l": 117,
     "raw": "text-4xl",
     "note": "tailwind 4xl/5xl — 브리지 밖·clamp 편입 안건"
-   },
-   {
-    "f": "src/components/apt/AptSitePageView.tsx",
-    "l": 61,
-    "raw": "sm:text-4xl",
-    "note": "tailwind 4xl/5xl — 브리지 밖·clamp 편입 안건"
    }
   ],
   "display": [
@@ -90,6 +84,130 @@
     "l": 152,
     "raw": "56",
     "note": "over-ladder"
+   },
+   {
+    "f": "src/components/apt/AptInsightsUnified.tsx",
+    "l": 48,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/apt/detail/AptDDayCard.tsx",
+    "l": 32,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/apt/home/AptHomeHero.tsx",
+    "l": 74,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/apt/SiteHero.tsx",
+    "l": 193,
+    "raw": "'clamp(48px, 12vw, 96px)'"
+   },
+   {
+    "f": "src/components/blog/RelatedBlogsSection.tsx",
+    "l": 116,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/calc/CalcEngine.tsx",
+    "l": 213,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/EmptyState.tsx",
+    "l": 15,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/ErrorBoundary.tsx",
+    "l": 28,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/GlobalPanorama.tsx",
+    "l": 82,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/GuideInstallButton.tsx",
+    "l": 91,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/GuideInstallButton.tsx",
+    "l": 104,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/GuideInstallButton.tsx",
+    "l": 131,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/GuideInstallButton.tsx",
+    "l": 138,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/GuideInstallButton.tsx",
+    "l": 155,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/InAppBrowserModal.tsx",
+    "l": 139,
+    "raw": "36",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/modals/ReportModal.tsx",
+    "l": 71,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/onboarding/MarketingConsentModal.tsx",
+    "l": 158,
+    "raw": "40",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/PortfolioSimulator.tsx",
+    "l": 172,
+    "raw": "28",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/signup/KakaoChannelAddModal.tsx",
+    "l": 167,
+    "raw": "48",
+    "note": "over-ladder"
+   },
+   {
+    "f": "src/components/SignupNudgeModal.tsx",
+    "l": 216,
+    "raw": "'clamp(18px, 5vw, 22px)'"
+   },
+   {
+    "f": "src/components/TossTeaser.tsx",
+    "l": 90,
+    "raw": "40",
+    "note": "over-ladder"
    }
   ],
   "ls-positive-zeroed": [
@@ -107,6 +225,156 @@
     "f": "src/app/(main)/blog/[slug]/page.tsx",
     "l": 1006,
     "raw": "'0.3px'"
+   },
+   {
+    "f": "src/components/apt/AptBlogStack.tsx",
+    "l": 48,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/AptCompareTable.tsx",
+    "l": 112,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/AptFeedCard.tsx",
+    "l": 71,
+    "raw": "'0.3px'"
+   },
+   {
+    "f": "src/components/apt/AptHeroCard.tsx",
+    "l": 51,
+    "raw": "'0.3px'"
+   },
+   {
+    "f": "src/components/apt/AptHeroLarge.tsx",
+    "l": 163,
+    "raw": "1"
+   },
+   {
+    "f": "src/components/apt/AptInsightsUnified.tsx",
+    "l": 51,
+    "raw": "1"
+   },
+   {
+    "f": "src/components/apt/AptPriceTrendCard.tsx",
+    "l": 102,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/AptPriceTrendCard.tsx",
+    "l": 103,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/AptPriceTrendCard.tsx",
+    "l": 110,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/AptPriceTrendUnified.tsx",
+    "l": 102,
+    "raw": "1"
+   },
+   {
+    "f": "src/components/apt/AptQuickFilters.tsx",
+    "l": 94,
+    "raw": "1"
+   },
+   {
+    "f": "src/components/apt/AptQuickFilters.tsx",
+    "l": 109,
+    "raw": "1"
+   },
+   {
+    "f": "src/components/apt/AptQuickFilters.tsx",
+    "l": 125,
+    "raw": "1"
+   },
+   {
+    "f": "src/components/apt/AptSidebar.tsx",
+    "l": 56,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/CheongakMatchCard.tsx",
+    "l": 31,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/CheongakMatchCard.tsx",
+    "l": 78,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/CheongakMatchCard.tsx",
+    "l": 113,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/CheongakMatchCard.tsx",
+    "l": 118,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/CheongakMatchCard.tsx",
+    "l": 125,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/ComplexScale.tsx",
+    "l": 43,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/ComplexScale.tsx",
+    "l": 61,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/detail/AptKeyMetrics.tsx",
+    "l": 128,
+    "raw": "'.02em'"
+   },
+   {
+    "f": "src/components/apt/home/AptHomeHero.tsx",
+    "l": 65,
+    "raw": "0.3"
+   },
+   {
+    "f": "src/components/apt/LifecycleTimeline.tsx",
+    "l": 111,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/LifecycleTimeline.tsx",
+    "l": 112,
+    "raw": "0.5"
+   },
+   {
+    "f": "src/components/apt/SiteDetailRail.tsx",
+    "l": 60,
+    "raw": "'.08em'"
+   },
+   {
+    "f": "src/components/apt/SiteThumb.tsx",
+    "l": 188,
+    "raw": "1.2"
+   },
+   {
+    "f": "src/components/home/RecentlyViewed.tsx",
+    "l": 32,
+    "raw": "0.3"
+   },
+   {
+    "f": "src/components/NoticeBanner.tsx",
+    "l": 204,
+    "raw": "'0.03em'"
+   },
+   {
+    "f": "src/components/ui/AIRelatedPanel.tsx",
+    "l": 43,
+    "raw": "1"
    }
   ],
   "ls-unknown-size": [
@@ -114,6 +382,16 @@
     "f": "src/app/(main)/stock/[symbol]/page.tsx",
     "l": 291,
     "raw": "\"-.0125em\""
+   },
+   {
+    "f": "src/components/apt/SiteHero.tsx",
+    "l": 196,
+    "raw": "'-.05em'"
+   },
+   {
+    "f": "src/components/blog/BlogMentionCard.tsx",
+    "l": 466,
+    "raw": "'-1px'"
    }
   ],
   "lh-unit": [
@@ -126,6 +404,41 @@
     "f": "src/app/(main)/apt/map/MapClient.tsx",
     "l": 198,
     "raw": "'54px'"
+   },
+   {
+    "f": "src/components/AdBanner.tsx",
+    "l": 89,
+    "raw": "'15px'"
+   },
+   {
+    "f": "src/components/apt/SiteFloatingActions.tsx",
+    "l": 212,
+    "raw": "'18px'"
+   },
+   {
+    "f": "src/components/blog/BlogHeroExtras.tsx",
+    "l": 39,
+    "raw": "'24px'"
+   }
+  ],
+  "css": [
+   {
+    "f": "src/app/globals.css",
+    "l": 852,
+    "raw": "-0.5px",
+    "note": "ls-unknown-size"
+   },
+   {
+    "f": "src/app/globals.css",
+    "l": 1640,
+    "raw": "28px",
+    "note": "display"
+   },
+   {
+    "f": "src/app/styles/components.css",
+    "l": 550,
+    "raw": ".08em",
+    "note": "ls-positive-zeroed"
    }
   ]
  },

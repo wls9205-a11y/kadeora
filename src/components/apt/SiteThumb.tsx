@@ -180,17 +180,17 @@ export default function SiteThumb({
         color: '#fff',
       }}
     >
-      <span style={{ fontSize: Math.round(size * (isBrand ? 0.22 : 0.3)), fontWeight: 600, lineHeight: 1 }}>
+      <span style={{ fontSize: Math.round(size * (isBrand ? 0.22 : 0.3)), fontWeight: 'var(--fw-title)', lineHeight: 1 }}>
         {initials}
       </span>
       {isBrand ? (
         // 브랜드 줄만 골드. 단계는 배경이 아니라 카드 좌상단 태그로 가른다.
-        <span style={{ fontSize: 9, fontWeight: 500, letterSpacing: 1.2, color: '#FFC53D', lineHeight: 1 }}>
+        <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', letterSpacing: 0, color: '#FFC53D', lineHeight: 1 }}>
           KADEORA
         </span>
       ) : (
         stage && size >= 56 && (
-          <span style={{ fontSize: 8, opacity: 0.85, lineHeight: 1, whiteSpace: 'nowrap', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <span style={{ fontSize: 'var(--fs-3xs)', opacity: 0.85, lineHeight: 1, whiteSpace: 'nowrap', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {stage}
           </span>
         )

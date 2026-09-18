@@ -89,7 +89,7 @@ export default function ImageLightbox({ images, initialIndex, onClose }: Props) 
           position: 'absolute', top: 'max(12px, env(safe-area-inset-top))', right: 12, zIndex: 3,
           width: 40, height: 40, borderRadius: '50%',
           background: 'rgba(255,255,255,0.1)', border: 'none',
-          color: '#fff', fontSize: 22, cursor: 'pointer',
+          color: '#fff', fontSize: 'var(--fs-lg)', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}
       >
@@ -100,7 +100,7 @@ export default function ImageLightbox({ images, initialIndex, onClose }: Props) 
       <div style={{
         position: 'absolute', top: 'max(18px, env(safe-area-inset-top))', left: '50%',
         transform: 'translateX(-50%)', zIndex: 3,
-        fontSize: 13, color: 'rgba(255,255,255,0.6)', fontWeight: 600,
+        fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.6)', fontWeight: 'var(--fw-title)',
       }}>
         {idx + 1} / {total}
       </div>
@@ -130,7 +130,7 @@ export default function ImageLightbox({ images, initialIndex, onClose }: Props) 
         {/* 워터마크 — 확대 뷰에서도 적용 */}
         {!zoom && <div style={{ position: 'absolute', bottom: 90, right: 30, opacity: 0.5, pointerEvents: 'none', display: 'flex', alignItems: 'center', gap: 6, zIndex: 2 }}>
           <svg width="16" height="16" viewBox="0 0 72 72"><circle cx="18" cy="36" r="7" fill="rgba(255,255,255,0.8)"/><circle cx="36" cy="36" r="7" fill="rgba(255,255,255,0.8)"/><circle cx="54" cy="36" r="7" fill="rgba(255,255,255,0.8)"/></svg>
-          <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>kadeora.app</span>
+          <span style={{ fontSize: 'var(--fs-sm)', color: 'rgba(255,255,255,0.7)', fontWeight: 'var(--fw-body)' }}>kadeora.app</span>
         </div>}
       </div>
 
@@ -144,7 +144,7 @@ export default function ImageLightbox({ images, initialIndex, onClose }: Props) 
               position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
               width: 44, height: 44, borderRadius: '50%',
               background: 'rgba(255,255,255,0.08)', border: 'none',
-              color: '#fff', fontSize: 20, cursor: 'pointer',
+              color: '#fff', fontSize: 'var(--fs-md)', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
@@ -157,7 +157,7 @@ export default function ImageLightbox({ images, initialIndex, onClose }: Props) 
               position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
               width: 44, height: 44, borderRadius: '50%',
               background: 'rgba(255,255,255,0.08)', border: 'none',
-              color: '#fff', fontSize: 20, cursor: 'pointer',
+              color: '#fff', fontSize: 'var(--fs-md)', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
@@ -172,7 +172,7 @@ export default function ImageLightbox({ images, initialIndex, onClose }: Props) 
         left: 0, right: 0, textAlign: 'center', zIndex: 3,
       }}>
         {img.caption && (
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginBottom: 8 }}>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.7)', marginBottom: 8 }}>
             {img.caption}
           </div>
         )}

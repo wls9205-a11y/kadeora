@@ -461,7 +461,7 @@ function FallbackThumb({ name, height, isSeed }: { name: string; height: number;
       <div style={{
         position: 'absolute', inset: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: initialFontSize, fontWeight: 600,
+        fontSize: initialFontSize, fontWeight: 'var(--fw-title)',
         color: palette.initialColor,
         letterSpacing: '-1px', userSelect: 'none',
       }}>
@@ -527,9 +527,9 @@ function renderStockTop(stocks: any[], sparklines: Record<string, number[]>) {
         display: 'flex', alignItems: 'center', gap: 8,
       }}>
         <span style={{ width: 3, height: 15, borderRadius: 2, background: '#378ADD' }} />
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>관련 종목</span>
-        {stocks[0]?.sector && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>· {stocks[0].sector} 섹터</span>}
-        <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 5 }}>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>관련 종목</span>
+        {stocks[0]?.sector && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>· {stocks[0].sector} 섹터</span>}
+        <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 5 }}>
           <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#378ADD', display: 'inline-block', animation: 'bmcPulse 2s ease-in-out infinite' }} />
           LIVE · {stocks.length}종목
         </span>
@@ -567,7 +567,7 @@ function renderStockTop(stocks: any[], sparklines: Record<string, number[]>) {
               }}>
                 <span style={{
                   position: 'absolute', top: 7, right: 8,
-                  fontSize: 9, fontWeight: 600, padding: '2px 6px', borderRadius: 3,
+                  fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', padding: '2px 6px', borderRadius: 3,
                   color: '#fff', background: isUp ? '#A32D2D' : '#185FA5',
                 }}>
                   {isUp ? '+' : ''}{pct.toFixed(2)}%
@@ -581,7 +581,7 @@ function renderStockTop(stocks: any[], sparklines: Record<string, number[]>) {
                   <div style={{
                     width: '100%', height: 32,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 22, fontWeight: 600, color: isUp ? 'rgba(163,45,45,0.25)' : 'rgba(24,95,165,0.25)',
+                    fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: isUp ? 'rgba(163,45,45,0.25)' : 'rgba(24,95,165,0.25)',
                   }}>
                     {isUp ? '↗' : '↘'}
                   </div>
@@ -595,32 +595,32 @@ function renderStockTop(stocks: any[], sparklines: Record<string, number[]>) {
                 background: isSeed ? 'rgba(230,241,251,0.5)' : 'transparent',
               }}>
                 <div style={{
-                  fontSize: 13, fontWeight: 600,
+                  fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
                   color: isSeed ? '#042C53' : 'var(--text-primary)',
                   whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                 }}>
                   {s.name}
                 </div>
-                <div style={{ fontSize: 9, color: isSeed ? '#185FA5' : 'var(--text-tertiary)' }}>
+                <div style={{ fontSize: 'var(--fs-2xs)', color: isSeed ? '#185FA5' : 'var(--text-tertiary)' }}>
                   {s.symbol} · {s.market}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 3 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: isSeed ? '#042C53' : 'var(--text-primary)', letterSpacing: '-0.3px' }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: isSeed ? '#042C53' : 'var(--text-primary)', letterSpacing: 0 }}>
                     {fmtStockPrice(Number(s.price), s.market)}
                   </span>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: isUp ? '#A32D2D' : '#185FA5' }}>
+                  <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', color: isUp ? '#A32D2D' : '#185FA5' }}>
                     {fmtChangeAmt(Number(s.change_amt || 0), s.market)}
                   </span>
                 </div>
                 {(Number(s.per) > 0 || Number(s.dividend_yield) > 0) && (
                   <div style={{ display: 'flex', gap: 3, marginTop: 5, flexWrap: 'wrap' }}>
                     {Number(s.per) > 0 && (
-                      <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: 'var(--bg-hover, var(--bg-secondary))', color: 'var(--text-secondary)' }}>
+                      <span style={{ fontSize: 'var(--fs-2xs)', padding: '1px 5px', borderRadius: 3, background: 'var(--bg-hover, var(--bg-secondary))', color: 'var(--text-secondary)' }}>
                         PER {Number(s.per).toFixed(1)}
                       </span>
                     )}
                     {Number(s.dividend_yield) > 0 && (
-                      <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: 'var(--bg-hover, var(--bg-secondary))', color: 'var(--text-secondary)' }}>
+                      <span style={{ fontSize: 'var(--fs-2xs)', padding: '1px 5px', borderRadius: 3, background: 'var(--bg-hover, var(--bg-secondary))', color: 'var(--text-secondary)' }}>
                         배당 {Number(s.dividend_yield).toFixed(1)}%
                       </span>
                     )}
@@ -637,11 +637,11 @@ function renderStockTop(stocks: any[], sparklines: Record<string, number[]>) {
         padding: '8px 14px 10px', borderTop: '1px solid var(--border)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
-        <Link href={`/stock/compare?a=${stocks[0]?.symbol || ''}`} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textDecoration: 'none' }}>
+        <Link href={`/stock/compare?a=${stocks[0]?.symbol || ''}`} style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', textDecoration: 'none' }}>
           종목 비교 →
         </Link>
         <Link href={`/stock/${stocks[0]?.symbol || ''}`} style={{
-          fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 6,
+          fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', padding: '5px 12px', borderRadius: 6,
           background: '#185FA5', color: '#fff', textDecoration: 'none',
         }}>
           AI 분석 보기
@@ -669,7 +669,7 @@ function renderStockBottom(stocks: any[]) {
     }}>
       <div style={{
         display: 'flex', alignItems: 'center', gap: 6,
-        padding: '9px 12px 8px', fontSize: 12, fontWeight: 600,
+        padding: '9px 12px 8px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
         color: 'var(--text-primary)',
         borderBottom: '1px solid var(--border)',
       }}>
@@ -697,37 +697,37 @@ function renderStockBottom(stocks: any[]) {
                   ? 'linear-gradient(180deg, rgba(5,150,105,0.08) 0%, transparent 100%)'
                   : 'linear-gradient(180deg, rgba(220,38,38,0.08) 0%, transparent 100%)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 22, fontWeight: 600, color: isUp ? 'rgba(5,150,105,0.2)' : 'rgba(220,38,38,0.2)',
+                fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: isUp ? 'rgba(5,150,105,0.2)' : 'rgba(220,38,38,0.2)',
               }}>
                 {isUp ? '↗' : '↘'}
               </div>
               <span style={{
                 position: 'absolute', top: 6, right: 6,
-                fontSize: 9, fontWeight: 600, padding: '1px 6px', borderRadius: 4,
+                fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', padding: '1px 6px', borderRadius: 4,
                 color: '#fff', background: isUp ? 'rgba(5,150,105,0.85)' : 'rgba(220,38,38,0.85)',
               }}>
                 {isUp ? '+' : ''}{pct.toFixed(1)}%
               </span>
               <div style={{ padding: '8px 8px 7px' }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {s.name}
                 </div>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 1 }}>
+                <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 1 }}>
                   {s.symbol} · {s.market}{s.sector ? ` · ${s.sector}` : ''}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginTop: 3 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>
                     {fmtStockPrice(Number(s.price), s.market)}
                   </span>
                 </div>
                 <div style={{ display: 'flex', gap: 3, marginTop: 4, flexWrap: 'wrap' }}>
                   {Number(s.per) > 0 && (
-                    <span style={{ fontSize: 8, padding: '1px 5px', borderRadius: 3, background: 'var(--bg-hover, var(--bg-secondary))', color: 'var(--text-secondary)' }}>
+                    <span style={{ fontSize: 'var(--fs-3xs)', padding: '1px 5px', borderRadius: 3, background: 'var(--bg-hover, var(--bg-secondary))', color: 'var(--text-secondary)' }}>
                       PER {Number(s.per).toFixed(1)}
                     </span>
                   )}
                   {Number(s.dividend_yield) > 0 && (
-                    <span style={{ fontSize: 8, padding: '1px 5px', borderRadius: 3, background: 'var(--bg-hover, var(--bg-secondary))', color: 'var(--text-secondary)' }}>
+                    <span style={{ fontSize: 'var(--fs-3xs)', padding: '1px 5px', borderRadius: 3, background: 'var(--bg-hover, var(--bg-secondary))', color: 'var(--text-secondary)' }}>
                       배당 {Number(s.dividend_yield).toFixed(1)}%
                     </span>
                   )}
@@ -741,11 +741,11 @@ function renderStockBottom(stocks: any[]) {
         padding: '7px 12px 8px', borderTop: '1px solid var(--border)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <Link href={`/stock/compare?a=${stocks[0]?.symbol || ''}`} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textDecoration: 'none' }}>
+        <Link href={`/stock/compare?a=${stocks[0]?.symbol || ''}`} style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', textDecoration: 'none' }}>
           종목 비교 →
         </Link>
         <Link href={`/stock/${stocks[0]?.symbol || ''}`} style={{
-          fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 6,
+          fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', padding: '5px 12px', borderRadius: 6,
           background: '#2563EB', color: '#fff', textDecoration: 'none',
         }}>
           AI 분석 보기
@@ -768,9 +768,9 @@ function renderAptTop(apts: any[], region: string | null, sigungu: string | null
         display: 'flex', alignItems: 'center', gap: 8,
       }}>
         <span style={{ width: 3, height: 15, borderRadius: 2, background: '#0F6E56' }} />
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>관련 아파트</span>
-        {(sigungu || region) && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>· {sigungu || region}</span>}
-        <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-tertiary)' }}>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>관련 아파트</span>
+        {(sigungu || region) && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>· {sigungu || region}</span>}
+        <span style={{ marginLeft: 'auto', fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>
           {apts.length}단지 발견
         </span>
       </div>
@@ -820,7 +820,7 @@ function renderAptTop(apts: any[], region: string | null, sigungu: string | null
                 {isSeed && (
                   <span style={{
                     position: 'absolute', top: 6, left: 6,
-                    fontSize: 9, fontWeight: 600, padding: '2px 6px', borderRadius: 3,
+                    fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', padding: '2px 6px', borderRadius: 3,
                     background: 'rgba(0,0,0,0.55)', color: '#fff',
                   }}>
                     이 글의 단지
@@ -833,25 +833,25 @@ function renderAptTop(apts: any[], region: string | null, sigungu: string | null
                 background: isSeed ? 'rgba(225,245,238,0.5)' : 'transparent',
               }}>
                 <div style={{
-                  fontSize: 13, fontWeight: 600,
+                  fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
                   color: isSeed ? '#04342C' : 'var(--text-primary)',
                   whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                 }}>
                   {a.name}
                 </div>
                 <div style={{
-                  fontSize: 10, color: isSeed ? '#0F6E56' : 'var(--text-tertiary)', marginTop: 2,
+                  fontSize: 'var(--fs-2xs)', color: isSeed ? '#0F6E56' : 'var(--text-tertiary)', marginTop: 2,
                   whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                 }}>
                   {subParts.join(' · ')}
                 </div>
                 {price && (
-                  <div style={{ fontSize: 13, fontWeight: 600, color: isSeed ? '#04342C' : 'var(--text-primary)', marginTop: 4, letterSpacing: '-0.3px' }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: isSeed ? '#04342C' : 'var(--text-primary)', marginTop: 4, letterSpacing: 0 }}>
                     {price}
                   </div>
                 )}
                 <div style={{ display: 'flex', gap: 3, marginTop: 5, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: 'var(--bg-hover, var(--bg-secondary))', color: 'var(--text-secondary)' }}>
+                  <span style={{ fontSize: 'var(--fs-2xs)', padding: '1px 5px', borderRadius: 3, background: 'var(--bg-hover, var(--bg-secondary))', color: 'var(--text-secondary)' }}>
                     {a._source === 'complex' ? '단지백과' : '현장 정보'}
                   </span>
                 </div>
@@ -865,11 +865,11 @@ function renderAptTop(apts: any[], region: string | null, sigungu: string | null
         padding: '8px 14px 10px', borderTop: '1px solid var(--border)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
-        <Link href={sigungu ? `/apt?region=${encodeURIComponent(region || '')}&sigungu=${encodeURIComponent(sigungu)}` : region ? `/apt?region=${encodeURIComponent(region)}` : '/apt'} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textDecoration: 'none' }}>
+        <Link href={sigungu ? `/apt?region=${encodeURIComponent(region || '')}&sigungu=${encodeURIComponent(sigungu)}` : region ? `/apt?region=${encodeURIComponent(region)}` : '/apt'} style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', textDecoration: 'none' }}>
           {sigungu ? `${sigungu} 전체` : region ? `${region} 전체` : '전체 현장 보기'} →
         </Link>
         <Link href={sigungu ? `/apt?region=${encodeURIComponent(region || '')}&sigungu=${encodeURIComponent(sigungu)}` : region ? `/apt?region=${encodeURIComponent(region)}` : '/apt'} style={{
-          fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 6,
+          fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', padding: '5px 12px', borderRadius: 6,
           background: '#0F6E56', color: '#fff', textDecoration: 'none',
         }}>
           청약 일정 보기
@@ -889,7 +889,7 @@ function renderAptBottom(apts: any[], region: string | null, sigungu: string | n
     }}>
       <div style={{
         display: 'flex', alignItems: 'center', gap: 6,
-        padding: '9px 12px 8px', fontSize: 12, fontWeight: 600,
+        padding: '9px 12px 8px', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
         color: 'var(--text-primary)',
         borderBottom: '1px solid var(--border)',
       }}>
@@ -930,19 +930,19 @@ function renderAptBottom(apts: any[], region: string | null, sigungu: string | n
                 loading="lazy" decoding="async"
               />
               <div style={{ padding: '8px 8px 7px' }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {a.name}
                 </div>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {locationLabel}{a.total_units ? ` · ${Number(a.total_units).toLocaleString()}세대` : ''}{yearLabel ? ` · ${yearLabel}` : ''}
                 </div>
                 {price && (
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginTop: 4 }}>
+                  <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginTop: 4 }}>
                     {price}
                   </div>
                 )}
                 <div style={{ display: 'flex', gap: 3, marginTop: 4, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 8, padding: '1px 5px', borderRadius: 3, background: 'var(--bg-hover, var(--bg-secondary))', color: 'var(--text-secondary)' }}>
+                  <span style={{ fontSize: 'var(--fs-3xs)', padding: '1px 5px', borderRadius: 3, background: 'var(--bg-hover, var(--bg-secondary))', color: 'var(--text-secondary)' }}>
                     {a._source === 'complex' ? '단지백과' : '현장 정보'}
                   </span>
                 </div>
@@ -955,11 +955,11 @@ function renderAptBottom(apts: any[], region: string | null, sigungu: string | n
         padding: '7px 12px 8px', borderTop: '1px solid var(--border)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <Link href={region ? `/apt?region=${encodeURIComponent(region)}` : '/apt'} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textDecoration: 'none' }}>
+        <Link href={region ? `/apt?region=${encodeURIComponent(region)}` : '/apt'} style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)', textDecoration: 'none' }}>
           {region ? `${region} 전체 현장` : '전체 현장 보기'} →
         </Link>
         <Link href={region ? `/apt?region=${encodeURIComponent(region)}` : '/apt'} style={{
-          fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 6,
+          fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', padding: '5px 12px', borderRadius: 6,
           background: '#059669', color: '#fff', textDecoration: 'none',
         }}>
           청약 일정 보기

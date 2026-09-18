@@ -107,7 +107,7 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
               dateTime={e.occurred_at}
               style={{
                 fontSize: 'var(--fs-xs)',
-                fontWeight: 500,
+                fontWeight: 'var(--fw-body)',
                 lineHeight: 1.5,
                 color: 'var(--text-tertiary)',
                 fontVariantNumeric: 'tabular-nums',
@@ -156,18 +156,18 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
                 style={{
                   display: 'block',
                   fontSize: 'var(--fs-xs)',
-                  fontWeight: 600,
+                  fontWeight: 'var(--fw-title)',
                   letterSpacing: 0,   // fs-xs(14px) — 자간 규칙상 14px 이하는 0
                   color: 'var(--text-primary)',
-                  lineHeight: 1.45,
+                  lineHeight: 1.5,
                 }}
               >
                 {detail && e.event_type === 'stage_change' ? (
-                  <span style={{ fontWeight: 600, color: 'var(--text-tertiary)' }}>{detail} </span>
+                  <span style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)' }}>{detail} </span>
                 ) : null}
                 {title}
                 {detail && e.event_type !== 'stage_change' ? (
-                  <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}> {detail}</span>
+                  <span style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-secondary)' }}> {detail}</span>
                 ) : null}
               </span>
 
@@ -176,7 +176,7 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
                   style={{
                     display: 'block',
                     fontSize: 'var(--fs-xs)',
-                    lineHeight: 1.55,
+                    lineHeight: 1.5,
                     color: 'var(--text-secondary)',
                     marginTop: 2,
                     wordBreak: 'keep-all',
@@ -194,7 +194,7 @@ export default function SiteHistoryTimeline({ events }: { events: AptSiteEvent[]
                     style={{
                       minWidth: 0,
                       fontSize: 'var(--fs-xs)',
-                      lineHeight: 1.4,
+                      lineHeight: 1.3,
                       color: 'var(--text-tertiary)',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',

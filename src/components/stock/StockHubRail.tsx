@@ -28,7 +28,7 @@ function MoverList({ rows }: { rows: MoverRow[] }) {
             <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {r.name}
             </span>
-            <span style={{ flexShrink: 0, fontSize: 'var(--fs-2xs)', fontWeight: 700, color: chipFg, fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ flexShrink: 0, fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-num)', color: chipFg, fontVariantNumeric: 'tabular-nums' }}>
               {formatChangePct(r.change_pct)}
             </span>
           </Link>
@@ -68,7 +68,7 @@ export default function StockHubRail({
               style={{ display: 'flex', alignItems: 'center', gap: 8, borderBottom: 0, padding: '4px 0' }}
             >
               <span style={{ flex: 1, minWidth: 0 }}>{label}</span>
-              <span style={{ flexShrink: 0, fontSize: 'var(--fs-2xs)', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+              <span style={{ flexShrink: 0, fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-num)', fontVariantNumeric: 'tabular-nums' }}>
                 <span style={{ color: 'var(--accent-red)' }}>▲{b.up}</span>
                 <span style={{ marginLeft: 5, color: 'var(--accent-blue)' }}>▼{b.down}</span>
               </span>
@@ -76,7 +76,7 @@ export default function StockHubRail({
           ))}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', color: 'var(--text-secondary)' }}>
             <span style={{ flex: 1, minWidth: 0 }}>원/달러</span>
-            <span style={{ flexShrink: 0, fontSize: 'var(--fs-2xs)', fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ flexShrink: 0, fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
               {strip.usdkrw ? strip.usdkrw.toLocaleString('ko-KR', { maximumFractionDigits: 1 }) : '—'}
             </span>
           </div>
@@ -117,7 +117,7 @@ export default function StockHubRail({
                   background: params.theme === t ? 'var(--brand)' : 'var(--bg-sunken)',
                   color: params.theme === t ? 'var(--text-inverse)' : 'var(--text-secondary)',
                   fontSize: 'var(--fs-2xs)',
-                  fontWeight: params.theme === t ? 600 : 500,
+                  fontWeight: params.theme === t ? 'var(--fw-title)' : 'var(--fw-body)',
                   textDecoration: 'none',
                   borderBottom: params.theme === t ? '1px solid var(--brand)' : '1px solid var(--border)',
                 }}

@@ -46,23 +46,23 @@ export default function AptHomeHero({ region, sigungu, kpis }: Props) {
             border: '1px solid var(--border)',
             color: 'var(--text-primary)',
             textDecoration: 'none',
-            fontSize: 12,
-            fontWeight: 500,
+            fontSize: 'var(--fs-xs)',
+            fontWeight: 'var(--fw-body)',
           }}
         >
           <span aria-hidden>📍</span>
           <span>{regionLabel || '전국'}</span>
-          <span style={{ fontSize: 10, opacity: 0.6 }}>▾</span>
+          <span style={{ fontSize: 'var(--fs-2xs)', opacity: 0.6 }}>▾</span>
         </Link>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
         <span
           style={{
-            fontSize: 13,
-            fontWeight: 500,
+            fontSize: 'var(--fs-xs)',
+            fontWeight: 'var(--fw-body)',
             color: 'var(--text-tertiary)',
-            letterSpacing: 0.3,
+            letterSpacing: 0,
           }}
         >
           이번 주 청약
@@ -72,9 +72,9 @@ export default function AptHomeHero({ region, sigungu, kpis }: Props) {
             <span
               style={{
                 fontSize: 36,
-                fontWeight: 700,
+                fontWeight: 'var(--fw-num)',
                 color: 'var(--text-primary)',
-                letterSpacing: -1.5,
+                letterSpacing: '-0.4px',
                 lineHeight: 1,
               }}
             >
@@ -82,8 +82,8 @@ export default function AptHomeHero({ region, sigungu, kpis }: Props) {
             </span>
             <span
               style={{
-                fontSize: 16,
-                fontWeight: 500,
+                fontSize: 'var(--fs-sm)',
+                fontWeight: 'var(--fw-body)',
                 color: 'var(--text-secondary)',
               }}
             >
@@ -93,10 +93,10 @@ export default function AptHomeHero({ region, sigungu, kpis }: Props) {
         ) : (
           <span
             style={{
-              fontSize: 22,
-              fontWeight: 700,
+              fontSize: 'var(--fs-lg)',
+              fontWeight: 'var(--fw-num)',
               color: 'var(--text-primary)',
-              letterSpacing: -0.5,
+              letterSpacing: '-0.4px',
             }}
           >
             진행 중
@@ -107,7 +107,7 @@ export default function AptHomeHero({ region, sigungu, kpis }: Props) {
       <p
         style={{
           margin: '6px 0 0',
-          fontSize: 11,
+          fontSize: 'var(--fs-xs)',
           color: 'var(--text-tertiary)',
           lineHeight: 1.5,
         }}

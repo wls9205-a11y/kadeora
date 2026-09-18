@@ -44,7 +44,7 @@ export default function RecentMovesStrip({
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 'var(--sp-sm)', marginBottom: 8 }}>
         <h2
           id="apt-moves-heading"
-          style={{ margin: 0, fontSize: 'var(--fs-sm)', fontWeight: 600, letterSpacing: '-.0125em', color: 'var(--text-primary)' }}
+          style={{ margin: 0, fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', letterSpacing: '-0.2px', color: 'var(--text-primary)' }}
         >
           이번 주 움직인 현장
         </h2>
@@ -92,23 +92,23 @@ export default function RecentMovesStrip({
                       padding: '1.5px 5px',
                       borderRadius: 'var(--radius-xs)',
                       fontSize: 'var(--fs-xs)',
-                      fontWeight: 500,
+                      fontWeight: 'var(--fw-body)',
                       background: tone.bg,
                       color: tone.fg,
                     }}
                   >
                     {tone.label}
                   </span>
-                  {when && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--text-tertiary)' }}>{when}</span>}
+                  {when && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)' }}>{when}</span>}
                 </span>
 
                 <span
                   style={{
                     display: 'block',
                     fontSize: 'var(--fs-xs)',
-                    fontWeight: 600,
+                    fontWeight: 'var(--fw-title)',
                     letterSpacing: 0,   // fs-xs(14px) — 자간 규칙상 14px 이하는 0
-                    lineHeight: 1.35,
+                    lineHeight: 1.3,
                     color: 'var(--text-primary)',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -122,9 +122,9 @@ export default function RecentMovesStrip({
                   style={{
                     display: 'block',
                     fontSize: 'var(--fs-xs)',
-                    lineHeight: 1.45,
+                    lineHeight: 1.5,
                     color: 'var(--brand)',
-                    fontWeight: 500,
+                    fontWeight: 'var(--fw-body)',
                     marginTop: 3,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',

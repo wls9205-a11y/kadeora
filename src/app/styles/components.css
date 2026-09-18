@@ -16,7 +16,7 @@
     border: none;
     border-radius: 9999px;
     padding: 0.5rem 1.25rem;
-    font-weight: 700;
+    font-weight: var(--fw-num);
     font-size: 0.9rem;
     cursor: pointer;
     transition: background-color 0.15s ease, transform 0.1s ease;
@@ -147,8 +147,8 @@
   .kd-lc-name {
     flex: 1;
     min-width: 0;
-    font-size: 12.5px;
-    font-weight: 500;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-body);
     line-height: 1.3;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -156,14 +156,14 @@
   }
 
   .kd-lc-num {
-    font-size: 11.5px;
+    font-size: var(--fs-2xs);
     font-variant-numeric: tabular-nums;
     color: var(--text-secondary);
     white-space: nowrap;
   }
 
   .kd-lc-meta {
-    font-size: 11px;
+    font-size: var(--fs-3xs);
     color: var(--text-tertiary);
     white-space: nowrap;
   }
@@ -189,7 +189,7 @@
     border-radius: 6px;
     background: var(--bg-surface);
     border: 1px solid var(--border);
-    font-size: 12px;
+    font-size: var(--fs-2xs);
     color: var(--text-tertiary);
     text-align: center;
   }
@@ -270,9 +270,9 @@
     border-radius: 4px;
     background: var(--bg-sunken);
     color: var(--text-tertiary);
-    font-size: 10px;
-    font-weight: 800;
-    line-height: 1.2;
+    font-size: var(--fs-3xs);
+    font-weight: var(--fw-num);
+    line-height: 1.3;
     text-align: center;
     white-space: nowrap;
   }
@@ -286,10 +286,10 @@
   .kd-lrow-t {
     display: block;
     min-width: 0;
-    font-size: 13px;
+    font-size: var(--fs-xs);
     font-weight: var(--fw-title);
-    line-height: 1.35;
-    letter-spacing: -.03em;
+    line-height: 1.3;
+    letter-spacing: 0;
     color: var(--text-primary);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -311,8 +311,8 @@
     gap: 5px;
     min-width: 0;
     margin-top: 3px;
-    font-size: 10px;
-    line-height: 1.4;
+    font-size: var(--fs-3xs);
+    line-height: 1.3;
     color: var(--text-tertiary);
   }
   .kd-lrow-m > span {
@@ -328,7 +328,7 @@
     display: block;
     flex-shrink: 0;
     text-align: right;
-    font-size: 12px;
+    font-size: var(--fs-2xs);
     font-weight: var(--fw-num);
     line-height: 1.3;
     font-variant-numeric: tabular-nums;
@@ -344,9 +344,9 @@
     gap: 9px;
     padding: 0 2px 5px;
     border-bottom: 1px solid var(--border);
-    font-size: 8.5px;
-    font-weight: 700;
-    letter-spacing: .1em;
+    font-size: var(--fs-3xs);
+    font-weight: var(--fw-num);
+    letter-spacing: 0.14em;
     color: var(--text-tertiary);
     text-transform: uppercase;
   }
@@ -443,17 +443,17 @@
   }
   .kd-cur-title {
     margin: 0;
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: -.02em;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-num);
+    letter-spacing: 0;
     color: var(--text-primary);
   }
   .kd-cur-count {
     flex-shrink: 0;
     font-family: var(--font-mono);
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: .06em;
+    font-size: var(--fs-3xs);
+    font-weight: var(--fw-num);
+    letter-spacing: 0.14em;
     color: var(--text-tertiary);
     font-variant-numeric: tabular-nums;
   }
@@ -545,18 +545,18 @@
   }
   .kd-rail-panel h2 {
     margin: 0 0 8px;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: .08em;
+    font-size: var(--fs-3xs);
+    font-weight: var(--fw-num);
+    letter-spacing: 0;
     color: var(--text-tertiary);
   }
   .kd-rail-panel a {
     display: block;
     padding: 7px 0;
     border-bottom: 1px solid var(--border);
-    font-size: 12.5px;
-    font-weight: 600;
-    line-height: 1.35;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-title);
+    line-height: 1.3;
     color: var(--text-primary);
     text-decoration: none;
     overflow: hidden;
@@ -657,8 +657,8 @@
     font-size: var(--fs-2xs);
     /* ⚠️ 800 이었다 — 설계서 §2 TY1 굵기 사다리는 «800+ 화면 금지» 다.
        제목은 600 이다(400 본문 / 500 라벨 / 600 제목 / 700 희소 수치). */
-    font-weight: 600;
-    letter-spacing: -.03em;
+    font-weight: var(--fw-title);
+    letter-spacing: 0;
     line-height: 1.3;
     color: var(--text-primary);
     overflow: hidden;
@@ -757,8 +757,8 @@
   }
   .kd-masthead__logo {
     font-size: var(--fs-md);
-    font-weight: 700;
-    letter-spacing: -.02em;
+    font-weight: var(--fw-num);
+    letter-spacing: -0.2px;
     color: var(--text-inverse);
   }
   /* 로고 뒤 골드 점 — 도형이라 흰 바탕 금칙(골드 텍스트)에 걸리지 않는다 */
@@ -774,7 +774,7 @@
   .kd-masthead__tag {
     margin-top: var(--sp-xs);
     font-size: var(--fs-2xs);
-    font-weight: 400;
+    font-weight: var(--fw-quiet);
     color: rgba(255, 255, 255, 0.72);
   }
   /* 검색 «자리». 안에 들어오는 것은 UniversalSearchBar hero variant 다
@@ -795,8 +795,8 @@
   }
   .kd-submast__title {
     font-size: var(--fs-base);
-    font-weight: 700;
-    letter-spacing: -.02em;
+    font-weight: var(--fw-num);
+    letter-spacing: -0.2px;
     color: var(--text-inverse);
   }
   /* 우측 슬롯 — 지역 셀렉 트리거·검색 아이콘이 들어온다.
@@ -812,13 +812,13 @@
     border-radius: var(--radius-sm);
     background: none;
     font-size: var(--fs-2xs);
-    font-weight: 500;
+    font-weight: var(--fw-body);
     color: var(--text-inverse);
   }
   .kd-submast__sub {
     margin-top: var(--sp-xs);
     font-size: var(--fs-3xs);
-    font-weight: 400;
+    font-weight: var(--fw-quiet);
     color: rgba(255, 255, 255, 0.62);
   }
 
@@ -847,7 +847,7 @@
   .kd-sechead__eb {
     font-family: var(--font-mono);
     font-size: var(--fs-xs);
-    font-weight: 500;
+    font-weight: var(--fw-body);
     letter-spacing: .14em;
     text-transform: uppercase;
     color: var(--brand);
@@ -859,9 +859,9 @@
   .kd-sechead__title {
     margin: 0;
     font-size: var(--fs-xl);
-    font-weight: 600;
-    letter-spacing: -.02em;
-    line-height: 1.25;
+    font-weight: var(--fw-title);
+    letter-spacing: -0.4px;
+    line-height: 1.3;
     color: var(--text-primary);
     word-break: keep-all;
   }
@@ -935,7 +935,7 @@
     border-bottom: 2px solid transparent;
     background: none;
     font-size: var(--fs-2xs);
-    font-weight: 500;
+    font-weight: var(--fw-body);
     color: var(--text-tertiary);
     text-decoration: none;
     white-space: nowrap;
@@ -944,7 +944,7 @@
   .kd-utab[aria-selected='true'],
   .kd-utab[aria-current='true'] {
     color: var(--brand-navy);
-    font-weight: 600;
+    font-weight: var(--fw-title);
     border-bottom-color: var(--brand-gold);
   }
 }
@@ -1032,9 +1032,9 @@
     min-width: 46px;
     padding-inline: 16px;
     border-radius: var(--radius-pill);
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: -0.2px;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-title);
+    letter-spacing: 0;
     text-decoration: none;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
     transition: padding 0.18s ease, gap 0.18s ease, width 0.18s ease;

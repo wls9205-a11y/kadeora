@@ -439,8 +439,8 @@ export default function UniversalSearchBar({
             style={{
               flex: 1,
               // ⚠️ 16px 미만으로 내리지 말 것 (iOS 자동확대). 회전 문구도 이 자리에 들어간다.
-              fontSize: 17,
-              lineHeight: 1.2,
+              fontSize: 'var(--fs-sm)',
+              lineHeight: 1.3,
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -471,8 +471,8 @@ export default function UniversalSearchBar({
             <span
               style={{
                 width: "100%",
-                fontSize: 12,
-                fontWeight: 500,
+                fontSize: 'var(--fs-xs)',
+                fontWeight: 'var(--fw-body)',
                 letterSpacing: 0,
                 lineHeight: 1.3,
                 color: "var(--text-tertiary)",
@@ -499,9 +499,9 @@ export default function UniversalSearchBar({
                   padding: "5px 10px",
                   borderRadius: "var(--radius-pill)",
                   fontSize: "var(--fs-2xs)",
-                  fontWeight: 400,
+                  fontWeight: 'var(--fw-quiet)',
                   letterSpacing: 0,
-                  lineHeight: 1.2,
+                  lineHeight: 1.3,
                   // H5-1 «칩 단색» — 반투명(흰 0.14)은 그라디언트 밝은 끝에서 흰 글씨가
                   //   4.03:1 로 미달했다(실측). 네이비 단색이면 어느 위치에서도 13.48:1 이다.
                   // ⚠️ 다만 «칩 면 vs 배경» 경계가 1.27~2.61 로 3:1 에 못 미친다 —

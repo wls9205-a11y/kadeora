@@ -35,7 +35,7 @@ export default function TossTeaser({
         onClick={handleOpen}
         style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          color: 'var(--brand)', fontWeight: 500, fontSize: 13,
+          color: 'var(--brand)', fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-xs)',
           padding: '4px 0', fontFamily: 'inherit',
           display: 'inline-flex', alignItems: 'center', gap: 4,
         }}
@@ -59,8 +59,8 @@ export default function TossTeaser({
         }}
       >
         <div>
-          <div style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>카더라</div>
-          <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, marginTop: 1 }}>
+          <div style={{ color: '#fff', fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-sm)' }}>카더라</div>
+          <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 'var(--fs-xs)', marginTop: 1 }}>
             {subtitle || '주식·청약·부동산 정보를 더 자세히'}
           </div>
         </div>
@@ -68,8 +68,8 @@ export default function TossTeaser({
           onClick={handleOpen}
           style={{
             padding: '10px 20px', borderRadius: 999, border: 'none',
-            background: '#fff', color: '#1B64DA', fontWeight: 500,
-            fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
+            background: '#fff', color: '#1B64DA', fontWeight: 'var(--fw-body)',
+            fontSize: 'var(--fs-xs)', cursor: 'pointer', fontFamily: 'inherit',
             flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
           }}
         >
@@ -88,10 +88,10 @@ export default function TossTeaser({
         borderRadius: 'var(--radius-lg)', margin: '0 -4px',
       }}>
         <div style={{ fontSize: 40, marginBottom: 12 }}>🔒</div>
-        <div style={{ fontWeight: 600, fontSize: 16, color: '#191F28', marginBottom: 6 }}>
+        <div style={{ fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-sm)', color: '#191F28', marginBottom: 6 }}>
           전체 콘텐츠는 카더라에서
         </div>
-        <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16, lineHeight: 1.5 }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 16, lineHeight: 1.5 }}>
           {subtitle || '투자 정보 블로그, 실시간 종목 시세\n무료 가입하고 전부 확인하세요'}
         </div>
         <button
@@ -99,14 +99,14 @@ export default function TossTeaser({
           style={{
             padding: '14px 32px', borderRadius: 'var(--radius-card)', border: 'none',
             background: 'linear-gradient(135deg, #1B64DA, #3182F6)',
-            color: '#fff', fontWeight: 500, fontSize: 15,
+            color: '#fff', fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-sm)',
             cursor: 'pointer', fontFamily: 'inherit',
             boxShadow: '0 4px 16px rgba(49,130,246,0.3)',
           }}
         >
           카더라 앱 열기
         </button>
-        <div style={{ marginTop: 10, fontSize: 11, color: '#B0B8C1' }}>
+        <div style={{ marginTop: 10, fontSize: 'var(--fs-xs)', color: '#B0B8C1' }}>
           가입 10초 · 카카오 로그인
         </div>
       </div>
@@ -128,17 +128,17 @@ export default function TossTeaser({
       }}
     >
       <div style={{ textAlign: 'left' }}>
-        <div style={{ fontWeight: 600, fontSize: 14, color: '#191F28' }}>
+        <div style={{ fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-sm)', color: '#191F28' }}>
           {label}
         </div>
         {subtitle && (
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>{subtitle}</div>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>{subtitle}</div>
         )}
       </div>
       <div style={{
         padding: '8px 16px', borderRadius: 999,
         background: '#3182F6', color: '#fff',
-        fontWeight: 500, fontSize: 12, flexShrink: 0,
+        fontWeight: 'var(--fw-body)', fontSize: 'var(--fs-xs)', flexShrink: 0,
       }}>
         열기 →
       </div>
@@ -188,7 +188,7 @@ export function TossFunnelGate({
       {arr}
       <div style={{ padding: '4px 0' }}>
         <div style={{
-          textAlign: 'center', fontSize: 12, color: 'var(--text-tertiary)',
+          textAlign: 'center', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)',
           marginBottom: 8,
         }}>
           {countText}

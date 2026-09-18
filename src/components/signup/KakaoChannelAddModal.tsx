@@ -158,7 +158,7 @@ export default function KakaoChannelAddModal({ triggerOnMount = true }: Props) {
             style={{
               position: 'absolute', top: 10, right: 12,
               width: 28, height: 28, color: 'rgba(255,255,255,0.5)',
-              background: 'transparent', border: 'none', fontSize: 18, cursor: 'pointer',
+              background: 'transparent', border: 'none', fontSize: 'var(--fs-base)', cursor: 'pointer',
               padding: 0,
             }}
           >×</button>
@@ -166,7 +166,7 @@ export default function KakaoChannelAddModal({ triggerOnMount = true }: Props) {
           <div style={{ textAlign: 'center', marginBottom: 14 }}>
             <div style={{ fontSize: 48, marginBottom: 8 }}>💬</div>
             <div style={{
-              fontSize: 11, color: '#FEE500', fontWeight: 500, marginBottom: 6,
+              fontSize: 'var(--fs-xs)', color: '#FEE500', fontWeight: 'var(--fw-body)', marginBottom: 6,
               background: 'rgba(254,229,0,0.1)', padding: '4px 12px',
               borderRadius: 999, display: 'inline-block',
             }}>
@@ -177,7 +177,7 @@ export default function KakaoChannelAddModal({ triggerOnMount = true }: Props) {
           <div
             id="kd-channel-title"
             style={{
-              textAlign: 'center', color: '#fff', fontSize: 18, fontWeight: 500,
+              textAlign: 'center', color: '#fff', fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-body)',
               lineHeight: 1.3, marginBottom: 12, wordBreak: 'keep-all',
             }}
           >
@@ -187,7 +187,7 @@ export default function KakaoChannelAddModal({ triggerOnMount = true }: Props) {
 
           <div style={{
             textAlign: 'center', color: 'rgba(255,255,255,0.65)',
-            fontSize: 12, lineHeight: 1.5, marginBottom: 18,
+            fontSize: 'var(--fs-xs)', lineHeight: 1.5, marginBottom: 18,
           }}>
             우리 동네 부동산 핫이슈 + 청약 임박 알림<br />
             카카오톡으로 즉시 받기 (앱 알림 X)
@@ -197,7 +197,7 @@ export default function KakaoChannelAddModal({ triggerOnMount = true }: Props) {
             onClick={handleAddChannel}
             style={{
               width: '100%', background: '#FEE500', color: '#191919',
-              padding: '14px', borderRadius: 12, fontSize: 15, fontWeight: 500,
+              padding: '14px', borderRadius: 12, fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)',
               border: 'none', cursor: 'pointer', marginBottom: 10,
               boxShadow: '0 4px 16px rgba(254,229,0,0.18)',
             }}
@@ -209,7 +209,7 @@ export default function KakaoChannelAddModal({ triggerOnMount = true }: Props) {
             onClick={() => handleDismiss()}
             style={{
               width: '100%', background: 'transparent',
-              color: 'rgba(255,255,255,0.5)', fontSize: 12,
+              color: 'rgba(255,255,255,0.5)', fontSize: 'var(--fs-xs)',
               padding: 8, border: 'none', cursor: 'pointer',
             }}
           >

@@ -69,14 +69,14 @@ export default function AptPriceTrendUnified(props: Props) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
-          <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+          <h2 style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: 0 }}>
             📈 {label} 평당가 12개월
           </h2>
           {last && (
-            <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
               {last.m} · {fmtPriceMan(last.v)}
               {yoyPct !== null && (
-                <span style={{ marginLeft: 6, fontWeight: 700, color: yoyPct >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>
+                <span style={{ marginLeft: 6, fontWeight: 'var(--fw-num)', color: yoyPct >= 0 ? 'var(--accent-red)' : 'var(--accent-blue)' }}>
                   {yoyPct >= 0 ? '+' : ''}{yoyPct.toFixed(1)}%
                 </span>
               )}
@@ -91,7 +91,7 @@ export default function AptPriceTrendUnified(props: Props) {
               <path d={linePath} stroke="#2563EB" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           ) : (
-            <div style={{ height: H, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)', fontSize: 11 }}>
+            <div style={{ height: H, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)' }}>
               시계열 데이터 부족
             </div>
           )}
@@ -99,7 +99,7 @@ export default function AptPriceTrendUnified(props: Props) {
 
         {/* 가격대 5 그룹 pill */}
         <div style={{ marginTop: 10 }}>
-          <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-tertiary)', marginBottom: 5, letterSpacing: 1 }}>
+          <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-tertiary)', marginBottom: 5, letterSpacing: 0 }}>
             가격대 (클릭 시 전체 grid 적용)
           </div>
           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
@@ -113,7 +113,7 @@ export default function AptPriceTrendUnified(props: Props) {
                   aria-pressed={active}
                   style={{
                     padding: '6px 12px', borderRadius: 999,
-                    fontSize: 11, fontWeight: 500,
+                    fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
                     background: active ? 'var(--brand-navy)' : 'var(--bg-hover)',
                     color: active ? 'var(--text-inverse)' : 'var(--text-secondary)',
                     border: `1px solid ${active ? 'var(--brand-navy)' : 'var(--border)'}`,

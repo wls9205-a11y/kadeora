@@ -102,12 +102,12 @@ export default function BlogAptAlertCTA({ aptName, siteSlug, category = 'apt', l
         padding: '14px 16px', borderRadius: 10, margin: '20px 0',
         background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)',
       }}>
-        <span style={{ fontSize: 18 }}>✅</span>
+        <span style={{ fontSize: 'var(--fs-base)' }}>✅</span>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+          <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>
             {aptName} 알림 등록 완료
           </div>
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
             가격 변동 시 알림을 드립니다
           </div>
         </div>
@@ -137,12 +137,12 @@ export default function BlogAptAlertCTA({ aptName, siteSlug, category = 'apt', l
           backdropFilter: 'blur(8px)',
         }}
       >
-        <span style={{ fontSize: 22, flexShrink: 0, lineHeight: 1 }}>🚨</span>
+        <span style={{ fontSize: 'var(--fs-lg)', flexShrink: 0, lineHeight: 1 }}>🚨</span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#fff', wordBreak: 'keep-all', lineHeight: 1.35 }}>
+          <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: '#fff', wordBreak: 'keep-all', lineHeight: 1.3 }}>
             {aptName} 청약 시작/실거래 등록 시 알림
           </div>
-          <div style={{ fontSize: 11, color: '#FEE500', marginTop: 2, fontWeight: 500 }}>
+          <div style={{ fontSize: 'var(--fs-xs)', color: '#FEE500', marginTop: 2, fontWeight: 'var(--fw-body)' }}>
             가입 즉시 100P · 알림 등록 +10P
           </div>
         </div>
@@ -152,7 +152,7 @@ export default function BlogAptAlertCTA({ aptName, siteSlug, category = 'apt', l
           style={{
             padding: '9px 14px', borderRadius: 10, border: 'none', cursor: 'pointer',
             background: '#FEE500', color: '#191919',
-            fontSize: 12, fontWeight: 500, fontFamily: 'inherit',
+            fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', fontFamily: 'inherit',
             opacity: status === 'loading' ? 0.7 : 1,
             flexShrink: 0,
           }}
@@ -172,15 +172,15 @@ export default function BlogAptAlertCTA({ aptName, siteSlug, category = 'apt', l
       background: 'rgba(254,229,0,0.04)', border: '1px solid rgba(254,229,0,0.15)',
     }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-        <span style={{ fontSize: 26, flexShrink: 0, lineHeight: 1 }}>🚨</span>
+        <span style={{ fontSize: 'var(--fs-xl)', flexShrink: 0, lineHeight: 1 }}>🚨</span>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 3 }}>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 3 }}>
             {aptName} 청약 시작/실거래 등록 시 알림
           </div>
-          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.5, marginBottom: 10 }}>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', lineHeight: 1.5, marginBottom: 10 }}>
             {/* ⚠️ 이 줄은 «밝은» 카드(rgba(254,229,0,.04)) 위다 — 위쪽 142·145 행의 어두운 카드와 다르다.
                  #FEE500 은 여기서 대비 1.26 이었다. 기존 토큰 --accent-yellow 로 6.77. */}
-              가입 즉시 <span style={{ color: 'var(--accent-yellow)', fontWeight: 700 }}>100P</span> · 알림 등록 시 추가 <span style={{ color: 'var(--accent-yellow)', fontWeight: 700 }}>+10P</span>
+              가입 즉시 <span style={{ color: 'var(--accent-yellow)', fontWeight: 'var(--fw-num)' }}>100P</span> · 알림 등록 시 추가 <span style={{ color: 'var(--accent-yellow)', fontWeight: 'var(--fw-num)' }}>+10P</span>
           </div>
           <button
             onClick={handleAlert}
@@ -188,7 +188,7 @@ export default function BlogAptAlertCTA({ aptName, siteSlug, category = 'apt', l
             style={{
               padding: '10px 18px', borderRadius: 8, border: 'none', cursor: 'pointer',
               background: '#FEE500',
-              color: '#191919', fontSize: 13, fontWeight: 500,
+              color: '#191919', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)',
               opacity: status === 'loading' ? 0.7 : 1,
             }}
           >

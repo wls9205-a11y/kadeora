@@ -12,7 +12,7 @@ export default function UnsoldTrendMini({ region }: { region?: string }) {
 
   return (
     <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 14px', marginBottom: 8 }}>
-      <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>📉 미분양 추이{region ? ` (${region})` : ''}</div>
+      <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', marginBottom: 8 }}>📉 미분양 추이{region ? ` (${region})` : ''}</div>
       <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end', height: 40 }}>
         {data.map((d, i) => {
           const max = Math.max(...data.map(x => x.total_unsold || 1));
@@ -20,7 +20,7 @@ export default function UnsoldTrendMini({ region }: { region?: string }) {
           return (
             <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
               <div style={{ width: '80%', height: h, borderRadius: 4, background: d.change_from_prev > 0 ? '#E24B4A60' : '#34D39960' }} />
-              <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{d.recorded_month?.slice(5)}</span>
+              <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{d.recorded_month?.slice(5)}</span>
             </div>
           );
         })}

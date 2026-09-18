@@ -37,7 +37,7 @@ export default function KakaoShareButton({ title, description, slug, coverImage 
       style={{
         display: 'flex', alignItems: 'center', gap: 6,
         padding: '6px 14px', borderRadius: 'var(--radius-xl)', border: 'none',
-        background: '#FEE500', color: '#191919', fontSize: 13, fontWeight: 700,
+        background: '#FEE500', color: '#191919', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)',
         cursor: 'pointer', whiteSpace: 'nowrap',
       }}
     >

@@ -19,7 +19,7 @@ export default function CategoryGrid({ title, items }: Props) {
 
   return (
     <section style={{ margin: '0 0 var(--kd-gap-lg)' }}>
-      <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--kd-text-3)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 'var(--kd-gap-sm)', padding: '0 4px' }}>
+      <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-num)', color: 'var(--kd-text-3)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: 'var(--kd-gap-sm)', padding: '0 4px' }}>
         {title}
       </div>
       <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -37,8 +37,8 @@ export default function CategoryGrid({ title, items }: Props) {
                 background: it.active ? 'var(--kd-accent-soft)' : 'transparent',
                 border: it.active ? '1px solid var(--kd-accent-border)' : '1px solid transparent',
                 textDecoration: 'none',
-                fontSize: 12,
-                fontWeight: it.active ? 800 : 600,
+                fontSize: 'var(--fs-xs)',
+                fontWeight: it.active ? 'var(--fw-num)' : 'var(--fw-title)',
                 color: it.active ? 'var(--kd-accent)' : 'var(--kd-text-2)',
               }}
             >
@@ -47,7 +47,7 @@ export default function CategoryGrid({ title, items }: Props) {
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.label}</span>
               </span>
               {it.count != null && (
-                <span style={{ fontSize: 10, fontWeight: 700, color: it.active ? 'var(--kd-accent)' : 'var(--kd-text-3)', flexShrink: 0 }}>
+                <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-num)', color: it.active ? 'var(--kd-accent)' : 'var(--kd-text-3)', flexShrink: 0 }}>
                   {it.count.toLocaleString()}
                 </span>
               )}

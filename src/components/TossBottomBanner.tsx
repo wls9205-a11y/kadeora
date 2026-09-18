@@ -65,18 +65,18 @@ export default function TossBottomBanner() {
           width: 34, height: 34, borderRadius: 'var(--radius-md)',
           background: 'linear-gradient(135deg, #3182F6, #1B64DA)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 16, flexShrink: 0,
+          fontSize: 'var(--fs-sm)', flexShrink: 0,
         }}>
           📊
         </div>
         <div style={{ minWidth: 0 }}>
           <div style={{
-            color: '#fff', fontWeight: 600, fontSize: 13,
+            color: '#fff', fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-xs)',
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
             {cta.sub}
           </div>
-          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, marginTop: 1 }}>
+          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 'var(--fs-xs)', marginTop: 1 }}>
             카더라 · 무료
           </div>
         </div>
@@ -89,8 +89,8 @@ export default function TossBottomBanner() {
           padding: '10px 18px', borderRadius: 'var(--radius-md)', border: 'none',
           // ⚠️ #3182F6 위 흰 글씨는 3.71 로 하한 미달이었다. 같은 파일이 이미 쓰는
           //    어두운 토스 파랑 #1B64DA 로 5.41. 브랜드 팔레트 밖으로 나가지 않았다.
-          background: '#1B64DA', color: '#fff', fontWeight: 500,
-          fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
+          background: '#1B64DA', color: '#fff', fontWeight: 'var(--fw-body)',
+          fontSize: 'var(--fs-xs)', cursor: 'pointer', fontFamily: 'inherit',
           flexShrink: 0, whiteSpace: 'nowrap',
         }}
       >

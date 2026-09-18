@@ -89,7 +89,7 @@ export default function GuideInstallButton() {
   if (state === 'installed') return (
     <div style={cardStyle}>
       <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>✅</div>
-      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--accent-green)', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--accent-green)', marginBottom: 'var(--sp-sm)' }}>
         설치 완료!
       </div>
       <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
@@ -102,7 +102,7 @@ export default function GuideInstallButton() {
   if (state === 'can-install') return (
     <div style={cardStyle}>
       <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>📲</div>
-      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
         카더라 앱 설치
       </div>
       <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6, marginBottom: 'var(--sp-xl)' }}>
@@ -115,7 +115,7 @@ export default function GuideInstallButton() {
         style={{
           padding: '16px 40px', borderRadius: 'var(--radius-lg)', border: 'none',
           background: 'var(--brand)', color: 'white',
-          fontSize: 'var(--fs-base)', fontWeight: 500, cursor: 'pointer',
+          fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-body)', cursor: 'pointer',
           width: '100%', maxWidth: 320,
           opacity: installing ? 0.6 : 1,
           boxShadow: '0 4px 16px rgba(37,99,235,0.3)',
@@ -129,14 +129,14 @@ export default function GuideInstallButton() {
   if (state === 'ios-safari') return (
     <div style={cardStyle}>
       <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>📱</div>
-      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
         카더라 앱 설치
       </div>
-      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.8, marginBottom: 'var(--sp-xs)' }}>
+      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6, marginBottom: 'var(--sp-xs)' }}>
         Safari 하단 <strong style={{ color: 'var(--text-primary)' }}>공유 버튼(⬆️)</strong> 누르기
       </div>
       <div style={{ fontSize: 28, margin: '8px 0' }}>⬇️</div>
-      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.8 }}>
+      <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6 }}>
         <strong style={{ color: 'var(--text-primary)' }}>&quot;홈 화면에 추가&quot;</strong> 누르면 끝!
       </div>
       <div style={{
@@ -153,7 +153,7 @@ export default function GuideInstallButton() {
   return (
     <div style={cardStyle}>
       <div style={{ fontSize: 48, marginBottom: 'var(--sp-md)' }}>💻</div>
-      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 'var(--sp-sm)' }}>
         카더라 앱 설치
       </div>
       <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-tertiary)', lineHeight: 1.6, marginBottom: 'var(--sp-lg)' }}>

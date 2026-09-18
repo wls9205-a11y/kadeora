@@ -14,7 +14,7 @@ export default function EmptyState({ icon, title, description, action, suggestio
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         margin: '0 auto 18px', fontSize: 36, lineHeight: 1,
       }}>{icon}</div>
-      <h3 style={{ fontSize: 'var(--fs-lg)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px', letterSpacing: '-0.3px' }}>{title}</h3>
+      <h3 style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', margin: '0 0 8px', letterSpacing: '-0.4px' }}>{title}</h3>
       {description && <p style={{ fontSize: 'var(--fs-sm)', margin: '0 0 20px', lineHeight: 1.6, color: 'var(--text-tertiary)', maxWidth: 320, marginLeft: 'auto', marginRight: 'auto' }}>{description}</p>}
       {action && (
         <Link href={action.href} className="kd-btn-glow" style={{
@@ -29,7 +29,7 @@ export default function EmptyState({ icon, title, description, action, suggestio
             <Link key={s.href} href={s.href} style={{
               fontSize: 'var(--fs-xs)', padding: '6px 14px', borderRadius: 'var(--radius-xl)',
               background: 'var(--bg-hover)', border: '1px solid var(--border)',
-              color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600,
+              color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 'var(--fw-title)',
               transition: 'border-color var(--transition-fast)',
             }}>{s.label}</Link>
           ))}

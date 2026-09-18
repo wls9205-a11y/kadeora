@@ -77,7 +77,7 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
       }}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>
+        <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 2 }}>
           관심 단지로 저장
           {statusLabel && (
             <span
@@ -88,7 +88,7 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
                 background: 'var(--brand-bg)',
                 color: 'var(--brand)',
                 fontSize: 'var(--fs-xs)',
-                fontWeight: 500,
+                fontWeight: 'var(--fw-body)',
               }}
             >
               {statusLabel}
@@ -108,7 +108,7 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
           borderRadius: 'var(--radius-pill)',
           background: done ? 'var(--brand-bg)' : 'var(--kakao-bg)',
           color: done ? 'var(--brand)' : 'var(--kakao-text)',
-          fontWeight: 500,
+          fontWeight: 'var(--fw-body)',
           fontSize: 'var(--fs-sm)',
           border: 'none',
           cursor: loading || done ? 'default' : 'pointer',
@@ -125,7 +125,7 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
         rel="noopener noreferrer"
         style={{
           fontSize: 'var(--fs-xs)',
-          fontWeight: 600,
+          fontWeight: 'var(--fw-title)',
           color: 'var(--text-secondary)',
           textDecoration: 'none',
           whiteSpace: 'nowrap',
@@ -141,11 +141,11 @@ export function InterestRegisterHero({ aptId, aptName, aptSlug, status, isLogged
         <div style={{ width: '100%', marginTop: 4, padding: '8px 10px', background: 'rgba(250,199,117,0.08)', border: '1px solid rgba(250,199,117,0.3)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--sp-sm)', flexWrap: 'wrap' }}>
           {/* ⚠️ #FAC775 는 제 8% 틴트 배경 위에서 대비 1.50 이었다(★·링크 둘 다).
                같은 배경에서 기존 토큰 --kd-accent(#7A4F0A)는 6.87. 새 토큰은 만들지 않았다. */}
-          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', fontWeight: 600 }}>
+          <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)' }}>
             <span style={{ color: 'var(--kd-accent)', marginRight: 4 }}>★</span>
             가점 입력하면 매칭 단지 자동 알림
           </span>
-          <Link href="/profile/cheongak" style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--kd-accent)', textDecoration: 'none' }}>입력하기 →</Link>
+          <Link href="/profile/cheongak" style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--kd-accent)', textDecoration: 'none' }}>입력하기 →</Link>
         </div>
       )}
     </div>

@@ -72,10 +72,10 @@ export default async function RelatedBlogsSection({ blogId, className }: Props) 
       style={{ margin: '24px 0' }}
     >
       <div style={{ marginBottom: 12 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 600, margin: '0 0 4px', color: 'var(--text-primary)' }}>
+        <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', margin: '0 0 4px', color: 'var(--text-primary)' }}>
           이어서 읽을 만한 글
         </h2>
-        <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: 0 }}>
+        <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', margin: 0 }}>
           블로그 2글 이상 본 분들, 가입률 6.5배 (실측)
         </p>
       </div>
@@ -116,7 +116,7 @@ export default async function RelatedBlogsSection({ blogId, className }: Props) 
                 <span style={{ fontSize: 28, lineHeight: 1, flexShrink: 0 }} aria-hidden>{emoji}</span>
                 {isStrategy && (
                   <span style={{
-                    fontSize: 10, fontWeight: 500,
+                    fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)',
                     padding: '2px 8px', borderRadius: 999,
                     background: 'var(--warning)', color: '#111',
                   }}>⚡ 전략</span>
@@ -124,10 +124,10 @@ export default async function RelatedBlogsSection({ blogId, className }: Props) 
               </div>
               <div
                 style={{
-                  fontSize: 14,
-                  fontWeight: 600,
+                  fontSize: 'var(--fs-sm)',
+                  fontWeight: 'var(--fw-title)',
                   color: 'var(--text-primary)',
-                  lineHeight: 1.45,
+                  lineHeight: 1.5,
                   display: '-webkit-box',
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: 'vertical',
@@ -137,8 +137,8 @@ export default async function RelatedBlogsSection({ blogId, className }: Props) 
               >
                 {r.title}
               </div>
-              <div style={{ marginTop: 'auto', display: 'flex', gap: 10, alignItems: 'center', fontSize: 11, color: 'var(--text-tertiary)' }}>
-                {catLabel && <span style={{ fontWeight: 600 }}>{catLabel}</span>}
+              <div style={{ marginTop: 'auto', display: 'flex', gap: 10, alignItems: 'center', fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
+                {catLabel && <span style={{ fontWeight: 'var(--fw-title)' }}>{catLabel}</span>}
                 {views > 0 && <span>👁️ {views.toLocaleString()}</span>}
                 {r.reading_minutes ? <span>⏱ {r.reading_minutes}분</span> : null}
               </div>

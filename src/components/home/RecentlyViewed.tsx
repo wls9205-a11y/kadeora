@@ -26,10 +26,10 @@ export default function RecentlyViewed({ limit = 3 }: { limit?: number }) {
     <section aria-label="최근 본 현장" style={{ marginBottom: 16 }}>
       <div
         style={{
-          fontSize: 11,
-          fontWeight: 500,
+          fontSize: 'var(--fs-xs)',
+          fontWeight: 'var(--fw-body)',
           color: 'var(--text-tertiary)',
-          letterSpacing: 0.3,
+          letterSpacing: 0,
           padding: '0 3px',
           marginBottom: 6,
         }}
@@ -45,8 +45,8 @@ export default function RecentlyViewed({ limit = 3 }: { limit?: number }) {
               maxWidth: '100%',
               padding: '5px 10px',
               borderRadius: 'var(--radius-pill)',
-              fontSize: 12,
-              fontWeight: 500,
+              fontSize: 'var(--fs-xs)',
+              fontWeight: 'var(--fw-body)',
               background: 'var(--bg-surface)',
               border: '1px solid var(--border)',
               color: 'var(--text-secondary)',

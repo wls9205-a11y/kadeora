@@ -81,7 +81,7 @@ export default function CandlestickChart({ data, width = 340, height = 240, show
       }}>
         {d ? (
           <>
-            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--text-primary)' }}>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)' }}>
               {d.date}
             </span>
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
@@ -93,10 +93,10 @@ export default function CandlestickChart({ data, width = 340, height = 240, show
             <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-blue)' }}>
               저 {fmtNum(d.low, currency)}
             </span>
-            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: isSelectedUp ? 'var(--accent-red)' : 'var(--accent-blue)' }}>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: isSelectedUp ? 'var(--accent-red)' : 'var(--accent-blue)' }}>
               종 {fmtNum(d.close, currency)}
             </span>
-            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: isSelectedUp ? 'var(--accent-red)' : 'var(--accent-blue)' }}>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: isSelectedUp ? 'var(--accent-red)' : 'var(--accent-blue)' }}>
               {changePct > 0 ? '+' : ''}{changePct.toFixed(2)}%
             </span>
             {d.volume != null && (
@@ -130,7 +130,7 @@ export default function CandlestickChart({ data, width = 340, height = 240, show
               <line x1={P} x2={width - P} y1={y} y2={y}
                 stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.5" />
               {(pct === 0 || pct === 0.5 || pct === 1) && (
-                <text x={width - P + 2} y={y + 3} textAnchor="start" fontSize="8" fill="var(--text-tertiary)">
+                <text x={width - P + 2} y={y + 3} textAnchor="start" fontSize="10" fill="var(--text-tertiary)">
                   {price >= 10000 ? `${(price / 10000).toFixed(0)}만` : price.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </text>
               )}
@@ -200,7 +200,7 @@ export default function CandlestickChart({ data, width = 340, height = 240, show
           if (i !== 0 && i !== data.length - 1 && i !== Math.floor(data.length / 2)) return null;
           const x = P + i * gapW + gapW / 2;
           return (
-            <text key={d.date} x={x} y={height - 2} textAnchor="middle" fontSize="8" fill="var(--text-tertiary)">
+            <text key={d.date} x={x} y={height - 2} textAnchor="middle" fontSize="10" fill="var(--text-tertiary)">
               {d.date.slice(5)}
             </text>
           );

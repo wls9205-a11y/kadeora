@@ -90,7 +90,7 @@
 
   .kd-action-link {
     font-size: var(--fs-xs);
-    font-weight: 600;
+    font-weight: var(--fw-title);
     color: var(--text-tertiary);
     text-decoration: none;
     padding: 4px 10px;
@@ -184,7 +184,7 @@
   .kd-btn-glow {
     background: var(--brand);
     color: #fff;
-    font-weight: 700;
+    font-weight: var(--fw-num);
     border: none;
     border-radius: var(--radius-sm);
     padding: 12px 28px;
@@ -430,7 +430,7 @@
        1.7 이상은 높이가 고정된 카드에서 세로 넘침을 만든다.
        1.5 → 1.65 로 올렸다가 실화면에서 밀도가 과해 1.58 로 내렸다.
        배지·숫자·한 줄 라벨의 인라인 lineHeight 1.4 이하는 의도된 값이라 건드리지 않는다. */
-    line-height: 1.58;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     transition: background-color 0.2s ease, color 0.2s ease;
     word-break: keep-all;
@@ -470,9 +470,9 @@
      본문 타이포(.blog-content / p / h2)는 styles/blog.css 로 수렴했다.
      blog.css 가 뒤에 로드되어 항상 이기므로 여기 남은 중복 정의는 전부 죽은 코드였고,
      "globals 를 고쳤는데 화면이 안 바뀐다" 의 원인이었다. h3 장식만 남긴다. */
-  .blog-content h3 { font-size: 18px; border-left: 3px solid var(--brand); padding-left: 10px; margin-top: 28px; }
-  .blog-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
-  .blog-content th { background: var(--bg-surface); padding: 10px 12px; text-align: left; font-weight: 600; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .blog-content h3 { font-size: var(--fs-base); border-left: 3px solid var(--brand); padding-left: 10px; margin-top: 28px; }
+  .blog-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: var(--fs-xs); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+  .blog-content th { background: var(--bg-surface); padding: 10px 12px; text-align: left; font-weight: var(--fw-title); font-size: var(--fs-xs); border-bottom: 1px solid var(--border); }
   .blog-content td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
   .blog-content tr:last-child td { border-bottom: none; }
   .blog-content blockquote { border-left: 3px solid var(--brand); padding: 12px 16px; margin: 16px 0; background: var(--bg-surface); border-radius: 0 var(--radius-md) var(--radius-md) 0; }
@@ -504,7 +504,7 @@
   /* 테이블 오버플로우 — 모바일 가로 스크롤 */
   .apt-card table { width: 100%; font-size: var(--fs-xs); }
   @media (max-width: 479.98px) {
-    .apt-card table { font-size: 10px; }
+    .apt-card table { font-size: var(--fs-3xs); }
     .apt-card th, .apt-card td { padding: 4px 3px !important; }
   }
 
@@ -533,12 +533,12 @@
   /* 공유 버튼 — 모바일에서 간격 조정 */
   @media (max-width: 479.98px) {
     .share-buttons { gap: 4px !important; }
-    .share-buttons button { padding: 4px 8px !important; font-size: 11px !important; }
+    .share-buttons button { padding: 4px 8px !important; font-size: var(--fs-2xs) !important; }
   }
 
   /* 타임라인 단계 — 모바일 텍스트 축소 */
   @media (max-width: 479.98px) {
-    .tl-step { font-size: 8px !important; }
+    .tl-step { font-size: var(--fs-3xs) !important; }
   }
 
   /* 가로 스크롤 pill — 한줄 스크롤 */
@@ -565,23 +565,23 @@
      .blog-content / .blog-content p / h2 의 타이포·색 정의는 styles/blog.css 로 옮겼다.
      같은 선언을 두 파일에 두면 뒤에 로드되는 blog.css 가 항상 이겨서 여기 수정이 묻힌다. */
   .blog-content h3 {
-    font-size: 18px;
-    font-weight: 600;
+    font-size: var(--fs-base);
+    font-weight: var(--fw-title);
     color: var(--text-primary);
     margin: 36px 0 14px;
-    letter-spacing: -0.3px;
-    line-height: 1.45;
+    letter-spacing: -0.2px;
+    line-height: 1.5;
     padding: 8px 0 8px 14px;
     border-left: 3px solid var(--brand);
   }
   .blog-content h4 {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-title);
     color: var(--text-primary);
     margin: 28px 0 10px;
   }
   .blog-content strong, .blog-content b {
-    font-weight: 700;
+    font-weight: var(--fw-num);
     color: var(--text-primary);
   }
   .blog-content a {
@@ -597,8 +597,8 @@
     padding-left: 22px;
   }
   .blog-content li {
-    font-size: 16px;
-    line-height: 2.0;
+    font-size: var(--fs-sm);
+    line-height: 1.6;
     margin-bottom: 8px;
     color: var(--text-secondary);
   }
@@ -611,9 +611,9 @@
     border-radius: 12px;
     background: rgba(74,138,247,0.04);
     border: 1px solid rgba(74,138,247,0.08);
-    font-size: 15.5px;
+    font-size: var(--fs-sm);
     font-style: italic;
-    line-height: 1.85;
+    line-height: 1.6;
     color: var(--text-secondary);
     position: relative;
   }
@@ -622,7 +622,7 @@
     position: absolute;
     top: 10px;
     left: 16px;
-    font-size: 32px;
+    font-size: var(--fs-2xl);
     font-family: Georgia, serif;
     color: var(--brand);
     opacity: 0.2;
@@ -640,7 +640,7 @@
     border-collapse: separate;
     border-spacing: 0;
     margin: 12px 0 28px;
-    font-size: 14px;
+    font-size: var(--fs-xs);
     border: 1px solid rgba(255,255,255,0.05);
     border-radius: 12px;
     overflow: hidden;
@@ -648,9 +648,9 @@
   .blog-content th {
     padding: 12px 16px;
     text-align: left;
-    font-weight: 600;
-    font-size: 11px;
-    letter-spacing: 0.5px;
+    font-weight: var(--fw-title);
+    font-size: var(--fs-3xs);
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--text-tertiary);
     background: rgba(74,138,247,0.05);
@@ -662,13 +662,13 @@
     line-height: 1.6;
     color: var(--text-secondary);
   }
-  .blog-content td:last-child { font-weight: 500; color: var(--text-primary); }
+  .blog-content td:last-child { font-weight: var(--fw-body); color: var(--text-primary); }
   .blog-content tr:last-child td { border-bottom: none; }
   .blog-content tr:nth-child(even) td { background: rgba(255,255,255,0.012); }
 
   .blog-content code {
     font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: var(--fs-xs);
     padding: 2px 7px;
     border-radius: 5px;
     background: var(--bg-hover);
@@ -682,8 +682,8 @@
     background: var(--bg-surface);
     border: 1px solid var(--border);
     overflow-x: auto;
-    font-size: 13px;
-    line-height: 1.7;
+    font-size: var(--fs-xs);
+    line-height: 1.6;
   }
   .blog-content pre code {
     padding: 0;
@@ -717,19 +717,19 @@
      미디어쿼리는 특이도를 올리지 않으므로 여기 두면 뒤에 로드되는 blog.css 의
      기본 규칙(16px)에 그대로 져서 죽은 코드가 된다 — 실제로 그랬다. */
   @media (max-width: 767.98px) {
-    .blog-content h2 { margin-top: 40px; margin-bottom: 14px; font-size: 20px; }
-    .blog-content h3 { margin-top: 28px; font-size: 16.5px; padding: 6px 0 6px 12px; }
-    .blog-content table { font-size: 12.5px; display: block; overflow-x: auto; }
+    .blog-content h2 { margin-top: 40px; margin-bottom: 14px; font-size: var(--fs-lg); }
+    .blog-content h3 { margin-top: 28px; font-size: var(--fs-base); padding: 6px 0 6px 12px; }
+    .blog-content table { font-size: var(--fs-xs); display: block; overflow-x: auto; }
     .blog-content th, .blog-content td { padding: 10px 12px; white-space: nowrap; }
     .blog-content img { margin: 16px 0; border-radius: 8px; }
-    .blog-content li { font-size: 15px; }
-    .blog-content blockquote { padding: 16px 18px 16px 20px; font-size: 14.5px; }
+    .blog-content li { font-size: var(--fs-sm); }
+    .blog-content blockquote { padding: 16px 18px 16px 20px; font-size: var(--fs-sm); }
   }
 
   /* ═══ 피드 게시글 본문 ═══ */
   .feed-detail-content {
-    font-size: 15px !important;
-    line-height: 1.82 !important;
+    font-size: var(--fs-xs) !important;
+    line-height: 1.6 !important;
     letter-spacing: -0.2px;
     word-break: keep-all;
     color: var(--text-primary);
@@ -747,23 +747,23 @@
   }
   .kd-comment:last-child { border-bottom: none; }
   .kd-comment-body {
-    font-size: 14px;
-    line-height: 1.75;
+    font-size: var(--fs-xs);
+    line-height: 1.6;
     color: var(--text-primary);
     word-break: keep-all;
     margin: 6px 0 8px;
     white-space: pre-wrap;
   }
   .kd-comment-meta {
-    font-size: 12px;
+    font-size: var(--fs-2xs);
     color: var(--text-tertiary);
     display: flex;
     align-items: center;
     gap: 8px;
   }
   .kd-comment-author {
-    font-weight: 600;
-    font-size: 13px;
+    font-weight: var(--fw-title);
+    font-size: var(--fs-xs);
     color: var(--text-primary);
   }
   .kd-comment-actions {
@@ -772,7 +772,7 @@
     margin-top: 4px;
   }
   .kd-comment-actions button {
-    font-size: 12px;
+    font-size: var(--fs-2xs);
     color: var(--text-tertiary);
     background: none;
     border: none;
@@ -786,8 +786,8 @@
   .kd-comment-actions button:hover { color: var(--text-secondary); }
   @media (max-width: 767.98px) {
     .kd-comment { padding: 12px 0; }
-    .kd-comment-body { font-size: 13.5px; line-height: 1.7; }
-    .kd-comment-author { font-size: 12.5px; }
+    .kd-comment-body { font-size: var(--fs-xs); line-height: 1.6; }
+    .kd-comment-author { font-size: var(--fs-xs); }
   }
 
   /* ═══ 버튼 — 통일된 가독성 ═══ */
@@ -798,14 +798,14 @@
     gap: 6px;
     padding: 8px 16px;
     border-radius: var(--radius-md, 8px);
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-title);
     cursor: pointer;
     transition: all 0.15s;
     border: 1px solid var(--border);
     background: var(--bg-surface);
     color: var(--text-primary);
-    line-height: 1.4;
+    line-height: 1.3;
     white-space: nowrap;
   }
   .kd-btn:hover { border-color: var(--border-strong); background: var(--bg-hover); }
@@ -816,44 +816,44 @@
     border-color: var(--brand);
   }
   .kd-btn-primary:hover { opacity: 0.9; }
-  .kd-btn-sm { padding: 5px 10px; font-size: 12px; }
-  .kd-btn-lg { padding: 10px 20px; font-size: 14px; }
+  .kd-btn-sm { padding: 5px 10px; font-size: var(--fs-2xs); }
+  .kd-btn-lg { padding: 10px 20px; font-size: var(--fs-xs); }
   @media (max-width: 767.98px) {
-    .kd-btn { padding: 7px 14px; font-size: 12.5px; }
-    .kd-btn-lg { padding: 9px 18px; font-size: 13px; }
+    .kd-btn { padding: 7px 14px; font-size: var(--fs-xs); }
+    .kd-btn-lg { padding: 9px 18px; font-size: var(--fs-xs); }
   }
 
   /* ═══ 피드 카드 제목/본문 가독성 ═══ */
   .kd-feed-card .kd-feed-title {
-    font-size: 15px;
-    font-weight: 700;
-    line-height: 1.45;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-num);
+    line-height: 1.5;
     color: var(--text-primary);
-    letter-spacing: -0.3px;
+    letter-spacing: -0.2px;
     margin-bottom: 6px;
     word-break: keep-all;
   }
   .kd-feed-card .kd-feed-body {
-    font-size: 14px;
-    line-height: 1.65;
+    font-size: var(--fs-xs);
+    line-height: 1.6;
     color: var(--text-secondary);
     word-break: keep-all;
   }
   @media (max-width: 767.98px) {
-    .kd-feed-card .kd-feed-title { font-size: 14.5px; }
-    .kd-feed-card .kd-feed-body { font-size: 13.5px; }
+    .kd-feed-card .kd-feed-title { font-size: var(--fs-sm); }
+    .kd-feed-card .kd-feed-body { font-size: var(--fs-xs); }
   }
 
   /* ═══ 글쓰기 에디터 ═══ */
   .kd-write-title {
     font-size: clamp(18px, 5vw, 22px) !important;
-    font-weight: 800 !important;
-    line-height: 1.4 !important;
+    font-weight: var(--fw-num) !important;
+    line-height: 1.3 !important;
     letter-spacing: -0.5px;
   }
   .kd-write-body {
-    font-size: 15px !important;
-    line-height: 1.8 !important;
+    font-size: var(--fs-xs) !important;
+    line-height: 1.6 !important;
     letter-spacing: -0.2px;
   }
 
@@ -902,8 +902,8 @@
     border-radius: var(--radius-sm);
     background: var(--bg-elevated);
     border: none;
-    font-size: 11px;
-    font-weight: 600;
+    font-size: var(--fs-3xs);
+    font-weight: var(--fw-title);
     color: var(--text-tertiary);
     cursor: pointer;
     font-family: inherit;
@@ -922,7 +922,7 @@
     background: var(--bg-surface);
     color: var(--text-tertiary);
     font-size: var(--fs-xs);
-    font-weight: 600;
+    font-weight: var(--fw-title);
     cursor: pointer;
     font-family: inherit;
     flex-shrink: 0;
@@ -941,8 +941,8 @@
     padding: 2px 8px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
-    font-size: 11px;
-    font-weight: 600;
+    font-size: var(--fs-3xs);
+    font-weight: var(--fw-title);
     color: var(--text-tertiary);
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -966,13 +966,13 @@
     align-items: center;
     gap: 6px;
     font-size: var(--fs-base);
-    font-weight: 800;
+    font-weight: var(--fw-num);
     margin: 0;
   }
   .kd-section-header a {
     font-size: var(--fs-xs);
     color: var(--brand);
-    font-weight: 600;
+    font-weight: var(--fw-title);
     text-decoration: none;
   }
 
@@ -981,13 +981,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
+    font-weight: var(--fw-num);
     color: var(--text-inverse);
     flex-shrink: 0;
   }
-  .kd-avatar-sm { width: 28px; height: 28px; border-radius: var(--radius-sm); font-size: 11px; }
-  .kd-avatar-md { width: 36px; height: 36px; border-radius: var(--radius-md); font-size: 14px; }
-  .kd-avatar-lg { width: 48px; height: 48px; border-radius: var(--radius-lg); font-size: 18px; }
+  .kd-avatar-sm { width: 28px; height: 28px; border-radius: var(--radius-sm); font-size: var(--fs-3xs); }
+  .kd-avatar-md { width: 36px; height: 36px; border-radius: var(--radius-md); font-size: var(--fs-xs); }
+  .kd-avatar-lg { width: 48px; height: 48px; border-radius: var(--radius-lg); font-size: var(--fs-base); }
 
   /* ── 인터랙션 바 (카드 하단) ── */
   .kd-interaction-bar {
@@ -1011,8 +1011,8 @@
     background: var(--bg-surface);
     border: 1px solid var(--border);
   }
-  .kd-stat-item .label { font-size: 9px; color: var(--text-tertiary); margin-bottom: 2px; }
-  .kd-stat-item .value { font-size: var(--fs-sm); font-weight: 700; }
+  .kd-stat-item .label { font-size: var(--fs-3xs); color: var(--text-tertiary); margin-bottom: 2px; }
+  .kd-stat-item .value { font-size: var(--fs-sm); font-weight: var(--fw-num); }
 
   /* ── 프로그레스 바 ── */
   .kd-progress { height: 3px; border-radius: 2px; background: var(--bg-elevated); overflow: hidden; margin-top: var(--sp-sm); }
@@ -1024,7 +1024,7 @@
 
   /* 캘린더 7열 — 모바일 글꼴/패딩 축소 */
   @media (max-width: 479.98px) {
-    .kd-cal-grid { font-size: 10px !important; gap: 1px !important; }
+    .kd-cal-grid { font-size: var(--fs-3xs) !important; gap: 1px !important; }
     .kd-cal-grid > div { padding: 2px !important; }
   }
 
@@ -1139,8 +1139,8 @@
   }
   .hero-badges, .hero-chip { z-index: 2; }
   .hero-name {
-    font-size: 16px;
-    font-weight: 800;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-num);
     color: #fff;
     line-height: 1.3;
     text-shadow: 0 1px 3px rgba(0,0,0,0.5);
@@ -1149,7 +1149,7 @@
     white-space: nowrap;
   }
   .hero-addr {
-    font-size: 12px;
+    font-size: var(--fs-2xs);
     color: rgba(255,255,255,0.8);
     margin-top: 1px;
     text-shadow: 0 1px 2px rgba(0,0,0,0.4);
@@ -1182,8 +1182,8 @@
   .hero-dday {
     padding: 4px 10px;
     border-radius: 6px;
-    font-size: 12px;
-    font-weight: 700;
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-num);
   }
   .hero-kpi {
     display: grid;
@@ -1201,13 +1201,13 @@
     text-align: center;
   }
   .hero-kpi-label {
-    font-size: 11px;
+    font-size: var(--fs-3xs);
     color: var(--text-tertiary);
     margin-bottom: 3px;
   }
   .hero-kpi-val {
-    font-size: 13px;
-    font-weight: 800;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-num);
     line-height: 1.3;
   }
   .hero-overlay-stat {
@@ -1222,7 +1222,7 @@
   @media (max-width: 479.98px) {
     .hero-img { height: 100px; }
     .hero-img-sm { height: 80px; }
-    .hero-name { font-size: 14px; }
+    .hero-name { font-size: var(--fs-xs); }
   }
 
   /* SignupNudge 팝업 애니메이션 */
@@ -1333,7 +1333,7 @@
   /* FeedStatusBar: 초소형 화면 대응 */
   @media (max-width: 479.98px) {
     .feed-status-bar {
-      font-size: 10px !important;
+      font-size: var(--fs-3xs) !important;
       gap: 2px !important;
       padding: 4px !important;
     }
@@ -1366,7 +1366,7 @@
 
   /* 네비게이션 하단 바: 아이콘 & 텍스트 크기 */
   @media (max-width: 320px) {
-    .bottom-nav { font-size: 9px !important; }
+    .bottom-nav { font-size: var(--fs-3xs) !important; }
     .bottom-nav svg { width: 18px !important; height: 18px !important; }
   }
 
@@ -1382,7 +1382,7 @@
   @media (max-width: 320px) {
     .kpi-row {
       gap: 2px !important;
-      font-size: 10px !important;
+      font-size: var(--fs-3xs) !important;
     }
     .kpi-row > div {
       padding: 4px 2px !important;
@@ -1422,7 +1422,7 @@
       flex-wrap: wrap !important;
     }
     .share-buttons button, .share-buttons a {
-      font-size: 10px !important;
+      font-size: var(--fs-3xs) !important;
       padding: 3px 6px !important;
     }
   }
@@ -1430,7 +1430,7 @@
   /* 어드민: 모바일 대응 */
   @media (max-width: 479.98px) {
     .adm-card { padding: 10px !important; }
-    .adm-btn { padding: 6px 8px !important; font-size: 11px !important; }
+    .adm-btn { padding: 6px 8px !important; font-size: var(--fs-2xs) !important; }
   }
 
   /* 토론방: 메시지 버블 넘침 방지 */
@@ -1447,7 +1447,7 @@
 
   /* 모바일: 카드 내 숫자 텍스트 축소 */
   @media (max-width: 479.98px) {
-    .kd-counter { font-size: 14px !important; }
+    .kd-counter { font-size: var(--fs-xs) !important; }
   }
 
   /* 모바일: 터치 타겟 최소 크기 보장 */
@@ -1478,7 +1478,7 @@
   /* HotTopicBar: 모바일 pill 크기 */
   @media (max-width: 479.98px) {
     .hot-topic-pill {
-      font-size: 11px !important;
+      font-size: var(--fs-2xs) !important;
       padding: 4px 8px !important;
     }
   }
@@ -1486,7 +1486,7 @@
   /* 종목 상세: 가격 헤더 모바일 */
   @media (max-width: 479.98px) {
     .stock-price-header {
-      font-size: 28px !important;
+      font-size: var(--fs-2xl) !important;
     }
   }
 
@@ -1584,8 +1584,8 @@
     .apt-page-container { max-width: 900px; padding: var(--sp-lg); }
   }
   .apt-section-title {
-    font-size: var(--fs-md); font-weight: 800; color: var(--text-primary);
-    margin: 0 0 var(--sp-sm); line-height: 1.3; letter-spacing: -0.01em;
+    font-size: var(--fs-md); font-weight: var(--fw-num); color: var(--text-primary);
+    margin: 0 0 var(--sp-sm); line-height: 1.3; letter-spacing: -0.2px;
   }
   @media (min-width: 768px) { .apt-section-title { font-size: var(--fs-lg); } }
   .apt-card-v2 {
@@ -1637,8 +1637,8 @@
     padding: 16px 18px; margin: 0 18px 18px;
   }
   .apt-dday-number {
-    font-size: 28px; font-weight: 800; color: var(--accent-amber);
-    letter-spacing: -0.02em; line-height: 1;
+    font-size: 28px; font-weight: var(--fw-num); color: var(--accent-amber);
+    letter-spacing: -0.4px; line-height: 1;
   }
 
   /* KPI 2x2 grid */
@@ -1650,7 +1650,7 @@
     border-radius: var(--radius-md);
   }
   .apt-kpi-number {
-    font-size: 20px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em;
+    font-size: var(--fs-md); font-weight: var(--fw-num); line-height: 1; letter-spacing: -0.4px;
     color: var(--text-primary);
   }
 
@@ -1693,10 +1693,10 @@
     .apt-imminent-card { flex-basis: 150px; }
     .apt-category-card { padding: 10px 8px; }
     .apt-dday-card { padding: 12px 14px; margin: 0 12px var(--sp-md); }
-    .apt-dday-number { font-size: 24px; }
+    .apt-dday-number { font-size: var(--fs-xl); }
     .apt-kpi-grid { padding: 0 12px; }
     .apt-kpi-card { padding: 10px 12px; }
-    .apt-kpi-number { font-size: 18px; }
+    .apt-kpi-number { font-size: var(--fs-md); }
   }
 
   /* ========================================

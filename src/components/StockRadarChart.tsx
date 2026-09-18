@@ -50,7 +50,7 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
 
   return (
     <div style={{ marginBottom: 'var(--sp-md)' }}>
-      <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)', letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: 'var(--sp-sm)' }}>
         종목 레이더 비교 (최대 3개)
       </div>
 
@@ -62,9 +62,9 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', zIndex: 50, marginTop: 3 }}>
             {searchRes.map(s => (
               <button aria-label="닫기" key={s.symbol} onClick={() => { toggle(s.symbol); setSearch(''); }} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', width: '100%', padding: '7px 10px', background: selected.includes(s.symbol) ? 'var(--brand-bg)' : 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-                <span style={{ fontSize: 12, color: 'var(--text-primary)', flex: 1 }}>{s.name}</span>
-                <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>{s.symbol}</span>
-                {selected.includes(s.symbol) && <span style={{ fontSize: 10, color: 'var(--brand)' }}>✓</span>}
+                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', flex: 1 }}>{s.name}</span>
+                <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>{s.symbol}</span>
+                {selected.includes(s.symbol) && <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--brand)' }}>✓</span>}
               </button>
             ))}
           </div>
@@ -77,7 +77,7 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
           const idx = selected.indexOf(s.symbol);
           const col = idx >= 0 ? COLORS[idx] : undefined;
           return (
-            <button key={s.symbol} onClick={() => toggle(s.symbol)} style={{ fontSize: 10, padding: '4px 8px', borderRadius: 'var(--radius-xs)', background: col ? `${col}20` : 'var(--bg-surface)', border: `1px solid ${col || 'var(--border)'}`, color: col || 'var(--text-secondary)', cursor: 'pointer', fontWeight: col ? 700 : 400 }}>
+            <button key={s.symbol} onClick={() => toggle(s.symbol)} style={{ fontSize: 'var(--fs-2xs)', padding: '4px 8px', borderRadius: 'var(--radius-xs)', background: col ? `${col}20` : 'var(--bg-surface)', border: `1px solid ${col || 'var(--border)'}`, color: col || 'var(--text-secondary)', cursor: 'pointer', fontWeight: col ? 'var(--fw-num)' : 'var(--fw-quiet)' }}>
               {col && <span style={{ marginRight: 3 }}>●</span>}{s.name.length > 6 ? s.name.slice(0, 6) + '..' : s.name}
             </button>
           );
@@ -100,7 +100,7 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
               return (
                 <g key={label}>
                   <line x1={CX} y1={CY} x2={x} y2={y} stroke="var(--border)" strokeWidth="0.5" />
-                  <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fontSize="7" fill="var(--text-tertiary)" fontFamily="var(--font-mono)">{label}</text>
+                  <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fontSize="10" fill="var(--text-tertiary)" fontFamily="var(--font-mono)">{label}</text>
                 </g>
               );
             })}
@@ -125,16 +125,16 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
                 <div key={s.symbol} style={{ marginBottom: 10 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
                     <div style={{ width: 8, height: 8, borderRadius: 4, background: col }} />
-                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)' }}>{s.name}</span>
-                    <button onClick={() => toggle(s.symbol)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 12, marginLeft: 'auto' }} aria-label="종목 제거">×</button>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{s.name}</span>
+                    <button onClick={() => toggle(s.symbol)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-xs)', marginLeft: 'auto' }} aria-label="종목 제거">×</button>
                   </div>
                   {AXES.map((ax, i) => (
                     <div key={ax} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                      <span style={{ fontSize: 10, color: 'var(--text-tertiary)', width: 42, flexShrink: 0, fontFamily: 'var(--font-mono)' }}>{ax}</span>
+                      <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', width: 42, flexShrink: 0, fontFamily: 'var(--font-mono)' }}>{ax}</span>
                       <div style={{ flex: 1, height: 3, background: 'var(--bg-hover)', borderRadius: 4, overflow: 'hidden' }}>
                         <div style={{ width: `${scores[i]}%`, height: '100%', background: col, opacity: 0.7, borderRadius: 4 }} />
                       </div>
-                      <span style={{ fontSize: 10, color: col, width: 24, textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{Math.round(scores[i])}</span>
+                      <span style={{ fontSize: 'var(--fs-2xs)', color: col, width: 24, textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{Math.round(scores[i])}</span>
                     </div>
                   ))}
                 </div>
@@ -144,7 +144,7 @@ export default function StockRadarChart({ stocks, isKR }: Props) {
         </div>
       ) : (
         <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-tertiary)' }}>
-          <div style={{ fontSize: 11 }}>종목을 1~3개 선택하면 레이더 차트가 표시됩니다</div>
+          <div style={{ fontSize: 'var(--fs-xs)' }}>종목을 1~3개 선택하면 레이더 차트가 표시됩니다</div>
         </div>
       )}
     </div>

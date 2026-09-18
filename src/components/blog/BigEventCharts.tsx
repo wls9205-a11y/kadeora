@@ -100,8 +100,8 @@ export default async function BigEventCharts({ eventId }: Props) {
       border: '1px solid var(--border)',
     };
     const TITLE: React.CSSProperties = {
-      fontSize: 14,
-      fontWeight: 600,
+      fontSize: 'var(--fs-sm)',
+      fontWeight: 'var(--fw-title)',
       color: 'var(--text-primary)',
       margin: '0 0 10px',
     };
@@ -115,12 +115,12 @@ export default async function BigEventCharts({ eventId }: Props) {
           {areaBars.map((b) => {
             const w = Math.max(6, Math.round((b.median / barMax) * 100));
             return (
-              <div key={b.label} style={{ display: 'grid', gridTemplateColumns: '80px 1fr 80px', gap: 8, alignItems: 'center', fontSize: 12 }}>
+              <div key={b.label} style={{ display: 'grid', gridTemplateColumns: '80px 1fr 80px', gap: 8, alignItems: 'center', fontSize: 'var(--fs-xs)' }}>
                 <span style={{ color: 'var(--text-secondary)' }}>{b.label} · {b.count}건</span>
                 <div style={{ height: 10, borderRadius: 999, background: 'var(--bg-hover)', overflow: 'hidden' }}>
                   <div style={{ width: `${w}%`, height: '100%', background: 'linear-gradient(90deg,#3b7bf6,#2563eb)' }} />
                 </div>
-                <span style={{ color: 'var(--text-primary)', fontWeight: 700, textAlign: 'right' }}>{fmt억(b.median)}</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-num)', textAlign: 'right' }}>{fmt억(b.median)}</span>
               </div>
             );
           })}
@@ -182,20 +182,20 @@ export default async function BigEventCharts({ eventId }: Props) {
                   background: bg,
                   color: fg,
                   textAlign: 'center',
-                  fontSize: 11,
-                  fontWeight: active ? 600 : 500,
+                  fontSize: 'var(--fs-xs)',
+                  fontWeight: active ? 'var(--fw-title)' : 'var(--fw-body)',
                   border: active ? '2px solid var(--brand-navy)' : '1px solid var(--border)',
                 }}
                 aria-current={active ? 'step' : undefined}
               >
-                <div style={{ fontSize: 10, opacity: 0.8 }}>Stage {s}</div>
+                <div style={{ fontSize: 'var(--fs-2xs)', opacity: 0.8 }}>Stage {s}</div>
                 <div>{STAGE_LABEL[s]}</div>
               </div>
             );
           })}
         </div>
         {ev.new_brand_name ? (
-          <div style={{ marginTop: 10, fontSize: 12, color: 'var(--text-secondary)' }}>
+          <div style={{ marginTop: 10, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>
             예상 브랜드: <strong style={{ color: 'var(--text-primary)' }}>{ev.new_brand_name}</strong>
           </div>
         ) : null}

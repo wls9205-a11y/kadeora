@@ -105,7 +105,7 @@ export default function AptPriceTrendChart({ aptName, region, sigungu, prefix }:
       {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <div>
-          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>실거래가 추이</div>
+          <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>실거래가 추이</div>
           {stats && (
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 2 }}>
               {stats.count}건 · 최고 {fmtPrice(stats.max)} · 최저 {fmtPrice(stats.min)}
@@ -116,7 +116,7 @@ export default function AptPriceTrendChart({ aptName, region, sigungu, prefix }:
           {(['price', 'pyeong'] as const).map(m => (
             <button key={m} onClick={() => setMode(m)} style={{
               padding: '4px 10px', borderRadius: 'var(--radius-xs)', border: 'none', cursor: 'pointer',
-              fontSize: 'var(--fs-xs)', fontWeight: 600,
+              fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
               background: mode === m ? 'var(--brand)' : 'var(--bg-hover)',
               color: mode === m ? 'var(--text-inverse)' : 'var(--text-tertiary)',
             }}>
@@ -139,7 +139,7 @@ export default function AptPriceTrendChart({ aptName, region, sigungu, prefix }:
               flex: 1, padding: '6px 8px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', textAlign: 'center',
             }}>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{s.label}</div>
-              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: s.color }}>{s.value}</div>
+              <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: s.color }}>{s.value}</div>
             </div>
           ))}
         </div>
@@ -156,7 +156,7 @@ export default function AptPriceTrendChart({ aptName, region, sigungu, prefix }:
           return (
             <g key={pct}>
               <line x1={PAD} y1={y} x2={W - PAD} y2={y} stroke="var(--border)" strokeWidth={0.5} strokeDasharray="4,4" />
-              <text x={PAD - 4} y={y + 3} textAnchor="end" fill="var(--text-tertiary)" fontSize={9}>
+              <text x={PAD - 4} y={y + 3} textAnchor="end" fill="var(--text-tertiary)" fontSize={10}>
                 {fmtPrice(Math.round(val))}
               </text>
             </g>
@@ -193,7 +193,7 @@ export default function AptPriceTrendChart({ aptName, region, sigungu, prefix }:
           const origIdx = sorted.indexOf(t);
           const x = PAD + (origIdx / Math.max(sorted.length - 1, 1)) * chartW;
           return (
-            <text key={idx} x={x} y={H - 4} textAnchor="middle" fill="var(--text-tertiary)" fontSize={9}>
+            <text key={idx} x={x} y={H - 4} textAnchor="middle" fill="var(--text-tertiary)" fontSize={10}>
               {t.deal_date?.slice(2, 7)}
             </text>
           );

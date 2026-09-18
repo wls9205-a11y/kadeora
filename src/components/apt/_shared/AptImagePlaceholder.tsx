@@ -18,7 +18,7 @@ export default function AptImagePlaceholder({ name, size = 60, aspectRatio = '4/
         <rect x="63" y="18" width="11" height="42" fill="rgba(255,255,255,0.7)" />
         <rect x="76" y="30" width="14" height="30" fill="rgba(255,255,255,0.6)" />
       </svg>
-      <span style={{ position: 'relative', zIndex: 1, fontSize: 10, color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>
+      <span style={{ position: 'relative', zIndex: 1, fontSize: 'var(--fs-2xs)', color: 'rgba(255,255,255,0.85)', fontWeight: 'var(--fw-title)' }}>
         사진 준비중{name ? ` · ${name.slice(0, 12)}` : ''}
       </span>
     </div>

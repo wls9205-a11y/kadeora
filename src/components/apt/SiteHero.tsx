@@ -45,7 +45,7 @@ const WatermarkSm = () => (
       <circle cx="36" cy="36" r="7" fill="rgba(255,255,255,0.85)" />
       <circle cx="54" cy="36" r="7" fill="rgba(255,255,255,0.85)" />
     </svg>
-    <span style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>kadeora.app</span>
+    <span style={{ fontSize: 'var(--fs-xs)', color: 'rgba(255,255,255,0.8)', fontWeight: 'var(--fw-body)' }}>kadeora.app</span>
   </div>
 );
 
@@ -191,7 +191,7 @@ export default function SiteHero({ src, name, region, credit, alt, badges, varia
             <span
               style={{
                 fontSize: 'clamp(48px, 12vw, 96px)',
-                fontWeight: 600,
+                fontWeight: 'var(--fw-title)',
                 // 장식 워터마크(opacity .5)다 — 48~96px 디스플레이 자간에 UI 텍스트 기준을 적용하지 않았다.
                 letterSpacing: '-.05em',
                 lineHeight: 1,
@@ -212,7 +212,7 @@ export default function SiteHero({ src, name, region, credit, alt, badges, varia
           <div
             style={{
               position: 'absolute', right: 12, bottom: 8, zIndex: 2, maxWidth: '60%',
-              fontSize: 'var(--fs-xs)', lineHeight: 1.4, textAlign: 'right',
+              fontSize: 'var(--fs-xs)', lineHeight: 1.3, textAlign: 'right',
               color: 'rgba(255,255,255,0.86)',
               textShadow: '0 1px 2px rgba(0,0,0,0.5)',
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',

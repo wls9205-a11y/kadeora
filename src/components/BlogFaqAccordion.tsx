@@ -17,7 +17,7 @@ export default function BlogFaqAccordion({ items }: Props) {
 
   return (
     <div style={{ margin: '24px 0' }}>
-      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>
+      <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', marginBottom: 'var(--sp-md)' }}>
         자주 묻는 질문
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -33,7 +33,7 @@ export default function BlogFaqAccordion({ items }: Props) {
                 justifyContent: 'space-between', padding: '12px 16px',
                 background: 'none', border: 'none', cursor: 'pointer',
                 textAlign: 'left', color: 'var(--text-primary)',
-                fontSize: 'var(--fs-base)', fontWeight: 600, gap: 'var(--sp-md)',
+                fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', gap: 'var(--sp-md)',
               }}
             >
               <span>Q. {item.question}</span>
@@ -48,7 +48,7 @@ export default function BlogFaqAccordion({ items }: Props) {
             {openIndex === i && (
               <div style={{
                 padding: '0 16px 14px', fontSize: 'var(--fs-sm)',
-                color: 'var(--text-secondary)', lineHeight: 1.7,
+                color: 'var(--text-secondary)', lineHeight: 1.6,
                 borderTop: '1px solid var(--border)',
                 paddingTop: 12,
               }}>

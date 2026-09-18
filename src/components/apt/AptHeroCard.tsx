@@ -37,18 +37,18 @@ export default function AptHeroCard({ data }: { data: HeroData }) {
           ? `url(${data.image_url}) center/cover, linear-gradient(135deg, #B5D4F4 0%, #378ADD 100%)`
           : 'linear-gradient(135deg, #B5D4F4 0%, #378ADD 100%)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: '#042C53', fontSize: 32,
+        color: '#042C53', fontSize: 'var(--fs-2xl)',
       }}>
         {!data.image_url && <span style={{ opacity: 0.55 }}>🏢</span>}
         <div style={{ position: 'absolute', top: 7, left: 7, display: 'flex', gap: 3 }}>
           <span style={{
-            fontSize: 10, padding: '2px 6px', borderRadius: 3, fontWeight: 500,
+            fontSize: 'var(--fs-2xs)', padding: '2px 6px', borderRadius: 3, fontWeight: 'var(--fw-body)',
             background: 'rgba(255,255,255,0.92)', color: '#0C447C',
           }}>청약</span>
           {data.urgency_score >= 70 && (
             <span style={{
-              fontSize: 9, padding: '2px 5px', borderRadius: 3, fontWeight: 500,
-              background: '#E24B4A', color: 'white', letterSpacing: '0.3px',
+              fontSize: 'var(--fs-2xs)', padding: '2px 5px', borderRadius: 3, fontWeight: 'var(--fw-body)',
+              background: '#E24B4A', color: 'white', letterSpacing: 0,
             }}>HOT</span>
           )}
         </div>
@@ -57,12 +57,12 @@ export default function AptHeroCard({ data }: { data: HeroData }) {
           width: 24, height: 24, borderRadius: '50%',
           background: 'rgba(255,255,255,0.92)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 12, color: 'var(--text-tertiary)',
+          fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)',
         }}>♡</div>
         {data.dday !== null && data.dday !== undefined && (
           <div style={{
             position: 'absolute', bottom: 7, right: 7,
-            fontSize: 10, padding: '3px 7px', borderRadius: 4, fontWeight: 500,
+            fontSize: 'var(--fs-2xs)', padding: '3px 7px', borderRadius: 4, fontWeight: 'var(--fw-body)',
             background: data.is_urgent ? '#E24B4A' : 'rgba(0,0,0,0.65)',
             color: 'white',
           }}>
@@ -76,24 +76,24 @@ export default function AptHeroCard({ data }: { data: HeroData }) {
           marginBottom: 3, gap: 8,
         }}>
           <div style={{
-            fontSize: 13.5, fontWeight: 500, lineHeight: 1.25,
+            fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', lineHeight: 1.3,
             color: 'var(--text-primary)',
           }}>{data.title}</div>
           {data.region && (
             <div style={{
-              fontSize: 11, color: 'var(--text-secondary)', flexShrink: 0,
+              fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', flexShrink: 0,
             }}>{data.region}</div>
           )}
         </div>
         {data.meta_primary && (
           <div style={{
-            fontSize: 11.5, fontWeight: 500, color: 'var(--text-primary)',
+            fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-primary)',
             marginTop: 2,
           }}>
             {data.meta_primary}
             {data.meta_secondary && (
               <span style={{
-                color: 'var(--text-secondary)', fontWeight: 400, fontSize: 11,
+                color: 'var(--text-secondary)', fontWeight: 'var(--fw-quiet)', fontSize: 'var(--fs-xs)',
               }}> · {data.meta_secondary}</span>
             )}
           </div>

@@ -32,7 +32,11 @@
 5. **FB 매트릭스 5항 재판정.** `/feed` 는 `/apt` 로 영구 301(피드 표면 폐쇄)이라 «피드 목록 상단 글쓰기» 는 도달 불가 —
    원 의도 «작성 진입점 ≠ 0» 으로 잰다(`e2e/fab-openchat.spec.ts` 주석).
 6. **`/daily/busan` 은 404.** 지역 slug 는 한글이다 — dom-census 는 `/daily/부산`.
-7. **input·textarea·select** 의 인라인 크기는 `max(16px, var(--fs-*))` — 모바일 사다리(sm 15)가 iOS 16px 하한을 깨지 않게.
+7. **DS2 소관 제외.** 색·배지·tone·스테이지 칩은 §0 접촉 금지 — codemod 가 함수명(chip·badge·tone·stage)을 품은 스타일 헬퍼 몸통과
+   파일명이 badge·chip·tone 인 모듈(`subscription-badge.ts` 등)을 건너뛴다. 그 안의 크기·굵기는 DS2 트랙이 정리한다(게이트도 같은 판정).
+8. **자간은 치환 «후» 크기로 판정.** 인라인 13px(가드 렌더 15)는 `--fs-xs`(14)가 되므로 음수 자간은 0 — «12~13px 음수 금지» 와 일치.
+9. **CSS 모바일 블록은 모바일 사다리로 스냅.** `max-width<768` 안의 값을 데스크탑 기준으로 고르면 모바일 본문이 −2 떨어진다(blog.css p 15px).
+10. **input·textarea·select** 의 인라인 크기는 `max(16px, var(--fs-*))` — 모바일 사다리(sm 15)가 iOS 16px 하한을 깨지 않게.
 
 ## 되돌리기 한 줄 (Node 몫 ②)
 

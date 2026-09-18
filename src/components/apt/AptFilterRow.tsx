@@ -50,7 +50,7 @@ const ACTIVE: React.CSSProperties = {
   background: 'var(--brand)',
   borderColor: 'var(--brand)',
   color: 'var(--text-inverse)',
-  fontWeight: 500,
+  fontWeight: 'var(--fw-body)',
 };
 
 /** 건수는 칩 크기를 키우지 않게 작게, 위첨자처럼 붙인다. */
@@ -61,7 +61,7 @@ function Count({ n, active }: { n: number; active: boolean }) {
       aria-hidden
       style={{
         fontSize: 'var(--fs-xs)',
-        fontWeight: 500,
+        fontWeight: 'var(--fw-body)',
         opacity: active ? 1 : 0.75,   // ⚠️ 활성 0.85 는 흰글씨/--brand 합성 대비 4.19 로 하한 미달이었다(비활성 0.75 는 4.88 통과).
         //    건수의 종속감은 이미 fs-xs(칩 본문 fs-sm)가 낸다. 1 로 올려 5.17.
         color: active ? 'var(--text-inverse)' : 'var(--accent-red)',
@@ -183,7 +183,7 @@ export default function AptFilterRow({
       {/* 헤더 줄에 있던 링크. 줄을 하나 없애면서 칩 끝으로 옮겼다 — 라우트는 그대로. */}
       <Link
         href={currentRegion === '전국' ? '/apt/region' : `/apt/region?region=${encodeURIComponent(currentRegion)}`}
-        style={{ ...CHIP, color: 'var(--text-tertiary)', fontWeight: 500 }}
+        style={{ ...CHIP, color: 'var(--text-tertiary)', fontWeight: 'var(--fw-body)' }}
       >
         전체 17개 →
       </Link>

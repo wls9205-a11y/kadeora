@@ -113,7 +113,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
       {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>주민 리뷰</span>
+          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>주민 리뷰</span>
           {avgRating > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
               <StarRating rating={Math.round(avgRating)} size={12} />
@@ -125,7 +125,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
         <button aria-label="리뷰 작성" onClick={() => setShowForm(!showForm)} style={{
           display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', padding: '4px 10px',
           background: 'var(--brand)', color: 'var(--text-inverse)', border: 'none', borderRadius: 'var(--radius-xs)',
-          fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer',
+          fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', cursor: 'pointer',
         }}>
           <PenSquare size={12} /> 리뷰 쓰기
         </button>
@@ -164,7 +164,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
           {error && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-red)', marginBottom: 6 }}>{error}</div>}
           <button aria-label="리뷰 제출" onClick={handleSubmit} disabled={submitting} style={{
             width: '100%', padding: '8px', borderRadius: 'var(--radius-xs)', border: 'none', cursor: 'pointer',
-            background: 'var(--brand)', color: 'var(--text-inverse)', fontWeight: 600, fontSize: 'var(--fs-xs)',
+            background: 'var(--brand)', color: 'var(--text-inverse)', fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-xs)',
             opacity: submitting ? 0.5 : 1,
           }}>
             {submitting ? '등록 중...' : '리뷰 등록 (+10P)'}
@@ -187,11 +187,11 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
                 width: 28, height: 28, borderRadius: '50%',
                 background: getAvatarColor(r.profiles?.nickname || ''), display: 'flex',
                 alignItems: 'center', justifyContent: 'center',
-                color: 'var(--text-inverse)', fontSize: 'var(--fs-xs)', fontWeight: 600,
+                color: 'var(--text-inverse)', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
               }}>
                 {(r.profiles?.nickname || '?')[0]}
               </div>
-              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)' }}>{r.profiles?.nickname || '익명'}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{r.profiles?.nickname || '익명'}</span>
               <StarRating rating={r.rating} size={10} />
               {r.is_resident && (
                 <span style={{ fontSize: 'var(--fs-xs)', padding: '1px 4px', borderRadius: 4, background: 'var(--accent-green-bg)', color: 'var(--accent-green)' }}>거주중</span>
@@ -211,7 +211,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
                 display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)', padding: '3px 8px',
                 background: likedSet.has(r.id) ? 'var(--brand-bg)' : 'transparent',
                 border: `1px solid ${likedSet.has(r.id) ? 'var(--brand)' : 'var(--border)'}`,
-                borderRadius: 'var(--radius-xs)', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 600,
+                borderRadius: 'var(--radius-xs)', cursor: 'pointer', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
                 color: likedSet.has(r.id) ? 'var(--brand)' : 'var(--text-tertiary)',
                 transition: 'all 0.15s ease',
               }}>
@@ -235,7 +235,7 @@ export default function AptReviewSection({ aptName, region }: { aptName: string;
         <div style={{
           position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
           background: 'var(--bg-elevated)', color: 'var(--text-inverse)', padding: '10px 18px',
-          borderRadius: 'var(--radius-md)', fontSize: 'var(--fs-xs)', fontWeight: 600, zIndex: 100,
+          borderRadius: 'var(--radius-md)', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', zIndex: 100,
           boxShadow: '0 4px 20px rgba(0,0,0,0.3)', whiteSpace: 'nowrap',
           animation: 'fadeIn 0.2s ease-out',
         }}>{toast}</div>

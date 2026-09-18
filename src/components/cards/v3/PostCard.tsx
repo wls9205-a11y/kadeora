@@ -59,10 +59,10 @@ export default function PostCard({
                 style={{
                   fontFamily: 'var(--font-mono)',
                   fontSize: 'var(--fs-xs)',
-                  letterSpacing: '.12em',
+                  letterSpacing: '0.14em',
                   textTransform: 'uppercase',
                   color: 'var(--brand)',
-                  fontWeight: 600,
+                  fontWeight: 'var(--fw-title)',
                 }}
               >
                 {eyebrow}
@@ -77,8 +77,8 @@ export default function PostCard({
                   color: BADGE_TONE[badge.tone].fg,
                   border: `1px solid ${BADGE_TONE[badge.tone].border}`,
                   fontSize: 'var(--fs-xs)',
-                  fontWeight: 500,
-                  lineHeight: 1.4,
+                  fontWeight: 'var(--fw-body)',
+                  lineHeight: 1.3,
                   whiteSpace: 'nowrap',
                 }}
               >
@@ -92,9 +92,9 @@ export default function PostCard({
           style={{
             margin: 0,
             fontSize: 'var(--fs-md)',
-            fontWeight: 600,
-            lineHeight: 1.4,
-            letterSpacing: '-.015em',
+            fontWeight: 'var(--fw-title)',
+            lineHeight: 1.3,
+            letterSpacing: '-0.2px',
             color: 'var(--text-primary)',
             wordBreak: 'keep-all',
             display: '-webkit-box',

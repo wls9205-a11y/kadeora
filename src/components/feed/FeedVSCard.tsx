@@ -77,22 +77,22 @@ export default function FeedVSCard({ post }: { post: PostWithProfile }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--sp-sm)' }}>
         <div style={{
           width: 30, height: 30, borderRadius: '50%', background: 'rgba(245,158,11,0.15)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)',
         }}>{GRADE_EMOJI[grade] ?? '🌱'}</div>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600 }}>{nickname}</span>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-primary)', fontWeight: 'var(--fw-title)' }}>{nickname}</span>
             <span style={{
-              padding: '1px 5px', borderRadius: 4, fontSize: 9, fontWeight: 500,
+              padding: '1px 5px', borderRadius: 4, fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)',
               background: 'rgba(245,158,11,0.1)', color: 'var(--warning)',
             }}>⚔️ VS</span>
           </div>
-          <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
+          <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{timeAgo(post.created_at)}</span>
         </div>
-        <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>👀{post.view_count}</span>
+        <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>👀{post.view_count}</span>
       </div>
 
-      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)', textAlign: 'center', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', textAlign: 'center', marginBottom: 'var(--sp-sm)' }}>
         {post.title}
       </div>
 
@@ -107,12 +107,12 @@ export default function FeedVSCard({ post }: { post: PostWithProfile }) {
             border: voted === o.side ? `2px solid ${o.color}` : '1px solid var(--border)',
             cursor: voted ? 'default' : 'pointer', transition: 'all 0.25s',
           }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{o.label}</div>
-            {voted && <div style={{ fontSize: 18, fontWeight: 700, color: o.color, marginTop: 4 }}>{o.pct}%</div>}
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{o.label}</div>
+            {voted && <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', color: o.color, marginTop: 4 }}>{o.pct}%</div>}
           </button>
         ))}
       </div>
-      <div style={{ textAlign: 'center', fontSize: 10, color: 'var(--text-tertiary)', marginTop: 8 }}>
+      <div style={{ textAlign: 'center', fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>
         {total.toLocaleString()}명 참여 · +5P
       </div>
     </div>

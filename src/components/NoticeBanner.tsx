@@ -198,10 +198,10 @@ export default function NoticeBanner() {
             whiteSpace: 'nowrap',
             animation: `kd-marquee-v2 ${style.speed}s linear infinite`,
             paddingLeft: '100%',
-            fontSize: 13,
-            fontWeight: 600,
+            fontSize: 'var(--fs-xs)',
+            fontWeight: 'var(--fw-title)',
             color: textColor,
-            letterSpacing: '0.03em',
+            letterSpacing: 0,
             textShadow: style.glow,
           }}
         >
@@ -237,12 +237,12 @@ export default function NoticeBanner() {
             {/* 헤더 */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-lg)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
-                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>
+                <span style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>
                   {style.icon} {notice.is_paid ? '전광판 광고' : '공지사항'}
                 </span>
                 {notice.is_paid && (
                   <span style={{
-                    fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-md)', fontWeight: 500,
+                    fontSize: 'var(--fs-xs)', padding: '3px 8px', borderRadius: 'var(--radius-md)', fontWeight: 'var(--fw-body)',
                     background: tier === 'urgent' ? 'rgba(248,113,113,0.12)' : tier === 'premium' ? 'rgba(251,191,36,0.12)' : 'rgba(52,211,153,0.12)',
                     color: tier === 'urgent' ? 'var(--accent-red)' : tier === 'premium' ? 'var(--accent-yellow)' : 'var(--accent-green)',
                   }}>
@@ -258,21 +258,21 @@ export default function NoticeBanner() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-md)', padding: '12px 16px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-card)', marginBottom: 'var(--sp-lg)' }}>
                 <Avatar src={notice.author.avatar_url} nickname={notice.author.nickname} size={40} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)' }}>{notice.author.nickname ?? '사용자'}</div>
+                  <div style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{notice.author.nickname ?? '사용자'}</div>
                   {notice.author.grade_title && <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginTop: 2 }}>{notice.author.grade_title}</div>}
                 </div>
-                <a href={`/profile/${notice.author.id}`} style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 600, padding: '6px 12px', border: '1px solid var(--brand)', borderRadius: 'var(--radius-sm)', flexShrink: 0 }}>프로필</a>
+                <a href={`/profile/${notice.author.id}`} style={{ fontSize: 'var(--fs-sm)', color: 'var(--brand)', textDecoration: 'none', fontWeight: 'var(--fw-title)', padding: '6px 12px', border: '1px solid var(--brand)', borderRadius: 'var(--radius-sm)', flexShrink: 0 }}>프로필</a>
               </div>
             )}
 
             {/* 내용 */}
-            <div style={{ fontSize: 'var(--fs-base)', lineHeight: 1.7, color: 'var(--text-primary)', whiteSpace: 'pre-line', marginBottom: 'var(--sp-lg)', padding: '16px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-card)', borderLeft: `3px solid ${textColor}` }}>
+            <div style={{ fontSize: 'var(--fs-base)', lineHeight: 1.6, color: 'var(--text-primary)', whiteSpace: 'pre-line', marginBottom: 'var(--sp-lg)', padding: '16px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-card)', borderLeft: `3px solid ${textColor}` }}>
               {notice.content}
             </div>
 
             {/* 게시글 링크 */}
             {notice.linked_post_id && (
-              <a href={`/feed/${notice.linked_post_id}`} style={{ display: 'block', padding: '12px 16px', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', textDecoration: 'none', marginBottom: 'var(--sp-lg)', fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 600 }}>
+              <a href={`/feed/${notice.linked_post_id}`} style={{ display: 'block', padding: '12px 16px', background: 'var(--bg-hover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', textDecoration: 'none', marginBottom: 'var(--sp-lg)', fontSize: 'var(--fs-sm)', color: 'var(--brand)', fontWeight: 'var(--fw-title)' }}>
                 📄 관련 게시글 보기 →
               </a>
             )}
@@ -281,22 +281,22 @@ export default function NoticeBanner() {
             {notice.is_paid && (
               <div style={{ display: 'flex', gap: 'var(--sp-sm)', marginBottom: 'var(--sp-lg)' }}>
                 <div style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)' }}>
-                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{notice.impression_count || 0}</div>
+                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)' }}>{notice.impression_count || 0}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>노출</div>
                 </div>
                 <div style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)' }}>
-                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>{notice.click_count || 0}</div>
+                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)' }}>{notice.click_count || 0}</div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>클릭</div>
                 </div>
                 <div style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)' }}>
-                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, color: 'var(--brand)' }}>
+                  <div style={{ fontSize: 'var(--fs-lg)', fontWeight: 'var(--fw-num)', color: 'var(--brand)' }}>
                     {notice.impression_count ? ((notice.click_count / notice.impression_count) * 100).toFixed(1) : '0.0'}%
                   </div>
                   <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>클릭률</div>
                 </div>
                 {getTimeRemaining() && (
                   <div style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)' }}>
-                    <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'var(--warning)' }}>{getTimeRemaining()}</div>
+                    <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: 'var(--warning)' }}>{getTimeRemaining()}</div>
                     <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>잔여</div>
                   </div>
                 )}
@@ -310,7 +310,7 @@ export default function NoticeBanner() {
               </div>
             )}
 
-            <button aria-label="닫기" onClick={() => setShowSheet(false)} style={{ width: '100%', padding: '12px 0', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-base)', fontWeight: 600, cursor: 'pointer' }}>닫기</button>
+            <button aria-label="닫기" onClick={() => setShowSheet(false)} style={{ width: '100%', padding: '12px 0', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', cursor: 'pointer' }}>닫기</button>
           </div>
         </>
       )}

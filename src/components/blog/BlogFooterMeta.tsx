@@ -49,15 +49,15 @@ export default function BlogFooterMeta({ tags, category, createdAt, updatedAt, r
               href={`/blog?tag=${encodeURIComponent(t)}`}
               role="listitem"
               style={{
-                fontSize: 11,
+                fontSize: 'var(--fs-xs)',
                 padding: '4px 10px',
                 borderRadius: 999,
                 background: 'var(--blog-tag-bg, rgba(59,123,246,0.08))',
                 color: 'var(--blog-tag-color, var(--brand))',
                 border: '1px solid var(--blog-info-box-border, rgba(59,123,246,0.15))',
                 textDecoration: 'none',
-                fontWeight: 600,
-                letterSpacing: '-0.2px',
+                fontWeight: 'var(--fw-title)',
+                letterSpacing: 0,
               }}
             >
               #{t}
@@ -72,7 +72,7 @@ export default function BlogFooterMeta({ tags, category, createdAt, updatedAt, r
             display: 'flex',
             flexWrap: 'wrap',
             gap: 12,
-            fontSize: 11,
+            fontSize: 'var(--fs-xs)',
             color: 'var(--text-tertiary)',
             fontVariantNumeric: 'tabular-nums',
           }}

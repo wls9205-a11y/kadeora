@@ -123,14 +123,14 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>댓글</span>
-          {comments.length > 0 && <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{comments.length}</span>}
+          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>댓글</span>
+          {comments.length > 0 && <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{comments.length}</span>}
         </div>
         {comments.length > 1 && (
           <div style={{ display: 'flex', gap: 2, background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', padding: 2 }}>
             {(['latest', 'popular'] as const).map(s => (
               <button key={s} onClick={() => setSort(s)} style={{
-                padding: '4px 10px', borderRadius: 'var(--radius-sm)', border: 'none', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                padding: '4px 10px', borderRadius: 'var(--radius-sm)', border: 'none', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', cursor: 'pointer',
                 color: sort === s ? '#fff' : 'var(--text-tertiary)',
                 background: sort === s ? 'var(--brand)' : 'transparent',
               }}>{s === 'latest' ? '최신순' : '인기순'}</button>
@@ -142,14 +142,14 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
       {/* 댓글 입력 — 채팅 스타일 */}
       <div style={{ marginBottom: 'var(--sp-xl)' }}>
         {replyTo && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, padding: '4px 10px', background: 'rgba(37,99,235,0.06)', borderRadius: 'var(--radius-sm)', fontSize: 12, color: 'var(--brand)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, padding: '4px 10px', background: 'rgba(37,99,235,0.06)', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-xs)', color: 'var(--brand)' }}>
             ↩ <strong>{replyTo.nickname}</strong>에게 답글
-            <button onClick={() => setReplyTo(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 14, padding: 0 }} aria-label="답글 취소">✕</button>
+            <button onClick={() => setReplyTo(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 'var(--fs-sm)', padding: 0 }} aria-label="답글 취소">✕</button>
           </div>
         )}
         {userId ? (
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-inverse)', flexShrink: 0, marginTop: 'var(--sp-xs)' }}>나</div>
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-inverse)', flexShrink: 0, marginTop: 'var(--sp-xs)' }}>나</div>
             <div style={{ flex: 1 }}>
               <textarea
                 value={content}
@@ -160,7 +160,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                 style={{
                   width: '100%', background: 'var(--bg-hover)', border: '1px solid var(--border)',
                   borderRadius: 'var(--radius-lg)', color: 'var(--text-primary)', padding: 'var(--sp-md) var(--card-p)',
-                  fontSize: 16, resize: 'none', lineHeight: 1.5, boxSizing: 'border-box',
+                  fontSize: 'max(16px, var(--fs-sm))', resize: 'none', lineHeight: 1.5, boxSizing: 'border-box',
                   transition: 'border-color var(--transition-fast)',
                 }}
                 onFocus={e => e.currentTarget.style.borderColor = 'var(--brand)'}
@@ -171,7 +171,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <input ref={imgInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={handleImageUpload} />
                   <button onClick={() => imgInputRef.current?.click()} disabled={uploadingImage || !!commentImage} type="button" aria-label="사진 첨부"
-                    style={{ display: 'flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', color: commentImage ? 'var(--brand)' : 'var(--text-tertiary)', padding: 0, fontSize: 14 }}>
+                    style={{ display: 'flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', color: commentImage ? 'var(--brand)' : 'var(--text-tertiary)', padding: 0, fontSize: 'var(--fs-sm)' }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
                   </button>
                   <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>{content.length}/500</span>
@@ -180,7 +180,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                   padding: '6px 18px', borderRadius: 'var(--radius-xl)', border: 'none',
                   background: (content.trim() || commentImage) ? 'var(--brand)' : 'var(--bg-hover)',
                   color: (content.trim() || commentImage) ? 'white' : 'var(--text-tertiary)',
-                  cursor: (content.trim() || commentImage) ? 'pointer' : 'default', fontSize: 'var(--fs-xs)', fontWeight: 600,
+                  cursor: (content.trim() || commentImage) ? 'pointer' : 'default', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
                   transition: 'all var(--transition-fast)',
                 }}>{uploadingImage ? '...' : '등록'}</button>
               </div>
@@ -189,14 +189,14 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                 <div style={{ marginTop: 6, display: 'inline-flex', position: 'relative' }}>
                   <img src={commentImage} alt="첨부" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }} />
                   <button onClick={() => setCommentImage(null)} aria-label="이미지 제거"
-                    style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 10, color: 'var(--text-tertiary)', padding: 0 }}>✕</button>
+                    style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', padding: 0 }}>✕</button>
                 </div>
               )}
             </div>
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: '16px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
-            💬 <a href={`/login?redirect=${encodeURIComponent(pathname)}&source=comment`} style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 500 }}>로그인</a>하고 대화에 참여하세요
+            💬 <a href={`/login?redirect=${encodeURIComponent(pathname)}&source=comment`} style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 'var(--fw-body)' }}>로그인</a>하고 대화에 참여하세요
           </div>
         )}
       </div>
@@ -204,7 +204,7 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
       {/* 댓글 목록 — D안 컴팩트 리스트 */}
       <div>
         {comments.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-tertiary)', fontSize: 14 }}>
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)' }}>
             아직 댓글이 없어요. 첫 의견을 남겨보세요!
           </div>
         ) : (() => {
@@ -232,40 +232,40 @@ export function CommentSection({ postId, initialComments = [] }: CommentSectionP
                     {comment.profiles?.avatar_url ? (
                       <img src={comment.profiles.avatar_url} alt={nick} style={{ width: avSize, height: avSize, borderRadius: '50%', objectFit: 'cover' }} />
                     ) : (
-                      <div style={{ width: avSize, height: avSize, borderRadius: '50%', background: getAvatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isReply ? 10 : 12, fontWeight: 500, color: '#fff' }}>
+                      <div style={{ width: avSize, height: avSize, borderRadius: '50%', background: getAvatarColor(nick), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isReply ? 'var(--fs-2xs)' : 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: '#fff' }}>
                         {nick[0].toUpperCase()}
                       </div>
                     )}
                   </Link>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{nick}</span>
+                    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{nick}</span>
                     {grade !== null && grade >= 2 && (
-                      <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 5px', borderRadius: 4, marginLeft: 6, background: `${gradeColor(grade)}14`, color: gradeColor(grade) }}>
+                      <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', padding: '1px 5px', borderRadius: 4, marginLeft: 6, background: `${gradeColor(grade)}14`, color: gradeColor(grade) }}>
                         {gradeTitle(grade)}
                       </span>
                     )}
-                    <span style={{ fontSize: 12, color: 'var(--text-tertiary)', marginLeft: 6 }}>{timeAgo(comment.created_at)}</span>
-                    <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6, marginTop: 3, wordBreak: 'break-word' as const }}>{comment.content}</div>
+                    <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginLeft: 6 }}>{timeAgo(comment.created_at)}</span>
+                    <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-primary)', lineHeight: 1.6, marginTop: 3, wordBreak: 'break-word' as const }}>{comment.content}</div>
                     {(comment as any).image_url && (
                       <a href={(comment as any).image_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: 4 }}>
                         <img src={(comment as any).image_url} alt="댓글 이미지" style={{ maxWidth: 180, maxHeight: 120, borderRadius: 'var(--radius-md)', objectFit: 'cover', border: '1px solid var(--border)' }} />
                       </a>
                     )}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 6, fontSize: 12, color: 'var(--text-tertiary)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 6, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                       <button onClick={() => handleCommentLike(comment.id, likes)} disabled={likingIds.has(comment.id)} aria-label="좋아요"
-                        style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 12, padding: 0, opacity: likingIds.has(comment.id) ? 0.5 : 1 }}>
+                        style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: 0, opacity: likingIds.has(comment.id) ? 0.5 : 1 }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
                         {likes > 0 && likes}
                       </button>
                       {!isReply && userId && (
                         <button onClick={() => setReplyTo({ id: comment.id, nickname: nick })}
-                          style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 12, padding: 0 }}>
+                          style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', padding: 0 }}>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                           {replies.length > 0 && replies.length}
                         </button>
                       )}
                       {userId === comment.author_id && (
-                        <button onClick={() => setDeleteTarget(comment.id)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 12, cursor: 'pointer', padding: 0 }}>삭제</button>
+                        <button onClick={() => setDeleteTarget(comment.id)} style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)', cursor: 'pointer', padding: 0 }}>삭제</button>
                       )}
                       <ReportButton commentId={comment.id} />
                     </div>

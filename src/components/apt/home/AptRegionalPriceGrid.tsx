@@ -67,8 +67,8 @@ export default function AptRegionalPriceGrid({ region, sigunguTrends }: Props) {
     >
       <h2
         style={{
-          fontSize: 14,
-          fontWeight: 600,
+          fontSize: 'var(--fs-sm)',
+          fontWeight: 'var(--fw-title)',
           color: 'var(--text-primary)',
           margin: '0 0 8px',
           padding: '0 4px',
@@ -105,8 +105,8 @@ export default function AptRegionalPriceGrid({ region, sigunguTrends }: Props) {
             >
               <span
                 style={{
-                  fontSize: 12,
-                  fontWeight: 500,
+                  fontSize: 'var(--fs-xs)',
+                  fontWeight: 'var(--fw-body)',
                   color: 'var(--text-tertiary)',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -117,16 +117,16 @@ export default function AptRegionalPriceGrid({ region, sigunguTrends }: Props) {
               </span>
               <span
                 style={{
-                  fontSize: 18,
-                  fontWeight: 700,
+                  fontSize: 'var(--fs-base)',
+                  fontWeight: 'var(--fw-num)',
                   color: 'var(--text-primary)',
-                  letterSpacing: -0.5,
+                  letterSpacing: '-0.2px',
                 }}
               >
                 {fmtPrice(r.avg_price)}
               </span>
               {ch && (
-                <span style={{ fontSize: 11, fontWeight: 600, color: ch.color }}>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: ch.color }}>
                   {ch.label}
                 </span>
               )}

@@ -99,28 +99,28 @@ export default async function AptPriceTrendCard({ region, sigungu, aptName, pric
       style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '14px 16px', margin: '0 0 12px' }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: 0.5 }}>인근 시세 트렌드</span>
-        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--kd-accent)', padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)', letterSpacing: 0.5 }}>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', letterSpacing: 0 }}>인근 시세 트렌드</span>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--kd-accent)', padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)', letterSpacing: 0 }}>
           KADEORA
         </span>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 'var(--sp-md)', alignItems: 'flex-end' }}>
         <div>
-          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 500, letterSpacing: 0.5 }}>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-body)', letterSpacing: 0 }}>
             {sigungu} 평당 평균
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--sp-sm)', flexWrap: 'wrap', marginTop: 2 }}>
-            <span style={{ fontSize: 'var(--fs-2xl)', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: -0.5, lineHeight: 1.1 }}>
+            <span style={{ fontSize: 'var(--fs-2xl)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', letterSpacing: '-0.4px', lineHeight: 1 }}>
               {fmtMan(recentPyeong)}
             </span>
             {changePct != null && (
-              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: changePct >= 0 ? 'var(--kd-danger)' : 'var(--kd-success)' }}>
+              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: changePct >= 0 ? 'var(--kd-danger)' : 'var(--kd-success)' }}>
                 {changePct > 0 ? '↑' : changePct < 0 ? '↓' : '→'} {Math.abs(changePct).toFixed(1)}%
               </span>
             )}
           </div>
-          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 600, marginTop: 2 }}>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)', marginTop: 2 }}>
             최근 1년 거래 {totalDealsYear.toLocaleString()}건
           </div>
         </div>
@@ -135,9 +135,9 @@ export default async function AptPriceTrendCard({ region, sigungu, aptName, pric
       </div>
 
       {estPyeongPrice && premiumX != null && (
-        <div style={{ marginTop: 10, padding: '8px 10px', background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', fontWeight: 600 }}>
-          분양 추정 평당 <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{fmtMan(estPyeongPrice)}</span> ({aptName || '단지'}) → 시군구 평균의{' '}
-          <span style={{ color: 'var(--kd-accent)', fontWeight: 700 }}>{premiumX.toFixed(1)}배</span>
+        <div style={{ marginTop: 10, padding: '8px 10px', background: 'var(--kd-accent-soft)', border: '1px solid var(--kd-accent-border)', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', fontWeight: 'var(--fw-title)' }}>
+          분양 추정 평당 <span style={{ color: 'var(--text-primary)', fontWeight: 'var(--fw-num)' }}>{fmtMan(estPyeongPrice)}</span> ({aptName || '단지'}) → 시군구 평균의{' '}
+          <span style={{ color: 'var(--kd-accent)', fontWeight: 'var(--fw-num)' }}>{premiumX.toFixed(1)}배</span>
         </div>
       )}
     </section>

@@ -66,12 +66,12 @@ export default function BlogCurationCard({
 
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: '11px 13px 12px' }}>
         {/* ⚠️ 네이비 위에서는 카테고리색이 대부분 대비 미달이다. 골드로 통일한다(8.54). */}
-        <span style={{ fontSize: 10, fontWeight: 500, color: navy ? 'var(--brand-gold)' : catColor, marginBottom: 4 }}>{catLabel}</span>
+        <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-body)', color: navy ? 'var(--brand-gold)' : catColor, marginBottom: 4 }}>{catLabel}</span>
 
         <Link
           href={`/blog/${post.slug}`}
           style={{
-            fontSize: 14, fontWeight: 600, lineHeight: 1.4, letterSpacing: '-.02em',
+            fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', lineHeight: 1.3, letterSpacing: '-0.2px',
             color: navy ? 'var(--text-inverse)' : 'var(--text-primary)', textDecoration: 'none', wordBreak: 'keep-all',
             marginBottom: 5,
           }}
@@ -82,7 +82,7 @@ export default function BlogCurationCard({
         {post.excerpt && (
           <p
             style={{
-              margin: 0, fontSize: 11.5, lineHeight: 1.55,
+              margin: 0, fontSize: 'var(--fs-2xs)', lineHeight: 1.5,
               color: navy ? 'rgba(255,255,255,0.78)' : 'var(--text-secondary)',
               display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
               overflow: 'hidden', wordBreak: 'keep-all',

@@ -82,21 +82,21 @@ export default function PortfolioTab() {
       }}>
         <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--sp-xs)' }}>총 평가 손익</div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--sp-sm)' }}>
-          <span style={{ fontSize: 'var(--fs-2xl)', fontWeight: 900, color: pnlColor }}>
+          <span style={{ fontSize: 'var(--fs-2xl)', fontWeight: 'var(--fw-num)', color: pnlColor }}>
             {summary.totalPnl >= 0 ? '+' : ''}{summary.totalPnl.toLocaleString('ko-KR')}원
           </span>
-          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: pnlColor }}>
+          <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: pnlColor }}>
             ({summary.pnlPct >= 0 ? '+' : ''}{summary.pnlPct.toFixed(2)}%)
           </span>
         </div>
         <div style={{ display: 'flex', gap: 'var(--sp-lg)', marginTop: 10 }}>
           <div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>투자금액</div>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{summary.totalInvested.toLocaleString('ko-KR')}원</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{summary.totalInvested.toLocaleString('ko-KR')}원</div>
           </div>
           <div>
             <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>평가금액</div>
-            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{summary.totalCurrent.toLocaleString('ko-KR')}원</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{summary.totalCurrent.toLocaleString('ko-KR')}원</div>
           </div>
         </div>
       </div>
@@ -124,8 +124,8 @@ export default function PortfolioTab() {
             borderRadius: 'var(--radius-card)', padding: 'var(--sp-md) var(--card-p)', marginBottom: 'var(--sp-md)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-sm)' }}>
-              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-tertiary)' }}>📈 30일 수익률 추이</span>
-              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color }}>{isUp ? '+' : ''}{lastPct.toFixed(2)}%</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)' }}>📈 30일 수익률 추이</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color }}>{isUp ? '+' : ''}{lastPct.toFixed(2)}%</span>
             </div>
             <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: 'block' }}>
               <defs>
@@ -159,7 +159,7 @@ export default function PortfolioTab() {
         display: 'flex', alignItems: 'center', gap: 6, width: '100%', padding: 'var(--sp-md) var(--card-p)',
         background: showAdd ? 'var(--bg-hover)' : 'var(--bg-surface)',
         border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)', cursor: 'pointer',
-        color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 600, marginBottom: 'var(--sp-md)',
+        color: 'var(--brand)', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', marginBottom: 'var(--sp-md)',
       }}>
         <Plus size={16} /> 종목 추가
       </button>
@@ -186,7 +186,7 @@ export default function PortfolioTab() {
           </div>
           <button onClick={handleAdd} disabled={submitting} style={{
             width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer',
-            background: 'var(--brand)', color: 'var(--text-inverse)', fontWeight: 700, fontSize: 'var(--fs-sm)',
+            background: 'var(--brand)', color: 'var(--text-inverse)', fontWeight: 'var(--fw-num)', fontSize: 'var(--fs-sm)',
             opacity: submitting ? 0.5 : 1,
           }}>
             {submitting ? '추가 중...' : '추가하기'}
@@ -214,13 +214,13 @@ export default function PortfolioTab() {
                 {isProfit ? <TrendingUp size={18} color={color} /> : <TrendingDown size={18} color={color} />}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{h.name || h.symbol}</div>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{h.name || h.symbol}</div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                   {h.quantity}주 · 평단 {fmt(h.buy_price, h.currency)}
                 </div>
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color }}>
+                <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color }}>
                   {isProfit ? '+' : ''}{h.pnl_pct?.toFixed(2)}%
                 </div>
                 <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>

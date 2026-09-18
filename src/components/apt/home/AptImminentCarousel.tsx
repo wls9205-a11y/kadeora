@@ -22,15 +22,15 @@ export default function AptImminentCarousel({ sites }: Props) {
     >
       <h2
         style={{
-          fontSize: 14,
-          fontWeight: 600,
+          fontSize: 'var(--fs-sm)',
+          fontWeight: 'var(--fw-title)',
           color: 'var(--text-primary)',
           margin: '0 0 8px',
           padding: '0 4px',
         }}
       >
         ⏰ 청약 임박 D-7
-        <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', marginLeft: 6 }}>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)', marginLeft: 6 }}>
           · {sites.length}곳
         </span>
       </h2>
@@ -91,8 +91,8 @@ export default function AptImminentCarousel({ sites }: Props) {
                       left: 6,
                       padding: '3px 8px',
                       borderRadius: 999,
-                      fontSize: 10,
-                      fontWeight: 500,
+                      fontSize: 'var(--fs-2xs)',
+                      fontWeight: 'var(--fw-body)',
                       background: ddayBg(dday),
                       color: '#fff',
                     }}
@@ -104,8 +104,8 @@ export default function AptImminentCarousel({ sites }: Props) {
               <div style={{ padding: '8px 9px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <span
                   style={{
-                    fontSize: 12,
-                    fontWeight: 600,
+                    fontSize: 'var(--fs-xs)',
+                    fontWeight: 'var(--fw-title)',
                     color: 'var(--text-primary)',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -117,7 +117,7 @@ export default function AptImminentCarousel({ sites }: Props) {
                 {sub && (
                   <span
                     style={{
-                      fontSize: 10,
+                      fontSize: 'var(--fs-2xs)',
                       color: 'var(--text-tertiary)',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',

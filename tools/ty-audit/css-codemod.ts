@@ -14,7 +14,8 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROOT, FS_STEPS, snapFs, FW_TOKEN, snapLh, tyLetterSpacing } from './shared';
 
-const SKIP_SEL = /\[style\*=|\.text-\\\[|html\.font-(large|small)|\binput\b|\bselect\b|\btextarea\b|\.kd-input/;
+// chip·badge·tone·stage 선택자는 DS2 소관(§0 접촉 금지).
+const SKIP_SEL = /chip|badge|tone|stage|\[style\*=|\.text-\\\[|html\.font-(large|small)|\binput\b|\bselect\b|\btextarea\b|\.kd-input/;
 const desk = (t: string) => FS_STEPS.find((s) => s.token === t)?.desktop ?? null;
 
 /** 모바일 전용 미디어 블록(max-width ≤ 767.98) 안인가 — 그 안의 값은 «모바일 사다리» 로 스냅해야 한다.

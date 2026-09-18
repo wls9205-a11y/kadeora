@@ -7,8 +7,8 @@ import { useAuth } from '@/components/AuthProvider';
 import { SITE_URL } from '@/lib/constants';
 
 const card: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 14 };
-const label: React.CSSProperties = { fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 };
-const hint: React.CSSProperties = { fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 };
+const label: React.CSSProperties = { fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', color: 'var(--text-secondary)', display: 'block', marginBottom: 6 };
+const hint: React.CSSProperties = { fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 2 };
 
 function InputField({ input, value, onChange, values }: { input: CalcInput; value: number | string; onChange: (v: number | string) => void; values: Record<string, number | string> }) {
   // 조건부 표시
@@ -25,8 +25,8 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input type="text" inputMode="numeric" value={Number(value).toLocaleString('ko-KR')}
               onChange={e => onChange(Number(e.target.value.replace(/[^0-9-]/g, '')) || 0)}
-              style={{ flex: 1, padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600 }} />
-            <span style={{ fontSize: 12, color: 'var(--text-tertiary)', flexShrink: 0 }}>{input.unit || '원'}</span>
+              style={{ flex: 1, padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 'max(16px, var(--fs-sm))', fontWeight: 'var(--fw-title)' }} />
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', flexShrink: 0 }}>{input.unit || '원'}</span>
           </div>
           {input.hint && <div style={hint}>{input.hint}</div>}
         </div>
@@ -38,7 +38,7 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
           <label style={label}>{input.label}</label>
           <input type="number" inputMode="decimal" value={value} min={input.min} max={input.max} step={input.step || 1}
             onChange={e => onChange(Number(e.target.value))}
-            style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600 }} />
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 'max(16px, var(--fs-sm))', fontWeight: 'var(--fw-title)' }} />
           {input.hint && <div style={hint}>{input.hint}</div>}
         </div>
       );
@@ -50,7 +50,7 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
             <input type="range" min={input.min || 0} max={input.max || 100} step={input.step || 1} value={value}
               onChange={e => onChange(Number(e.target.value))}
               style={{ flex: 1, accentColor: 'var(--brand)' }} />
-            <span style={{ fontSize: 16, fontWeight: 700, minWidth: 50, textAlign: 'right', color: 'var(--text-primary)' }}>{value}{input.unit || ''}</span>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', minWidth: 50, textAlign: 'right', color: 'var(--text-primary)' }}>{value}{input.unit || ''}</span>
           </div>
         </div>
       );
@@ -61,7 +61,7 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
           <div style={{ display: 'flex', gap: 6 }}>
             {input.options?.map(opt => (
               <button key={String(opt.value)} onClick={() => onChange(opt.value)}
-                style={{ flex: 1, padding: '9px 0', borderRadius: 'var(--radius-md)', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13,
+                style={{ flex: 1, padding: '9px 0', borderRadius: 'var(--radius-md)', border: 'none', cursor: 'pointer', fontWeight: 'var(--fw-title)', fontSize: 'var(--fs-xs)',
                   background: value === opt.value ? 'var(--brand)' : 'var(--bg-hover)',
                   color: value === opt.value ? 'var(--text-inverse)' : 'var(--text-secondary)' }}>
                 {opt.label}
@@ -75,7 +75,7 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
         <div style={{ marginBottom: 16 }}>
           <label style={label}>{input.label}</label>
           <select value={String(value)} onChange={e => onChange(e.target.value)}
-            style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 14 }}>
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 'max(16px, var(--fs-sm))' }}>
             {input.options?.map(opt => <option key={String(opt.value)} value={String(opt.value)}>{opt.label}</option>)}
           </select>
         </div>
@@ -87,11 +87,11 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <button onClick={() => onChange(Math.max(input.min || 0, Number(value) - 1))}
               className="touch-target"
-              style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 18 }}>−</button>
-            <span style={{ fontSize: 18, fontWeight: 700, minWidth: 30, textAlign: 'center' }}>{value}</span>
+              style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 'var(--fs-base)' }}>−</button>
+            <span style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-num)', minWidth: 30, textAlign: 'center' }}>{value}</span>
             <button onClick={() => onChange(Math.min(input.max || 99, Number(value) + 1))}
               className="touch-target"
-              style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 18 }}>+</button>
+              style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 'var(--fs-base)' }}>+</button>
           </div>
         </div>
       );
@@ -100,7 +100,7 @@ function InputField({ input, value, onChange, values }: { input: CalcInput; valu
         <div style={{ marginBottom: 16 }}>
           <label style={label}>{input.label}</label>
           <input type="date" value={String(value)} onChange={e => onChange(e.target.value)}
-            style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 14 }} />
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-primary)', fontSize: 'max(16px, var(--fs-sm))' }} />
         </div>
       );
     default:
@@ -144,17 +144,17 @@ export default function CalcEngine({ calc, liveData }: { calc: CalcMeta; liveDat
       {/* 결과 영역 */}
       {result && (
         <div style={{ ...card, textAlign: 'center', padding: 24 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 4 }}>{result.main.label}</div>
-          <div style={{ fontSize: 32, fontWeight: 700, color: result.main.color || 'var(--brand)', lineHeight: 1.2, wordBreak: 'break-all' }}>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginBottom: 4 }}>{result.main.label}</div>
+          <div style={{ fontSize: 'var(--fs-2xl)', fontWeight: 'var(--fw-num)', color: result.main.color || 'var(--brand)', lineHeight: 1.3, wordBreak: 'break-all' }}>
             {result.main.value}
           </div>
 
           {result.details.length > 0 && (
             <div style={{ marginTop: 16, textAlign: 'left' }}>
               {result.details.map((d, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: i < result.details.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 13 }}>
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: i < result.details.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 'var(--fs-xs)' }}>
                   <span style={{ color: 'var(--text-secondary)' }}>{d.label}</span>
-                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{d.value}</span>
+                  <span style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{d.value}</span>
                 </div>
               ))}
             </div>
@@ -190,13 +190,13 @@ export default function CalcEngine({ calc, liveData }: { calc: CalcMeta; liveDat
                 if (navigator.share) navigator.share({ title: calc.titleShort, text, url }).catch(() => {});
                 else navigator.clipboard.writeText(text + '\n' + url).then(() => alert('복사되었습니다!'));
               }
-            }} style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', border: 'none', cursor: 'pointer', background: 'var(--brand)', color: '#fff', fontSize: 12, fontWeight: 500 }}>
+            }} style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', border: 'none', cursor: 'pointer', background: 'var(--brand)', color: '#fff', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)' }}>
               🔗 결과 URL 공유
             </button>
             <button onClick={() => {
               const text = `${result.main.label}: ${result.main.value}`;
               navigator.clipboard.writeText(text).then(() => alert('복사되었습니다!'));
-            }} style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', cursor: 'pointer', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 12, fontWeight: 600 }}>
+            }} style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', cursor: 'pointer', background: 'var(--bg-hover)', color: 'var(--text-secondary)', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)' }}>
               결과 복사
             </button>
           </div>
@@ -212,16 +212,16 @@ export default function CalcEngine({ calc, liveData }: { calc: CalcMeta; liveDat
         }}>
           <div style={{ fontSize: 28, flexShrink: 0 }}>📊</div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 3 }}>
+            <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 3 }}>
               계산 결과를 저장하고 비교해보세요
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
               회원가입하면 계산 이력 관리, 맞춤 계산기 추천, 부동산·주식 실시간 정보를 받을 수 있어요.
             </div>
           </div>
           <Link href={`/login?redirect=/calc/${calc.category}/${calc.slug}&source=calc_engine`} style={{
             padding: '8px 16px', borderRadius: 'var(--radius-md)', background: 'var(--brand)', color: '#fff',
-            fontSize: 12, fontWeight: 500, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
+            fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-body)', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
           }}>
             3초 가입
           </Link>
@@ -229,7 +229,7 @@ export default function CalcEngine({ calc, liveData }: { calc: CalcMeta; liveDat
       )}
 
       {/* 면책 */}
-      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.6, marginTop: 8, padding: '0 8px' }}>
+      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: 1.6, marginTop: 8, padding: '0 8px' }}>
         본 계산기는 참고용이며 법적 효력이 없습니다.
         {calc.legalBasis && <> 기준: {calc.legalBasis}.</>}
         {' '}v{calc.version} ({calc.lastUpdated})

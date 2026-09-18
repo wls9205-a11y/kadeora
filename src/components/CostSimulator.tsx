@@ -73,9 +73,9 @@ export default function CostSimulator({ types, options = [], siteName, priceSour
 
   return (
     <div style={{ padding: '16px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 600, marginBottom: 14, color: 'var(--text-primary)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', marginBottom: 14, color: 'var(--text-primary)' }}>
         실입주 총비용 시뮬레이터
-        {priceSource === 'estimated' && <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4, background: 'rgba(245,158,11,0.12)', color: 'var(--warning)', fontWeight: 600 }}>추정치 기반</span>}
+        {priceSource === 'estimated' && <span style={{ fontSize: 'var(--fs-2xs)', padding: '3px 8px', borderRadius: 4, background: 'rgba(245,158,11,0.12)', color: 'var(--warning)', fontWeight: 'var(--fw-title)' }}>추정치 기반</span>}
       </div>
 
       {/* 선택 영역 */}
@@ -87,7 +87,7 @@ export default function CostSimulator({ types, options = [], siteName, priceSour
             style={{
               padding: '8px 10px', borderRadius: 'var(--radius-sm)',
               background: 'var(--bg-hover)', border: '1px solid var(--border)',
-              color: 'var(--text-primary)', fontSize: 13, fontWeight: 600,
+              color: 'var(--text-primary)', fontSize: 'max(16px, var(--fs-xs))', fontWeight: 'var(--fw-title)',
             }}
           >
             {validTypes.map((vt, i) => (
@@ -102,7 +102,7 @@ export default function CostSimulator({ types, options = [], siteName, priceSour
             style={{
               padding: '8px 10px', borderRadius: 'var(--radius-sm)',
               background: 'var(--bg-hover)', border: '1px solid var(--border)',
-              color: 'var(--text-primary)', fontSize: 13, fontWeight: 600,
+              color: 'var(--text-primary)', fontSize: 'max(16px, var(--fs-xs))', fontWeight: 'var(--fw-title)',
             }}
           >
             {uniqueFloorOptions.map(o => (
@@ -115,13 +115,13 @@ export default function CostSimulator({ types, options = [], siteName, priceSour
       {/* 옵션 체크 */}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
         {t.balcony_price && t.balcony_price > 0 && (
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-secondary)', cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', cursor: 'pointer' }}>
             <input type="checkbox" checked={includeBalcony} onChange={e => setIncludeBalcony(e.target.checked)} />
             발코니 확장 ({t.balcony_price.toLocaleString()}만)
           </label>
         )}
         {options.map((opt, i) => (
-          <label key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-secondary)', cursor: 'pointer' }}>
+          <label key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', cursor: 'pointer' }}>
             <input
               type="checkbox"
               checked={selectedOptions.has(i)}
@@ -137,10 +137,10 @@ export default function CostSimulator({ types, options = [], siteName, priceSour
       </div>
 
       {/* 비용 내역 */}
-      <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+      <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
           <span>분양가 ({typeLabel} {uniqueFloorOptions.find(o => o.value === selectedFloor)?.label || ''})</span>
-          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{basePrice.toLocaleString()}만</span>
+          <span style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{basePrice.toLocaleString()}만</span>
         </div>
         {balconyPrice > 0 && (
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
@@ -163,19 +163,19 @@ export default function CostSimulator({ types, options = [], siteName, priceSour
         <div style={{
           display: 'flex', justifyContent: 'space-between', padding: '10px 0 4px',
           borderTop: '1.5px solid var(--border)', marginTop: 6,
-          fontSize: 15, fontWeight: 700, color: 'var(--text-primary)',
+          fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)',
         }}>
           <span>예상 총비용</span>
           <span style={{ color: 'var(--brand)' }}>
             {totalCost.toLocaleString()}만
-            {ppyeong > 0 && <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-tertiary)', marginLeft: 6 }}>
+            {ppyeong > 0 && <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)', marginLeft: 6 }}>
               평당 {ppyeong.toLocaleString()}만
             </span>}
           </span>
         </div>
       </div>
 
-      <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 8 }}>
+      <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', marginTop: 8 }}>
         * 1주택 기준 취득세 추정치입니다. 정확한 세금은 세무 전문가 상담을 권장합니다.
       </div>
     </div>

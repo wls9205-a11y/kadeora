@@ -172,8 +172,8 @@ export default function LifecycleRail({
           display: 'flex',
           justifyContent: 'space-between',
           fontFamily: 'var(--font-mono)',
-          fontSize: size === 'full' ? 10.5 : 9.5,
-          letterSpacing: '.02em',
+          fontSize: size === 'full' ? 'var(--fs-3xs)' : 'var(--fs-3xs)',
+          letterSpacing: '0.14em',
           color: 'var(--text-tertiary)',
         }}
       >
@@ -185,7 +185,7 @@ export default function LifecycleRail({
                 flex: 1,
                 textAlign: i === 0 ? 'left' : i === labels.length - 1 ? 'right' : 'center',
                 color: i === active ? 'var(--rail-now)' : undefined,
-                fontWeight: i === active ? 600 : 400,
+                fontWeight: i === active ? 'var(--fw-title)' : 'var(--fw-quiet)',
                 whiteSpace: 'nowrap',
               }}
             >

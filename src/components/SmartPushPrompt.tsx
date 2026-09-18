@@ -129,41 +129,41 @@ export default function SmartPushPrompt() {
       <div style={cardStyle}>
         <button onClick={dismiss} style={{
           position: 'absolute', top: 10, right: 12, background: 'none', border: 'none',
-          color: 'var(--text-tertiary)', fontSize: 16, cursor: 'pointer',
+          color: 'var(--text-tertiary)', fontSize: 'var(--fs-sm)', cursor: 'pointer',
         }}>✕</button>
 
         {done ? (
           <div style={{ textAlign: 'center', padding: '8px 0' }}>
-            <div style={{ fontSize: 24, marginBottom: 4 }}>🎉</div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--accent-green)' }}>알림 설정 완료!</div>
+            <div style={{ fontSize: 'var(--fs-xl)', marginBottom: 4 }}>🎉</div>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--accent-green)' }}>알림 설정 완료!</div>
           </div>
         ) : pushState === 'needs-pwa' ? (
           <>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 6 }}>
               📱 알림을 받으려면 앱 설치가 필요해요
             </div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 12 }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 12 }}>
               iPhone에서는 홈 화면에 추가해야 알림을 받을 수 있어요.
             </div>
             <div style={{
               background: 'var(--bg-base)', borderRadius: 'var(--radius-md)', padding: '12px 14px',
-              fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.8,
+              fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6,
             }}>
-              <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>설치 방법 (10초)</div>
+              <div style={{ fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 4 }}>설치 방법 (10초)</div>
               <div>1️⃣ 하단 <strong style={{ color: 'var(--brand)' }}>공유 버튼</strong> (⬆️) 탭</div>
               <div>2️⃣ <strong style={{ color: 'var(--brand)' }}>&quot;홈 화면에 추가&quot;</strong> 탭</div>
               <div>3️⃣ 우측 상단 <strong style={{ color: 'var(--brand)' }}>&quot;추가&quot;</strong> 탭</div>
-              <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-tertiary)' }}>
+              <div style={{ marginTop: 6, fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)' }}>
                 추가 후 홈 화면에서 카더라 앱을 열면 알림 설정이 가능해요
               </div>
             </div>
           </>
         ) : pushState === 'denied' ? (
           <>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 6 }}>
               🔕 알림이 차단되어 있어요
             </div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               {platform === 'android' ? (
                 <>Chrome 설정 → 사이트 설정 → kadeora.app → 알림 허용</>
               ) : platform === 'ios-pwa' ? (
@@ -175,21 +175,21 @@ export default function SmartPushPrompt() {
           </>
         ) : (
           <>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
+            <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 4 }}>
               🔔 청약 마감·시세 변동 알림 받기
             </div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.5 }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.5 }}>
               관심 단지 청약 마감, 종목 급등락, 새 분석 리포트를 실시간으로 받아보세요.
             </div>
             <button onClick={subscribe} disabled={subscribing} style={{
               width: '100%', padding: '11px 0', borderRadius: 'var(--radius-md)', border: 'none',
               background: 'var(--brand)', color: '#fff',
-              fontSize: 14, fontWeight: 500, cursor: subscribing ? 'not-allowed' : 'pointer',
+              fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-body)', cursor: subscribing ? 'not-allowed' : 'pointer',
               opacity: subscribing ? 0.6 : 1,
             }}>
               {subscribing ? '설정 중...' : '알림 허용하기'}
             </button>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 6, textAlign: 'center' }}>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', marginTop: 6, textAlign: 'center' }}>
               언제든 알림 설정에서 끌 수 있어요
             </div>
           </>

@@ -107,8 +107,8 @@ export default function AptCommentSection({ slug, siteName, houseType }: { slug:
 
   return (
     <div className="apt-card" id={APT_COMMENT_SECTION_ID} style={{ scrollMarginTop: 60 }}>
-      <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-        💬 댓글 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--accent-blue)', fontWeight: 600 }}>{top.length}</span>
+      <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+        💬 댓글 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--accent-blue)', fontWeight: 'var(--fw-title)' }}>{top.length}</span>
       </h2>
 
       {/* 입력 — 비로그인 시 로그인 유도 */}
@@ -135,7 +135,7 @@ export default function AptCommentSection({ slug, siteName, houseType }: { slug:
             style={{
               padding: '9px 16px', borderRadius: 'var(--radius-sm)', border: 'none',
               background: 'var(--brand)', color: '#fff', fontSize: 'var(--fs-xs)',
-              fontWeight: 500, cursor: submitting ? 'wait' : 'pointer',
+              fontWeight: 'var(--fw-body)', cursor: submitting ? 'wait' : 'pointer',
               opacity: submitting || input.trim().length < 2 ? 0.5 : 1,
             }}
           >등록</button>
@@ -145,7 +145,7 @@ export default function AptCommentSection({ slug, siteName, houseType }: { slug:
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           padding: '10px 12px', marginBottom: 14, borderRadius: 'var(--radius-sm)',
           border: '1px dashed var(--border)', background: 'var(--bg-hover)',
-          textDecoration: 'none', color: 'var(--brand)', fontSize: 'var(--fs-xs)', fontWeight: 600,
+          textDecoration: 'none', color: 'var(--brand)', fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
         }}>
           💬 로그인하고 댓글 남기기 (+5P)
         </a>
@@ -177,20 +177,20 @@ export default function AptCommentSection({ slug, siteName, houseType }: { slug:
               width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
               background: 'rgba(59,123,246,0.12)', color: 'var(--accent-blue)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 11, fontWeight: 600,
+              fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)',
             }}>{c.author_name.slice(0, 1)}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-primary)' }}>{c.author_name}</span>
-                <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{ago(c.created_at)}</span>
+                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{c.author_name}</span>
+                <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{ago(c.created_at)}</span>
               </div>
               <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 1.5, marginTop: 3 }}>{c.content}</div>
               <div style={{ display: 'flex', gap: 10, marginTop: 5 }}>
                 <span
                   onClick={() => like(c.id)}
-                  style={{ fontSize: 10, color: c.like_count > 0 ? '#FF6B6B' : 'var(--text-tertiary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 2 }}
+                  style={{ fontSize: 'var(--fs-2xs)', color: c.like_count > 0 ? '#FF6B6B' : 'var(--text-tertiary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 2 }}
                 >👍 {c.like_count > 0 ? c.like_count : ''}</span>
-                <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>답글</span>
+                <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>답글</span>
               </div>
             </div>
           </div>
@@ -210,7 +210,7 @@ export default function AptCommentSection({ slug, siteName, houseType }: { slug:
         >댓글 {top.length - 3}개 더보기</button>
       )}
 
-      <div style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'center', marginTop: 8 }}>
+      <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: 8 }}>
         댓글은 로그인 후 작성 가능합니다. 욕설·광고는 삭제될 수 있습니다.
       </div>
     </div>

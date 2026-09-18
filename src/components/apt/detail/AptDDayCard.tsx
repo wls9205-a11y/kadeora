@@ -26,14 +26,14 @@ export default function AptDDayCard({ targetDate, status, ctaHref }: Props) {
   return (
     <div className="apt-dday-card">
       <div>
-        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', fontWeight: 600, marginBottom: 4 }}>
+        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-tertiary)', fontWeight: 'var(--fw-title)', marginBottom: 4 }}>
           청약 마감까지
         </div>
-        <div className="apt-dday-number" style={{ fontSize: 36, fontWeight: 700, color: 'var(--brand)', lineHeight: 1 }}>
+        <div className="apt-dday-number" style={{ fontSize: 36, fontWeight: 'var(--fw-num)', color: 'var(--brand)', lineHeight: 1 }}>
           {label}
         </div>
         {status && (
-          <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4 }}>{status}</div>
+          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: 4 }}>{status}</div>
         )}
       </div>
       <Link
@@ -47,8 +47,8 @@ export default function AptDDayCard({ targetDate, status, ctaHref }: Props) {
           background: 'var(--brand)',
           color: '#fff',
           textDecoration: 'none',
-          fontSize: 13,
-          fontWeight: 500,
+          fontSize: 'var(--fs-xs)',
+          fontWeight: 'var(--fw-body)',
           marginTop: 12,
         }}
       >

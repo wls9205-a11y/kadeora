@@ -102,18 +102,18 @@ export default function AptRecentFeed({ initialItems, region, stats }: Props) {
           <button key={c.key} type="button"
             onClick={() => setCategory(c.key)}
             style={{
-              fontSize: 11.5, padding: '4px 10px', borderRadius: 999,
+              fontSize: 'var(--fs-2xs)', padding: '4px 10px', borderRadius: 999,
               background: active ? CATEGORY_ACTIVE_COLOR[c.key] : 'transparent',
               color: active ? 'var(--bg-surface)' : 'var(--text-secondary)',
               border: '1px solid',
               borderColor: active ? CATEGORY_ACTIVE_COLOR[c.key] : 'var(--border)',
               whiteSpace: 'nowrap', cursor: 'pointer',
-              fontWeight: active ? 500 : 400,
+              fontWeight: active ? 'var(--fw-body)' : 'var(--fw-quiet)',
               display: 'flex', alignItems: 'center', gap: 4,
             }}>
             {c.label}
             {count !== null && (
-              <span style={{ fontSize: 10, opacity: active ? 0.7 : 0.55, fontWeight: 400 }}>
+              <span style={{ fontSize: 'var(--fs-2xs)', opacity: active ? 0.7 : 0.55, fontWeight: 'var(--fw-quiet)' }}>
                 {count.toLocaleString()}
               </span>
             )}
@@ -128,21 +128,21 @@ export default function AptRecentFeed({ initialItems, region, stats }: Props) {
       {stats && stats.fresh.window && stats.fresh.count > 0 && (
         <div style={{
           margin: '4px 6px 0', padding: '8px 12px',
-          fontSize: 11.5, color: '#0F6E56',
+          fontSize: 'var(--fs-2xs)', color: '#0F6E56',
           background: '#E1F5EE', borderRadius: 6,
           display: 'flex', alignItems: 'center', gap: 6,
         }}>
-          <span style={{ fontSize: 12 }}>✨</span>
+          <span style={{ fontSize: 'var(--fs-xs)' }}>✨</span>
           <span>
             최근 {stats.fresh.window === '24h' ? '24시간' : '7일'}{' '}
-            <strong style={{ color: '#04342C', fontWeight: 500 }}>{stats.fresh.count}건</strong> 신규 등록
+            <strong style={{ color: '#04342C', fontWeight: 'var(--fw-body)' }}>{stats.fresh.count}건</strong> 신규 등록
           </span>
         </div>
       )}
       {chipBar}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        padding: '4px 8px 8px', fontSize: 10.5, color: 'var(--text-tertiary)',
+        padding: '4px 8px 8px', fontSize: 'var(--fs-3xs)', color: 'var(--text-tertiary)',
       }}>
         <span>최근 등록 · {region}</span>
         <span>최신순</span>
@@ -157,19 +157,19 @@ export default function AptRecentFeed({ initialItems, region, stats }: Props) {
       {items.length === 0 && (
         <div style={{
           padding: '40px 16px', textAlign: 'center',
-          color: 'var(--text-tertiary)', fontSize: 13,
+          color: 'var(--text-tertiary)', fontSize: 'var(--fs-xs)',
         }}>이 카테고리에 최근 등록된 단지가 없어요</div>
       )}
       <div ref={sentinelRef} aria-hidden="true" style={{ height: 1 }} />
       {loading && (
         <div style={{
           padding: '12px 16px', textAlign: 'center',
-          color: 'var(--text-tertiary)', fontSize: 11.5,
+          color: 'var(--text-tertiary)', fontSize: 'var(--fs-2xs)',
         }}>불러오는 중…</div>
       )}
       {done && items.length > 0 && (
         <div style={{
-          padding: '20px 16px', textAlign: 'center', fontSize: 11.5,
+          padding: '20px 16px', textAlign: 'center', fontSize: 'var(--fs-2xs)',
           color: 'var(--text-tertiary)',
         }}>— 끝 —</div>
       )}

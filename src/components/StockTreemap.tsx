@@ -48,7 +48,7 @@ export default function StockTreemap({ stocks, isKR }: Props) {
 
   return (
     <div style={{ marginBottom: 'var(--sp-md)' }}>
-      <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: 'var(--sp-sm)' }}>
+      <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-tertiary)', letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: 'var(--sp-sm)' }}>
         시총 트리맵 · 크기=시총 · 색상=등락
       </div>
 
@@ -71,9 +71,9 @@ export default function StockTreemap({ stocks, isKR }: Props) {
               transition: 'all var(--transition-fast)', padding: 4,
               boxShadow: isSelected ? `0 0 0 2px ${col}60` : 'none',
             }}>
-              {cs >= 2 && rs >= 2 && <span style={{ fontSize: Math.min(10, 7 + cs), fontWeight: 700, color: '#E0EAFF', lineHeight: 1.1, textAlign: 'center' }}>{sec.name}</span>}
-              {rs >= 2 && <span style={{ fontSize: 10, fontWeight: 600, color: col, fontFamily: 'var(--font-mono)' }}>{sec.avg > 0 ? '+' : ''}{sec.avg.toFixed(1)}%</span>}
-              {rs >= 3 && cs >= 3 && <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{fmtCap(sec.total)}</span>}
+              {cs >= 2 && rs >= 2 && <span style={{ fontSize: Math.min(10, 7 + cs), fontWeight: 'var(--fw-num)', color: '#E0EAFF', lineHeight: 1, textAlign: 'center' }}>{sec.name}</span>}
+              {rs >= 2 && <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 'var(--fw-title)', color: col, fontFamily: 'var(--font-mono)' }}>{sec.avg > 0 ? '+' : ''}{sec.avg.toFixed(1)}%</span>}
+              {rs >= 3 && cs >= 3 && <span style={{ fontSize: 'var(--fs-2xs)', color: 'rgba(255,255,255,0.4)' }}>{fmtCap(sec.total)}</span>}
             </button>
           );
         })}
@@ -84,13 +84,13 @@ export default function StockTreemap({ stocks, isKR }: Props) {
         <div style={{ background: 'var(--bg-surface)', border: `1px solid ${selected.avg > 0 ? (isKR ? 'rgba(255,107,107,0.3)' : 'rgba(46,232,165,0.3)') : (isKR ? 'rgba(108,180,255,0.3)' : 'rgba(255,107,107,0.3)')}`, borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-sm)' }}>
             <div>
-              <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', marginRight: 8 }}>{selected.name}</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: selected.avg > 0 ? upC : dnC, fontFamily: 'var(--font-mono)' }}>
+              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-num)', color: 'var(--text-primary)', marginRight: 8 }}>{selected.name}</span>
+              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: selected.avg > 0 ? upC : dnC, fontFamily: 'var(--font-mono)' }}>
                 {selected.avg > 0 ? '▲' : '▼'} {Math.abs(selected.avg).toFixed(2)}%
               </span>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{selected.count}종목 · 시총 {fmtCap(selected.total)}</div>
+              <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{selected.count}종목 · 시총 {fmtCap(selected.total)}</div>
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-xs)' }}>
@@ -99,9 +99,9 @@ export default function StockTreemap({ stocks, isKR }: Props) {
               return (
                 <Link key={s.symbol} href={`/stock/${encodeURIComponent(s.symbol)}`} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)', textDecoration: 'none', padding: '5px 6px', borderRadius: 'var(--radius-xs)', background: 'var(--bg-hover)' }}>
                   <div style={{ width: 3, height: 24, borderRadius: 4, background: c, flexShrink: 0 }} />
-                  <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{s.name}</span>
-                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>{s.symbol}</span>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: c, fontFamily: 'var(--font-mono)' }}>{s.pct > 0 ? '+' : ''}{s.pct.toFixed(2)}%</span>
+                  <span style={{ flex: 1, fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-title)', color: 'var(--text-primary)' }}>{s.name}</span>
+                  <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>{s.symbol}</span>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-num)', color: c, fontFamily: 'var(--font-mono)' }}>{s.pct > 0 ? '+' : ''}{s.pct.toFixed(2)}%</span>
                 </Link>
               );
             })}
@@ -110,7 +110,7 @@ export default function StockTreemap({ stocks, isKR }: Props) {
       )}
 
       {/* 범례 */}
-      <div style={{ display: 'flex', gap: 'var(--sp-md)', marginTop: 6, fontSize: 10, color: 'var(--text-tertiary)', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 'var(--sp-md)', marginTop: 6, fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)', alignItems: 'center' }}>
         <span>크기 = 시총</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-xs)' }}>
           <div style={{ width: 10, height: 10, borderRadius: 4, background: upC, opacity: 0.7 }} />

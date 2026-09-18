@@ -108,7 +108,7 @@ export default function SearchInput({
           background: 'var(--bg-surface)',
           color: 'var(--text-primary)',
           fontSize: fontSizes[size],
-          fontWeight: 500,
+          fontWeight: 'var(--fw-body)',
           outline: 'none',
           transition: 'border-color 0.15s, box-shadow 0.15s',
           boxSizing: 'border-box',

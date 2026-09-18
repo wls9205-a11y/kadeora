@@ -66,8 +66,22 @@ function hostTag(obj: ts.ObjectLiteralExpression): string | null {
   return null;
 }
 
+/** ⛔ 색·배지·tone·스테이지 칩은 DS2 소관(§0) — 그 스타일 헬퍼 안은 건드리지 않는다.
+ *  함수명(선언·화살표 변수·메서드)이 chip/badge/tone/stage 를 품으면 그 몸통 전체를 건너뛴다. */
+const DS2_NAME = /chip|badge|tone|stage/i;
+function inDs2Helper(node: ts.Node): boolean {
+  for (let p: ts.Node | undefined = node; p; p = p.parent) {
+    if ((ts.isFunctionDeclaration(p) || ts.isMethodDeclaration(p)) && p.name && DS2_NAME.test(p.name.getText())) return true;
+    if ((ts.isArrowFunction(p) || ts.isFunctionExpression(p)) && ts.isVariableDeclaration(p.parent) && DS2_NAME.test(p.parent.name.getText())) return true;
+    if (ts.isVariableDeclaration(p) && p.initializer && ts.isObjectLiteralExpression(p.initializer) && DS2_NAME.test(p.name.getText())) return true;
+  }
+  return false;
+}
+
 export function transformFile(abs: string, holds: Set<string>, ledger: Ledger, allow: Ledger, onlyTw = false) {
   const f = rel(abs);
+  // 파일명 자체가 배지·칩·tone 모듈이면 통째로 DS2 소관 — 손대지 않는다(subscription-badge.ts 등).
+  if (!onlyTw && /(badge|chip|tone)[^/]*$/i.test(f)) return { changed: false, stat: {} as Record<string, number> };
   const text = readFileSync(abs, 'utf8');
   const sf = ts.createSourceFile(abs, text, ts.ScriptTarget.Latest, true, abs.endsWith('x') ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
   const edits: Edit[] = [];
@@ -85,7 +99,8 @@ export function transformFile(abs: string, holds: Set<string>, ledger: Ledger, a
       if (ls.length !== 1) return null;
       const leaf = ls[0].leaf;
       const px = pxOfLeaf(leaf);
-      if (px != null) return renderOf(px);
+      // 자간은 «치환 후» 크기로 판정한다 — 13px(가드 렌더 15)는 --fs-xs(14)가 되므로 음수 0(12~13px 음수 금지).
+      if (px != null) { const t = snapFs(renderOf(px)); return t ? fsDesktop(t) : renderOf(px); }
       const m = typeof leaf === 'string' && leaf.match(/var\(--fs-([\w]+)\)/);
       if (m) return fsDesktop(m[1]);
       return null;
@@ -98,6 +113,7 @@ export function transformFile(abs: string, holds: Set<string>, ledger: Ledger, a
       (pr.name.getText() === 'fontFamily' && /mono/i.test(pr.initializer.getText()))));
 
   const visit = (node: ts.Node) => {
+    if (!onlyTw && inDs2Helper(node)) { ts.forEachChild(node, visit); return; }
     if (!onlyTw && ts.isPropertyAssignment(node) && ts.isObjectLiteralExpression(node.parent) && (ts.isIdentifier(node.name) || ts.isStringLiteral(node.name))) {
       const name = node.name.text;
       const obj = node.parent;
@@ -238,8 +254,12 @@ if (require.main === module) {
   const touched = new Set(targets.map(rel));
   const merge = (p: string, L: Ledger) => {
     const prev = readJson<{ _doc?: string; entries: Ledger }>(p, { entries: {} });
-    for (const k of Object.keys(prev.entries)) prev.entries[k] = prev.entries[k].filter((e) => !touched.has(e.f));
-    for (const [k, v] of Object.entries(L)) prev.entries[k] = [...(prev.entries[k] ?? []), ...v];
+    // 합집합(중복 제거). 재실행은 이미 0 으로 바뀐 자간 등을 다시 «기록» 하지 못하므로 교체하면 대장이 지워진다.
+    void touched;
+    for (const [k, v] of Object.entries(L)) {
+      const seen = new Set((prev.entries[k] ?? []).map((e) => `${e.f}:${e.l}:${e.raw}`));
+      prev.entries[k] = [...(prev.entries[k] ?? []), ...v.filter((e) => !seen.has(`${e.f}:${e.l}:${e.raw}`))];
+    }
     if (!dry) writeFileSync(join(ROOT, p), JSON.stringify(prev, null, 1));
   };
   if (!onlyTw) {
