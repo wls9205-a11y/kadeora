@@ -932,6 +932,13 @@ async function finalizeArticle(sb: any, issue: any, config: any, article: GenRes
     if (hubSite?.is_active && isLeadEligible(hubSite.lifecycle_stage)) hubForIssue = hubSite.slug;
   }
 
+  // BN 4회차 — slug 유일성. 재생성은 LLM 이 옛 초안과 같은 slug 를 고를 수 있다(사직5 sajik5-redev-hillstate-busan).
+  //   중복이면 INSERT 가 실패하고 아래 «slug 로 기존 글 찾기» 가 옛 글을 붙잡아 새 본문으로 덮어썼다(112541). 미리 접미사로 비킨다.
+  if (article.slug) {
+    const { data: taken } = await (sb as any).from('blog_posts').select('id').eq('slug', article.slug).maybeSingle();
+    if (taken) article.slug = `${article.slug}-${Date.now().toString(36)}`;
+  }
+
   const insertResult = await safeBlogInsert(sb, {
     ...(hubForIssue ? { hub_apt_slug: hubForIssue } : {}),
     slug: article.slug, title: article.title, content: seoEnriched,
@@ -953,7 +960,11 @@ async function finalizeArticle(sb: any, issue: any, config: any, article: GenRes
 
   let blogPostId: number | null = (insertResult.id ? Number(insertResult.id) : null);
   if (!blogPostId && article.slug) {
-    try { const { data: found } = await sb.from('blog_posts').select('id').eq('slug', article.slug).maybeSingle(); if (found) blogPostId = found.id; } catch {}
+    // ⚠️ 방금 이 실행이 넣은 글만(10분 이내 생성) — 예전 글을 붙잡아 새 본문으로 덮어쓰지 않는다(112541 사고).
+    try {
+      const { data: found } = await sb.from('blog_posts').select('id, created_at').eq('slug', article.slug).maybeSingle();
+      if (found && Date.now() - Date.parse(found.created_at) < 10 * 60_000) blogPostId = found.id;
+    } catch {}
   }
 
   // s195: safeBlogInsert 내부 enrichContent 가 우리 seoEnriched 를 덮어쓸 위험 차단.

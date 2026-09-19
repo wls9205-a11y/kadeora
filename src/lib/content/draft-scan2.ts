@@ -16,7 +16,7 @@ export const PROMPT_LEAK_MARKER = '⟦KDR⟧';
 export interface Scan2Defect { rule: 'period' | 'amount' | 'bracket' | 'leak' | 'year' | 'image' | 'link' | 'place' | 'percent' | 'section' | 'fact'; text: string }
 
 /** 축약 규격 목차에 있는 H2(순서는 판독 몫). 면책·데이터 출처는 기존 규격 허용. */
-const COMPACT_ALLOWED_H2 = /3줄\s*요약|현장\s*개요|사업\s*단계|주변\s*거래|자주\s*묻는\s*질문|관심\s*고객|일정\s*알림|면책|데이터\s*출처|참고\s*자료/;
+const COMPACT_ALLOWED_H2 = /3줄\s*요약|현장\s*개요|사업\s*단계|주변\s*거래|자주\s*묻는\s*질문|관심\s*고객|일정\s*알림|현장\s*정보\s*확인|공급\s*정보|면책|데이터\s*출처|참고\s*자료/;
 
 /** BN-B2 §4 — 축약 규격(site_compact)에서 금지된 제도 일반론 섹션 제목. */
 const COMPACT_FORBIDDEN_H2 = /^##\s+[^\n]*(청약\s*자격|가점|취득세|양도세|세액\s*공제|LTV|DSR|대출|전매|재당첨|시나리오|전망)/gm;
@@ -127,7 +127,7 @@ const BRACKET_STOP = new Set(['기준', '기준일', '실거래', '거래', '시
 
 export interface Scan2Input { title: string; content: string; siteContext: string; constantsBlock: string; compact?: boolean }
 
-export function scanDraft2({ content, siteContext, constantsBlock, compact }: Scan2Input): Scan2Defect[] {
+export function scanDraft2({ title, content, siteContext, constantsBlock, compact }: Scan2Input): Scan2Defect[] {
   const defects: Scan2Defect[] = [];
   const body = content ?? '';
 
@@ -160,8 +160,12 @@ export function scanDraft2({ content, siteContext, constantsBlock, compact }: Sc
     const cut = body.indexOf('\n## 관련 정보');
     const main = cut > 0 ? body.slice(0, cut) : body;
     const h2 = /^##\s+([^\n]+)/gm;
+    // 제목 되풀이 H2(「## 센텀자이 리버노블 — 수영1구역 재개발」)는 허용 — 단지명·구역 핵심어를 품은 머리.
+    const [cnPart, zonePart] = String(title ?? '').split(' — ');
+    const zoneCore = /([가-힣A-Za-z0-9-]+구역)/.exec(zonePart ?? '')?.[1] ?? '';
+    const echoes = (t: string) => (!!cnPart && cnPart.length >= 3 && t.includes(cnPart.trim())) || (!!zoneCore && t.includes(zoneCore));
     while ((h = h2.exec(main)) !== null) {
-      if (COMPACT_ALLOWED_H2.test(h[1]) || defects.some((d) => d.rule === 'section' && d.text.includes(h![1].slice(0, 20)))) continue;
+      if (COMPACT_ALLOWED_H2.test(h[1]) || echoes(h[1]) || defects.some((d) => d.rule === 'section' && d.text.includes(h![1].slice(0, 20)))) continue;
       defects.push({ rule: 'section', text: `## ${h[1]}`.slice(0, 60) });
     }
   }

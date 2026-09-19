@@ -144,3 +144,11 @@ describe('BN 3회차 — 축약 목차 화이트리스트', () => {
     expect(d.map((x) => x.text)).toEqual(['## 현장 입지와 교통']);
   });
 });
+
+describe('BN 4회차 — 목차 화이트리스트 보정', () => {
+  it('제목 되풀이 H2·공급 정보·현장 정보 확인은 허용, 일반론 H2 는 section', () => {
+    const c = '## 센텀자이 리버노블 — 수영1구역 재개발\n## 현장 개요\n## 공급 정보\n## 현장 정보 확인\n## 재개발 사업의 일반적 진행 절차\n## 투자 판단 시 주의사항';
+    const d = scanDraft2({ title: '센텀자이 리버노블 — 수영1구역 재개발 현재 상황·일정 총정리', content: c, siteContext: SITE, constantsBlock: '', compact: true });
+    expect(d.map((x) => x.text)).toEqual(['## 재개발 사업의 일반적 진행 절차', '## 투자 판단 시 주의사항']);
+  });
+});
