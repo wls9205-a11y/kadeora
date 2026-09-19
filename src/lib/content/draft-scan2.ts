@@ -13,13 +13,16 @@ import { APT_NON_SITE_SEGMENTS } from '@/lib/blog-safe-insert';
 /** 프롬프트의 현장 블록 머리에 박는 마커. 본문에 나오면 지시문을 옮긴 것이다. */
 export const PROMPT_LEAK_MARKER = '⟦KDR⟧';
 
-export interface Scan2Defect { rule: 'period' | 'amount' | 'bracket' | 'leak' | 'year' | 'image' | 'link' | 'place' | 'percent' | 'section'; text: string }
+export interface Scan2Defect { rule: 'period' | 'amount' | 'bracket' | 'leak' | 'year' | 'image' | 'link' | 'place' | 'percent' | 'section' | 'fact'; text: string }
 
 /** 축약 규격 목차에 있는 H2(순서는 판독 몫). 면책·데이터 출처는 기존 규격 허용. */
 const COMPACT_ALLOWED_H2 = /3줄\s*요약|현장\s*개요|사업\s*단계|주변\s*거래|자주\s*묻는\s*질문|관심\s*고객|일정\s*알림|면책|데이터\s*출처|참고\s*자료/;
 
 /** BN-B2 §4 — 축약 규격(site_compact)에서 금지된 제도 일반론 섹션 제목. */
 const COMPACT_FORBIDDEN_H2 = /^##\s+[^\n]*(청약\s*자격|가점|취득세|양도세|세액\s*공제|LTV|DSR|대출|전매|재당첨|시나리오|전망)/gm;
+
+/** 정비사업 단계 순서(stage-phrase.ts 표시명의 머리). 현장 블록 「사업 단계(확정)」 줄과 대조. */
+const STAGE_ORDER = ['정비구역', '조합설립인가', '시공자', '사업시행계획인가', '관리처분계획인가', '이주', '착공', '일반분양', '준공'];
 
 /** 서울에만 있는 지명(다른 시·도 글에 나오면 혼입). 부산 등에도 있는 이름은 넣지 않는다. */
 const SEOUL_ONLY_PLACES = ['강남역', '광화문', '여의도', '잠실', '압구정', '강남구', '서초구', '송파구', '용산구', '마포구', '성수동'];
@@ -127,6 +130,26 @@ export interface Scan2Input { title: string; content: string; siteContext: strin
 export function scanDraft2({ content, siteContext, constantsBlock, compact }: Scan2Input): Scan2Defect[] {
   const defects: Scan2Defect[] = [];
   const body = content ?? '';
+
+  // BN 4차 판독 ⑥' — 단계·조합 서술 사실 결함(비국소, 재생성). 112539·112540 실측.
+  //   문장 단위로 본다 — 실제 문장은 「세입자로 구성된 조합」「조합이 공식으로 구성되지」처럼 낱말 사이가 벌어진다.
+  const builderKnown = /^- 시공사: (?!미정)\S/m.test(siteContext);
+  const stageLine = /^- 사업 단계\(확정\): (\S+)/m.exec(siteContext)?.[1] ?? '';
+  const stageIdx = STAGE_ORDER.findIndex((s) => stageLine.startsWith(s));
+  const NEG = /아니|않|없|제외|불가|해당되지/;
+  for (const sentence of stripUrls(body).split(/(?<=[.!?。])\s+|\n+/)) {
+    const s = sentence.trim();
+    if (!s) continue;
+    const hit = (why: string) => defects.push({ rule: 'fact', text: `${why}: ${s.slice(0, 60)}` });
+    // 조합원 자격 — 세입자·거주자가 조합(원)에 든다는 서술(부정문 제외)
+    if (/세입자|거주자/.test(s) && /조합/.test(s) && !NEG.test(s)) { hit('세입자 조합원'); continue; }
+    // 시공사가 확정인데 «선정 전»
+    if (builderKnown && /시공(?:사|자)[^.\n]{0,8}(?:선정\s*전|선정\s*예정|미정|선정되지|정해지지|향후\s*선정)/.test(s)) { hit('시공사 선정 전'); continue; }
+    // 조합설립인가 이후인데 «조합 미구성·조합 설립 예정·조합원 모집»
+    if (stageIdx >= 1 && (/조합[^.\n]{0,10}(?:구성|설립)[^.\n]{0,6}(?:되지|되기\s*전|\s전|예정|→)|조합\s*(?:구성|설립)\s*(?:후|이후|→)|조합원\s*모집/.test(s))) { hit('조합 미구성'); continue; }
+    // 사업시행계획인가 이후인데 «초기·예비 단계»
+    if (stageIdx >= 3 && /(?:초기|예비)\s*(?:개발\s*)?단계/.test(s)) { hit('초기 단계'); continue; }
+  }
 
   // 축약 규격 — 금지 섹션(구조 결함 → 편집 대상 아님, 재생성)
   if (compact) {

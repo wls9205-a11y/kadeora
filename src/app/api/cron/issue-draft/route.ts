@@ -18,6 +18,7 @@ import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
 import { sortForGeneration } from '@/lib/content/realestate-priority';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
 import { reviewHoldOf, reviewSwitches, isReviewHoldReason } from '@/lib/content/review-hold';
+import { injectStageSection } from '@/lib/content/stage-phrase';
 import { scanDraft2, enforceTitleSpec, PROMPT_LEAK_MARKER, extractInternalLinks, HARD_HOLD_RULES, LOCAL_EDIT_RULES, type Scan2Defect } from '@/lib/content/draft-scan2';
 
 /**
@@ -29,7 +30,8 @@ const COMPACT_SITE_RULES = `
 ## 현장 글 목차 규격 (이 순서 그대로)
 1. 3줄 요약 — 단지명(제안 여부)·구역·현재 단계
 2. ## 현장 개요 — 단지명·시공사·사업 성격·위치(시·구·동까지만)·세대수(블록 값, 없으면 「미정」)
-3. ## 사업 단계 — 블록의 현재 단계와 «다음 단계 이름» 만. 연도·반기 예측 금지, 시기는 「모집공고 후 확정」
+3. ## 사업 단계 — 제목만 두고 본문은 한 문장 이하로 둔다(시스템이 확정 문형으로 채운다). 다른 섹션에서도 블록의 「사업 단계(확정)」와 다른 단계·조합 구성 여부를 쓰지 않는다
+⛔ 조합원 자격은 「토지등소유자(구역 안 토지·건축물 소유자)」 문형만 — 세입자·거주자가 조합원이 된다고 쓰지 않는다.
 4. ## 주변 거래 데이터 — 블록의 시군구 실거래 줄(기간·건수·중위)만 그대로. 해석 괄호·기간 수식어 금지
 5. ## 자주 묻는 질문 — 4~6문항(7문항 이상 금지), 현장 사실만
 6. 관심 고객 안내 — 현장 상세 링크로 청약·일정 알림 받기
@@ -665,6 +667,9 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     dbw('issue-draft', 'issue_alerts.update@533', await (sb as any).from('issue_alerts').update({ publish_decision: 'ai_failed', retry_count: newRetry, fail_reason: failReason }).eq('id', issue.id));
     return { decision: 'ai_failed_final', score: issue.final_score };
   }
+
+  // BN 4차 판독 ⑥' — 「사업 단계」 섹션 본문을 확정 문형으로 교체(축약 규격). 게이트·스캔2 가 교체본을 본다.
+  if (ctx.stageText) article.content = injectStageSection(article.content, ctx.stageText);
 
   // BN-2 ⑤ — 제목 규격(BN 글감만). 게이트가 «바뀐 제목» 을 보게 여기서 먼저.
   const titleFix = enforceTitleSpec(article.title, issue.raw_data);

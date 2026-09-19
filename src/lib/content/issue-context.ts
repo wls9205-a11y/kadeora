@@ -10,6 +10,7 @@ import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
 import { stripSyntheticPrice } from '@/lib/apt/synthetic-price';
 import { buildAllow, verifyNumbers, yearsIn } from '@/lib/content/number-verify';
 import { extractArticleText } from '@/lib/content/article-text';
+import { stageName, stageSection } from '@/lib/content/stage-phrase';
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const MODEL = 'claude-haiku-4-5-20251001';
@@ -84,7 +85,7 @@ export async function buildSiteContext(sb: any, siteId: string | null | undefine
   if (!siteId) return '';
   try {
     const { data } = await (sb as any).from('apt_sites')
-      .select('slug, name, display_name, sigungu, region, builder, total_units, complex_units, expected_sale_period, expected_sale_period_asof, price_min, price_max, price_source, site_type, source_ids')
+      .select('slug, name, display_name, sigungu, region, builder, total_units, complex_units, expected_sale_period, expected_sale_period_asof, price_min, price_max, price_source, site_type, source_ids, lifecycle_stage')
       .eq('id', siteId).maybeSingle();
     if (!data) return '';
     // AB-2 · Q-1 — 합성 분양가(지역 채움값)는 싣지 않는다. 비우면 아래 줄이 「미공개」로 안내한다.
@@ -102,6 +103,8 @@ export async function buildSiteContext(sb: any, siteId: string | null | undefine
       `- 표기할 이름: 「${preferred}」 ${preferred !== data.name ? `(구역명: ${data.name})` : ''}`,
       data.sigungu ? `- 지역: ${[data.region, data.sigungu].filter(Boolean).join(' ')}` : '',
       data.builder ? `- 시공사: ${data.builder}` : '- 시공사: 미정(단정하지 말 것)',
+      // BN 4차 판독 ⑥' — 단계를 추측하지 않게 확정 단계를 싣는다(「조합 미구성」·「시공사 선정 전」 자기모순의 원인).
+      isRedev && stageName(data.lifecycle_stage) ? `- 사업 단계(확정): ${stageName(data.lifecycle_stage)} — 이 단계와 다른 단계·조합 구성 여부를 쓰지 않는다` : '',
       // ABG 증분 2 §4 — 청약 경유 현장의 total_units 는 공고 «공급» 세대수다(sync 덮어쓰기). 총세대로 쓰게 두면 그랑라크 1,153 사고가 된다.
       unitsOpen
         ? '- 세대수: 자료 간 불일치로 확인 중 — 세대수 숫자를 쓰지 않는다(「규모는 확정 발표 후 안내」 문형)'
@@ -280,7 +283,7 @@ export async function editScan2Defects(content: string, defects: Array<{ rule: s
   }
 }
 
-export interface IssueContext { siteContext: string; sourceText: string; constantsBlock: string; bigEventContext: string; compact?: boolean }
+export interface IssueContext { siteContext: string; sourceText: string; constantsBlock: string; bigEventContext: string; compact?: boolean; stageText?: string | null }
 
 /** 글감 1건의 입력 문맥 전부(생성 프롬프트와 게이트가 «같은 것» 을 본다). */
 export async function loadIssueContext(sb: any, issue: any): Promise<IssueContext> {
@@ -301,7 +304,13 @@ export async function loadIssueContext(sb: any, issue: any): Promise<IssueContex
   // BN-B2 §4 — 현장 글 축약 규격은 제도 상수를 싣지 않는다(제도 수치는 허용 목록에서도 빠져 수치 게이트가 막는다).
   const compact = issue.raw_data?.template === 'site_compact';
   const constantsBlock = issue.category === 'apt' && !compact ? await loadPolicyConstants(sb) : '';
-  return { siteContext, sourceText, constantsBlock, bigEventContext, compact };
+  // ⑥' — 축약 규격은 「사업 단계」 섹션을 확정 문형으로 채운다(호출부가 생성 직후 주입).
+  let stageText: string | null = null;
+  if (compact && issue.apt_site_id) {
+    const { data: st } = await (sb as any).from('apt_sites').select('lifecycle_stage, builder, site_type, source_ids').eq('id', issue.apt_site_id).maybeSingle();
+    if (st) stageText = stageSection({ stage: st.lifecycle_stage, builder: st.builder, isRedev: st.site_type === 'redevelopment' || !!st.source_ids?.redev_id });
+  }
+  return { siteContext, sourceText, constantsBlock, bigEventContext, compact, stageText };
 }
 
 /** 허용 목록. ⛔ raw_data 의 blocked_draft·edit_pending(지난 초안)은 넣지 않는다 — 넣으면 환각 숫자가 스스로를 허가한다. */
