@@ -87,9 +87,8 @@ describe('BN-B 증보', () => {
 });
 
 describe('BN-B 증보 2 — 유령 지명 · 상수 연도 비허용', () => {
-  it('서울 밖 현장 글의 서울 고유 지명', () => {
-    expect(scan('동래구 일대는 강남역, 교대역, 사직역 등').map((d) => d.rule)).toEqual(['place']);
-    expect(scan('교대역·사직역 인근')).toEqual([]);
+  it('서울 밖 현장 글의 서울 고유 지명 + 역명(BN-B2 §5 — 역명 서술 자체 금지)', () => {
+    expect(scan('동래구 일대는 강남역, 교대역, 사직역 등').map((d) => d.text).sort()).toEqual(['강남역', '교대역', '사직역']);
   });
   it('상수 블록의 연도는 일정 예측을 허가하지 않는다', () => {
     const d = scanDraft2({ title: '', content: '6. **준공 및 입주** (2030년 전후)', siteContext: SITE, constantsBlock: '- 감면 기한: 2030-12-31' });
@@ -106,5 +105,23 @@ describe('BN-B 재생성 판독 — 퍼센트 · 금액 파서', () => {
   });
   it('「9억 1~3%」의 1 은 금액이 아니다', () => {
     expect(extractWonAmounts('6억~9억 1~3%').map((a) => a.won)).not.toContain(900_010_000);
+  });
+});
+
+// BN-B2 §3·§5 — 편집 대상 분류 · 역명·권역 · 운영 메모 누출(112524·112528 실측)
+import { LOCAL_EDIT_RULES } from '@/lib/content/draft-scan2';
+
+describe('BN-B2 증보', () => {
+  it('편집 회차는 국소 결함만', () => {
+    for (const r of ['period', 'percent', 'year', 'bracket', 'amount'] as const) expect(LOCAL_EDIT_RULES.has(r)).toBe(true);
+    for (const r of ['place', 'leak', 'image', 'link'] as const) expect(LOCAL_EDIT_RULES.has(r)).toBe(false);
+  });
+  it('역명·권역은 결함, 단지명 속 「역」·지역·구역은 통과', () => {
+    expect(scan('지하철 1·2호선 교차(부산역, 범내골역 등)').filter((d) => d.rule === 'place').map((d) => d.text)).toEqual(['부산역', '범내골역']);
+    expect(scan('부산진구는 동부산의 대표 주거지').map((d) => d.rule)).toEqual(['place']);
+    expect(scan('사직역자이 엘리스트는 동래구 사직동 구역 지역에 있다')).toEqual([]);
+  });
+  it('운영 메모 누출', () => {
+    expect(scan('농어촌특별세(이 글의 글감 선택 조건상 비적용)').map((d) => d.rule)).toEqual(['leak']);
   });
 });

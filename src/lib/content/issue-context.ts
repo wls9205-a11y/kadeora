@@ -242,6 +242,44 @@ export async function editOutNumbers(content: string, tokens: string[], issue: a
 }
 
 
+/**
+ * BN-B2 §3 — 스캔2 국소 결함 편집 1회. 문형 치환 우선, 삭제는 차선. 새 수치·새 문단 금지.
+ * 호출부가 수치 게이트·스캔2 로 재판정한다(통과 못 하면 원문 유지).
+ */
+export async function editScan2Defects(content: string, defects: Array<{ rule: string; text: string }>, issue: any): Promise<string | null> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey || defects.length === 0) return null;
+  const list = defects.map((d, i) => `${i + 1}. [${d.rule}] ${d.text}`).join('\n');
+  try {
+    const res = await anthropicFetch(ANTHROPIC_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: MODEL, max_tokens: 12000,
+        system: [
+          '당신은 편집자다. 주어진 마크다운 본문에서 지정한 결함 대목만 고친다. 나머지 문장은 한 글자도 바꾸지 않는다. 결과 본문만 출력한다.',
+          '고치는 방법(문형 치환 우선, 불가하면 그 문장만 삭제):',
+          '- [percent] 계약금·중도금·잔금 비율 → 「계약금·중도금·잔금의 비율과 납부 일정은 입주자모집공고에서 확정됩니다」. 그 밖의 근거 없는 퍼센트는 숫자를 빼고 말로.',
+          '- [year] 연도·반기 예측 → 연도를 지우고 단계 이름만 남긴 뒤 「시기는 모집공고 후 확정」. 표 칸이면 「미정」.',
+          '- [period] 「최근 N년」류 → 데이터 기간(괄호 속 연월)으로 바꾸거나 수식어만 삭제.',
+          '- [bracket] 최고·최저·중위 옆 해석 괄호 → 괄호만 삭제.',
+          '- [amount] 근거 없는 금액 → 그 문장 삭제 또는 금액 없는 서술.',
+          '새 수치·새 표·새 문단을 추가하지 않는다. 문단이 끊기지 않게 앞뒤 문장을 자연스럽게 잇는다.',
+        ].join('\n'),
+        messages: [{ role: 'user', content: `고칠 결함:\n${list}\n\n본문:\n${content}` }],
+      }),
+    }, { caller: 'issue-draft-edit', category: llmCategoryOfContent(issue?.category), postId: null, metadata: { issue_id: issue?.id ?? null, scan2_defects: defects.length } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const text = String(data.content?.[0]?.text || '').replace(/^```(?:markdown)?\s*|```\s*$/g, '').trim();
+    // 치환 문형이 조금 길 수 있다 — 5% 까지만 허용(새 문단 추가 방지)
+    if (!text || text.length > content.length * 1.05 || text.length < content.length * 0.6) return null;
+    return text;
+  } catch {
+    return null;
+  }
+}
+
 export interface IssueContext { siteContext: string; sourceText: string; constantsBlock: string; bigEventContext: string }
 
 /** 글감 1건의 입력 문맥 전부(생성 프롬프트와 게이트가 «같은 것» 을 본다). */
@@ -258,7 +296,9 @@ export async function loadIssueContext(sb: any, issue: any): Promise<IssueContex
       + '조합 총회 확정 여부는 단정하지 않는다(「제안 단지명」 문형)';
   }
   const sourceText = await loadSourceText(sb, issue);
-  const constantsBlock = issue.category === 'apt' ? await loadPolicyConstants(sb) : '';
+  // BN-B2 §4 — 현장 글 축약 규격은 제도 상수를 싣지 않는다(제도 수치는 허용 목록에서도 빠져 수치 게이트가 막는다).
+  const compact = issue.raw_data?.template === 'site_compact';
+  const constantsBlock = issue.category === 'apt' && !compact ? await loadPolicyConstants(sb) : '';
   return { siteContext, sourceText, constantsBlock, bigEventContext };
 }
 

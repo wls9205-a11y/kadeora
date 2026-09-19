@@ -16,6 +16,12 @@ export interface Scan2Defect { rule: 'period' | 'amount' | 'bracket' | 'leak' | 
 /** 서울에만 있는 지명(다른 시·도 글에 나오면 혼입). 부산 등에도 있는 이름은 넣지 않는다. */
 const SEOUL_ONLY_PLACES = ['강남역', '광화문', '여의도', '잠실', '압구정', '강남구', '서초구', '송파구', '용산구', '마포구', '성수동'];
 
+/** 권역 이름 — 행정구역이 아니라 오귀속 위험만 크다(「부산진구는 동부산」). */
+const REGION_BELT_WORDS = ['동부산', '서부산', '중부산', '원도심권', '서면권', '동부권', '서부권'];
+
+/** BN-B2 §3 ② — 편집 회차로 고칠 수 있는 «문장 단위 국소 결함». 그 밖(지명·누출·이미지·링크)은 재생성. */
+export const LOCAL_EDIT_RULES: ReadonlySet<Scan2Defect['rule']> = new Set(['period', 'percent', 'year', 'bracket', 'amount']);
+
 /** BN-B §3 A·C — 기계 판정이라 오탐이 낮다. BN 밖 부동산 글감에도 즉시 강제(hold). */
 export const HARD_HOLD_RULES: ReadonlySet<Scan2Defect['rule']> = new Set(['image', 'link']);
 
@@ -182,10 +188,23 @@ export function scanDraft2({ content, siteContext, constantsBlock }: Scan2Input)
   if (region && region !== '서울') {
     for (const w of SEOUL_ONLY_PLACES) if (body.includes(w)) defects.push({ rule: 'place', text: w });
   }
+  // BN-B2 §5 — 역명·권역 서술(112524 「부산역·범내골역」 동래구 오귀속 · 112528 「부산진구는 동부산」).
+  //   위치는 시·구·동까지만. 단지명 속 「역」(사직역자이)은 뒤에 한글이 붙어 걸리지 않고, 현장 블록에 있는 이름은 허용.
+  const stationRe = /([가-힣]{1,6}역)(?![가-힣])/g;
+  const seenSt = new Set<string>();
+  const proseSt = stripUrls(body);
+  while ((m = stationRe.exec(proseSt)) !== null) {
+    const st = m[1];
+    if (seenSt.has(st) || defects.some((d) => d.rule === 'place' && d.text === st) || siteContext.includes(st) || /(지역|구역|영역|권역|전역|무역|수역|성역)$/.test(st)) continue;
+    seenSt.add(st);
+    defects.push({ rule: 'place', text: st });
+  }
+  for (const w of REGION_BELT_WORDS) if (body.includes(w) && !siteContext.includes(w)) defects.push({ rule: 'place', text: w });
 
   // ④ 지시문 누출 — 마커 · 규율 용어 · 「본 기사는 …하지 않습니다」 자기 서술 · 내부 트랙 표기
   const leaks = [
     /BN\s*허브|허브\s*발행|bn_hub|bp70_hub|BP70|BP-B|BN-B/,
+    /글감|선택\s*조건|이 글의 조건|운영\s*메모|발행\s*경로/,
     new RegExp(PROMPT_LEAK_MARKER.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
     /(데이터|현장|상수)\s*블록/,
     /(수치|사실)\s*규율|수치\s*출처율/,

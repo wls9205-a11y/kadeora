@@ -18,11 +18,30 @@ import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
 import { sortForGeneration } from '@/lib/content/realestate-priority';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
 import { reviewHoldOf, reviewSwitches, isReviewHoldReason } from '@/lib/content/review-hold';
-import { scanDraft2, enforceTitleSpec, PROMPT_LEAK_MARKER, extractInternalLinks, HARD_HOLD_RULES, type Scan2Defect } from '@/lib/content/draft-scan2';
+import { scanDraft2, enforceTitleSpec, PROMPT_LEAK_MARKER, extractInternalLinks, HARD_HOLD_RULES, LOCAL_EDIT_RULES, type Scan2Defect } from '@/lib/content/draft-scan2';
+
+/**
+ * BN-B2 §4·§5 — 현장 글 축약 규격(raw_data.template='site_compact'). 제도 상수 블록은 싣지 않는다(loadIssueContext).
+ * 청약 요건·세제·대출·전매·재당첨·세액공제 같은 제도 일반론은 현장 글에서 빼고 상위 경로로만 안내한다 —
+ * 오류 표면적(112524 전매 「제한 없음」·112528 월세 공제율)·전 현장 중복 콘텐츠·생성 비용을 한꺼번에 줄인다.
+ */
+const COMPACT_SITE_RULES = `
+## 현장 글 목차 규격 (이 순서 그대로)
+1. 3줄 요약 — 단지명(제안 여부)·구역·현재 단계
+2. ## 현장 개요 — 단지명·시공사·사업 성격·위치(시·구·동까지만)·세대수(블록 값, 없으면 「미정」)
+3. ## 사업 단계 — 블록의 현재 단계와 «다음 단계 이름» 만. 연도·반기 예측 금지, 시기는 「모집공고 후 확정」
+4. ## 주변 거래 데이터 — 블록의 시군구 실거래 줄(기간·건수·중위)만 그대로. 해석 괄호·기간 수식어 금지
+5. ## 자주 묻는 질문 — 4~6문항, 현장 사실만
+6. 관심 고객 안내 — 현장 상세 링크로 청약·일정 알림 받기
+⛔ 제도 일반론 섹션을 만들지 않는다: 청약 자격·가점, 취득세·양도세·월세 세액공제, LTV·DSR·중도금 대출, 전매제한·재당첨, 시나리오 전망.
+   필요하면 한 줄로 [청약 가점 계산기](/apt/diagnose) · [카더라 계산기](/calc) 링크만 단다.
+⛔ 지리 서술 금지 — 지하철역·역세권 이름·권역(「동부산」·「서면권」 등)을 쓰지 않는다. 위치는 시·구·동까지만.
+⛔ 운영 메모 금지 — 「글감」·「선택 조건」·「이 글의 조건상」 같은 제작 과정 표현을 쓰지 않는다.
+`;
 
 /** BN-B §3-B — 생성 시점 외부 이미지 삽입 중단(insertImages 머리말 참조). */
 const EXTERNAL_IMAGE_INSERT_DISABLED = true;
-import { editOutNumbers, loadIssueContext, buildIssueAllow, verifyIssueDraft, type IssueContext } from '@/lib/content/issue-context';
+import { editOutNumbers, editScan2Defects, loadIssueContext, buildIssueAllow, verifyIssueDraft, type IssueContext } from '@/lib/content/issue-context';
 import { parseSalePeriod } from '@/lib/apt/sale-period';
 import { periodWindow } from '@/lib/apt/upcoming-sales';
 import { naverOpenApiFetch } from '@/lib/naver/openapi';
@@ -112,17 +131,19 @@ async function generateArticle(issue: any, bigEventContext = '', siteContext = '
   const template = selectDraftTemplate(issue.category, issue.issue_type);
   const isPreempt = ['pre_announcement', 'preempt_coverage', 'new_subscription', 'search_spike'].includes(issue.issue_type);
   const catKo = issue.category === 'apt' ? '부동산' : issue.category === 'stock' ? '주식' : '경제';
+  // BN-B2 §4 — 현장 글 축약 규격(템플릿 다이어트). 오류의 8할이 현장 사실이 아니라 제도 일반론 장문에서 나왔다.
+  const compact = issue.raw_data?.template === 'site_compact';
 
   // [P0-FACT] big_event context를 system prompt 최상단에 강제 삽입
   const systemPrompt = `${bigEventContext ? bigEventContext + '\n' : ''}당신은 카더라(kadeora.app)의 수석 데이터 에디터입니다. ${isPreempt ? '분양 선점형 심층 분석' : catKo + ' 심층 분석'} 기사를 작성합니다.
 
 규칙:
-- 분량: ${isPreempt ? '6,000~8,000자' : '5,000~7,000자'} (충분히 깊이 있게)
-- H2 섹션: 6~10개 (## 형식)
+- 분량: ${compact ? '3,000~4,500자 (현장 사실 중심 — 제도 일반론을 쓰지 않는다)' : isPreempt ? '6,000~8,000자 (충분히 깊이 있게)' : '5,000~7,000자 (충분히 깊이 있게)'}
+- H2 섹션: ${compact ? '4~6개' : '6~10개'} (## 형식)
 ${issue.category === 'apt' ? '- 마크다운 표는 «이 글의 현장» 데이터 블록에 표가 될 행이 있을 때만 만든다. 없으면 표를 만들지 않는다. 표는 많아도 5개 이하' : '- 마크다운 표(|---|): 최소 2개 (비교 분석 필수)'}
-- 핵심 수치 강조: **굵은 숫자**와 퍼센트를 적극 활용
+${compact ? '' : `- 핵심 수치 강조: **굵은 숫자**와 퍼센트를 적극 활용
 - 각 섹션 첫 문장에 핵심 수치 배치
-- 면책 조항 포함 (투자 판단은 본인 책임)
+`}- 면책 조항 포함 (투자 판단은 본인 책임)
 - 데이터 출처 명시
 - 특정 종목/단지 매수·매도 권유 절대 금지
 - "오를 것이다", "내릴 것이다" 등 단정적 전망 금지
@@ -152,6 +173,7 @@ ${issue.category === 'apt' ? `
    확정 일정이 없으면 단계 이름만 순서대로 쓰고 시기는 「모집공고 후 확정」 문형으로만 쓴다.
 ⛔ 표기 규율 — 글감의 내부 표기(발행 경로·트랙·배치 이름, 괄호 속 운영 메모)를 본문·요약에 옮기지 않는다.
    내부 링크는 «이 글의 현장» 블록의 현장 링크와 /apt · /blog · /calc 같은 상위 경로만 쓴다 — /blog/<영문 이름> 같은 글 주소를 지어내지 않는다.
+${compact ? COMPACT_SITE_RULES : ''}
 ${siteContext ? `
 ## 이 글의 현장 ${PROMPT_LEAK_MARKER}
 ${siteContext}` : ''}
@@ -159,13 +181,13 @@ ${constantsBlock ? `
 ## 제도 상수(전국 공통 · 출처·기준일 있음 — 인용 시 기준일을 함께 쓴다)
 ${constantsBlock}` : ''}
 ` : ''}
-## 구조 가이드:
+${compact ? '' : `## 구조 가이드:
 - 도입부: 핵심 팩트 1~2줄 → 배경 설명
 - 본론: 데이터 테이블 + 분석 의견 교차
 - 결론: 전망 시나리오 (긍정/부정/중립 3가지)
-
+`}
 ⚠️ FAQ는 **필수**입니다. 누락 시 기사가 발행되지 않습니다.
-반드시 "## 자주 묻는 질문" 섹션을 포함하고, Q./A. 형식으로 5~8개 작성하세요.
+반드시 "## 자주 묻는 질문" 섹션을 포함하고, Q./A. 형식으로 ${compact ? '4~6개(현장 사실 질문만)' : '5~8개'} 작성하세요.
 구글/네이버 FAQPage 리치스니펫용이므로 형식을 정확히 지켜주세요.
 ${issue.category === 'apt' ? `
 ## FAQ 규격 (AB-2 · AI 브리핑 인용)
@@ -664,10 +686,50 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     }).eq('id', issue.id));
     return { decision: 'edit_pending', score: issue.final_score, title: article.title };
   }
-  const gateLog = issue.category === 'apt'
-    ? { gate_result: 'passed_first', first_unverified: [], checked: gate.checked, ...(await scan2Log(sb, article, ctx, titleFix.replaced)) }
-    : { number_shadow: { ok: gate.ok, checked: gate.checked, unverified: gate.unverified.slice(0, 30), had_source_text: !!sourceText } };
+  if (issue.category === 'apt') {
+    const s2 = await scan2Log(sb, article, ctx, titleFix.replaced);
+    const base = { gate_result: 'passed_first', first_unverified: [], checked: gate.checked };
+    if (shouldScan2Edit(issue, s2.scan2.defects)) return queueScan2Edit(sb, issue, article, s2.scan2.defects, base);
+    return finalizeArticle(sb, issue, config, article, { ...base, ...s2 });
+  }
+  const gateLog = { number_shadow: { ok: gate.ok, checked: gate.checked, unverified: gate.unverified.slice(0, 30), had_source_text: !!sourceText } };
   return finalizeArticle(sb, issue, config, article, gateLog);
+}
+
+/**
+ * BN-B2 §3 — 스캔2 편집 회차. 조건 ② 국소 결함만(LOCAL_EDIT_RULES), 서술·구조형이 하나라도 섞이면 편집하지 않는다(재생성).
+ * 글감당 1회(raw_data.scan2_edit_done). BN 글감만.
+ */
+function shouldScan2Edit(issue: any, defects: Scan2Defect[]): boolean {
+  return reviewHoldOf(issue)?.namespace === 'bn' && !issue.raw_data?.scan2_edit_done
+    && defects.length > 0 && defects.every((d) => LOCAL_EDIT_RULES.has(d.rule));
+}
+
+async function queueScan2Edit(sb: any, issue: any, article: GenResult, defects: Scan2Defect[], base: Record<string, unknown>) {
+  dbw('issue-draft', 'issue_alerts.update@scan2_edit_pending', await (sb as any).from('issue_alerts').update({
+    publish_decision: 'edit_pending', fail_reason: null,
+    raw_data: { ...(issue.raw_data ?? {}), edit_pending: { at: new Date().toISOString(), kind: 'scan2', article, defects, base } },
+  }).eq('id', issue.id));
+  return { decision: 'edit_pending', score: issue.final_score, title: article.title };
+}
+
+/** 스캔2 편집 1회 → 수치 게이트 재판정(통과 못 하면 원문 유지) → 전체 재스캔 → 마무리. edited_out 이력은 판독 입력. */
+async function processScan2Edit(sb: any, issue: any, config: any, pending: any) {
+  const article: GenResult = pending.article;
+  const defects: Scan2Defect[] = pending.defects ?? [];
+  const ctx: IssueContext = await loadIssueContext(sb, issue);
+  const allow = buildIssueAllow(ctx, issue);
+  let used = article;
+  let edited = false;
+  const revised = await editScan2Defects(article.content, defects, issue);
+  if (revised) {
+    const g = verifyIssueDraft(article.title, revised, allow);
+    if (g.ok) { used = { ...article, content: revised }; edited = true; }
+  }
+  const s2 = await scan2Log(sb, used, ctx, null);
+  issue.raw_data = { ...(issue.raw_data ?? {}), edit_pending: undefined, scan2_edit_done: true };
+  const gateLog = { ...(pending.base ?? { gate_result: 'passed_first' }), scan2: { ...s2.scan2, edited, edited_out: defects } };
+  return finalizeArticle(sb, issue, config, used, gateLog);
 }
 
 /** 차단 기록 — 막힌 초안은 blog_posts 에 넣지 않는다(미발행 수문). 판독용으로 글감 행에만 남긴다. */
@@ -690,6 +752,7 @@ async function processEditIssue(sb: any, issue: any, config: any): Promise<{ dec
     .eq('id', issue.id).eq('publish_decision', 'edit_pending').select('id');
   if (!lock || lock.length === 0) return { decision: 'race', score: issue.final_score };
   const pending = issue.raw_data?.edit_pending;
+  if (pending?.kind === 'scan2' && pending?.article?.content) return processScan2Edit(sb, issue, config, pending);
   const article: GenResult | undefined = pending?.article;
   if (!article?.title || !article?.content) {
     dbw('issue-draft', 'issue_alerts.update@edit_missing', await (sb as any).from('issue_alerts').update({ publish_decision: 'ai_failed', fail_reason: 'parse' }).eq('id', issue.id));
@@ -717,8 +780,11 @@ async function processEditIssue(sb: any, issue: any, config: any): Promise<{ dec
     return { decision: 'number_unverified', score: issue.final_score, title: article.title };
   }
   issue.raw_data = { ...(issue.raw_data ?? {}), edit_pending: undefined };
-  const gateLog = { gate_result: edited ? 'passed_after_edit' : 'passed_first', first_unverified: firstUnverified.slice(0, 20), checked: first.checked, ...(await scan2Log(sb, article, ctx, titleFix.replaced)) };
-  return finalizeArticle(sb, issue, config, article, gateLog);
+  const s2 = await scan2Log(sb, article, ctx, titleFix.replaced);
+  const base = { gate_result: edited ? 'passed_after_edit' : 'passed_first', first_unverified: firstUnverified.slice(0, 20), checked: first.checked };
+  // 수치 편집 뒤 스캔2 국소 결함이 남으면 다음 편집 회차로(한 회차에 LLM 편집 두 번은 300s 에 못 든다)
+  if (shouldScan2Edit(issue, s2.scan2.defects)) return queueScan2Edit(sb, issue, article, s2.scan2.defects, base);
+  return finalizeArticle(sb, issue, config, article, { ...base, ...s2 });
 }
 
 /** BN-2 §4 스캔2 기록. 강제(hold)는 BN 글감만 — 그 밖의 부동산 글감은 섀도(기록만)다. */
