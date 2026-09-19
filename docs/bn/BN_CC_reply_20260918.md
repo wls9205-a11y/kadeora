@@ -214,3 +214,21 @@ WHERE i.image_type='stock_photo' AND i.image_url !~ 'kadeora|supabase' AND b.cro
 
 ## 재생성 리셋(세션 A)
 판독 §4 절차 그대로. 대상 112514~112523(10). 리셋 후 첫 회전부터 위 게이트·프롬프트가 적용된다.
+
+---
+
+# BN CC 5차 회신 — 리셋 집행 · 131편 본문 이미지 표본 실렌더 (2026-09-19)
+
+## 리셋 — 세션 A 집행분은 «전무» 였다 → CC 가 원자 단일문으로 집행
+- 검증: 10건 모두 `draft` + 옛 초안 연결 그대로(타임아웃 문은 롤백).
+- 집행(단일 CTE): 초안 10편 `hold:bn_review*` → `hold:bn_regen_superseded`(10) · 글감 10건 초기화(publish_decision·blog_post_id·is_processed·retry_count·fail_reason·processed_at·block_reason, raw_data 게이트 기록 제거) + `raw_data.superseded_post`(옛 초안 id)·`regen_after='bn_b_readout_20260919'`(10). 재생성 모니터 가동.
+
+## S9-2 선행 — 발행 글 외부 본문 이미지
+- 범위: 발행 issue-draft 중 외부 stock_photo 보유 **전 기간 512편**(30일 132). 커버 외부 512/512.
+- **DB 전수(512)**: 본문 마크다운에 외부 이미지 96편 — 그중 «이미지가 유일한 시각 요소»(자체 이미지 0 · 표 0) **0편**. 평균 표 3.1개.
+- **표본 20편 실렌더**(kadeora.app 실페이지 `<article>` img 집계): 외부 이미지 렌더 20/20 · 자체 이미지 동반 20/20 · 표 20/20 · **외부만 남는 글 0/20** · og:image 외부 0/20(S9 isSafeCover 가 이미 막음).
+  - 렌더되는 외부 출처: imgnews.naver.net(언론 보도사진 다수) · landthumb/dthumb/scs-phinf.pstatic.net · image.hogangnono.com · file.kbland.kr · i.ytimg.com · cloudfront · thinkpool.
+  - 본문 마크다운 밖 경로도 있다: 페이지가 `blog_post_images`(인라인·갤러리)를 따로 그린다 — 본문 수정 없이도 외부 이미지가 나간다.
+- **판단 자료**: 렌더 필터로 외부 이미지를 걷어도 텍스트만 남는 글은 표본·전수 모두 0 → S9-2 가 우려한 «빈약해지는 글» 위험은 실측상 없음.
+  렌더러 `isSafeImg`(src/lib/image-sanitize.ts)는 세션 142 에서 블랙리스트(hc.go.kr 1건)로 바뀌어 위 출처를 전부 통과시킨다. 출처 대부분은 image-pipeline `IMG_BLOCK_DOMAINS` 에 이미 올라 있는 도메인이다(뉴스·경쟁 플랫폼) — 렌더러와 수집기가 서로 다른 목록을 쓰는 상태.
+  → 필터 안(판정 필요): (a) 렌더러에 `IMG_BLOCK_DOMAINS` + `ytimg`·`dthumb` 적용(세션 142 의 «정당한 외부 CDN» 은 유지) (b) issue-draft 글 한정 자체 도메인 화이트리스트. 적용 대상은 본문 marked 렌더러 + blog_post_images 인라인·갤러리 두 경로.
