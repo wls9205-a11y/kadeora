@@ -2,7 +2,8 @@ import { Metadata } from 'next';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { SITE_URL } from '@/lib/constants';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
+import { isRedevNumericId, resolveRedevIdTarget } from '@/lib/apt/redev-id-redirect';
 import { generateAptSlug } from '@/lib/apt-slug';
 import JsonLd from '@/components/seo/JsonLd';
 
@@ -56,6 +57,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function RegionRedevPage({ params }: Props) {
   const { region } = await params;
   const decodedRegion = decodeURIComponent(region);
+  // BN 7차 — 숫자 인자(/apt/redev/{id})는 죽은 링크였다. 연결 현장 → 시·도 목록 → /apt/redev 로 308(본문 불변).
+  if (isRedevNumericId(decodedRegion)) permanentRedirect(await resolveRedevIdTarget(decodedRegion));
   if (!VALID_REGIONS.includes(decodedRegion)) notFound();
 
   const sb = await createSupabaseServer();
