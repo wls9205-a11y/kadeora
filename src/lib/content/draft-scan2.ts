@@ -15,6 +15,9 @@ export const PROMPT_LEAK_MARKER = '⟦KDR⟧';
 
 export interface Scan2Defect { rule: 'period' | 'amount' | 'bracket' | 'leak' | 'year' | 'image' | 'link' | 'place' | 'percent' | 'section'; text: string }
 
+/** 축약 규격 목차에 있는 H2(순서는 판독 몫). 면책·데이터 출처는 기존 규격 허용. */
+const COMPACT_ALLOWED_H2 = /3줄\s*요약|현장\s*개요|사업\s*단계|주변\s*거래|자주\s*묻는\s*질문|관심\s*고객|면책|데이터\s*출처|참고\s*자료/;
+
 /** BN-B2 §4 — 축약 규격(site_compact)에서 금지된 제도 일반론 섹션 제목. */
 const COMPACT_FORBIDDEN_H2 = /^##\s+[^\n]*(청약\s*자격|가점|취득세|양도세|세액\s*공제|LTV|DSR|대출|전매|재당첨|시나리오|전망)/gm;
 
@@ -130,6 +133,14 @@ export function scanDraft2({ content, siteContext, constantsBlock, compact }: Sc
     let h: RegExpExecArray | null;
     COMPACT_FORBIDDEN_H2.lastIndex = 0;
     while ((h = COMPACT_FORBIDDEN_H2.exec(body)) !== null) defects.push({ rule: 'section', text: h[0].slice(0, 60) });
+    // 목차 규격 밖 H2(「분양가 및 계약 조건」「현장 입지와 교통」「정비사업 특성과 리스크」 — 3회차 5편). 「## 관련 정보」 이후 보강 블록은 제외.
+    const cut = body.indexOf('\n## 관련 정보');
+    const main = cut > 0 ? body.slice(0, cut) : body;
+    const h2 = /^##\s+([^\n]+)/gm;
+    while ((h = h2.exec(main)) !== null) {
+      if (COMPACT_ALLOWED_H2.test(h[1]) || defects.some((d) => d.rule === 'section' && d.text.includes(h![1].slice(0, 20)))) continue;
+      defects.push({ rule: 'section', text: `## ${h[1]}`.slice(0, 60) });
+    }
   }
 
   // ① 기간 수식어 — 데이터 창과 어긋나면. 창이 없으면(실거래 줄 없음) 기간 주장 자체가 근거 없음.
