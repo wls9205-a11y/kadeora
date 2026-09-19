@@ -152,3 +152,11 @@ describe('BN 4회차 — 목차 화이트리스트 보정', () => {
     expect(d.map((x) => x.text)).toEqual(['## 재개발 사업의 일반적 진행 절차', '## 투자 판단 시 주의사항']);
   });
 });
+
+describe('BN-C — 출처 문장', () => {
+  it('데이터 출처 문장은 수치 없는 시세가 아니다(112575)', () => {
+    const c = '**데이터 출처**: 부산 사하구 아파트 실거래가는 국토교통부 실거래가 공개 시스템(2026년 4월~9월 기준) 기준이며, 현장 정보는 각 시공사·조합 공시 자료를 참고했습니다.';
+    expect(scanDraft2({ title: '', content: c, siteContext: SITE, constantsBlock: '', compact: true })).toEqual([]);
+    expect(scan('중위 거래가는 다양한 수준에서 형성됩니다').map((d) => d.rule)).toEqual(['fact']);
+  });
+});
