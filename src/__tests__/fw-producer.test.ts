@@ -56,10 +56,11 @@ describe('review-hold fw', () => {
   });
 });
 
-import { kstDayStartIso } from '@/lib/fw/producer';
+import { bucketDayStartIso } from '@/lib/fw/producer';
 describe('FW 일 캡', () => {
-  it('KST 자정 경계', () => {
-    expect(kstDayStartIso(new Date('2026-09-19T07:30:00Z'))).toBe('2026-09-18T15:00:00.000Z');
-    expect(kstDayStartIso(new Date('2026-09-19T15:01:00Z'))).toBe('2026-09-19T15:00:00.000Z');
+  it('버킷 일 = UTC 날짜(validate_blog_post created_at::date, TZ=UTC)', () => {
+    expect(bucketDayStartIso(new Date('2026-09-19T07:30:00Z'))).toBe('2026-09-19T00:00:00.000Z');
+    expect(bucketDayStartIso(new Date('2026-09-19T15:01:00Z'))).toBe('2026-09-19T00:00:00.000Z');
+    expect(bucketDayStartIso(new Date('2026-09-20T00:00:01Z'))).toBe('2026-09-20T00:00:00.000Z');
   });
 });

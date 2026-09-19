@@ -23,13 +23,14 @@ export async function fwSwitch(sb: any, key: 'producer_enabled' | 'hub_publish_e
 const COLS = 'id, slug, name, display_name, region, sigungu';
 
 /**
- * 일 캡 — issue-draft 60/KST일 버킷은 뉴스·BN 과 공유 자원이다(9/19 한도 우회 사고). FW 적재는 KST 하루 캡 안에서만.
+ * 일 캡 — issue-draft 60/일 버킷은 뉴스·BN 과 공유 자원이다(9/19 한도 우회 사고). FW 적재는 같은 «버킷 일» 안에서만.
+ * ⚠️ 버킷 일 = UTC 날짜: validate_blog_post 가 `created_at::date = now()::date` 로 세고 세션 TZ 가 UTC 다(리셋 00:00Z = KST 09:00).
+ *    KST 자정으로 보고 해제했다가 25건이 다시 60/60 에 막혔다(2026-09-19 15:01Z).
  * 값은 app_config fw.daily_cap(기본 30, 세션 A 판정 2026-09-19). 상향은 전환 스위치 on 창에서 설정값 1회.
  */
 export const FW_DAILY_CAP_DEFAULT = 30;
-export function kstDayStartIso(now = new Date()): string {
-  const k = new Date(now.getTime() + 9 * 3600_000);
-  return new Date(Date.UTC(k.getUTCFullYear(), k.getUTCMonth(), k.getUTCDate()) - 9 * 3600_000).toISOString();
+export function bucketDayStartIso(now = new Date()): string {
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString();
 }
 export async function capLeft(sb: any, now = new Date()): Promise<number> {
   const { data } = await sb.from('app_config').select('value').eq('namespace', 'fw').eq('key', 'daily_cap').maybeSingle();
@@ -37,7 +38,7 @@ export async function capLeft(sb: any, now = new Date()): Promise<number> {
   if (cap <= 0) return 0;
   // 캡이 작아 행을 cap 개까지만 받아 센다(count:exact 핫패스 금지 — no-exact-count-hotpath).
   const { data: rows } = await sb.from('issue_alerts').select('id')
-    .eq('source_type', 'fw_hub').gte('created_at', kstDayStartIso(now)).limit(cap);
+    .eq('source_type', 'fw_hub').gte('created_at', bucketDayStartIso(now)).limit(cap);
   return Math.max(0, cap - ((rows ?? []) as unknown[]).length);
 }
 
