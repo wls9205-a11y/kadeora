@@ -257,3 +257,55 @@ WHERE i.image_type='stock_photo' AND i.image_url !~ 'kadeora|supabase' AND b.cro
 - 스캔2 보정(48dc08e6): 계약금·중도금·잔금 비율 **명시 규칙**(상수의 같은 숫자 때문에 허용 목록으로는 통과하던 것) · 블록 밖 퍼센트(URL 인코딩 제외) · 금액 파서 「9억 1~3%」 오탐 수리.
 - **관찰**: 프롬프트 규율(일정·계약금 문장 고정)을 넣어도 생성이 같은 결함형(비율·연도 예측)을 반복한다. 재생성 루프는 편당 30~40분·LLM 2~3콜.
   **제안(판정 필요)**: 스캔2 결함을 «감산 편집 1회» 로 넘기는 편집 회차 — 이미 있는 editOutNumbers(수치 게이트 편집)와 같은 방식으로 결함 문장만 삭제·비수치화 후 재스캔. 통과분만 초안. 새 크론 0(issue-draft 편집 회차 재사용).
+
+---
+
+# BN CC 6차 회신 — BN-B2 판독 후속 (2026-09-19)
+
+## ① 커버 교체 — 집행 완료
+- 대상 정의(기승인): 30일 issue-draft · 외부 stock_photo 보유 502편 중 **커버가 외부인 499편**(3편은 이미 자체). ⚠️ 판독문의 「462」는 재현되지 않았다(발행 외부 커버 475 · 발행 스톡 연결 459 · 30일 502/499) — 승인된 정의로 집행.
+- 백업 `blog_posts_cover_backup_bn_20260919`(499행, anon·authenticated 권한 회수 + RLS) → `cover_image` 를 issue-draft 규격 OG 카드(`/api/og?title=…&category=…&author=카더라&design=`)로 교체 **499(발행 131)**. 원복: 백업 조인 1문.
+- 검증: 교체 URL 200 image/png · 해당 글 og:image 자체 도메인.
+
+## ② 편집 회차 — 구현(48c28341)
+- 조건 ① 문형 치환 우선(사전: 계약금 비율 → 「비율과 납부 일정은 입주자모집공고에서 확정」 · 연도 예측 → 단계 이름 + 「모집공고 후 확정」 · 기간 수식어 → 데이터 연월 · 괄호 → 삭제 · 근거 없는 금액 → 문장 삭제/비수치화)
+- 조건 ② 국소 결함(period·percent·year·bracket·amount)만. place·leak·image·link 가 하나라도 섞이면 편집 안 함(재생성).
+- 조건 ③ 편집본 수치 게이트 재판정(실패 시 원문 유지) + 전체 재스캔, `raw_data.scan2.edited`·`edited_out`.
+- 조건 ④(편집 문맥 파손 판독)는 세션 A 몫 — `edited_out` 가 판독 대상 표시.
+- BN 글감만 · 글감당 1회 · 새 크론 0(issue-draft 편집 회차 재사용).
+
+## ③ 템플릿 다이어트 — 현장 글 목차 규격(`raw_data.template='site_compact'`, BN 10 글감에 부착)
+1. 3줄 요약(단지명·구역·현재 단계) 2. 현장 개요(단지명·시공사·사업 성격·위치 시·구·동·세대수 블록값) 3. 사업 단계(현재 + 다음 단계 이름, 연도 금지)
+4. 주변 거래 데이터(시군구 실거래 줄 그대로) 5. FAQ 4~6(현장 사실만) 6. 관심 고객 안내(현장 상세 링크).
+- 분량 3,000~4,500자 · H2 4~6 · 전망 시나리오 구조 제거 · **제도 상수 블록 미주입**(제도 수치는 허용 목록에서도 빠져 수치 게이트가 막는다).
+- 제도 일반론(청약 자격·가점, 취득세·양도세·월세 공제, LTV·DSR·중도금 대출, 전매·재당첨)은 섹션 금지 — 필요 시 `/apt/diagnose`·`/calc` 한 줄.
+- 공용 가이드 글 분리는 이번 범위 밖(링크 대상만 상위 경로로 한정). 가이드 제작 여부는 판정 필요.
+
+## ④ E 확장
+- 역명·권역 서술 → 스캔2 place(「부산역·범내골역」·「동부산」, 단지명 속 「역」·지역·구역 제외) · 운영 메모 → leak(「글감」·「선택 조건」).
+- 전매제한 6개월 상수: 축약 규격은 전매 서술 자체를 금지하고 상수 블록을 싣지 않아 BN 글에는 불필요. 비축약 글용 상수 신설은 법령 원문(DRF) 대조가 필요 — 별도 안건으로 둔다.
+- 월세 공제율 등 제도 수치: 축약 규격에선 상수 미주입 → 쓰면 수치 게이트 차단.
+
+## ⑤ 괴정5 수치 게이트 차단 원인
+초안이 데이터 블록에 없는 추정 금액 「2억원」(분담금류 추정)을 썼고 감산 편집이 그 문장을 지우지 못해 차단. 재큐잉 후 112535 생성(스캔2 0, 단 다이어트 이전 규격 8,957자).
+
+## ⑥ 개별 개통 1문 (판독 통과분, 스위치 off 유지)
+```sql
+-- :id 하나씩. 사유가 정확히 hold:bn_review 인 것만(…:scan2 · superseded 는 불가). 가드는 같은 UPDATE 에서 사유를 비우면 통과.
+WITH p AS (
+  UPDATE blog_posts SET auto_unpublished_reason = NULL, is_published = true, published_at = now(), auto_publish_eligible = false
+  WHERE id = :id AND is_published = false AND auto_unpublished_reason = 'hold:bn_review'
+  RETURNING id, slug
+), q AS (
+  INSERT INTO indexnow_queue (url, priority, is_urgent, source, status, queued_at)
+  SELECT 'https://kadeora.app/blog/' || slug, 100, true, 'bn-open', 'pending', now() FROM p RETURNING url
+)
+UPDATE issue_alerts SET is_published = true, published_at = now(), publish_decision = 'auto'
+WHERE blog_post_id IN (SELECT id FROM p) RETURNING id, blog_post_id;
+```
+
+## 판정 요청 — 기존 결함 초안 7편의 처리 경로
+- 판독 §6 은 「국소형 6편은 편집 회차, 우동3·복합형은 다이어트 재생성」. 그런데
+  (a) 편집 회차는 «생성 직후의 원문 기사» 를 편집하도록 만들어졌다 — 기존 초안의 원문은 저장돼 있지 않고 blog_posts 본문은 이미 보강(시각화·푸터·SEO) 된 것이라, 다시 마무리를 태우면 보강이 이중으로 붙는다.
+  (b) 기존 7편은 **다이어트 이전 장문 규격**이다 — 112524·112528 을 떨어뜨린 제도 일반론 층(전매·세제·지리)이 편집 후에도 그대로 남는다.
+- **CC 권고**: 10편 전부(112535 포함) 다이어트 규격으로 재생성. 국소 결함은 생성 직후 편집 회차가 자동 처리. 승인 시 재생성 절차(사유 superseded + 제목 표식 + 글감 초기화) 1문으로 집행.
