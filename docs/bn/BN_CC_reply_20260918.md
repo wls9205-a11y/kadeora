@@ -175,3 +175,42 @@ docs/bn/FW_premeasure_20260919.md — 부동산 뉴스 전환 3%(no_entity 95%) 
 - 112523 우동3(C3 디에이치 아센테르): hub ✓ · 시공사 현대건설 ✓(옛 오기 없음) · 세대수 무기재 ✓ · 스캔2 괄호 귀속 3 → hold:bn_review:scan2
 - **첫 배치 10/10 초안 완비**: 깨끗 4(112516·112517·112519·112520 — 112516·112519 는 힐스테이트 오링크) · 결함 6(112514·112515·112518·112521·112522·112523, 전부 hold:bn_review:scan2).
   결함 6편 재생성은 6877d325 배포 이후라 괄호 귀속 재발 가능성이 낮다 — 세션 A 판독 후 절차(위)대로.
+
+---
+
+# BN CC 4차 회신 — BN-B 판독 증보 A~E (2026-09-19)
+
+커밋 910b2dde(A~E) · d071b846(프롬프트 운영 키 제외). **재생성 리셋 선행 조건 충족(배포 READY 확인 후).**
+
+## B 유입 경로 — 생성 시점 삽입(백필 아님) · 규모 큼
+- 112517 유튜브 썸네일 = `blog_post_images`(image_type `stock_photo`, 2026-09-19 01:03) — issue-draft `insertImages` 가 네이버 이미지 검색 URL 을
+  **차단 목록·관련도 채점·Storage 재호스팅 없이** 본문(최대 3장)과 `cover_image` 에 핫링크. 정식 파이프라인(image-pipeline · issue-image-attach)의 완전한 우회로.
+- **30일 issue-draft 502편이 외부 스톡 이미지 · 발행 131편 · 502편 전부 외부 커버.** S8/S9 계보의 살아 있던 유입구.
+- 수리: 생성 시점 삽입 중단(`EXTERNAL_IMAGE_INSERT_DISABLED`) — 이미지는 issue-image-attach 에 위임.
+- **판정 필요(세션 A/Node)**: 기발행 131편의 외부 본문 이미지·외부 커버. 본문은 수정 금지 규율 — cover_image(메타)는 OG 로 되돌릴 수 있다. 목록:
+```sql
+SELECT DISTINCT b.id, b.slug, b.is_published, b.cover_image FROM blog_posts b JOIN blog_post_images i ON i.post_id=b.id
+WHERE i.image_type='stock_photo' AND i.image_url !~ 'kadeora|supabase' AND b.cron_type='issue-draft' AND b.is_published;
+```
+
+## A ⑥ · C ⑦ — 전 부동산 글감 즉시 강제
+- ⑥ 본문 이미지 src 가 kadeora.app · *.supabase.co 밖 → 결함. ⑦ `/apt/<slug>` 활성 현장 · `/blog/<slug>` 존재 글 DB 대조, 미실존 → 결함.
+- 둘 중 하나라도 있으면 category=apt 글감 전부 hold: BN 은 `hold:bn_review:scan2`, 그 밖은 **`hold:scan2_hard`**(신설 사유, 가드 `hold:%` 로 재공개 차단). 섀도 없음.
+
+## 스캔2 추가 규칙(판독 결함 기계화)
+- 연도 예측: 일정어(착공·준공·입주·분양·관리처분·인가·일정…) 줄의 2026~2039 연도가 현장 블록에 없으면 결함. ⚠️ 상수 블록 연도(기한·시행일)는 허가 근거로 쓰지 않음 — 112520 을 통과시킨 원인.
+- 유령 지명: 서울 밖 현장 글에 서울 고유 지명(강남역·광화문·여의도·잠실·압구정·강남구·서초구·송파구·용산구·마포구·성수동). 「교대역」(부산에도 있음)·「강남동」(진주에 있음)은 제외.
+- 누출: 내부 트랙 표기(BN 허브·허브 발행·bn_hub·BP70·BP-B·BN-B).
+- 실측 재스캔: 112517 → image·place(강남역·광화문)·leak·극값 / 112520 → year 6줄·link 2(/blog/apartment-charter·/blog/redev-basic)·leak·극값. **판독 결함 중 기계 미검출은 112520 취득세 1%(→ E 프롬프트)·경미 2(「중앙동로」·템플릿 잔재)뿐.**
+
+## D 프롬프트
+- 일정 규율(블록에 없는 연도·반기 금지, 「모집공고 후 확정」) · 표기 규율(내부 표기 금지, `/blog/<영문>` 창작 금지 — 상위 경로만).
+- 「(BN 허브 발행)」 출처 = **CC 가 적재한 글감 summary** — DB 10건 정리 완료(RETURNING 10), 적재 SQL 문서 수정.
+- 프롬프트 「원본 데이터」 JSON 에서 운영 키 제외(batch·bp70_count·scan2·regen_after·gate 기록·title_spec·complex_name_src·doc).
+
+## E 조합원 취득세
+- 정비사업 현장 블록에 「조합원 취득세: 원시취득 등 별도 규정 — 세율 숫자를 쓰지 않는다. 제도 상수의 주택 취득세는 유상 매매 기준」.
+- 원시취득 상수 신설은 법령 원문(DRF) 대조가 필요해 이번엔 차선안(수치 금지). 상수 신설 원하면 별도 안건.
+
+## 재생성 리셋(세션 A)
+판독 §4 절차 그대로. 대상 112514~112523(10). 리셋 후 첫 회전부터 위 게이트·프롬프트가 적용된다.
