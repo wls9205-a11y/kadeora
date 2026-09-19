@@ -675,3 +675,16 @@ WHERE blog_post_id IN (SELECT id FROM p) RETURNING id, blog_post_id;
 - **FW 전환 스위치 판정 기준(2단):** FW 재생성 13편을 새 레일(fw_hub · site_compact · 월 문형)에서 전수 판독 →
   **판독 통과율 ≥ 80% + 잔여 결함 전부 기계 검출 가능 유형**이면 `fw.producer_enabled`·`fw.hub_publish_enabled` on — BN-C 일괄 개통과 같은 창.
 - **FW 상시 흐름 예고:** 첫 주 전수 판독 → 통과율 안정 확인 후 표본 판독 20% + 기계 게이트 체제(전환 시점은 별도 판정).
+
+---
+
+# 20차 — ⛔ 사고 3: 한도 창 오판 (2026-09-19 15:01Z)
+
+- **오판:** CRON_TYPE_DAILY_LIMIT 창을 KST 자정으로 보고 25건을 15:01Z 에 해제 → 15:10 회차가 다시 `60/60` 실패 5 · edit_pending 4.
+- **원인(함수 원문):** `validate_blog_post` — `SELECT count(*) … WHERE cron_type=NEW.cron_type AND created_at::date = COALESCE(NEW.created_at, v_now)::date`. 세션 TimeZone=UTC(서버·역할 모두) → **버킷 일 = UTC 날짜, 리셋 00:00Z(KST 09:00)**.
+  16차의 「kst_today=60」은 07:30Z 시점에 KST 일 창과 UTC 일 창이 같은 60건을 담아 생긴 우연 일치 — 함수 정의를 읽지 않고 건수로 추정한 CC 오류.
+- **피해:** 신규 글 0(image-attach 봉인 유효) · LLM 생성 약 9회분 소모(edit_pending 초안 폐기).
+- **조치:** 25건 재봉인(`fail_reason='bn_defer_limit2' · publish_decision='deferred'`). 15:10 회차가 보류 이후 in-flight 로 3건을 edit_pending 기록 → 즉시 재봉인, 25건 전부 확인.
+  해제 재예약 **2026-09-20 00:00:30Z(KST 09:00:30)**. FW 캡 창도 UTC 버킷 일로 정렬(`bucketDayStartIso`).
+- **교훈(정본):** 한도·창·주기 판정은 **함수 원문으로만**. 건수 일치는 근거가 아니다.
+- 일정 영향: BN-C 계열 12편 첫 묶음은 KST 09:00 이후 도착. 뉴스 글감과 같은 60 버킷을 00:00Z 부터 나눠 쓴다(해제 25 + 뉴스 몫 35).
