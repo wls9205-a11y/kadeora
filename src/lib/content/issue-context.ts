@@ -138,7 +138,10 @@ export async function buildSiteContext(sb: any, siteId: string | null | undefine
         const median = amts[Math.floor(amts.length / 2)];
         const months = rows.map((r) => String(r.deal_date).slice(0, 7)).sort();
         const fmt = (v: number) => (v >= 10000 ? `${Math.floor(v / 10000)}억${v % 10000 ? ` ${(v % 10000).toLocaleString()}만원` : '원'}` : `${v.toLocaleString()}만원`);
-        lines.push(`- 같은 시군구 아파트 실거래(${months[0]}~${months[months.length - 1]}, ${rows.length}건${rows.length === 1000 ? '+' : ''}): 중위 ${fmt(median)} · 최저 ${fmt(amts[0])} · 최고 ${fmt(amts[amts.length - 1])} — 단지를 특정하지 않은 시군구 전체 집계. 인용할 때 기간은 이 괄호의 연월로만 쓰고(「최근 N년」 금지), 최저·최고에 지역·단지 유형 해석을 덧붙이지 않는다`);
+        lines.push(`- 같은 시군구 아파트 실거래(${months[0]}~${months[months.length - 1]}, ${rows.length}건${rows.length === 1000 ? '+' : ''}): 중위 ${fmt(median)} — 단지를 특정하지 않은 시군구 전체 집계. 인용할 때 기간은 이 괄호의 연월로만 쓴다(「최근 N년」 금지)`);
+        // BN-2 — 최저·최고를 싣지 않는다. 시군구 전체의 극값(3천만~24억)은 현장 글에 의미가 없고, 모델이 그 옆에
+        //   「(강남동 고급 단지)」「(소규모 물량)」 같은 해석 괄호를 지어 붙였다 — 인용 지시(4e4bc584) 후에도 새 초안 6편 중 4편.
+        //   블록에서 빼면 허용 목록에서도 빠져 수치 게이트가 막는다.
       }
     }
     const subId = Number(data.source_ids?.subscription_id);
