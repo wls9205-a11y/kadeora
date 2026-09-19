@@ -61,10 +61,15 @@ export function scanDraft2({ content, siteContext, constantsBlock }: Scan2Input)
   const body = content ?? '';
 
   // ① 기간 수식어 — 데이터 창과 어긋나면. 창이 없으면(실거래 줄 없음) 기간 주장 자체가 근거 없음.
+  //    ⚠️ 시세·거래 문맥(앞뒤 30자)에서만 본다 — 「과거 5년 이내 당첨자 세대 아님」은 재당첨 제한 «규정» 이다
+  //       (112519·112521 오탐 실측). 제도 상수 블록에 있는 표현도 허용.
   const win = dataWindowMonths(siteContext);
   const pr = /(최근|지난|과거)\s*(\d+)\s*(년|개월|달)(간|동안)?/g;
+  const PRICE_CTX = /실거래|시세|가격|거래|중위|매매|상승|하락|호가|전세/;
   let m: RegExpExecArray | null;
   while ((m = pr.exec(body)) !== null) {
+    const around = body.slice(Math.max(0, m.index - 30), m.index + m[0].length + 30);
+    if (!PRICE_CTX.test(around) || constantsBlock.includes(m[0])) continue;
     const months = Number(m[2]) * (m[3] === '년' ? 12 : 1);
     if (win === null || Math.abs(months - win) > 1) defects.push({ rule: 'period', text: m[0] });
   }

@@ -138,7 +138,7 @@ export async function buildSiteContext(sb: any, siteId: string | null | undefine
         const median = amts[Math.floor(amts.length / 2)];
         const months = rows.map((r) => String(r.deal_date).slice(0, 7)).sort();
         const fmt = (v: number) => (v >= 10000 ? `${Math.floor(v / 10000)}억${v % 10000 ? ` ${(v % 10000).toLocaleString()}만원` : '원'}` : `${v.toLocaleString()}만원`);
-        lines.push(`- 같은 시군구 아파트 실거래(${months[0]}~${months[months.length - 1]}, ${rows.length}건${rows.length === 1000 ? '+' : ''}): 중위 ${fmt(median)} · 최저 ${fmt(amts[0])} · 최고 ${fmt(amts[amts.length - 1])} — 단지를 특정하지 않은 시군구 전체 집계`);
+        lines.push(`- 같은 시군구 아파트 실거래(${months[0]}~${months[months.length - 1]}, ${rows.length}건${rows.length === 1000 ? '+' : ''}): 중위 ${fmt(median)} · 최저 ${fmt(amts[0])} · 최고 ${fmt(amts[amts.length - 1])} — 단지를 특정하지 않은 시군구 전체 집계. 인용할 때 기간은 이 괄호의 연월로만 쓰고(「최근 N년」 금지), 최저·최고에 지역·단지 유형 해석을 덧붙이지 않는다`);
       }
     }
     const subId = Number(data.source_ids?.subscription_id);

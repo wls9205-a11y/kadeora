@@ -25,6 +25,9 @@ describe('scanDraft2', () => {
     expect(scan('최근 5년간 중위 실거래가가 4억 8,800만원').map((d) => d.rule)).toEqual(['period']);
     expect(scan('최근 6개월 실거래 중위 4억 8,800만원')).toEqual([]);
   });
+  it('① 시세 문맥 밖의 기간(재당첨 제한 규정)은 통과 — 112519 오탐', () => {
+    expect(scan('- **당첨 제한**: 과거 5년 이내 당첨자 세대 아님')).toEqual([]);
+  });
   it('② 블록 밖 금액 — 관리비 추정', () => {
     const d = scan('관리비는 **평당 월 8,000~12,000원 대**에서 형성될 가능성');
     expect(d.every((x) => x.rule === 'amount')).toBe(true);
