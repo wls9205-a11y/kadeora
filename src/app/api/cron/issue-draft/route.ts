@@ -18,6 +18,7 @@ import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
 import { sortForGeneration } from '@/lib/content/realestate-priority';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
 import { reviewHoldOf, reviewSwitches, isReviewHoldReason } from '@/lib/content/review-hold';
+import { scanDraft2, enforceTitleSpec, PROMPT_LEAK_MARKER } from '@/lib/content/draft-scan2';
 import { editOutNumbers, loadIssueContext, buildIssueAllow, verifyIssueDraft, type IssueContext } from '@/lib/content/issue-context';
 import { parseSalePeriod } from '@/lib/apt/sale-period';
 import { periodWindow } from '@/lib/apt/upcoming-sales';
@@ -145,7 +146,7 @@ ${issue.category === 'apt' ? `
 ⛔ 사실 규율 — 예정명은 «확정 발표된 것» 만 단정한다. 시공사 선정 «전» 의 이름이면
    반드시 「제안 단지명」이라고 밝힌다. 확정과 제안을 섞으면 그 현장을 영영 잘못 부르게 된다.
 ${siteContext ? `
-## 이 글의 현장
+## 이 글의 현장 ${PROMPT_LEAK_MARKER}
 ${siteContext}` : ''}
 ${constantsBlock ? `
 ## 제도 상수(전국 공통 · 출처·기준일 있음 — 인용 시 기준일을 함께 쓴다)
@@ -626,6 +627,10 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     return { decision: 'ai_failed_final', score: issue.final_score };
   }
 
+  // BN-2 ⑤ — 제목 규격(BN 글감만). 게이트가 «바뀐 제목» 을 보게 여기서 먼저.
+  const titleFix = enforceTitleSpec(article.title, issue.raw_data);
+  article.title = titleFix.title;
+
   // EX-A ③ — 수치 출처율 100%. LLM 원문(시각화·SEO 보강 «전») 을 그 글에 준 텍스트와 대조한다.
   //   ⚠️ 부동산은 막는다. 주식·경제는 «섀도»(기록만).
   // ABG X-2 — 감산 편집은 «편집 회차» 로 넘긴다. 생성 회차 안에서 편집까지 하면 건당 ~240s 라 회전당 1건에 갇혔다.
@@ -644,7 +649,7 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     return { decision: 'edit_pending', score: issue.final_score, title: article.title };
   }
   const gateLog = issue.category === 'apt'
-    ? { gate_result: 'passed_first', first_unverified: [], checked: gate.checked }
+    ? { gate_result: 'passed_first', first_unverified: [], checked: gate.checked, ...scan2Log(article, ctx, titleFix.replaced) }
     : { number_shadow: { ok: gate.ok, checked: gate.checked, unverified: gate.unverified.slice(0, 30), had_source_text: !!sourceText } };
   return finalizeArticle(sb, issue, config, article, gateLog);
 }
@@ -674,6 +679,8 @@ async function processEditIssue(sb: any, issue: any, config: any): Promise<{ dec
     dbw('issue-draft', 'issue_alerts.update@edit_missing', await (sb as any).from('issue_alerts').update({ publish_decision: 'ai_failed', fail_reason: 'parse' }).eq('id', issue.id));
     return { decision: 'edit_missing', score: issue.final_score };
   }
+  const titleFix = enforceTitleSpec(article.title, issue.raw_data);
+  article.title = titleFix.title;
   const ctx: IssueContext = await loadIssueContext(sb, issue);
   const allow = buildIssueAllow(ctx, issue);
   const first = verifyIssueDraft(article.title, article.content, allow);
@@ -694,8 +701,14 @@ async function processEditIssue(sb: any, issue: any, config: any): Promise<{ dec
     return { decision: 'number_unverified', score: issue.final_score, title: article.title };
   }
   issue.raw_data = { ...(issue.raw_data ?? {}), edit_pending: undefined };
-  const gateLog = { gate_result: edited ? 'passed_after_edit' : 'passed_first', first_unverified: firstUnverified.slice(0, 20), checked: first.checked };
+  const gateLog = { gate_result: edited ? 'passed_after_edit' : 'passed_first', first_unverified: firstUnverified.slice(0, 20), checked: first.checked, ...scan2Log(article, ctx, titleFix.replaced) };
   return finalizeArticle(sb, issue, config, article, gateLog);
+}
+
+/** BN-2 §4 스캔2 기록. 강제(hold)는 BN 글감만 — 그 밖의 부동산 글감은 섀도(기록만)다. */
+function scan2Log(article: GenResult, ctx: IssueContext, titleReplaced: string | null) {
+  const defects = scanDraft2({ title: article.title, content: article.content, siteContext: ctx.siteContext, constantsBlock: ctx.constantsBlock });
+  return { scan2: { at: new Date().toISOString(), defects: defects.slice(0, 30), title_replaced: titleReplaced } };
 }
 
 /** 게이트 통과 이후 — 시각화·SEO·적재·이미지·발행. 생성 회차와 편집 회차가 공유한다. */
@@ -789,7 +802,10 @@ async function finalizeArticle(sb: any, issue: any, config: any, article: GenRes
   //   app_config <ns>.hub_publish_enabled 가 정확히 true 일 때만 자동 발행 경로를 탄다(기본 보류). review-hold.ts 참조.
   const reviewHold = reviewHoldOf(issue);
   const holdPublishOn = reviewHold ? (await reviewSwitches(sb))[reviewHold.namespace] : true;
-  const canAutoPublish = holdPublishOn && config.auto_publish_enabled
+  // BN-2 §4 — 스캔2 결함이 있는 BN 초안은 스위치가 열려 있어도 hold(사유 …:scan2). 결함분은 재생성 대상.
+  const scan2Defects: unknown[] = (gateLog as any)?.scan2?.defects ?? [];
+  const scan2Hold = reviewHold?.namespace === 'bn' && scan2Defects.length > 0;
+  const canAutoPublish = holdPublishOn && !scan2Hold && config.auto_publish_enabled
     && issue.final_score >= (config.auto_publish_min_score ?? 40)
     && !issue.block_reason && check.passed
     && !(config.auto_publish_blocked_categories || []).includes(issue.category);
@@ -850,9 +866,9 @@ async function finalizeArticle(sb: any, issue: any, config: any, article: GenRes
   }
 
   // BN-1 ② — 판독 대기 초안에 사유 도장. DB 가드('hold:%')가 blog-auto-publish 등 모든 공개 경로를 막는다.
-  if (reviewHold?.stampReason && !holdPublishOn && blogPostId) {
+  if (reviewHold?.stampReason && (!holdPublishOn || scan2Hold) && blogPostId) {
     dbw('issue-draft', 'blog_posts.update@review_hold', await (sb as any).from('blog_posts')
-      .update({ auto_unpublished_reason: reviewHold.reason, auto_publish_eligible: false })
+      .update({ auto_unpublished_reason: scan2Hold ? `${reviewHold.reason}:scan2` : reviewHold.reason, auto_publish_eligible: false })
       .eq('id', blogPostId).eq('is_published', false));
   }
 

@@ -67,6 +67,19 @@ export async function fetchBigEventContext(sb: any, issue: any): Promise<string>
  * 예정명으로 제목을 세우고 현장 상세로 내부링크를 걸 수 있다.
  * ⚠️ 없으면 빈 문자열이다 — 주인 없는 글도 계속 만들어진다(기존 동작 불변).
  */
+/** 세대수 conflicting 미해소 여부 — 마지막 units_conflict 가 마지막 units_conflict_closed 보다 뒤면 열림. 조회 실패는 «열림»(싣지 않는 쪽이 안전). */
+export async function unitsConflictOpen(sb: any, siteId: string): Promise<boolean> {
+  try {
+    const { data, error } = await (sb as any).from('apt_site_events').select('event_type, created_at')
+      .eq('site_id', siteId).in('event_type', ['units_conflict', 'units_conflict_closed'])
+      .order('created_at', { ascending: false }).limit(1);
+    if (error) return true;
+    return (data ?? [])[0]?.event_type === 'units_conflict';
+  } catch {
+    return true;
+  }
+}
+
 export async function buildSiteContext(sb: any, siteId: string | null | undefined): Promise<string> {
   if (!siteId) return '';
   try {
@@ -77,7 +90,10 @@ export async function buildSiteContext(sb: any, siteId: string | null | undefine
     // AB-2 · Q-1 — 합성 분양가(지역 채움값)는 싣지 않는다. 비우면 아래 줄이 「미공개」로 안내한다.
     const priced = stripSyntheticPrice(data);
     const isRedev = data.site_type === 'redevelopment' || !!data.source_ids?.redev_id;
-    const units = data.complex_units || data.total_units;
+    // BN-2 §1-3 — 세대수 conflicting(apt_site_events units_conflict) 이 미해소면 세대수를 싣지 않는다.
+    //   해소 = 그 뒤의 units_conflict_closed 이벤트(merge_review_queue → merge_review_closed 관례).
+    const unitsOpen = await unitsConflictOpen(sb, siteId);
+    const units = unitsOpen ? null : (data.complex_units || data.total_units);
     const disp = (data.display_name || '').trim();
     // display 규격이 「{예정명} — {구역명}」이라 제목에는 앞쪽(예정명)만 쓴다.
     const preferred = (disp.split(' — ')[0] || disp || data.name || '').trim();
@@ -87,7 +103,9 @@ export async function buildSiteContext(sb: any, siteId: string | null | undefine
       data.sigungu ? `- 지역: ${[data.region, data.sigungu].filter(Boolean).join(' ')}` : '',
       data.builder ? `- 시공사: ${data.builder}` : '- 시공사: 미정(단정하지 말 것)',
       // ABG 증분 2 §4 — 청약 경유 현장의 total_units 는 공고 «공급» 세대수다(sync 덮어쓰기). 총세대로 쓰게 두면 그랑라크 1,153 사고가 된다.
-      data.complex_units
+      unitsOpen
+        ? '- 세대수: 자료 간 불일치로 확인 중 — 세대수 숫자를 쓰지 않는다(「규모는 확정 발표 후 안내」 문형)'
+        : data.complex_units
         ? `- 단지 전체 세대수: ${data.complex_units}세대`
         : units && (data.source_ids?.house_manage_no || data.source_ids?.subscription_id)
           ? `- 공급 세대수(청약 공고 기준): ${units}세대 — 단지 전체 세대수는 미확인. 「총 ${units}세대」라고 쓰지 않는다`
