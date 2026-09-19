@@ -1,3 +1,10 @@
+## 2026-09-19 — BN CC 3차: 크레딧 복구 후 재개 · 스캔2 게이트 5종 · 인라인 오링크 차단
+
+- 6c33fe04 스캔2(기간·블록 밖 금액·괄호 귀속·지시문 누출·제목) + 세대수 units_conflict 무기재 + 301 사직2 · c130ba4c 인라인 링크 브랜드 단독 제외·앞쪽 경계 · 4e4bc584 ① 오탐 수리·실거래 줄 인용 지시.
+- BN 초안 8(깨끗 4 · 결함 4) + 차단 2 재큐잉. 판독 입력은 docs/bn/BN_CC_reply_20260918.md 3차.
+- 신규: 브랜드 단독 slug(힐스테이트·아이파크) 오링크 34행 · hub 오염 12편 — 세션 A 정리 대상.
+- FW 사전 실측: docs/bn/FW_premeasure_20260919.md.
+
 ## 2026-09-18 (저녁) — BN CC 2차: hold·301·첫 배치 적재 — Anthropic 크레딧 소진으로 7/9 정지
 
 - d801620d BN hold(review-hold.ts · bn.hub_publish_enabled=false · hold:bn_review 도장) + 301 맵 +2 · 25523b4e 단지명 병기(raw_data.complex_name/title_spec) · 9662a033 sa.py T-C 필터 · 48f41bde merge_succession 수치 승계 차단.
