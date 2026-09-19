@@ -184,3 +184,23 @@ describe('8차 판독 기준 — 완료 인가 진행형', () => {
     expect(f('조합설립인가', '다음 절차는 사업시행계획인가 예정입니다.')).toEqual([]);
   });
 });
+
+describe('8차 판정 — 행위 서술은 결함, 국면 서술은 통과', () => {
+  const at = SITE + '\n- 사업 단계(확정): 조합설립인가 — 이 단계와 다른 단계·조합 구성 여부를 쓰지 않는다';
+  const f = (c: string) => scanDraft2({ title: '', content: c, siteContext: at, constantsBlock: '', compact: true });
+  it('국면 서술(단계로·단계를·단계에서 진행 중) 통과 — 112565', () => {
+    expect(f('2024년 8월 수주가 확정되었으며(2024-08-25 보도 기준), 이후 조합설립인가 단계를 진행 중입니다.')).toEqual([]);
+    expect(f('현재 조합설립인가 단계에서 사업이 진행 중입니다.')).toEqual([]);
+  });
+  it('행위 서술 결함 — 112572 원문', () => {
+    expect(f('조합 설립 및 인가 절차가 진행되고 있습니다.').length).toBeGreaterThan(0);
+  });
+});
+
+describe('8차 판정 — 제목 단지명 속 역 토큰', () => {
+  it('단지명 일부는 통과, 제목의 역 인근 서술은 결함', () => {
+    const t = '부산 사하구 괴정5구역 재개발 힐스테이트 푸르지오 사하역 포레스트 일정·현황';
+    expect(scanDraft2({ title: t, content: '힐스테이트 푸르지오 사하역 포레스트는', siteContext: SITE, constantsBlock: '' })).toEqual([]);
+    expect(scanDraft2({ title: '부산역 인근 신축 분양', content: '부산역 인근 단지', siteContext: SITE, constantsBlock: '' }).map((d) => d.rule)).toEqual(['place']);
+  });
+});

@@ -191,7 +191,8 @@ export function scanDraft2({ title, content, siteContext, constantsBlock, compac
     // 조합설립인가 이후인데 «조합 미구성·조합 설립 예정·조합원 모집»
     if (stageIdx >= 1 && (/조합[^.\n]{0,10}(?:구성|설립)[^.\n]{0,6}(?:되지|되기\s*전|\s전|예정|→)|조합\s*(?:구성|설립)\s*(?:후|이후|→)|조합원\s*모집/.test(s)
         // 7차 판독 — 앞으로의 절차 나열 속 「조합 구성」(112567 「이후 조합 구성, 관계인 동의, 모집공고 순」)
-        || /(?:이후|향후|앞으로|다음)[^.\n]{0,12}조합\s*(?:구성|설립)|조합\s*(?:구성|설립)\s*[,·]/.test(s)
+        // 8차 판정 — 「조합설립인가 단계를·단계로·단계에서 진행 중」은 국면 서술(통과). 행위 서술만 결함(112565 유지).
+        || /(?:이후|향후|앞으로|다음)[^.\n]{0,12}조합\s*(?:구성|설립)(?!\s*인가\s*단계)|조합\s*(?:구성|설립)\s*[,·]/.test(s)
         // 7차 판독(BN-C) — 「조합 구성과 후속 행정절차」(112569) · 「조합 설립 단계에서 확정」(112573)
         || /조합\s*(?:구성|설립)\s*(?:과|와|및)\s|조합\s*(?:구성|설립)\s*단계에서/.test(s))) { hit('조합 미구성'); continue; }
     // 사업시행계획인가 이후인데 «초기·예비 단계»
@@ -314,7 +315,10 @@ export function scanDraft2({ title, content, siteContext, constantsBlock, compac
   const proseSt = stripUrls(body);
   while ((m = stationRe.exec(proseSt)) !== null) {
     const st = m[1];
-    if (seenSt.has(st) || defects.some((d) => d.rule === 'place' && d.text === st) || siteContext.includes(st) || /(지역|구역|영역|권역|전역|무역|수역|성역)$/.test(st)) continue;
+    // 8차 판정 — 제목의 단지명 속 역 토큰(「힐스테이트 푸르지오 사하역 포레스트」, 112559)은 역명 서술이 아니다.
+    //   제목에서 역 토큰 바로 뒤에 한글 낱말이 이어질 때만(=이름의 일부) 제외 — 「부산역 인근」 같은 제목 서술은 여전히 잡는다.
+    const inTitleName = new RegExp(`${st.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+(?!인근|근처|주변|역세권|도보|일대)[가-힣A-Za-z]`).test(title ?? '');
+    if (seenSt.has(st) || defects.some((d) => d.rule === 'place' && d.text === st) || siteContext.includes(st) || inTitleName || /(지역|구역|영역|권역|전역|무역|수역|성역)$/.test(st)) continue;
     seenSt.add(st);
     defects.push({ rule: 'place', text: st });
   }
