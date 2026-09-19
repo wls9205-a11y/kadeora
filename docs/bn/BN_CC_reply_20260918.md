@@ -474,3 +474,19 @@ WHERE blog_post_id IN (SELECT id FROM p) RETURNING id, blog_post_id;
 ## /apt/redev/{id} 308 (8110fa91 — 세션 A 승인 조건 반영)
 - `/apt/redev/[region]` 이 숫자 인자를 받으면: ① 연결 현장 `/apt/<slug>` ② 연결 없음 → 구역 소속 시·도 `/apt/redev/<시·도>` ③ 시·도 모름 → `/apt/redev`. 매핑 `unstable_cache` 하루. 본문 불변.
 - 연결 없는 구역 1,041 / 1,796 — 시·도 폴백이 다수 경로.
+
+---
+
+# BNC-FW 1차 — BN-C 16 적재 · FW 선행 조건 (2026-09-19)
+
+## BN-C 적재 — 완료 (16 · RETURNING 16)
+- 정본 규격: source_type bn_hub · issue_type redevelopment · template site_compact · apt_site_id(hub 고정) · summary 운영 표기 0 · source_urls 비움 · final_score 45 · title_spec 「{단지명} — {구역} 현재 상황·일정 총정리」. 운영 키는 프롬프트 제외 목록(batch·title_spec 등)에 있고, 적재 때 넣은 `name_tier` 는 제외 목록 밖이라 DB 에서 제거(16).
+- bn.hub_publish_enabled = false 확인 — 생성분은 hold:bn_review 로 축적.
+- 형제 글감 차단 해소: **111400 대연8**(8/24 preempt · 사유 NULL · 서울 기축 푸터) → `hold:bn_20260918_footer_contam_replace_by_new`. 삼익비치(환각 처분)·용호2·중동5(기처분)는 이미 «죽은 글».
+- 검증 1문(세션 A):
+  `SELECT raw_data->>'slug', is_processed, publish_decision FROM issue_alerts WHERE source_type='bn_hub' AND raw_data->>'batch'='BN-C';` → 16행 · 초기 false/NULL.
+- 실측 주의(판독 입력): 광안a complex_units **2,780**(지시서 표 2,550 = total) · 반여3-1 complex_units **513**(표 811 = total) — 현장 블록은 complex_units 를 싣는다. 김해외동 site_type=subscription(정비 아님) → 단계 문형 미주입 · 「구역」 금지 문형.
+
+## FW — 착수 보류 사유 2
+1. **정본 「지시서_FW_20260919」가 저장소·세션에 없다**(docs/bn/FW_premeasure_20260919.md 는 CC 사전 실측). 선정 규칙·쿼터·축별 글감 규격·템플릿이 정본에 있어야 생산자를 짠다 — 원문 전달 요청.
+2. **옛 preempt 초안 791편**(9/1 이전 · 미발행 · 사유 NULL)이 같은 현장 중복 판정에서 «살아 있는 글» 로 잡힌다 → FW 생산자 글감이 해당 현장에서 same_site_pending 으로 막힌다(대연8 111400 실례). 8/24 배치 표본은 전부 서울 기축 푸터 오염. **FW 스위치 on 전 일괄 처분(사유 기록) 필요** — 판정 요청: 사유 `hold:fw_preempt_legacy`로 791편 일괄(본문 무수정, 원자 1문).
