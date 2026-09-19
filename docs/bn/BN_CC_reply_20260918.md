@@ -379,3 +379,26 @@ WHERE blog_post_id IN (SELECT id FROM p) RETURNING id, blog_post_id;
 ## 제안(판정 필요) — 목차 밖 섹션의 결정적 제거
 - 3·4회차 연속으로 모델이 「투자 판단 시 주의사항」류 일반론 섹션을 덧붙인다(4회차 5/10). 프롬프트 금지로는 수렴하지 않는다.
 - 구조 결함은 LLM 편집 대상이 아니라는 판정(②)은 유지하되, **화이트리스트 밖 H2 블록을 통째로 코드가 잘라내는 것**(LLM 없음·문장 편집 없음·섹션 단위)은 파손 위험이 낮다. 잘라낸 제목은 `raw_data.scan2.sections_removed` 로 남긴다. 승인 시 5회차부터 적용.
+
+---
+
+# BN CC 10차 — BN-B4 판독 반영 (7abd7f3d) (2026-09-19)
+
+## 원인 실측 2
+- **B 수치 소거(112554·112555)**: 편집 회차 오탐이 아니다. `first_unverified` = 「추정:3억 6,000만원」「추정:4억 8,800만원」 — 블록 중위가를 모델이 「약·수준·~대」와 함께 써서 **RULES#149 추정 규칙**(추정 표현이 수식한 금액은 허용 목록과 무관하게 차단)에 걸렸고, 감산 편집이 숫자를 지워 공허 문장이 남았다. RULES#149 는 완화하지 않고 거래 데이터 본문을 코드가 채운다.
+- **C 「디엘이엔씨」**: 다듬기 변형이 아니라 **DB builder 원값**(builder_normalized = 「DL이앤씨」). 주입 문형이 정규화명을 쓰도록 수리.
+
+## 반영 1~6
+1. 섹션 절제기 `exciseCompact`(LLM 0·섹션 단위): 목차 밖 H2 · 메타 표 · FAQ 7+ → 생성 파이프 편입, `raw_data.sections_removed`.
+2. 거래 데이터 문형 주입 `dataSection`: 「{지역} 아파트 실거래(기간, N건 집계)의 중위 거래가는 X입니다. 단지를 특정하지 않은 시군구 전체 집계이므로 …」 — 블록 값 그대로, 수식어 없음. 블록에 줄이 없으면 수치 없는 «집계 부족» 문형. 프롬프트: 중위가는 그 섹션 밖 반복 금지.
+3. 스캔2: 주변 거래 섹션 숫자 0 → section.
+4. 문형 보호: 편집 회차(수치·스캔2) 결과에 단계·거래 블록 재주입 · 시공사 정규화명 · 「정해집니다」.
+5. 축약 분량 하한 2,300.
+6. enrichVisuals 메타 표 — 부동산 글 미삽입.
+
+## 처분
+- **재절제 2편 — 완료**: 112548(메타 표 제거 · 결함 0 · 본문 2,430 · FAQ 6) · 112553(메타 표 + FAQ 7번째 제거 · 결함 0 · 본문 2,303 · FAQ 6). 원본 백업 `blog_posts_content_backup_bn_20260919`(RLS·권한 회수). 사유 hold:bn_review 유지 → **5차 판독 대상**.
+  - 주입 문형 말미는 이 2편에 한해 구판 「정해진다」 그대로(재절제는 LLM 0 · 문형 재주입 안 함).
+- **재생성 2편 합류**: 112554·112555 superseded → `bn_defer_slug_fix` (5회차 총 8편).
+- ⚠️ **해제는 7abd7f3d READY 후**(82b22c03 아님 — 거래 문형·절제기가 7abd7f3d 에 있다). 해제문은 표식 그대로:
+  `UPDATE issue_alerts SET is_processed=false, fail_reason=NULL WHERE source_type='bn_hub' AND fail_reason='bn_defer_slug_fix' AND blog_post_id IS NULL RETURNING raw_data->>'slug';`
