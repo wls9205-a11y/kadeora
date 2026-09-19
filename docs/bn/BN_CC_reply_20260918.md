@@ -511,3 +511,8 @@ WHERE blog_post_id IN (SELECT id FROM p) RETURNING id, blog_post_id;
 
 ## CC 순서
 791 hold + conflict 2 원자 집행 → FW 생산자 구현(스위치 off) → BP 무판독 13편 섀도 스캔 → BN-C 산출 모니터(도착 묶음 판독 입력).
+
+## 15차 집행 결과 (원자 1문)
+- `hold:fw_preempt_legacy` **791**(cron_type issue_preempt · created_at < 2026-09-01 · 미발행 · 사유 NULL). 표본 20 id:
+  109889,110366,111391,111401,98063,111878,112043,99018,110616,109699,111978,111130,109670,109677,97735,110679,109189,109570,98359,110334
+- units_conflict 등재 2: 광안a-재개발(2780 complex ↔ 2550 total) · 반여3-1-재건축(513 complex ↔ 811 total).
