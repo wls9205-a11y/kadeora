@@ -169,3 +169,18 @@ describe('BN-C 7차 판독 — 조합 미구성 변형', () => {
     expect(f('조합 구성은 사업 공고 및 조합 설립 단계에서 확정됩니다.')).toContain('fact');
   });
 });
+
+describe('8차 판독 기준 — 완료 인가 진행형', () => {
+  const at = (stage: string) => SITE + `\n- 사업 단계(확정): ${stage} — 이 단계와 다른 단계·조합 구성 여부를 쓰지 않는다`;
+  const f = (stage: string, c: string) => scanDraft2({ title: '', content: c, siteContext: at(stage), constantsBlock: '', compact: true }).map((d) => d.text);
+  it('완료된 인가의 진행형·미래형은 결함', () => {
+    expect(f('조합설립인가', '이 단계에서는 사업 추진을 위한 조합 설립 및 인가 절차가 진행되고 있습니다.').join()).toMatch(/조합 미구성|완료 인가/);
+    expect(f('관리처분계획인가', '관리처분계획인가를 받을 예정입니다.').join()).toContain('완료 인가 진행형');
+    expect(f('사업시행계획인가', '사업시행계획인가 절차가 진행 중입니다.').join()).toContain('완료 인가 진행형');
+  });
+  it('단계 이름표·완료 서술·아직 안 받은 인가는 통과', () => {
+    expect(f('조합설립인가', '현재 조합설립인가 단계로 진행 중입니다.')).toEqual([]);
+    expect(f('사업시행계획인가', '사업시행계획인가를 받은 뒤 관리처분계획인가를 앞두고 있습니다.')).toEqual([]);
+    expect(f('조합설립인가', '다음 절차는 사업시행계획인가 예정입니다.')).toEqual([]);
+  });
+});
