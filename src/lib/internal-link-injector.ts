@@ -28,13 +28,19 @@ export function _resetCache() { _cache = null; }
 async function loadCache(sb: any): Promise<CacheState> {
   if (_cache && Date.now() - _cache.loadedAt < TTL_MS) return _cache;
 
-  const [aptRes, redevRes, unsoldRes] = await Promise.all([
+  const [aptRes, redevRes, unsoldRes, brandRes] = await Promise.all([
     sb.from('apt_sites').select('slug, name').not('slug', 'is', null).limit(5000),
     sb.from('redevelopment_projects').select('id, district_name').not('district_name', 'is', null).limit(3000),
     sb.from('unsold_apts').select('id, house_nm').not('house_nm', 'is', null).limit(2000),
+    sb.from('brand_tokens').select('brand').eq('is_active', true),
   ]);
 
-  const apt: AptSite[] = (aptRes.data || []).filter((r: any) => r.name && r.name.length >= MIN_NAME_LEN);
+  // BN §3-A 후속(2026-09-19) — 이름이 «브랜드 단독» 인 현장은 링크 대상이 아니다.
+  //   「힐스테이트 푸르지오 사하역 포레스트」(부산 괴정5) 속 「힐스테이트」가 경기 이천 `/apt/힐스테이트` 로 걸렸다(112516).
+  //   브랜드 단독 이름은 어느 단지명에도 들어 있어 부분 일치가 곧 오귀속이다. 정본은 brand_tokens.
+  const brands = new Set(((brandRes?.data ?? []) as Array<{ brand: string }>).map((b) => b.brand.replace(/\s/g, '')));
+  const apt: AptSite[] = (aptRes.data || []).filter((r: any) =>
+    r.name && r.name.length >= MIN_NAME_LEN && !isBrandOnlyName(r.name, brands));
   const redev: RedevProject[] = (redevRes.data || []).filter((r: any) => r.district_name && r.district_name.length >= MIN_NAME_LEN);
   const unsold: UnsoldApt[] = (unsoldRes.data || []).filter((r: any) => r.house_nm && r.house_nm.length >= MIN_NAME_LEN);
 
@@ -51,10 +57,29 @@ async function loadCache(sb: any): Promise<CacheState> {
  * s195: lookbehind/lookahead 정규식이 한글 entity 에서 silent fail (브라우저별
  * 동작 다름 + V8 한글 경계 문제) → indexOf 기반 단순 매칭으로 교체.
  */
-function replaceFirstOccurrence(content: string, name: string, url: string): { changed: boolean; out: string } {
+/** 이름이 브랜드 토큰 하나뿐인가(공백 무시). */
+export function isBrandOnlyName(name: string, brands: Set<string>): boolean {
+  return brands.has(String(name ?? '').replace(/\s/g, ''));
+}
+
+/**
+ * 앞쪽 경계를 지키는 첫 등장 위치. 직전 글자가 한글·영숫자면 더 긴 낱말의 꼬리다(「센텀」 ⊂ 「해운대센텀」).
+ * ⚠️ 뒤쪽 경계는 걸지 않는다 — 한국어는 이름 뒤에 조사가 붙는다(「잠실엘스는」).
+ */
+export function boundedIndexOf(content: string, name: string): number {
+  let from = 0;
+  for (;;) {
+    const idx = content.indexOf(name, from);
+    if (idx === -1) return -1;
+    if (idx === 0 || !/[가-힣A-Za-z0-9]/.test(content[idx - 1])) return idx;
+    from = idx + 1;
+  }
+}
+
+export function replaceFirstOccurrence(content: string, name: string, url: string): { changed: boolean; out: string } {
   if (content.includes(`](${url})`)) return { changed: false, out: content };
 
-  const idx = content.indexOf(name);
+  const idx = boundedIndexOf(content, name);
   if (idx === -1) return { changed: false, out: content };
 
   // 직전이 '[' 면 이미 링크 텍스트 안
