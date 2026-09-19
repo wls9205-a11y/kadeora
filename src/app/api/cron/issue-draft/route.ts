@@ -219,7 +219,10 @@ ${getFreshnessContext()}`;
 핵심 키워드: ${(issue.detected_keywords || []).join(', ')}
 관련 대상: ${(issue.related_entities || []).join(', ')}
 ${titleHint ? `타이틀 보조 토큰: ${titleHint}` : ''}
-원본 데이터: ${JSON.stringify({ ...(issue.raw_data || {}), blocked_draft: undefined, source_text: undefined, number_shadow: undefined }).slice(0, 2000)}
+원본 데이터: ${JSON.stringify({ ...(issue.raw_data || {}), blocked_draft: undefined, source_text: undefined, number_shadow: undefined,
+  // BN-B §3 D — 운영 키는 모델에 보이지 않는다(배치명·트랙·게이트 기록이 본문 누출원). title_spec 은 제목 칸에서 따로 준다.
+  batch: undefined, bp70_count: undefined, scan2: undefined, regen_after: undefined, gate_result: undefined, first_unverified: undefined,
+  checked: undefined, edit_pending: undefined, title_spec: undefined, complex_name_src: undefined, doc: undefined }).slice(0, 2000)}
 출처 URL: ${(issue.source_urls || []).join(', ')}
 ${sourceText ? `
 원문 발췌(출처 기사 본문 — 숫자는 여기와 위 데이터에 있는 것만 쓴다. 문장은 그대로 옮기지 말고 새 문장으로):
