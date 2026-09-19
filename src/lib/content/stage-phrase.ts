@@ -22,6 +22,14 @@ const IDX: Record<string, number> = Object.fromEntries(REDEV_STEPS.map((s, i) =>
 /** 조합원 자격 — 이 문형만 쓴다(세입자·거주자 조합원 단정 금지). */
 export const MEMBER_PHRASE = '재개발 조합원은 정비구역 안의 토지 또는 건축물 소유자(토지등소유자)이며, 구체적인 자격과 분양 신청 요건은 조합 정관과 관리처분계획에서 정해집니다.';
 
+/** 받침 여부로 이/가. 마지막 글자가 한글이 아니면 가. */
+export function josaIGa(word: string): string {
+  const ch = String(word ?? '').trim().slice(-1);
+  const code = ch.charCodeAt(0) - 0xac00;
+  if (Number.isNaN(code) || code < 0 || code > 11171) return '가';
+  return code % 28 === 0 ? '가' : '이';
+}
+
 export interface StageInput { stage: string | null | undefined; builder?: string | null; isRedev: boolean }
 
 /** 현재 단계 표시명(정비사업만). 모르면 null. */
@@ -42,7 +50,7 @@ export function stageSection({ stage, builder, isRedev }: StageInput): string | 
   const b = String(builder ?? '').trim();
   const lines: string[] = [];
   lines.push(`현재 이 구역은 **${cur.name}** 단계입니다.`);
-  if (b && i < IDX.constructor_selected) lines.push(`시공자로는 ${b}이(가) 선정되었습니다(보도 기준). 조합설립인가를 받은 뒤 사업시행계획인가에 앞서 시공자를 뽑은 사례입니다.`);
+  if (b && i < IDX.constructor_selected) lines.push(`시공자로는 ${b}${josaIGa(b)} 선정되었습니다(보도 기준). 조합설립인가를 받은 뒤 사업시행계획인가에 앞서 시공자를 뽑은 사례입니다.`);
   else if (b && i >= IDX.constructor_selected) lines.push(`시공자는 ${b}입니다(보도 기준).`);
   // 다음 단계 — 시공자가 이미 있으면 시공자 선정 단계를 건너뛴다
   let next = i + 1;

@@ -75,7 +75,7 @@ describe('BN-B 증보', () => {
   });
   it('⑦ 내부 링크 추출 — /apt·/blog 한 단계만, 디코드', () => {
     expect(extractInternalLinks('[a](/blog/redev-basic) [b](/apt/%EC%82%AC%EC%A7%815-%EC%9E%AC%EA%B0%9C%EB%B0%9C) [c](/blog?category=apt) [d](/apt/redev/부산)'))
-      .toEqual({ apt: ['사직5-재개발'], blog: ['redev-basic'] });
+      .toEqual({ apt: ['사직5-재개발'], blog: ['redev-basic'], badRoutes: [] });
   });
   it('연도 예측 — 블록에 없는 연도의 일정 줄', () => {
     expect(scan('| 준공 | 2030 전후 |').map((d) => d.rule)).toEqual(['year']);

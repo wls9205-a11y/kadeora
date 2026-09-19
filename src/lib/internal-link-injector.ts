@@ -15,6 +15,8 @@ interface UnsoldApt { id: string; house_nm: string }
 interface CacheState {
   apt: AptSite[];
   redev: RedevProject[];
+  /** redevelopment_projects.id → 연결된 현장 slug */
+  redevSite: Map<string, string>;
   unsold: UnsoldApt[];
   loadedAt: number;
 }
@@ -29,7 +31,7 @@ async function loadCache(sb: any): Promise<CacheState> {
   if (_cache && Date.now() - _cache.loadedAt < TTL_MS) return _cache;
 
   const [aptRes, redevRes, unsoldRes, brandRes] = await Promise.all([
-    sb.from('apt_sites').select('slug, name').not('slug', 'is', null).limit(5000),
+    sb.from('apt_sites').select('slug, name, is_active, source_ids').not('slug', 'is', null).limit(5000),
     sb.from('redevelopment_projects').select('id, district_name').not('district_name', 'is', null).limit(3000),
     sb.from('unsold_apts').select('id, house_nm').not('house_nm', 'is', null).limit(2000),
     sb.from('brand_tokens').select('brand').eq('is_active', true),
@@ -44,7 +46,14 @@ async function loadCache(sb: any): Promise<CacheState> {
   const redev: RedevProject[] = (redevRes.data || []).filter((r: any) => r.district_name && r.district_name.length >= MIN_NAME_LEN);
   const unsold: UnsoldApt[] = (unsoldRes.data || []).filter((r: any) => r.house_nm && r.house_nm.length >= MIN_NAME_LEN);
 
-  _cache = { apt, redev, unsold, loadedAt: Date.now() };
+  // BN 6차 판독 — /apt/redev/{id} 는 없는 라우트다(/apt/redev/[region] 만 있다 · 실측 404). 120일 1,426편(발행 154)에 박혀 있었다.
+  //   정비구역은 연결된 현장(apt_sites.source_ids.redev_id)의 /apt/<slug> 로 건다. 연결이 없으면 링크하지 않는다.
+  const redevSite = new Map<string, string>();
+  for (const r of (aptRes.data || []) as any[]) {
+    const rid = r?.source_ids?.redev_id;
+    if (rid && r.is_active !== false && r.slug) redevSite.set(String(rid), r.slug);
+  }
+  _cache = { apt, redev, unsold, loadedAt: Date.now(), redevSite };
   return _cache;
 }
 
@@ -109,7 +118,7 @@ interface HubMappingRow {
 /**
  * 본문에 내부 링크 자동 삽입.
  *  - apt_sites: name → /apt/{slug}
- *  - redevelopment_projects: district_name → /apt/redev/{id}
+ *  - redevelopment_projects: district_name → 연결 현장 /apt/{slug} (연결 없으면 링크 안 함 — /apt/redev/{id} 는 404)
  *  - unsold_apts: house_nm → /apt/unsold/{id}
  *  postId 가 있으면 blog_hub_mapping 에 upsert (멱등).
  */
@@ -141,7 +150,9 @@ export async function injectInternalLinks(
   }
   for (const r of cache.redev) {
     if (injected >= maxLinks) break;
-    const url = `/apt/redev/${r.id}`;
+    const siteSlug = cache.redevSite.get(String(r.id));
+    if (!siteSlug) continue;
+    const url = `/apt/${siteSlug}`;
     const { changed, out: next } = replaceFirstOccurrence(out, r.district_name, url);
     if (changed) {
       out = next;

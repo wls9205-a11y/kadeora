@@ -52,21 +52,50 @@ export function externalImages(content: string): string[] {
 }
 
 /** ⑦ 대조 대상 내부 링크 — `/apt/<slug>` · `/blog/<slug>`(한 단계, 쿼리·앵커 제외). 디코드된 slug. */
-export function extractInternalLinks(content: string): { apt: string[]; blog: string[] } {
+export function extractInternalLinks(content: string): { apt: string[]; blog: string[]; badRoutes: string[] } {
   const apt = new Set<string>();
   const blog = new Set<string>();
+  const badRoutes = new Set<string>();
   const re = /(?:\]\(|href=["'])\/(apt|blog)\/([^)"'\s#?]+)/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(content ?? '')) !== null) {
     let slug = m[2];
     try { slug = decodeURIComponent(slug); } catch { /* 원문 그대로 */ }
     slug = slug.replace(/\/+$/, '');
-    if (!slug || slug.includes('/')) continue;
+    if (!slug) continue;
+    // BN 6차 판독 — 2단계 경로. /apt/redev/<x> 는 x 가 시·도일 때만 실존(/apt/redev/2093 → 404, 112563).
+    if (slug.includes('/')) {
+      const [seg, rest] = slug.split('/');
+      if (m[1] === 'apt' && seg === 'redev' && !SIDO.has(rest)) badRoutes.add(`/apt/${slug}`);
+      continue;
+    }
     // ⚠️ /apt/diagnose·/apt/map 같은 실제 라우트는 현장 slug 가 아니다 — 3회차 10편 전부가 이 오탐으로 hold 됐다.
     if (m[1] === 'apt' && APT_NON_SITE_SEGMENTS.has(slug)) continue;
     (m[1] === 'apt' ? apt : blog).add(slug);
   }
-  return { apt: [...apt], blog: [...blog] };
+  return { apt: [...apt], blog: [...blog], badRoutes: [...badRoutes] };
+}
+
+const SIDO = new Set(['서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주']);
+
+/**
+ * BN 6차 판독 ② — 결정적 링크 치환(LLM 0, 절제기와 같은 철학). 비실존 대상의 마크다운 링크를
+ * `/apt/...` 이면 글감 현장 링크로, `/blog/...` 이면 링크만 풀고 텍스트를 남긴다.
+ */
+export function repairLinks(content: string, invalidTargets: string[], siteSlug: string | null): { content: string; repaired: string[] } {
+  let out = String(content ?? '');
+  const repaired: string[] = [];
+  for (const t of invalidTargets) {
+    const enc = t.split('/').map((p, i) => (i < 2 ? p : encodeURIComponent(p))).join('/');
+    for (const target of new Set([t, enc])) {
+      const re = new RegExp(`\\[([^\\]]*)\\]\\(${target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`, 'g');
+      out = out.replace(re, (_all, text) => {
+        repaired.push(t);
+        return t.startsWith('/apt') && siteSlug ? `[${text}](/apt/${siteSlug})` : text;
+      });
+    }
+  }
+  return { content: out, repaired: [...new Set(repaired)] };
 }
 
 const UNIT_WON: Record<string, number> = { 조: 1e12, 억: 1e8, 만: 1e4, 천: 1e3 };
@@ -154,6 +183,8 @@ export function scanDraft2({ title, content, siteContext, constantsBlock, compac
     if (stageIdx >= 1 && (/조합[^.\n]{0,10}(?:구성|설립)[^.\n]{0,6}(?:되지|되기\s*전|\s전|예정|→)|조합\s*(?:구성|설립)\s*(?:후|이후|→)|조합원\s*모집/.test(s))) { hit('조합 미구성'); continue; }
     // 사업시행계획인가 이후인데 «초기·예비 단계»
     if (stageIdx >= 3 && /(?:초기|예비)\s*(?:개발\s*)?단계/.test(s)) { hit('초기 단계'); continue; }
+    // 옛 기관명 — 한국감정원은 2020-12 한국부동산원으로 바뀌었다(112562)
+    if (/한국감정원/.test(s)) { hit('옛 기관명'); continue; }
     // BN 5회차 — 수치 없는 시세 문장(감산 편집이 추정 금액을 지운 흔적: 「중위 거래가는 다양한 수준」「시세는 … 달라집니다 … 참고」).
     //   연·월 숫자는 수치로 치지 않는다(「(2026년 6월~9월 기준)」만 남은 문장).
     //   같은 단락에 금액이 있으면 단서 문장(「… 달라질 수 있습니다」)이다 — 112560 오탐.
@@ -181,7 +212,8 @@ export function scanDraft2({ title, content, siteContext, constantsBlock, compac
     // 제목 되풀이 H2(「## 센텀자이 리버노블 — 수영1구역 재개발」)는 허용 — 단지명·구역 핵심어를 품은 머리.
     const [cnPart, zonePart] = String(title ?? '').split(' — ');
     const zoneCore = /([가-힣A-Za-z0-9-]+구역)/.exec(zonePart ?? '')?.[1] ?? '';
-    const echoes = (t: string) => (!!cnPart && cnPart.length >= 3 && t.includes(cnPart.trim())) || (!!zoneCore && t.includes(zoneCore));
+    // BN 6차 — 단지명과 구역 핵심어를 «둘 다» 품어야 제목 되풀이(「단지명+일반명사」 H2 로 일반론이 남던 구멍)
+    const echoes = (t: string) => !!cnPart && cnPart.trim().length >= 3 && t.includes(cnPart.trim()) && (!zoneCore || t.includes(zoneCore));
     while ((h = h2.exec(main)) !== null) {
       if (COMPACT_ALLOWED_H2.test(h[1]) || echoes(h[1]) || defects.some((d) => d.rule === 'section' && d.text.includes(h![1].slice(0, 20)))) continue;
       defects.push({ rule: 'section', text: `## ${h[1]}`.slice(0, 60) });
@@ -322,7 +354,7 @@ export function exciseCompact(content: string, title: string): { content: string
   // 목차 밖 H2 블록
   const [cnPart, zonePart] = String(title ?? '').split(' — ');
   const zoneCore = /([가-힣A-Za-z0-9-]+구역)/.exec(zonePart ?? '')?.[1] ?? '';
-  const echoes = (t: string) => (!!cnPart && cnPart.trim().length >= 3 && t.includes(cnPart.trim())) || (!!zoneCore && t.includes(zoneCore));
+  const echoes = (t: string) => !!cnPart && cnPart.trim().length >= 3 && t.includes(cnPart.trim()) && (!zoneCore || t.includes(zoneCore));
   const parts = main.split(/(?=^##\s)/m);
   main = parts.filter((p) => {
     const h = /^##\s+([^\n]+)/.exec(p);

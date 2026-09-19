@@ -19,7 +19,7 @@ import { sortForGeneration } from '@/lib/content/realestate-priority';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
 import { reviewHoldOf, reviewSwitches, isReviewHoldReason } from '@/lib/content/review-hold';
 import { injectStageSection, injectDataSection } from '@/lib/content/stage-phrase';
-import { exciseCompact, scanDraft2, enforceTitleSpec, PROMPT_LEAK_MARKER, extractInternalLinks, HARD_HOLD_RULES, LOCAL_EDIT_RULES, type Scan2Defect } from '@/lib/content/draft-scan2';
+import { repairLinks, exciseCompact, scanDraft2, enforceTitleSpec, PROMPT_LEAK_MARKER, extractInternalLinks, HARD_HOLD_RULES, LOCAL_EDIT_RULES, type Scan2Defect } from '@/lib/content/draft-scan2';
 
 /**
  * BN-B2 §4·§5 — 현장 글 축약 규격(raw_data.template='site_compact'). 제도 상수 블록은 싣지 않는다(loadIssueContext).
@@ -809,7 +809,8 @@ async function scan2Log(sb: any, article: GenResult, ctx: IssueContext, titleRep
   const defects: Scan2Defect[] = scanDraft2({ title: article.title, content: article.content, siteContext: ctx.siteContext, constantsBlock: ctx.constantsBlock, compact: ctx.compact });
   // ⑦ 링크 실존 — `/apt/<slug>` 는 활성 현장, `/blog/<slug>` 는 존재하는 글. 영문 일반명(`/blog/redev-basic`)은 LLM 창작 패턴(112520).
   try {
-    const { apt, blog } = extractInternalLinks(article.content);
+    const { apt, blog, badRoutes } = extractInternalLinks(article.content);
+    for (const r of badRoutes) defects.push({ rule: 'link', text: r });
     if (apt.length > 0) {
       const { data } = await (sb as any).from('apt_sites').select('slug').in('slug', apt.slice(0, 50)).eq('is_active', true);
       const ok = new Set(((data ?? []) as Array<{ slug: string }>).map((r) => r.slug));
@@ -823,7 +824,18 @@ async function scan2Log(sb: any, article: GenResult, ctx: IssueContext, titleRep
   } catch (e: any) {
     console.warn('[issue-draft] scan2 link check failed:', e?.message);
   }
-  return { scan2: { at: new Date().toISOString(), defects: defects.slice(0, 30), title_replaced: titleReplaced } };
+  // BN 6차 판독 ② — 축약 규격: 비실존 링크는 결정적으로 치환(LLM 0)하고 link 결함에서 뺀다. 치환 목록은 기록.
+  let links_repaired: string[] | undefined;
+  const invalid = defects.filter((d) => d.rule === 'link').map((d) => d.text);
+  if (ctx.compact && invalid.length > 0) {
+    const r = repairLinks(article.content, invalid, ctx.siteSlug ?? null);
+    if (r.repaired.length > 0) {
+      article.content = r.content;
+      links_repaired = r.repaired;
+      for (let k = defects.length - 1; k >= 0; k--) if (defects[k].rule === 'link' && r.repaired.includes(defects[k].text)) defects.splice(k, 1);
+    }
+  }
+  return { scan2: { at: new Date().toISOString(), defects: defects.slice(0, 30), title_replaced: titleReplaced, ...(links_repaired ? { links_repaired } : {}) } };
 }
 
 /** 게이트 통과 이후 — 시각화·SEO·적재·이미지·발행. 생성 회차와 편집 회차가 공유한다. */

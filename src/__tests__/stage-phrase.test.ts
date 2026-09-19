@@ -7,7 +7,7 @@ describe('stageSection', () => {
   it('조합설립인가 + 시공사 있음 — 시공자 선정 단계를 건너뛰고 «선정됐다(보도 기준)»', () => {
     const t = stageSection({ stage: 'union_established', builder: '삼성물산', isRedev: true })!;
     expect(t).toContain('**조합설립인가** 단계');
-    expect(t).toContain('삼성물산이(가) 선정되었습니다(보도 기준)');
+    expect(t).toContain('삼성물산이 선정되었습니다(보도 기준)');
     expect(t).toContain('남은 절차는 사업시행계획인가 → 관리처분계획인가');
     expect(t).not.toMatch(/\d/);
     expect(t).toContain(MEMBER_PHRASE);
@@ -129,5 +129,29 @@ describe('scan2 — 수치 없는 시세: 단서 문장 오탐(112560)', () => {
     const site = '- 지역: 부산 동래구\n- 시공사: 현대건설\n- 사업 단계(확정): 조합설립인가 — …';
     const c = 'A. 부산 동래구 아파트의 최근 6개월(2026년 4월~9월) 중위 거래가는 4억 8,800만원입니다. 지역의 개별 단지와 입지에 따라 거래가는 달라질 수 있습니다.';
     expect(scanDraft2({ title: '', content: c, siteContext: site, constantsBlock: '' }).filter((x) => x.rule === 'fact')).toHaveLength(0);
+  });
+});
+
+// BN 6차 판독 — 링크 치환 · redev 2단계 경로 · 조사
+import { repairLinks, extractInternalLinks } from '@/lib/content/draft-scan2';
+import { josaIGa } from '@/lib/content/stage-phrase';
+
+describe('BN 6차 — 링크', () => {
+  it('/apt/redev/<숫자> 는 비실존, /apt/redev/<시·도> 는 실존', () => {
+    expect(extractInternalLinks('[감천2구역 재개발](/apt/redev/2093) [부산 정비](/apt/redev/부산)').badRoutes).toEqual(['/apt/redev/2093']);
+  });
+  it('비실존 /apt 는 글감 현장으로, 비실존 /blog 는 링크만 풀기', () => {
+    const r = repairLinks('도입 [감천2구역 재개발](/apt/redev/2093) · [기초](/blog/redev-basic)', ['/apt/redev/2093', '/blog/redev-basic'], '감천2-재개발');
+    expect(r.content).toBe('도입 [감천2구역 재개발](/apt/감천2-재개발) · 기초');
+    expect(r.repaired).toEqual(['/apt/redev/2093', '/blog/redev-basic']);
+  });
+});
+
+describe('josaIGa', () => {
+  it('받침 → 이, 없음·영문 → 가', () => {
+    expect(josaIGa('삼성물산')).toBe('이');
+    expect(josaIGa('현대건설')).toBe('이');
+    expect(josaIGa('DL이앤씨')).toBe('가');
+    expect(josaIGa('GS')).toBe('가');
   });
 });
