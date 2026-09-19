@@ -567,3 +567,8 @@ WHERE blog_post_id IN (SELECT id FROM p) RETURNING id, blog_post_id;
 - 역명·권역: 강서구청역·아시아드역·동부권·서부권·광역 등. ※ `부경경마공원역` 13/13 은 관련 정보 푸터의 현장명 링크 텍스트 — 스캐너 오탐.
 - 미실존 링크: 112435(/apt/부산 · /blog/분양청약전략) · 112438(/apt/busan-realtime-data 외 blog 2) · 112439(/apt/울산광역시-아파트 외 2) · 112440·112441(blog 1씩).
 - 판정 요청(2단): 13편 처분 — (a) 일괄 hold 후 BN 규격 재생성 (b) 누출 문구만 결정적 제거(본문 수정 금지 규칙 예외 필요) (c) 유지. CC 권고 (a).
+
+## 사고 2 — defer 마커가 타임아웃 잠금 회수에 풀림 (정정·재봉인)
+- issue-draft 의 EX-B 잠금 회수(`is_processed=true` · `publish_decision IS NULL` · `blog_post_id IS NULL` · processed_at 8분~6시간)가 defer 행을 «죽은 잠금» 으로 보고 07:30Z 에 되살렸다 → 한도분 5는 다시 `CRON_TYPE_DAILY_LIMIT` 실패, 3은 옛 프롬프트로 edit_pending. **신규 글 0**(image-attach 봉인 유효).
+- 재봉인: 11행 `publish_decision='deferred'` + `fail_reason='bn_defer_limit_kst0'` (판정이 채워져 회수 대상 밖). 해제 스크립트도 publish_decision 을 함께 비운다.
+- 이전 회차 defer 가 무사했던 것은 processed_at 이 NULL 이었거나 8분 안에 풀었기 때문. **이후 defer 는 반드시 publish_decision 을 채운다.**
