@@ -96,3 +96,15 @@ describe('BN-B 증보 2 — 유령 지명 · 상수 연도 비허용', () => {
     expect(d.map((x) => x.rule)).toEqual(['year']);
   });
 });
+
+describe('BN-B 재생성 판독 — 퍼센트 · 금액 파서', () => {
+  it('계약금·중도금 비율은 숫자 자체가 결함', () => {
+    expect(scan('- **계약금:** 분양가의 5~10% (계약 시 납부)').map((d) => d.rule)).toContain('percent');
+  });
+  it('URL 퍼센트 인코딩은 수치가 아니다', () => {
+    expect(scan('![표지](https://kadeora.app/api/og?title=%EC%82%AC%EC%A7%814)')).toEqual([]);
+  });
+  it('「9억 1~3%」의 1 은 금액이 아니다', () => {
+    expect(extractWonAmounts('6억~9억 1~3%').map((a) => a.won)).not.toContain(900_010_000);
+  });
+});

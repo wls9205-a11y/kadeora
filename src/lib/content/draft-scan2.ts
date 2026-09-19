@@ -11,7 +11,7 @@
 /** 프롬프트의 현장 블록 머리에 박는 마커. 본문에 나오면 지시문을 옮긴 것이다. */
 export const PROMPT_LEAK_MARKER = '⟦KDR⟧';
 
-export interface Scan2Defect { rule: 'period' | 'amount' | 'bracket' | 'leak' | 'year' | 'image' | 'link' | 'place'; text: string }
+export interface Scan2Defect { rule: 'period' | 'amount' | 'bracket' | 'leak' | 'year' | 'image' | 'link' | 'place' | 'percent'; text: string }
 
 /** 서울에만 있는 지명(다른 시·도 글에 나오면 혼입). 부산 등에도 있는 이름은 넣지 않는다. */
 const SEOUL_ONLY_PLACES = ['강남역', '광화문', '여의도', '잠실', '압구정', '강남구', '서초구', '송파구', '용산구', '마포구', '성수동'];
@@ -60,13 +60,14 @@ const num = (s: string) => Number(String(s).replace(/,/g, ''));
 export function extractWonAmounts(text: string): Array<{ won: number; text: string }> {
   const out: Array<{ won: number; text: string }> = [];
   // 복합(조·억 + 하위 단위) → 단일 단위 순으로 한 번에. 소비한 구간은 다시 세지 않는다.
-  const re = /(\d[\d,]*(?:\.\d+)?)\s*(조|억)(?:\s*(\d[\d,]*(?:\.\d+)?)\s*(억|만|천)?)?\s*원?|(\d[\d,]*(?:\.\d+)?)\s*(만|천)?\s*원/g;
+  const re = /(\d[\d,]*(?:\.\d+)?)\s*(조|억)(?:\s*(\d[\d,]*(?:\.\d+)?)\s*(억|만|천)(?=\s*원|\s|$|[^\d~%]))?\s*원?|(\d[\d,]*(?:\.\d+)?)\s*(만|천)?\s*원/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(text)) !== null) {
     let won: number;
     if (m[2]) {
       won = num(m[1]) * UNIT_WON[m[2]];
-      if (m[3]) won += num(m[3]) * (m[4] ? UNIT_WON[m[4]] : (m[2] === '조' ? 1e8 : 1e4));
+      // ⚠️ 하위 수는 단위가 붙어야 복합이다 — 「9억 1~3%」의 1 은 세율(112529 오탐)
+      if (m[3] && m[4]) won += num(m[3]) * UNIT_WON[m[4]];
       // 「6억 초과」처럼 원이 없는 억 단독도 금액이다(취득세 구간) — 그대로 센다
     } else {
       won = num(m[5]) * (m[6] ? UNIT_WON[m[6]] : 1);
@@ -79,6 +80,20 @@ export function extractWonAmounts(text: string): Array<{ won: number; text: stri
     const won = num(m[1]) * (m[3] ? UNIT_WON[m[3]] : 1);
     if (Number.isFinite(won) && won > 0) out.push({ won: Math.round(won), text: `${m[1]}~(${m[0].trim()})` });
   }
+  return out;
+}
+
+/** 링크·이미지 대상과 맨 URL 을 걷어낸다(수치 스캔용). */
+export function stripUrls(text: string): string {
+  return String(text ?? '').replace(/\]\([^)]*\)/g, ']').replace(/https?:\/\/\S+/g, ' ').replace(/(src|href)=["'][^"']*["']/g, '');
+}
+
+/** 퍼센트 수치 목록(범위 양끝 포함). */
+export function extractPercents(text: string): number[] {
+  const out: number[] = [];
+  const re = /(\d+(?:\.\d+)?)\s*(?:%|퍼센트)|(\d+(?:\.\d+)?)\s*[~∼～–-]\s*(?=\d+(?:\.\d+)?\s*%)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text ?? '')) !== null) out.push(Number(m[1] ?? m[2]));
   return out;
 }
 
@@ -119,6 +134,25 @@ export function scanDraft2({ content, siteContext, constantsBlock }: Scan2Input)
     seen.add(a.text);
     defects.push({ rule: 'amount', text: a.text });
   }
+
+  // 블록 밖 퍼센트 — 「계약금: 분양가의 5~10%」(ABG 계약금 규율) · 「조합원 분양 50~70%」(112527·112529·112531~3 실측).
+  //   범위는 양끝을 각각 본다. 현장 블록·제도 상수 블록에 없는 퍼센트 수치는 창작이다.
+  const pctAllowed = new Set(extractPercents(`${siteContext}\n${constantsBlock}`));
+  const pctSeen = new Set<string>();
+  //   ⚠️ URL 을 걷어낸 본문에서만 — OG 이미지 URL 의 퍼센트 인코딩(%EC%82…)을 수치로 읽었다(첫 적용 실측).
+  const prose = stripUrls(body);
+  const pr2 = /(\d+(?:\.\d+)?)\s*(?:%(?![0-9A-Fa-f]{2})|퍼센트)|(\d+(?:\.\d+)?)\s*[~∼～–-]\s*(?=\d+(?:\.\d+)?\s*%(?![0-9A-Fa-f]{2}))/g;
+  while ((m = pr2.exec(prose)) !== null) {
+    const v = m[1] ?? m[2];
+    if (pctAllowed.has(Number(v)) || pctSeen.has(v)) continue;
+    pctSeen.add(v);
+    defects.push({ rule: 'percent', text: prose.slice(Math.max(0, m.index - 20), m.index + m[0].length + 5).replace(/\n/g, ' ') });
+  }
+
+  //   ABG 증분 4 §4 — 계약금·중도금·잔금 비율은 숫자 자체가 금지(현장별 모집공고 확정). 상수 블록의 다른 항목에
+  //   같은 숫자(10% 등)가 있어 위 허용 목록으로는 통과한다(112527·112529·112532·112533) → 명시 규칙.
+  const cr = /(계약금|중도금|잔금)[^\n.]{0,25}?\d+(?:\.\d+)?\s*(?:[~∼～–-]\s*\d+(?:\.\d+)?\s*)?%(?![0-9A-Fa-f]{2})/g;
+  while ((m = cr.exec(prose)) !== null) defects.push({ rule: 'percent', text: m[0].slice(0, 60) });
 
   // ③ 최고·최저·중위 가격 인접 괄호의 귀속 — 괄호 속 한글 낱말이 현장 블록에 없으면 창작
   const br = /(최고|최저|중위)[^\n(]{0,40}\(([^)\n]{1,40})\)/g;
