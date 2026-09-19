@@ -16,7 +16,7 @@ export const PROMPT_LEAK_MARKER = '⟦KDR⟧';
 export interface Scan2Defect { rule: 'period' | 'amount' | 'bracket' | 'leak' | 'year' | 'image' | 'link' | 'place' | 'percent' | 'section'; text: string }
 
 /** 축약 규격 목차에 있는 H2(순서는 판독 몫). 면책·데이터 출처는 기존 규격 허용. */
-const COMPACT_ALLOWED_H2 = /3줄\s*요약|현장\s*개요|사업\s*단계|주변\s*거래|자주\s*묻는\s*질문|관심\s*고객|면책|데이터\s*출처|참고\s*자료/;
+const COMPACT_ALLOWED_H2 = /3줄\s*요약|현장\s*개요|사업\s*단계|주변\s*거래|자주\s*묻는\s*질문|관심\s*고객|일정\s*알림|면책|데이터\s*출처|참고\s*자료/;
 
 /** BN-B2 §4 — 축약 규격(site_compact)에서 금지된 제도 일반론 섹션 제목. */
 const COMPACT_FORBIDDEN_H2 = /^##\s+[^\n]*(청약\s*자격|가점|취득세|양도세|세액\s*공제|LTV|DSR|대출|전매|재당첨|시나리오|전망)/gm;
