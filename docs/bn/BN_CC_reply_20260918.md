@@ -516,3 +516,54 @@ WHERE blog_post_id IN (SELECT id FROM p) RETURNING id, blog_post_id;
 - `hold:fw_preempt_legacy` **791**(cron_type issue_preempt · created_at < 2026-09-01 · 미발행 · 사유 NULL). 표본 20 id:
   109889,110366,111391,111401,98063,111878,112043,99018,110616,109699,111978,111130,109670,109677,97735,110679,109189,109570,98359,110334
 - units_conflict 등재 2: 광안a-재개발(2780 complex ↔ 2550 total) · 반여3-1-재건축(513 complex ↔ 811 total).
+
+---
+
+# 16차 — FW 생산자(off) · BN-C 1차 도착 · BP 13 섀도 (2026-09-19)
+
+## FW 생산자 — 구현·배포·등록 (스위치 off, 적재 0 실측)
+- 커밋 041e35ca · 3a77705c. `src/lib/fw/producer.ts` · `/api/cron/fw-producer` · sync-apt-sites 훅(`stageHook`, `source NOT LIKE 'backfill:%'`).
+- 글감 규격 = BN 과 동일: source_type `fw_hub` · template site_compact · apt_site_id · source_urls 비움 · final_score 45. 제목 꼬리 축별(청약 일정·조건 / 분양 일정 / 입주 예정 / 사업 단계·일정 정리).
+- 선정: 축별 결정적 정렬(가까운 시기 먼저) · 이미 bn/bp/fw 글감이 있거나 hub 발행글이 있는 현장 제외. 회전 1회 4건(쿼리 n 상한 8), 훅 1회 6건 상한.
+- 저수지 실측(축 배타 · 미커버): 청약 27(25) · 분양예정 50(21) · 입주 부울경 154(129) · 정비 부울경 233(201). 골자 수치와 차이는 축 배타 우선순위 때문.
+- review-hold: `fw` namespace — 사유 `hold:fw_review` 도장, 스캔2 hold·편집 회차는 bn·fw 공유(SCAN2_NAMESPACES). DB 가드 'hold:%' 그대로.
+- 일반 분양·입주 현장 단계 문형(숫자 없음) 추가 · 현장 블록에 `입주 예정: YYYY년 M월(공고 기준)` 줄(월까지만).
+- app_config `fw.producer_enabled=false` · `fw.hub_publish_enabled=false` 신설.
+- pg_cron **186 `fw_producer` `11 */2 * * *`**(옛 preempt 슬롯 재사용). 수동 1회 호출 → 200 `{"processed":0,"skipped":"fw.producer_enabled != true"}` · fw_hub 글감 0.
+- ⚠️ 켜기 전 판정 필요: FW 는 issue-draft 와 **같은 CRON_TYPE_DAILY_LIMIT(issue-draft 60/KST일)** 을 쓴다. 한도 증액 금지 규칙 아래서 FW 회전량은 뉴스 글감과 경쟁 — 축량(회전 4건×12회=48/일 상한)은 세션 A 결정.
+
+## ⛔ 사고 1 — 한도 우회 경로 발견·봉인 (BN-C 6편)
+- BN-C 생성 도중 issue-draft 가 `CRON_TYPE_DAILY_LIMIT (60/60)` 에 막힘(KST 일 기준 60 도달). 막힌 글감은 draft_content 만 남았는데,
+  **issue-image-attach 가 `finalize_issue_to_post`(cron_type `issue_preempt` — 별도 한도 버킷)로 확정**해 6편 생성: 112584~112589.
+  hold 도장·축약 주입·스캔2 전부 미경유, 사유 NULL(=가드 밖). 공개 전 포착.
+- 조치: 즉시 `hold:bn_limit_bypass` → `hold:bn_regen_superseded`(+제목 표식) · 글감 리셋 · defer. 본문 무수정.
+- 봉인: issue-image-attach 는 판독 모드 글감(bp·bn·fw)을 blog_post_id 없이 finalize 하지 않는다(041e35ca).
+
+## BN-C 1차 도착 9편 — 스캔2+링크 섀도
+| id | 현장 | 결과 |
+|---|---|---|
+| 112569 | 중동5 | clean · hold:bn_review — **판독 입력** |
+| 112570 | 시민공원 촉진4 | clean — **판독 입력** |
+| 112572 | 광안5 | clean — **판독 입력** |
+| 112573 | 용호2 | clean — **판독 입력** |
+| 112576 | 김해 외동 | clean — **판독 입력** |
+| 112571 | 대연8 | fact 조합 미구성 ×2 → superseded |
+| 112574 | 광안a | fact 조합 미구성 ×2 → superseded |
+| 112575 | 괴정7 | fact 조합 미구성 · (수치 없는 시세 = 출처 문장 오탐, 룰 수정) → superseded |
+| 112577 | 남천2-3 삼익비치 | fact 조합 미구성 · 한국감정원 → superseded |
+- 레일 수리(3a77705c): COMPACT_SITE_RULES 에 조합설립인가 이후 현장의 「조합 설립 후·조합 구성·조합원 모집」 금지 · 「한국부동산원」 표기. 스캔2 출처 문장 제외.
+
+## 재생성 대기 11 — KST 0시 해제
+- defer 마커 `fail_reason='bn_defer_limit_kst0'` 11: 한도분 6(서금사5·반여4·반여3-1·감만1·사직1-5·사직3) + 미처리 1(서금사6) + 결함 4(대연8·광안a·괴정7·남천2-3).
+- 2026-09-19 15:01Z(KST 0:01) 자동 해제 대기 중(로컬 1회성, DB 크론 신설 없음). 배포 3a77705c 는 그 전에 READY.
+- 16편 모두 도착·통과 후 일괄 개통 배열 1문 제출.
+
+## BP 무판독 발행 13편 — 소급 섀도 (1단) · clean 0/13
+- **전건 공통 · 실결함: 본문에 내부 표기 누출 `(BP70 현장 허브 발행[ 2회차])`** — 공개 중 13편(`content LIKE '%BP70 현장 허브 발행%' AND is_published` = 13).
+- 외부 이미지 핫링크(hard 규칙군) 5: 112440·112441·112445·112447·112448.
+- 블록 밖 금액·괄호 귀속·비율: 112434·112437·112439·112441·112442·112446·112447·112448 (계약금·중도금 비율 「60%」「20~30%」 포함). 단, 최저·최고 금액은 당시 현장 블록에 있던 값(현재 블록은 중위만) — 금액 플래그 일부는 블록 변경분.
+- 연도 예측: 112440(2027~2028 착공·입주) · 112441(2029년 이후 입주).
+- 조합 미구성·수치 없는 시세: 112435·112437·112438·112440·112441·112443·112445·112446·112448.
+- 역명·권역: 강서구청역·아시아드역·동부권·서부권·광역 등. ※ `부경경마공원역` 13/13 은 관련 정보 푸터의 현장명 링크 텍스트 — 스캐너 오탐.
+- 미실존 링크: 112435(/apt/부산 · /blog/분양청약전략) · 112438(/apt/busan-realtime-data 외 blog 2) · 112439(/apt/울산광역시-아파트 외 2) · 112440·112441(blog 1씩).
+- 판정 요청(2단): 13편 처분 — (a) 일괄 hold 후 BN 규격 재생성 (b) 누출 문구만 결정적 제거(본문 수정 금지 규칙 예외 필요) (c) 유지. CC 권고 (a).
