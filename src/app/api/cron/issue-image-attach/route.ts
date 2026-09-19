@@ -22,6 +22,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { runImagePipeline, type PostContext } from '@/lib/image-pipeline';
 import { SITE_URL } from '@/lib/constants';
 import { dbw } from '@/lib/cron-db-log';
+import { reviewHoldOf } from '@/lib/content/review-hold';
 
 export const maxDuration = 300;
 export const runtime = 'nodejs';
@@ -71,7 +72,7 @@ async function handler(_req: NextRequest) {
       // s237: region_sido/sigungu 추가 SELECT — 이미지 검색 키워드 정확도 ↑ (silent fail 1,574/7d 회복용).
       const { data: pending, error: fetchErr } = await (sb as any)
         .from('issue_alerts')
-        .select('id, title, summary, category, sub_category, draft_title, draft_content, draft_slug, draft_keywords, detected_keywords, related_entities, source_urls, detected_at, blog_post_id, retry_count, region_sido, region_sigungu')
+        .select('id, title, summary, category, sub_category, source_type, raw_data, draft_title, draft_content, draft_slug, draft_keywords, detected_keywords, related_entities, source_urls, detected_at, blog_post_id, retry_count, region_sido, region_sigungu')
         .eq('fact_check_passed', true)
         .is('image_attached_at', null)
         .or('retry_count.is.null,retry_count.lt.3')
@@ -98,6 +99,11 @@ async function handler(_req: NextRequest) {
 
       for (const issue of pending as any[]) {
         if (Date.now() - start > PREEMPT_MS) break;
+        // ⛔ BN-C(2026-09-19) — 판독 모드 글감(bp·bn·fw)은 여기서 finalize 하지 않는다.
+        //   issue-draft insert 가 CRON_TYPE_DAILY_LIMIT 에 막히면 draft_content 만 남는데, 이 경로가
+        //   finalize_issue_to_post(cron_type issue_preempt — 다른 한도 버킷)로 확정해 한도를 우회했다.
+        //   hold 도장·축약 규격 주입·스캔2 를 모두 건너뛴 글 6편(112584~112589). 재시도는 issue-draft 몫.
+        if (!issue.blog_post_id && reviewHoldOf(issue)) { skipped++; failures.push(`${issue.id}:review_hold_no_finalize`); continue; }
         try {
           // 1) normalize category → canonical (apt/stock/unsold/finance/general/redev)
           const { data: normCat } = await (sb as any).rpc('normalize_category', {

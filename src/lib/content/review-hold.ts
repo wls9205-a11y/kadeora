@@ -9,7 +9,7 @@
 //   해제: 스위치를 true 로 + 판독 통과 초안의 사유를 비운다(가드는 사유만 본다).
 
 export interface ReviewHold {
-  namespace: 'bp' | 'bn';
+  namespace: 'bp' | 'bn' | 'fw';
   reason: string;
   stampReason: boolean;
 }
@@ -19,7 +19,13 @@ const HOLDS: Array<ReviewHold & { match: (i: { source_type?: string | null; raw_
     match: (i) => i.source_type === 'bp70_hub' || String(i.raw_data?.doc ?? '').startsWith('BP70') },
   { namespace: 'bn', reason: 'hold:bn_review', stampReason: true,
     match: (i) => i.source_type === 'bn_hub' },
+  // FW(2026-09-19) — 현장 기점 생산자(src/lib/fw/producer.ts). BN 과 같은 레일·같은 판독 모드, 스위치만 따로.
+  { namespace: 'fw', reason: 'hold:fw_review', stampReason: true,
+    match: (i) => i.source_type === 'fw_hub' },
 ];
+
+/** 스캔2 hold·편집 회차를 타는 namespace — BN 레일을 물려받은 글감(BP 는 기존 절차 유지). */
+export const SCAN2_NAMESPACES: ReadonlySet<ReviewHold['namespace']> = new Set(['bn', 'fw']);
 
 export function reviewHoldOf(issue: { source_type?: string | null; raw_data?: any }): ReviewHold | null {
   const h = HOLDS.find((x) => x.match(issue));
@@ -35,7 +41,7 @@ export function isReviewHoldReason(reason: string | null | undefined): boolean {
 export async function reviewSwitches(sb: any): Promise<Record<ReviewHold['namespace'], boolean>> {
   const { data } = await sb.from('app_config').select('namespace, value')
     .in('namespace', HOLDS.map((h) => h.namespace)).eq('key', 'hub_publish_enabled');
-  const out = { bp: false, bn: false };
-  for (const r of (data ?? []) as Array<{ namespace: 'bp' | 'bn'; value: unknown }>) out[r.namespace] = r.value === true;
+  const out: Record<ReviewHold['namespace'], boolean> = { bp: false, bn: false, fw: false };
+  for (const r of (data ?? []) as Array<{ namespace: 'bp' | 'bn' | 'fw'; value: unknown }>) out[r.namespace] = r.value === true;
   return out;
 }

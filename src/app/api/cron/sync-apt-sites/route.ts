@@ -6,6 +6,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { assertCoordInRegion } from '@/lib/geo/region-bbox';
 import { withCronAuth } from '@/lib/cron-auth';
 import { withCronLogging } from '@/lib/cron-logger';
+import { fwSwitch, stageHook } from '@/lib/fw/producer';
 import { generateAptSlugStrict } from '@/lib/apt-slug';
 
 export const maxDuration = 300;
@@ -536,6 +537,13 @@ async function run() {
     }
   } catch (e: unknown) { errors.push(`redev-lifecycle: ${errMsg(e)}`); }
 
+  // FW 가속기 — 이번 회차에 실제로 움직인 정비 현장(stage_change · backfill 제외)을 fw_hub 글감으로.
+  //   ⛔ fw.producer_enabled 가 정확히 true 일 때만(off 시작). 선정·적재 규칙은 src/lib/fw/producer.ts.
+  let fwEnqueued: string[] | null = null;
+  try {
+    if (await fwSwitch(sb, 'producer_enabled')) fwEnqueued = await stageHook(sb, new Date(start).toISOString());
+  } catch (e: unknown) { errors.push(`fw-stage-hook: ${errMsg(e)}`); }
+
   const elapsed = Date.now() - start;
 
   return {
@@ -550,6 +558,7 @@ async function run() {
     tradeInserted,
     unsoldInserted,
     redevLifecycle,
+    fwEnqueued,
     elapsed: `${elapsed}ms`,
     errors: errors.length ? errors : undefined,
   };

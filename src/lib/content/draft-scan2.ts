@@ -307,7 +307,7 @@ export function scanDraft2({ title, content, siteContext, constantsBlock, compac
 
   // ④ 지시문 누출 — 마커 · 규율 용어 · 「본 기사는 …하지 않습니다」 자기 서술 · 내부 트랙 표기
   const leaks = [
-    /BN\s*허브|허브\s*발행|bn_hub|bp70_hub|BP70|BP-B|BN-B/,
+    /BN\s*허브|FW\s*허브|허브\s*발행|bn_hub|fw_hub|bp70_hub|BP70|BP-B|BN-B/,
     /글감|선택\s*조건|이 글의 조건|운영\s*메모|발행\s*경로/,
     new RegExp(PROMPT_LEAK_MARKER.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
     /(데이터|현장|상수)\s*블록/,

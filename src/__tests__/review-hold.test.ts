@@ -29,9 +29,9 @@ describe('isReviewHoldReason', () => {
 describe('reviewSwitches', () => {
   const sb = (rows: any[]) => ({ from: () => ({ select: () => ({ in: () => ({ eq: async () => ({ data: rows }) }) }) }) });
   it('행이 없으면 닫힘', async () => {
-    expect(await reviewSwitches(sb([]))).toEqual({ bp: false, bn: false });
+    expect(await reviewSwitches(sb([]))).toEqual({ bp: false, bn: false, fw: false });
   });
   it('정확히 true 만 열림', async () => {
-    expect(await reviewSwitches(sb([{ namespace: 'bn', value: true }, { namespace: 'bp', value: 'true' }]))).toEqual({ bp: false, bn: true });
+    expect(await reviewSwitches(sb([{ namespace: 'bn', value: true }, { namespace: 'bp', value: 'true' }]))).toEqual({ bp: false, bn: true, fw: false });
   });
 });

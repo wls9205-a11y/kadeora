@@ -19,7 +19,7 @@ describe('stageSection', () => {
     expect(t).toContain('남은 절차는 이주·철거 → 착공');
   });
   it('정비사업 아님·단계 모름 → null', () => {
-    expect(stageSection({ stage: 'pre_announcement', isRedev: false })).toBeNull();
+    expect(stageSection({ stage: 'post_move_in', isRedev: false })).toBeNull();
     expect(stageSection({ stage: 'weird', isRedev: true })).toBeNull();
     expect(stageName('plan_approved')).toBe('사업시행계획인가');
   });
@@ -161,5 +161,15 @@ describe('7차 판독 — 절차 나열 속 「조합 구성」', () => {
     const site = '- 지역: 부산 부산진구\n- 시공사: 현대건설\n- 사업 단계(확정): 사업시행계획인가 — …';
     const d = scanDraft2({ title: '', content: 'A. 현재 사업시행계획인가 단계입니다. 이후 조합 구성, 관계인 동의, 모집공고 순으로 진행될 예정입니다.', siteContext: site, constantsBlock: '' });
     expect(d.filter((x) => x.rule === 'fact')).toHaveLength(1);
+  });
+});
+
+describe('FW — 일반 분양·입주 현장 단계 문형', () => {
+  it('청약·공사 단계는 숫자 없는 확정 문형', () => {
+    const t = stageSection({ stage: 'pre_announcement', isRedev: false })!;
+    expect(t).toContain('입주자모집공고 전 단계');
+    expect(stageSection({ stage: 'construction', isRedev: false })).toContain('월 단위');
+    for (const k of ['pre_announcement', 'subscription_open', 'award_pending', 'construction', 'move_in_started'])
+      expect(stageSection({ stage: k, isRedev: false })).not.toMatch(/\d/);
   });
 });

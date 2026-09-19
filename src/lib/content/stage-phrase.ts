@@ -42,8 +42,22 @@ export function stageName(stage: string | null | undefined): string | null {
  * 「사업 단계」 본문(마크다운). 정비사업이 아니거나 단계를 모르면 null — 그때는 섹션을 건드리지 않는다.
  * 시공사가 있으면 단계가 조합설립인가여도 «선정됐다(보도 기준)» 를 함께 쓴다 — 부산 등은 조합설립 뒤 시공자를 먼저 뽑는다.
  */
+/**
+ * FW(2026-09-19) — 일반 분양·입주 현장의 단계 문형. 정비 절차 대신 청약→입주 축. 숫자·연도 없음(입주 월은 현장 블록에만).
+ */
+const SITE_STAGE: Record<string, string> = {
+  site_planning: '현재 사업 계획 단계입니다. 분양 시기·공급 규모·분양가는 입주자모집공고에서 확정됩니다.',
+  pre_announcement: '현재 입주자모집공고 전 단계입니다. 청약 일정·공급 세대·분양가는 모집공고에서 확정됩니다.',
+  subscription_open: '현재 청약 접수가 진행 중인 단계입니다. 세부 일정과 자격 요건은 입주자모집공고를 기준으로 확인해야 합니다.',
+  award_pending: '청약 접수가 끝나고 당첨자 발표를 기다리는 단계입니다. 발표 일정과 계약 절차는 입주자모집공고를 따릅니다.',
+  award_announced: '당첨자 발표가 끝나고 계약 절차가 진행되는 단계입니다. 계약 일정과 조건은 입주자모집공고를 따릅니다.',
+  unsold_active: '분양 후 잔여 세대 계약이 진행 중인 단계입니다. 잔여 세대 조건은 시행·분양 주체의 공지를 기준으로 확인해야 합니다.',
+  construction: '현재 공사가 진행 중인 단계입니다. 입주 시기는 공고 기준 월 단위로 안내되며, 정확한 입주 지정 기간은 입주 안내에서 확정됩니다.',
+  move_in_started: '입주가 시작된 단계입니다. 입주 지정 기간과 절차는 입주 안내를 기준으로 확인해야 합니다.',
+};
+
 export function stageSection({ stage, builder, isRedev }: StageInput): string | null {
-  if (!isRedev) return null;
+  if (!isRedev) return stage && SITE_STAGE[stage] ? SITE_STAGE[stage] : null;
   const i = stage ? IDX[stage] : undefined;
   if (i === undefined) return null;
   const cur = REDEV_STEPS[i];

@@ -17,7 +17,7 @@ import { dbw } from '@/lib/cron-db-log';
 import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
 import { sortForGeneration } from '@/lib/content/realestate-priority';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
-import { reviewHoldOf, reviewSwitches, isReviewHoldReason } from '@/lib/content/review-hold';
+import { reviewHoldOf, reviewSwitches, isReviewHoldReason, SCAN2_NAMESPACES } from '@/lib/content/review-hold';
 import { injectStageSection, injectDataSection } from '@/lib/content/stage-phrase';
 import { repairLinks, exciseCompact, scanDraft2, enforceTitleSpec, PROMPT_LEAK_MARKER, extractInternalLinks, HARD_HOLD_RULES, LOCAL_EDIT_RULES, type Scan2Defect } from '@/lib/content/draft-scan2';
 
@@ -715,7 +715,7 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
  * 글감당 1회(raw_data.scan2_edit_done). BN 글감만.
  */
 function shouldScan2Edit(issue: any, defects: Scan2Defect[]): boolean {
-  return reviewHoldOf(issue)?.namespace === 'bn' && !issue.raw_data?.scan2_edit_done
+  return SCAN2_NAMESPACES.has(reviewHoldOf(issue)?.namespace as any) && !issue.raw_data?.scan2_edit_done
     && defects.length > 0 && defects.every((d) => LOCAL_EDIT_RULES.has(d.rule));
 }
 
@@ -931,7 +931,7 @@ async function finalizeArticle(sb: any, issue: any, config: any, article: GenRes
   const holdPublishOn = reviewHold ? (await reviewSwitches(sb))[reviewHold.namespace] : true;
   // BN-2 §4 — 스캔2 결함이 있는 BN 초안은 스위치가 열려 있어도 hold(사유 …:scan2). 결함분은 재생성 대상.
   const scan2Defects: Scan2Defect[] = (gateLog as any)?.scan2?.defects ?? [];
-  const scan2Hold = reviewHold?.namespace === 'bn' && scan2Defects.length > 0;
+  const scan2Hold = !!reviewHold && SCAN2_NAMESPACES.has(reviewHold.namespace) && scan2Defects.length > 0;
   // BN-B §3 A·C — 외부 이미지·미실존 링크는 모든 부동산 글감에서 즉시 hold(섀도 없음).
   const hardHold = issue.category === 'apt' && scan2Defects.some((d) => HARD_HOLD_RULES.has(d.rule));
   const canAutoPublish = holdPublishOn && !scan2Hold && !hardHold && config.auto_publish_enabled

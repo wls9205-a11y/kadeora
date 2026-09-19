@@ -85,7 +85,7 @@ export async function buildSiteContext(sb: any, siteId: string | null | undefine
   if (!siteId) return '';
   try {
     const { data } = await (sb as any).from('apt_sites')
-      .select('slug, name, display_name, sigungu, region, builder, total_units, complex_units, expected_sale_period, expected_sale_period_asof, price_min, price_max, price_source, site_type, source_ids, lifecycle_stage')
+      .select('slug, name, display_name, sigungu, region, builder, total_units, complex_units, expected_sale_period, expected_sale_period_asof, price_min, price_max, price_source, site_type, source_ids, lifecycle_stage, move_in_date')
       .eq('id', siteId).maybeSingle();
     if (!data) return '';
     // AB-2 · Q-1 — 합성 분양가(지역 채움값)는 싣지 않는다. 비우면 아래 줄이 「미공개」로 안내한다.
@@ -113,6 +113,10 @@ export async function buildSiteContext(sb: any, siteId: string | null | undefine
         : units && (data.source_ids?.house_manage_no || data.source_ids?.subscription_id)
           ? `- 공급 세대수(청약 공고 기준): ${units}세대 — 단지 전체 세대수는 미확인. 「총 ${units}세대」라고 쓰지 않는다`
           : units ? `- 세대수: ${units}세대` : '- 세대수: 미정(단정하지 말 것)',
+      // FW — 입주 예정은 월 단위 문형만(일자·「상반기」 추정 금지). move_in_date 는 YYYYMM.
+      /^\d{6}$/.test(String(data.move_in_date ?? ''))
+        ? `- 입주 예정: ${String(data.move_in_date).slice(0, 4)}년 ${Number(String(data.move_in_date).slice(4, 6))}월(공고 기준) — 월까지만 쓰고 일자·분기로 바꾸지 않는다`
+        : '',
       data.expected_sale_period
         ? `- 예상 분양 시기: ${data.expected_sale_period}${data.expected_sale_period_asof ? ` (${String(data.expected_sale_period_asof).slice(0, 10)} 기준 보도 — 본문·FAQ 에 기준일을 함께 쓴다)` : ''}`
         : '',
