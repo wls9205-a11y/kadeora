@@ -402,3 +402,12 @@ WHERE blog_post_id IN (SELECT id FROM p) RETURNING id, blog_post_id;
 - **재생성 2편 합류**: 112554·112555 superseded → `bn_defer_slug_fix` (5회차 총 8편).
 - ⚠️ **해제는 7abd7f3d READY 후**(82b22c03 아님 — 거래 문형·절제기가 7abd7f3d 에 있다). 해제문은 표식 그대로:
   `UPDATE issue_alerts SET is_processed=false, fail_reason=NULL WHERE source_type='bn_hub' AND fail_reason='bn_defer_slug_fix' AND blog_post_id IS NULL RETURNING raw_data->>'slug';`
+
+---
+
+# BN CC 11차 — 첫 발행 · 원값 정정 기록 (2026-09-19)
+
+- **BN 트랙 첫 발행**(세션 A 집행, 개통 1문 규격): 112548 디에이치 아센테르(우동3) · 112553 자이 더 센터니티(부곡2) — 공개 + IndexNow 긴급 큐 + 글감 상태 원자 집행. 5차 판독(절제 정합: 메타 표 0 · FAQ 6 · 본문 무파손 · 4차 소견 유효) 통과 후.
+- **builder 원값 정정**(세션 A 집행): 촉진3 · 전포1-1 `디엘이엔씨` → `DL이앤씨` 2건(RETURNING 확인). 도원이엔씨·한창이엔씨류 실제 사명, 아크로리버파크 `디엘이앤씨(주)` 등기 표기는 보존.
+- 5회차 8편 해제(7abd7f3d READY 후, RETURNING 8) — 절제기·거래 데이터 주입·문형 보호 반영 생성.
+- 발행 2편의 조합원 문형 말미 「정해진다」(구판)는 본문 수정 금지로 그대로. 신규분부터 「정해집니다」.
