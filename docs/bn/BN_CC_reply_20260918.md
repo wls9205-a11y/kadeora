@@ -232,3 +232,9 @@ WHERE i.image_type='stock_photo' AND i.image_url !~ 'kadeora|supabase' AND b.cro
 - **판단 자료**: 렌더 필터로 외부 이미지를 걷어도 텍스트만 남는 글은 표본·전수 모두 0 → S9-2 가 우려한 «빈약해지는 글» 위험은 실측상 없음.
   렌더러 `isSafeImg`(src/lib/image-sanitize.ts)는 세션 142 에서 블랙리스트(hc.go.kr 1건)로 바뀌어 위 출처를 전부 통과시킨다. 출처 대부분은 image-pipeline `IMG_BLOCK_DOMAINS` 에 이미 올라 있는 도메인이다(뉴스·경쟁 플랫폼) — 렌더러와 수집기가 서로 다른 목록을 쓰는 상태.
   → 필터 안(판정 필요): (a) 렌더러에 `IMG_BLOCK_DOMAINS` + `ytimg`·`dthumb` 적용(세션 142 의 «정당한 외부 CDN» 은 유지) (b) issue-draft 글 한정 자체 도메인 화이트리스트. 적용 대상은 본문 marked 렌더러 + blog_post_images 인라인·갤러리 두 경로.
+
+### 재생성 절차 보정 (실측 2026-09-19)
+- DB 트리거 `validate_blog_post` 는 INSERT 시 **상태 무관 동일 제목**이 있으면 `DUPLICATE_TITLE` 로 거부한다. 규격 제목(⑤)은 결정적이라 교체된 옛 초안이 새 초안의 제목 자리를 막는다(우동3·괴정5 실패).
+- 보정: 옛 초안(비공개·`hold:bn_regen_superseded`) 제목에 ` [superseded <id>]` 부착(10편, 본문 무수정) → 두 글감 재큐잉.
+- **이후 재생성 절차에 이 단계를 포함**: 사유 교체와 같은 문에서 제목 표식 부착.
+- 재생성 1호 112524(사직4): 스캔2 결함 0 · 규격 제목 · 커버 자체 OG · 외부 이미지 0(증보 B 작동) · 링크 자기 현장만.
