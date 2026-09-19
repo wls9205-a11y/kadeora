@@ -437,3 +437,14 @@ WHERE blog_post_id IN (SELECT id FROM p) RETURNING id, blog_post_id;
 - RULES#149 우회(블록 값이면 수식어 제거)는 하지 않는다 — 「예상 분양가 4억 8,800만원」 같은 창작 금액을 통과시킨다.
 - 112564·112566 superseded → `bn_defer_faq`(2편). 해제는 aaac9e1b 이상 READY 후:
   `UPDATE issue_alerts SET is_processed=false, fail_reason=NULL WHERE source_type='bn_hub' AND fail_reason='bn_defer_faq' AND blog_post_id IS NULL RETURNING raw_data->>'slug';`
+
+---
+
+# BN CC 13차 — 6차 판독 후속 (680c5882) (2026-09-19)
+
+- 세션 A 개통 5편(괴정5·사직5·수영1·촉진3·사직2) → **누적 발행 7편**. 하한 2,300 은 규격 유지 · 판독 재량 항목으로 확정.
+- **112563 감천2 — 치환 완료**: `[감천2구역 재개발](/apt/redev/2093)` → `/apt/감천2-재개발`(결정적 치환, LLM 0). 원본 백업 `blog_posts_content_backup_bn_20260919`(reason repair_links_bn_b6). 재스캔 결함 0 · 비실존 경로 0 → `hold:bn_review`(개통 대상).
+- **발생원(사이트 전체)**: internal-link-injector 가 정비구역명을 `/apt/redev/{redevelopment_projects.id}` 로 걸었다 — 없는 라우트(/apt/redev/[region] 만, 실측 404). **120일 1,426편(발행 154)** 에 박혀 있다. 신규는 연결 현장 `/apt/<slug>` 로(없으면 링크 안 함). 기발행분은 본문 수정 금지 — 처분 판정 필요(예: /apt/redev/[region] 라우트에서 숫자 인자를 연결 현장으로 308, 본문 무수정).
+- ⑦ 좁히기: 2단계 경로를 건너뛰던 구멍 — `/apt/redev/<x>` 는 x 가 시·도일 때만 실존. 결정적 링크 치환은 생성 파이프(축약 규격)에 편입, `raw_data.scan2.links_repaired`.
+- 경미 5 중 반영 3: 조사 「이(가)」(받침 판별) · 「한국감정원」 fact · 제목 되풀이 허용을 «단지명 + 구역 핵심어 둘 다» 로. 미반영 2(기록): FAQ Q 볼드 비일관(112561) · 112560 「의의」 섹션(무해).
+- 범천4·사직4(bn_defer_faq 해제분) 생성 대기 — 산출 시 7차 판독 입력.
