@@ -490,3 +490,24 @@ WHERE blog_post_id IN (SELECT id FROM p) RETURNING id, blog_post_id;
 ## FW — 착수 보류 사유 2
 1. **정본 「지시서_FW_20260919」가 저장소·세션에 없다**(docs/bn/FW_premeasure_20260919.md 는 CC 사전 실측). 선정 규칙·쿼터·축별 글감 규격·템플릿이 정본에 있어야 생산자를 짠다 — 원문 전달 요청.
 2. **옛 preempt 초안 791편**(9/1 이전 · 미발행 · 사유 NULL)이 같은 현장 중복 판정에서 «살아 있는 글» 로 잡힌다 → FW 생산자 글감이 해당 현장에서 same_site_pending 으로 막힌다(대연8 111400 실례). 8/24 배치 표본은 전부 서울 기축 푸터 오염. **FW 스위치 on 전 일괄 처분(사유 기록) 필요** — 판정 요청: 사유 `hold:fw_preempt_legacy`로 791편 일괄(본문 무수정, 원자 1문).
+
+---
+
+# 15차 — 세션 A 판정 기록 · FW 골자 (압축 대비 원문 보존) (2026-09-19)
+
+## 판정 ① 791편 일괄 hold — 승인 (CC 집행)
+- 사유 `hold:fw_preempt_legacy`. 조건: cron_type preempt 계열 + created_at < 2026-09-01 + is_published=false + auto_unpublished_reason IS NULL (사유 NULL 조건이 BN hold·타 트랙 초안 오폭 차단). 원자 1문 · RETURNING count 보고 · 표본 20 id 기록.
+- 같은 묶음: units_conflict 2건 등재 — 광안a(2,550↔2,780) · 반여3-1(811↔513). 해소 전까지 세대수 무기재 문형 자동, 공식 자료 확인 시 `units_conflict_closed` 1행.
+- 김해외동 subscription 문형 · name_tier 제거 — 승인.
+
+## 판정 ② FW 정본 — 「지시서_FW_20260919」(세션 A 작성 → Node 파일 전달, repo 에 없음이 정상). 골자:
+- 방향: 블로그를 **2026~2030 미래 진행 부동산(입주장·분양예정·재개발재건축)** 위주로 재편.
+- 실측 전제: 뉴스 경로 전환 3%(no_entity 95%) → 재가중 기각. **현장 기점 적재가 유일 경로**.
+- 생산자 (a)+(b) 혼성:
+  (a) preempt 슬롯 **전면 신작** 재등록(구 preempt 재사용 금지) · 스위치 `fw.producer_enabled` **off 시작**
+  (b) sync-apt-sites:524 훅 가속기 — backfill 필터(`source NOT LIKE 'backfill:%'`)로 신규·갱신 현장 글감화
+- 저수지 4축: 청약 19 · 분양예정 52 · 입주 부울경 157 · 정비 284. move_in_date 는 text YYYYMM → **월 문형만**(일 단위 창작 금지).
+- 발행 게이트 BP 2단: 1단 무판독 발행 13편 소급 섀도 스캔 → 2단 세션 A 판정 후 강제 전환. **전환 스위치 on 은 BN-C 일괄 개통과 같은 창**(마지막 한방 정렬).
+
+## CC 순서
+791 hold + conflict 2 원자 집행 → FW 생산자 구현(스위치 off) → BP 무판독 13편 섀도 스캔 → BN-C 산출 모니터(도착 묶음 판독 입력).
