@@ -8,10 +8,15 @@
 //   ⑤ 제목 규격 불일치 — title_spec 을 따르지 않은 제목
 // 모두 순수 함수다. 판정·기록은 호출부(issue-draft)가 한다.
 
+import { APT_NON_SITE_SEGMENTS } from '@/lib/blog-safe-insert';
+
 /** 프롬프트의 현장 블록 머리에 박는 마커. 본문에 나오면 지시문을 옮긴 것이다. */
 export const PROMPT_LEAK_MARKER = '⟦KDR⟧';
 
-export interface Scan2Defect { rule: 'period' | 'amount' | 'bracket' | 'leak' | 'year' | 'image' | 'link' | 'place' | 'percent'; text: string }
+export interface Scan2Defect { rule: 'period' | 'amount' | 'bracket' | 'leak' | 'year' | 'image' | 'link' | 'place' | 'percent' | 'section'; text: string }
+
+/** BN-B2 §4 — 축약 규격(site_compact)에서 금지된 제도 일반론 섹션 제목. */
+const COMPACT_FORBIDDEN_H2 = /^##\s+[^\n]*(청약\s*자격|가점|취득세|양도세|세액\s*공제|LTV|DSR|대출|전매|재당첨|시나리오|전망)/gm;
 
 /** 서울에만 있는 지명(다른 시·도 글에 나오면 혼입). 부산 등에도 있는 이름은 넣지 않는다. */
 const SEOUL_ONLY_PLACES = ['강남역', '광화문', '여의도', '잠실', '압구정', '강남구', '서초구', '송파구', '용산구', '마포구', '성수동'];
@@ -51,6 +56,8 @@ export function extractInternalLinks(content: string): { apt: string[]; blog: st
     try { slug = decodeURIComponent(slug); } catch { /* 원문 그대로 */ }
     slug = slug.replace(/\/+$/, '');
     if (!slug || slug.includes('/')) continue;
+    // ⚠️ /apt/diagnose·/apt/map 같은 실제 라우트는 현장 slug 가 아니다 — 3회차 10편 전부가 이 오탐으로 hold 됐다.
+    if (m[1] === 'apt' && APT_NON_SITE_SEGMENTS.has(slug)) continue;
     (m[1] === 'apt' ? apt : blog).add(slug);
   }
   return { apt: [...apt], blog: [...blog] };
@@ -112,11 +119,18 @@ export function dataWindowMonths(siteContext: string): number | null {
 
 const BRACKET_STOP = new Set(['기준', '기준일', '실거래', '거래', '시군구', '전체', '집계', '아파트', '계약', '전용', '신고', '국토교통부', '국토부', '매매']);
 
-export interface Scan2Input { title: string; content: string; siteContext: string; constantsBlock: string }
+export interface Scan2Input { title: string; content: string; siteContext: string; constantsBlock: string; compact?: boolean }
 
-export function scanDraft2({ content, siteContext, constantsBlock }: Scan2Input): Scan2Defect[] {
+export function scanDraft2({ content, siteContext, constantsBlock, compact }: Scan2Input): Scan2Defect[] {
   const defects: Scan2Defect[] = [];
   const body = content ?? '';
+
+  // 축약 규격 — 금지 섹션(구조 결함 → 편집 대상 아님, 재생성)
+  if (compact) {
+    let h: RegExpExecArray | null;
+    COMPACT_FORBIDDEN_H2.lastIndex = 0;
+    while ((h = COMPACT_FORBIDDEN_H2.exec(body)) !== null) defects.push({ rule: 'section', text: h[0].slice(0, 60) });
+  }
 
   // ① 기간 수식어 — 데이터 창과 어긋나면. 창이 없으면(실거래 줄 없음) 기간 주장 자체가 근거 없음.
   //    ⚠️ 시세·거래 문맥(앞뒤 30자)에서만 본다 — 「과거 5년 이내 당첨자 세대 아님」은 재당첨 제한 «규정» 이다

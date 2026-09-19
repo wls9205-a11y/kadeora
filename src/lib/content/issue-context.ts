@@ -280,12 +280,14 @@ export async function editScan2Defects(content: string, defects: Array<{ rule: s
   }
 }
 
-export interface IssueContext { siteContext: string; sourceText: string; constantsBlock: string; bigEventContext: string }
+export interface IssueContext { siteContext: string; sourceText: string; constantsBlock: string; bigEventContext: string; compact?: boolean }
 
 /** 글감 1건의 입력 문맥 전부(생성 프롬프트와 게이트가 «같은 것» 을 본다). */
 export async function loadIssueContext(sb: any, issue: any): Promise<IssueContext> {
   const bigEventContext = await fetchBigEventContext(sb, issue);
   let siteContext = await buildSiteContext(sb, issue.apt_site_id);
+  // BN-B2 3회차 — 축약 규격에선 「조합원 취득세」 안내 줄이 취득세 섹션을 유도했다(감천2·수영1·괴정5). 제도 서술 자체를 빼므로 줄도 뺀다.
+  if (issue.raw_data?.template === 'site_compact') siteContext = siteContext.split('\n').filter((l) => !l.startsWith('- 조합원 취득세:')).join('\n');
   // BN §5-3 — 단지명 병기. display 승격 금지(T-C 규율)라 현장 블록의 「표기할 이름」은 구역명이다.
   //   글감이 원장(site_name_candidates)에서 가져온 단지명을 실어 오면 병기 지시를 덧붙인다. 없으면 기존 동작.
   const cn = String(issue.raw_data?.complex_name ?? '').trim();
@@ -299,7 +301,7 @@ export async function loadIssueContext(sb: any, issue: any): Promise<IssueContex
   // BN-B2 §4 — 현장 글 축약 규격은 제도 상수를 싣지 않는다(제도 수치는 허용 목록에서도 빠져 수치 게이트가 막는다).
   const compact = issue.raw_data?.template === 'site_compact';
   const constantsBlock = issue.category === 'apt' && !compact ? await loadPolicyConstants(sb) : '';
-  return { siteContext, sourceText, constantsBlock, bigEventContext };
+  return { siteContext, sourceText, constantsBlock, bigEventContext, compact };
 }
 
 /** 허용 목록. ⛔ raw_data 의 blocked_draft·edit_pending(지난 초안)은 넣지 않는다 — 넣으면 환각 숫자가 스스로를 허가한다. */

@@ -125,3 +125,14 @@ describe('BN-B2 증보', () => {
     expect(scan('농어촌특별세(이 글의 글감 선택 조건상 비적용)').map((d) => d.rule)).toEqual(['leak']);
   });
 });
+
+describe('BN 3회차 — 비현장 경로 · 축약 금지 섹션', () => {
+  it('/apt/diagnose·/apt/map 은 현장 링크 대조 대상이 아니다(3회차 10편 오탐)', () => {
+    expect(extractInternalLinks('[계산기](/apt/diagnose) [지도](/apt/map) [현장](/apt/사직4-재개발)').apt).toEqual(['사직4-재개발']);
+  });
+  it('축약 규격의 제도 일반론 H2 는 section 결함', () => {
+    const d = scanDraft2({ title: '', content: '## 조합원 분양과 신축 취득세\n본문', siteContext: SITE, constantsBlock: '', compact: true });
+    expect(d.map((x) => x.rule)).toEqual(['section']);
+    expect(scanDraft2({ title: '', content: '## 조합원 분양과 신축 취득세', siteContext: SITE, constantsBlock: '' })).toEqual([]);
+  });
+});

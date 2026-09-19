@@ -209,7 +209,7 @@ const LEAD_BEARING_CATEGORIES = new Set(['apt', 'unsold']);
  *    100% 통과해 아무것도 막지 못한다. 반드시 `/apt/<슬러그>` 형태만 센다.
  * ⚠️ `/apt/map` `/apt/archive` `/apt/pipeline` 등 실제 라우트도 슬러그가 아니므로 뺀다.
  */
-const APT_NON_SITE_SEGMENTS = new Set([
+export const APT_NON_SITE_SEGMENTS = new Set([
   'map', 'archive', 'pipeline', 'region', 'busan', 'complex', 'redev', 'diagnose', 'subscription',
 ]);
 

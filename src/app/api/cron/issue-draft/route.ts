@@ -789,7 +789,7 @@ async function processEditIssue(sb: any, issue: any, config: any): Promise<{ dec
 
 /** BN-2 §4 스캔2 기록. 강제(hold)는 BN 글감만 — 그 밖의 부동산 글감은 섀도(기록만)다. */
 async function scan2Log(sb: any, article: GenResult, ctx: IssueContext, titleReplaced: string | null) {
-  const defects: Scan2Defect[] = scanDraft2({ title: article.title, content: article.content, siteContext: ctx.siteContext, constantsBlock: ctx.constantsBlock });
+  const defects: Scan2Defect[] = scanDraft2({ title: article.title, content: article.content, siteContext: ctx.siteContext, constantsBlock: ctx.constantsBlock, compact: ctx.compact });
   // ⑦ 링크 실존 — `/apt/<slug>` 는 활성 현장, `/blog/<slug>` 는 존재하는 글. 영문 일반명(`/blog/redev-basic`)은 LLM 창작 패턴(112520).
   try {
     const { apt, blog } = extractInternalLinks(article.content);
