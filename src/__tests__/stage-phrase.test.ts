@@ -155,3 +155,11 @@ describe('josaIGa', () => {
     expect(josaIGa('GS')).toBe('가');
   });
 });
+
+describe('7차 판독 — 절차 나열 속 「조합 구성」', () => {
+  it('사업시행계획인가 이후 「이후 조합 구성, …」 은 fact', () => {
+    const site = '- 지역: 부산 부산진구\n- 시공사: 현대건설\n- 사업 단계(확정): 사업시행계획인가 — …';
+    const d = scanDraft2({ title: '', content: 'A. 현재 사업시행계획인가 단계입니다. 이후 조합 구성, 관계인 동의, 모집공고 순으로 진행될 예정입니다.', siteContext: site, constantsBlock: '' });
+    expect(d.filter((x) => x.rule === 'fact')).toHaveLength(1);
+  });
+});
