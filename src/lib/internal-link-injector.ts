@@ -235,7 +235,18 @@ export async function appendRelatedHubFooter(
   content: string,
   opts: { category?: string; postId?: number | null; siteSlug?: string | null } = {}
 ): Promise<string> {
-  if (content.includes('## 관련 정보') || content.includes('## 관련 페이지')) return content;
+  const existing = /^## 관련 (정보|페이지)[^\n]*$/m.exec(content);
+  if (existing) {
+    // BN-2 — 본문이 스스로 「관련 정보」를 썼더라도 글감 현장 링크는 보장한다.
+    //   편집 회차(감산 편집)가 현장 링크 문장을 지우고, LLM 이 쓴 관련 정보 섹션엔 현장이 없어
+    //   §2-2 게이트(NO_APT_SITE_LINK)로 떨어졌다(2026-09-19 수영1·우동3). 섹션 머리 바로 아래에 한 줄만 넣는다.
+    if (!opts.siteSlug || extractAptSiteSlugs(content).includes(opts.siteSlug)) return content;
+    const { data } = await sb.from('apt_sites').select('slug, name, display_name').eq('slug', opts.siteSlug).eq('is_active', true).maybeSingle();
+    if (!data) return content;
+    const label = String(data.display_name ?? '').split(' — ')[0].trim() || data.name || data.slug;
+    const at = existing.index + existing[0].length;
+    return `${content.slice(0, at)}\n\n- [${label} →](/apt/${data.slug})${content.slice(at)}`;
+  }
 
   const wanted = [...new Set([opts.siteSlug, ...extractAptSiteSlugs(content)].filter((s): s is string => !!s))].slice(0, 20);
   let sites: FooterSite[] = [];

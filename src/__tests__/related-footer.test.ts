@@ -43,3 +43,19 @@ describe('internal link injector 경계', () => {
     expect(r.out).toBe('[잠실엘스](/apt/잠실엘스-송파구)는 대단지다');
   });
 });
+
+import { appendRelatedHubFooter } from '@/lib/internal-link-injector';
+
+describe('appendRelatedHubFooter — 기존 관련 정보 섹션', () => {
+  const sb = (row: any) => ({ from: () => ({ select: () => ({ eq: () => ({ eq: () => ({ maybeSingle: async () => ({ data: row }) }) }) }) }) });
+  const site = { slug: '수영1-재개발', name: '수영1 재개발', display_name: null };
+  it('섹션이 있어도 글감 현장 링크가 없으면 머리 아래에 한 줄', async () => {
+    const out = await appendRelatedHubFooter(sb(site), '본문\n\n## 관련 정보\n\n- [청약 일정](/apt)\n', { category: 'apt', siteSlug: '수영1-재개발' });
+    expect(out).toContain('## 관련 정보\n\n- [수영1 재개발 →](/apt/수영1-재개발)\n\n- [청약 일정](/apt)');
+    expect(extractAptSiteSlugs(out)).toEqual(['수영1-재개발']);
+  });
+  it('이미 링크가 있으면 그대로', async () => {
+    const c = '[수영1](/apt/수영1-재개발)\n\n## 관련 정보\n\n- [청약 일정](/apt)\n';
+    expect(await appendRelatedHubFooter(sb(site), c, { category: 'apt', siteSlug: '수영1-재개발' })).toBe(c);
+  });
+});
