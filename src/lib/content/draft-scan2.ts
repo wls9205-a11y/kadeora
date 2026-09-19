@@ -137,7 +137,12 @@ export function scanDraft2({ title, content, siteContext, constantsBlock, compac
   const stageLine = /^- 사업 단계\(확정\): (\S+)/m.exec(siteContext)?.[1] ?? '';
   const stageIdx = STAGE_ORDER.findIndex((s) => stageLine.startsWith(s));
   const NEG = /아니|않|없|제외|불가|해당되지/;
-  for (const sentence of stripUrls(body).split(/(?<=[.!?。])\s+|\n+/)) {
+  const sentences: Array<{ s: string; paraHasAmount: boolean }> = [];
+  for (const para of stripUrls(body).split(/\n+/)) {
+    const paraHasAmount = /\d[\d,]*\s*(?:억|만\s*원)/.test(para);
+    for (const x of para.split(/(?<=[.!?。])\s+/)) sentences.push({ s: x, paraHasAmount });
+  }
+  for (const { s: sentence, paraHasAmount } of sentences) {
     const s = sentence.trim();
     if (!s) continue;
     const hit = (why: string) => defects.push({ rule: 'fact', text: `${why}: ${s.slice(0, 60)}` });
@@ -151,7 +156,8 @@ export function scanDraft2({ title, content, siteContext, constantsBlock, compac
     if (stageIdx >= 3 && /(?:초기|예비)\s*(?:개발\s*)?단계/.test(s)) { hit('초기 단계'); continue; }
     // BN 5회차 — 수치 없는 시세 문장(감산 편집이 추정 금액을 지운 흔적: 「중위 거래가는 다양한 수준」「시세는 … 달라집니다 … 참고」).
     //   연·월 숫자는 수치로 치지 않는다(「(2026년 6월~9월 기준)」만 남은 문장).
-    if (/중위|시세|거래가|거래액/.test(s) && /수준|달라|참고|다양|상당/.test(s)
+    //   같은 단락에 금액이 있으면 단서 문장(「… 달라질 수 있습니다」)이다 — 112560 오탐.
+    if (!paraHasAmount && /중위|시세|거래가|거래액/.test(s) && /수준|달라|참고|다양|상당/.test(s)
         && !/\d/.test(s.replace(/20\d{2}\s*[년-]|\d{1,2}\s*월|\d{4}-\d{2}/g, ''))) { hit('수치 없는 시세'); continue; }
   }
 
