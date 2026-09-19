@@ -18,7 +18,10 @@ import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
 import { sortForGeneration } from '@/lib/content/realestate-priority';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
 import { reviewHoldOf, reviewSwitches, isReviewHoldReason } from '@/lib/content/review-hold';
-import { scanDraft2, enforceTitleSpec, PROMPT_LEAK_MARKER } from '@/lib/content/draft-scan2';
+import { scanDraft2, enforceTitleSpec, PROMPT_LEAK_MARKER, extractInternalLinks, HARD_HOLD_RULES, type Scan2Defect } from '@/lib/content/draft-scan2';
+
+/** BN-B §3-B — 생성 시점 외부 이미지 삽입 중단(insertImages 머리말 참조). */
+const EXTERNAL_IMAGE_INSERT_DISABLED = true;
 import { editOutNumbers, loadIssueContext, buildIssueAllow, verifyIssueDraft, type IssueContext } from '@/lib/content/issue-context';
 import { parseSalePeriod } from '@/lib/apt/sale-period';
 import { periodWindow } from '@/lib/apt/upcoming-sales';
@@ -145,6 +148,10 @@ ${issue.category === 'apt' ? `
    이 규율을 어긴 숫자가 하나라도 있으면 발행 전 검증기가 글 전체를 막는다.
 ⛔ 사실 규율 — 예정명은 «확정 발표된 것» 만 단정한다. 시공사 선정 «전» 의 이름이면
    반드시 「제안 단지명」이라고 밝힌다. 확정과 제안을 섞으면 그 현장을 영영 잘못 부르게 된다.
+⛔ 일정 규율 — 사업 일정표·타임라인에 «이 글의 현장» 블록에 없는 연도·반기를 넣지 않는다(「준공 2030 전후」 금지).
+   확정 일정이 없으면 단계 이름만 순서대로 쓰고 시기는 「모집공고 후 확정」 문형으로만 쓴다.
+⛔ 표기 규율 — 글감의 내부 표기(발행 경로·트랙·배치 이름, 괄호 속 운영 메모)를 본문·요약에 옮기지 않는다.
+   내부 링크는 «이 글의 현장» 블록의 현장 링크와 /apt · /blog · /calc 같은 상위 경로만 쓴다 — /blog/<영문 이름> 같은 글 주소를 지어내지 않는다.
 ${siteContext ? `
 ## 이 글의 현장 ${PROMPT_LEAK_MARKER}
 ${siteContext}` : ''}
@@ -348,6 +355,12 @@ function enrichVisuals(content: string, issue: any): string {
 /* ═══════════ 이미지 삽입 (본문 H2 사이에 실사진) ═══════════ */
 
 async function insertImages(content: string, title: string, keywords: string[], category: string, blogPostId: number | null, sb: any): Promise<string> {
+  // ⛔ BN-B 판독 §3-B(2026-09-19) — 이 함수는 네이버 이미지 검색 URL 을 차단 목록·관련도 채점·Storage 재호스팅
+  //   없이 본문(최대 3장)과 cover_image 에 그대로 핫링크했다. 정식 파이프라인(image-pipeline · issue-image-attach)의
+  //   완전한 우회로다. 실측: 30일 issue-draft 502편(발행 131)이 외부 스톡 이미지·외부 커버 — 112517 에 유튜브 썸네일
+  //   (「광화문 래미안 … 마이너 갤러리」). S8/S9 에서 걷어낸 외부 스크랩 계보의 살아 있던 유입구.
+  //   이미지는 issue-image-attach(정식 파이프라인)에 맡긴다. 아래 본문은 복원 참고용으로만 남긴다.
+  if (EXTERNAL_IMAGE_INSERT_DISABLED) return content;
   const query = keywords.slice(0, 2).join(' ') || title.replace(/[[\]|()]/g, '').slice(0, 20);
   const searchQuery = category === 'apt' ? `${query} 아파트 단지` : category === 'stock' ? `${query} 주식 차트` : `${query} 경제`;
   const images = await searchNaverImages(searchQuery, 5);
@@ -649,7 +662,7 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
     return { decision: 'edit_pending', score: issue.final_score, title: article.title };
   }
   const gateLog = issue.category === 'apt'
-    ? { gate_result: 'passed_first', first_unverified: [], checked: gate.checked, ...scan2Log(article, ctx, titleFix.replaced) }
+    ? { gate_result: 'passed_first', first_unverified: [], checked: gate.checked, ...(await scan2Log(sb, article, ctx, titleFix.replaced)) }
     : { number_shadow: { ok: gate.ok, checked: gate.checked, unverified: gate.unverified.slice(0, 30), had_source_text: !!sourceText } };
   return finalizeArticle(sb, issue, config, article, gateLog);
 }
@@ -701,13 +714,29 @@ async function processEditIssue(sb: any, issue: any, config: any): Promise<{ dec
     return { decision: 'number_unverified', score: issue.final_score, title: article.title };
   }
   issue.raw_data = { ...(issue.raw_data ?? {}), edit_pending: undefined };
-  const gateLog = { gate_result: edited ? 'passed_after_edit' : 'passed_first', first_unverified: firstUnverified.slice(0, 20), checked: first.checked, ...scan2Log(article, ctx, titleFix.replaced) };
+  const gateLog = { gate_result: edited ? 'passed_after_edit' : 'passed_first', first_unverified: firstUnverified.slice(0, 20), checked: first.checked, ...(await scan2Log(sb, article, ctx, titleFix.replaced)) };
   return finalizeArticle(sb, issue, config, article, gateLog);
 }
 
 /** BN-2 §4 스캔2 기록. 강제(hold)는 BN 글감만 — 그 밖의 부동산 글감은 섀도(기록만)다. */
-function scan2Log(article: GenResult, ctx: IssueContext, titleReplaced: string | null) {
-  const defects = scanDraft2({ title: article.title, content: article.content, siteContext: ctx.siteContext, constantsBlock: ctx.constantsBlock });
+async function scan2Log(sb: any, article: GenResult, ctx: IssueContext, titleReplaced: string | null) {
+  const defects: Scan2Defect[] = scanDraft2({ title: article.title, content: article.content, siteContext: ctx.siteContext, constantsBlock: ctx.constantsBlock });
+  // ⑦ 링크 실존 — `/apt/<slug>` 는 활성 현장, `/blog/<slug>` 는 존재하는 글. 영문 일반명(`/blog/redev-basic`)은 LLM 창작 패턴(112520).
+  try {
+    const { apt, blog } = extractInternalLinks(article.content);
+    if (apt.length > 0) {
+      const { data } = await (sb as any).from('apt_sites').select('slug').in('slug', apt.slice(0, 50)).eq('is_active', true);
+      const ok = new Set(((data ?? []) as Array<{ slug: string }>).map((r) => r.slug));
+      for (const s of apt) if (!ok.has(s)) defects.push({ rule: 'link', text: `/apt/${s}` });
+    }
+    if (blog.length > 0) {
+      const { data } = await (sb as any).from('blog_posts').select('slug').in('slug', blog.slice(0, 50));
+      const ok = new Set(((data ?? []) as Array<{ slug: string }>).map((r) => r.slug));
+      for (const s of blog) if (!ok.has(s)) defects.push({ rule: 'link', text: `/blog/${s}` });
+    }
+  } catch (e: any) {
+    console.warn('[issue-draft] scan2 link check failed:', e?.message);
+  }
   return { scan2: { at: new Date().toISOString(), defects: defects.slice(0, 30), title_replaced: titleReplaced } };
 }
 
@@ -803,9 +832,11 @@ async function finalizeArticle(sb: any, issue: any, config: any, article: GenRes
   const reviewHold = reviewHoldOf(issue);
   const holdPublishOn = reviewHold ? (await reviewSwitches(sb))[reviewHold.namespace] : true;
   // BN-2 §4 — 스캔2 결함이 있는 BN 초안은 스위치가 열려 있어도 hold(사유 …:scan2). 결함분은 재생성 대상.
-  const scan2Defects: unknown[] = (gateLog as any)?.scan2?.defects ?? [];
+  const scan2Defects: Scan2Defect[] = (gateLog as any)?.scan2?.defects ?? [];
   const scan2Hold = reviewHold?.namespace === 'bn' && scan2Defects.length > 0;
-  const canAutoPublish = holdPublishOn && !scan2Hold && config.auto_publish_enabled
+  // BN-B §3 A·C — 외부 이미지·미실존 링크는 모든 부동산 글감에서 즉시 hold(섀도 없음).
+  const hardHold = issue.category === 'apt' && scan2Defects.some((d) => HARD_HOLD_RULES.has(d.rule));
+  const canAutoPublish = holdPublishOn && !scan2Hold && !hardHold && config.auto_publish_enabled
     && issue.final_score >= (config.auto_publish_min_score ?? 40)
     && !issue.block_reason && check.passed
     && !(config.auto_publish_blocked_categories || []).includes(issue.category);
@@ -869,6 +900,10 @@ async function finalizeArticle(sb: any, issue: any, config: any, article: GenRes
   if (reviewHold?.stampReason && (!holdPublishOn || scan2Hold) && blogPostId) {
     dbw('issue-draft', 'blog_posts.update@review_hold', await (sb as any).from('blog_posts')
       .update({ auto_unpublished_reason: scan2Hold ? `${reviewHold.reason}:scan2` : reviewHold.reason, auto_publish_eligible: false })
+      .eq('id', blogPostId).eq('is_published', false));
+  } else if (hardHold && blogPostId) {
+    dbw('issue-draft', 'blog_posts.update@scan2_hard', await (sb as any).from('blog_posts')
+      .update({ auto_unpublished_reason: 'hold:scan2_hard', auto_publish_eligible: false })
       .eq('id', blogPostId).eq('is_published', false));
   }
 

@@ -35,7 +35,7 @@ pick as (
 insert into issue_alerts (title, summary, category, sub_category, issue_type, source_type, source_urls,
                           detected_keywords, apt_site_id, region_sido, region_sigungu, base_score, final_score, raw_data)
 select p.cn || ' — ' || p.zone || ' 현재 상황·일정 총정리',
-       p.cn || '(시공사 제안 단지명) — ' || p.region || ' ' || p.sigungu || ' ' || p.zone || ' 사업 단계·일정 정리 (BN 허브 발행)',
+       p.cn || '(시공사 제안 단지명) — ' || p.region || ' ' || p.sigungu || ' ' || p.zone || ' 사업 단계·일정 정리',
        'apt', 'bn_hub', 'redevelopment', 'bn_hub', '{}'::text[],
        array[p.cn, p.zone, p.cn || ' 분양', replace(p.zone, ' 재개발', '') || ' 재개발'],
        p.id, p.region, p.sigungu, 45, 45,

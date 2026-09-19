@@ -11,7 +11,44 @@
 /** 프롬프트의 현장 블록 머리에 박는 마커. 본문에 나오면 지시문을 옮긴 것이다. */
 export const PROMPT_LEAK_MARKER = '⟦KDR⟧';
 
-export interface Scan2Defect { rule: 'period' | 'amount' | 'bracket' | 'leak'; text: string }
+export interface Scan2Defect { rule: 'period' | 'amount' | 'bracket' | 'leak' | 'year' | 'image' | 'link' | 'place'; text: string }
+
+/** 서울에만 있는 지명(다른 시·도 글에 나오면 혼입). 부산 등에도 있는 이름은 넣지 않는다. */
+const SEOUL_ONLY_PLACES = ['강남역', '광화문', '여의도', '잠실', '압구정', '강남구', '서초구', '송파구', '용산구', '마포구', '성수동'];
+
+/** BN-B §3 A·C — 기계 판정이라 오탐이 낮다. BN 밖 부동산 글감에도 즉시 강제(hold). */
+export const HARD_HOLD_RULES: ReadonlySet<Scan2Defect['rule']> = new Set(['image', 'link']);
+
+/** 우리 도메인(사이트·Storage)만 허용. 그 밖 이미지는 핫링크·저작권 결함. */
+const OWN_IMAGE_HOST = /(^|\.)kadeora\.app$|\.supabase\.co$/i;
+
+/** ⑥ 본문 이미지 src 중 우리 도메인 밖. */
+export function externalImages(content: string): string[] {
+  const out: string[] = [];
+  const re = /!\[[^\]]*\]\((https?:\/\/[^)\s]+)[^)]*\)|<img[^>]+src=["'](https?:\/\/[^"']+)["']/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(content ?? '')) !== null) {
+    const url = m[1] ?? m[2];
+    try { if (!OWN_IMAGE_HOST.test(new URL(url).hostname)) out.push(url); } catch { out.push(url); }
+  }
+  return out;
+}
+
+/** ⑦ 대조 대상 내부 링크 — `/apt/<slug>` · `/blog/<slug>`(한 단계, 쿼리·앵커 제외). 디코드된 slug. */
+export function extractInternalLinks(content: string): { apt: string[]; blog: string[] } {
+  const apt = new Set<string>();
+  const blog = new Set<string>();
+  const re = /(?:\]\(|href=["'])\/(apt|blog)\/([^)"'\s#?]+)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(content ?? '')) !== null) {
+    let slug = m[2];
+    try { slug = decodeURIComponent(slug); } catch { /* 원문 그대로 */ }
+    slug = slug.replace(/\/+$/, '');
+    if (!slug || slug.includes('/')) continue;
+    (m[1] === 'apt' ? apt : blog).add(slug);
+  }
+  return { apt: [...apt], blog: [...blog] };
+}
 
 const UNIT_WON: Record<string, number> = { 조: 1e12, 억: 1e8, 만: 1e4, 천: 1e3 };
 const num = (s: string) => Number(String(s).replace(/,/g, ''));
@@ -91,8 +128,30 @@ export function scanDraft2({ content, siteContext, constantsBlock }: Scan2Input)
     if (alien.length > 0) defects.push({ rule: 'bracket', text: m[0].slice(0, 80) });
   }
 
-  // ④ 지시문 누출 — 마커 · 규율 용어 · 「본 기사는 …하지 않습니다」 자기 서술
+  // 연도 예측 — 일정어가 있는 줄의 연도(2026~2039)가 현장 블록·상수 블록에 없으면 창작 일정(112520 「준공 2030 전후」)
+  //    ⚠️ 허용 연도는 «현장 블록» 것만. 제도 상수의 기한·시행일(2028-12-31 등)이 예측 연도를 통과시켰다(112520).
+  const known = siteContext;
+  const SCHEDULE = /착공|준공|입주|분양|관리처분|사업시행|이주|철거|모집공고|인가|타임라인|일정/;
+  for (const line of body.split('\n')) {
+    if (!SCHEDULE.test(line)) continue;
+    const ys = line.match(/20(2[6-9]|3\d)(?=\s*(년|상반|하반|전후|경|\)|~|-|\s|$))/g) ?? [];
+    const alien = [...new Set(ys)].filter((y) => !known.includes(y));
+    if (alien.length > 0) defects.push({ rule: 'year', text: line.trim().slice(0, 80) });
+  }
+
+  // ⑥ 외부 이미지
+  for (const url of externalImages(body)) defects.push({ rule: 'image', text: url.slice(0, 120) });
+
+  // 유령 지명 — 서울 밖 현장 글에 서울 고유 지명(112517 「동래구 일대는 강남역 …」 · 112515 「강남동」 계보).
+  //   ⚠️ 좁은 목록만. 「교대역」·「서면」처럼 부산에도 있는 이름은 넣지 않는다.
+  const region = /^- 지역: (\S+)/m.exec(siteContext)?.[1] ?? '';
+  if (region && region !== '서울') {
+    for (const w of SEOUL_ONLY_PLACES) if (body.includes(w)) defects.push({ rule: 'place', text: w });
+  }
+
+  // ④ 지시문 누출 — 마커 · 규율 용어 · 「본 기사는 …하지 않습니다」 자기 서술 · 내부 트랙 표기
   const leaks = [
+    /BN\s*허브|허브\s*발행|bn_hub|bp70_hub|BP70|BP-B|BN-B/,
     new RegExp(PROMPT_LEAK_MARKER.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
     /(데이터|현장|상수)\s*블록/,
     /(수치|사실)\s*규율|수치\s*출처율/,

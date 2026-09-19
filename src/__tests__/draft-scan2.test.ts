@@ -61,3 +61,38 @@ describe('enforceTitleSpec', () => {
     expect(enforceTitleSpec('아무 제목', {}).replaced).toBeNull();
   });
 });
+
+// BN-B 판독 §3 — ⑥ 외부 이미지 · ⑦ 링크 추출 · 연도 예측 · 내부 표기 누출(112517·112520 실측)
+import { externalImages, extractInternalLinks, HARD_HOLD_RULES } from '@/lib/content/draft-scan2';
+
+describe('BN-B 증보', () => {
+  it('⑥ 외부 이미지 — 유튜브 썸네일은 결함, 우리 도메인·Storage 는 통과', () => {
+    expect(externalImages('![x](https://i.ytimg.com/vi/jEWEnQHYgqs/maxresdefault.jpg)')).toHaveLength(1);
+    expect(externalImages('![x](https://kadeora.app/api/og?title=a) ![y](https://abc.supabase.co/storage/v1/x.webp)')).toEqual([]);
+    expect(scan('![썸네일](https://i.ytimg.com/vi/a/maxresdefault.jpg)').map((d) => d.rule)).toEqual(['image']);
+    expect(scan('![광화문 래미안](https://i.ytimg.com/vi/a/maxresdefault.jpg)').map((d) => d.rule)).toEqual(['image', 'place']);
+    expect(HARD_HOLD_RULES.has('image') && HARD_HOLD_RULES.has('link')).toBe(true);
+  });
+  it('⑦ 내부 링크 추출 — /apt·/blog 한 단계만, 디코드', () => {
+    expect(extractInternalLinks('[a](/blog/redev-basic) [b](/apt/%EC%82%AC%EC%A7%815-%EC%9E%AC%EA%B0%9C%EB%B0%9C) [c](/blog?category=apt) [d](/apt/redev/부산)'))
+      .toEqual({ apt: ['사직5-재개발'], blog: ['redev-basic'] });
+  });
+  it('연도 예측 — 블록에 없는 연도의 일정 줄', () => {
+    expect(scan('| 준공 | 2030 전후 |').map((d) => d.rule)).toEqual(['year']);
+    expect(scan('실거래 기준 기간은 2026-03~2026-09 입니다. 분양 일정은 모집공고 후 확정')).toEqual([]);
+  });
+  it('내부 표기 누출 — 「(BN 허브 발행)」', () => {
+    expect(scan('> 사업 단계·일정 정리 (BN 허브 발행)').map((d) => d.rule)).toEqual(['leak']);
+  });
+});
+
+describe('BN-B 증보 2 — 유령 지명 · 상수 연도 비허용', () => {
+  it('서울 밖 현장 글의 서울 고유 지명', () => {
+    expect(scan('동래구 일대는 강남역, 교대역, 사직역 등').map((d) => d.rule)).toEqual(['place']);
+    expect(scan('교대역·사직역 인근')).toEqual([]);
+  });
+  it('상수 블록의 연도는 일정 예측을 허가하지 않는다', () => {
+    const d = scanDraft2({ title: '', content: '6. **준공 및 입주** (2030년 전후)', siteContext: SITE, constantsBlock: '- 감면 기한: 2030-12-31' });
+    expect(d.map((x) => x.rule)).toEqual(['year']);
+  });
+});
