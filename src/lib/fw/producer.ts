@@ -22,6 +22,25 @@ export async function fwSwitch(sb: any, key: 'producer_enabled' | 'hub_publish_e
 
 const COLS = 'id, slug, name, display_name, region, sigungu';
 
+/**
+ * 일 캡 — issue-draft 60/KST일 버킷은 뉴스·BN 과 공유 자원이다(9/19 한도 우회 사고). FW 적재는 KST 하루 캡 안에서만.
+ * 값은 app_config fw.daily_cap(기본 30, 세션 A 판정 2026-09-19). 상향은 전환 스위치 on 창에서 설정값 1회.
+ */
+export const FW_DAILY_CAP_DEFAULT = 30;
+export function kstDayStartIso(now = new Date()): string {
+  const k = new Date(now.getTime() + 9 * 3600_000);
+  return new Date(Date.UTC(k.getUTCFullYear(), k.getUTCMonth(), k.getUTCDate()) - 9 * 3600_000).toISOString();
+}
+export async function capLeft(sb: any, now = new Date()): Promise<number> {
+  const { data } = await sb.from('app_config').select('value').eq('namespace', 'fw').eq('key', 'daily_cap').maybeSingle();
+  const cap = Number.isFinite(Number(data?.value)) && data?.value !== null ? Number(data.value) : FW_DAILY_CAP_DEFAULT;
+  if (cap <= 0) return 0;
+  // 캡이 작아 행을 cap 개까지만 받아 센다(count:exact 핫패스 금지 — no-exact-count-hotpath).
+  const { data: rows } = await sb.from('issue_alerts').select('id')
+    .eq('source_type', 'fw_hub').gte('created_at', kstDayStartIso(now)).limit(cap);
+  return Math.max(0, cap - ((rows ?? []) as unknown[]).length);
+}
+
 /** 축별 후보. 우선순위는 축 안에서 결정적(가까운 시기 먼저). */
 export async function candidates(sb: any, axis: FwAxis, limit: number): Promise<FwSite[]> {
   let q = sb.from('apt_sites').select(COLS).eq('is_active', true);
@@ -81,7 +100,7 @@ export async function enqueue(sb: any, sites: FwSite[], axis: FwAxis, via: 'rota
 export async function runRotation(sb: any, perRun = 4): Promise<Record<FwAxis, string[]>> {
   const out: Record<FwAxis, string[]> = { subscription: [], presale: [], move_in: [], redev: [] };
   const axes: FwAxis[] = ['subscription', 'presale', 'move_in', 'redev'];
-  let left = perRun;
+  let left = Math.min(perRun, await capLeft(sb));
   for (const axis of axes) {
     if (left <= 0) break;
     const share = Math.max(1, Math.ceil(perRun / axes.length));
@@ -104,5 +123,5 @@ export async function stageHook(sb: any, sinceIso: string): Promise<string[]> {
   const { data: sites } = await sb.from('apt_sites').select(COLS).in('id', ids).eq('is_active', true)
     .in('region', BUGYEONG).eq('site_type', 'redevelopment').in('lifecycle_stage', REDEV_STAGES);
   const picks = await uncovered(sb, (sites ?? []) as FwSite[]);
-  return enqueue(sb, picks.slice(0, 6), 'redev', 'stage_hook');
+  return enqueue(sb, picks.slice(0, Math.min(6, await capLeft(sb))), 'redev', 'stage_hook');
 }

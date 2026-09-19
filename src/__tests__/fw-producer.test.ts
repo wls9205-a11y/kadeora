@@ -55,3 +55,11 @@ describe('review-hold fw', () => {
     expect(SCAN2_NAMESPACES.has('fw') && SCAN2_NAMESPACES.has('bn') && !SCAN2_NAMESPACES.has('bp')).toBe(true);
   });
 });
+
+import { kstDayStartIso } from '@/lib/fw/producer';
+describe('FW 일 캡', () => {
+  it('KST 자정 경계', () => {
+    expect(kstDayStartIso(new Date('2026-09-19T07:30:00Z'))).toBe('2026-09-18T15:00:00.000Z');
+    expect(kstDayStartIso(new Date('2026-09-19T15:01:00Z'))).toBe('2026-09-19T15:00:00.000Z');
+  });
+});

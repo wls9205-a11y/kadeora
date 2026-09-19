@@ -173,3 +173,15 @@ describe('FW — 일반 분양·입주 현장 단계 문형', () => {
       expect(stageSection({ stage: k, isRedev: false })).not.toMatch(/\d/);
   });
 });
+
+import { MEMBER_PHRASE_RECON, isReconstruction } from '@/lib/content/stage-phrase';
+describe('재건축 조합원 문형 — 도시정비법 제2조 제9호 나목·제39조', () => {
+  it('재건축 현장은 동의자 문형, 재개발은 토지등소유자 문형', () => {
+    expect(isReconstruction('반여4 재건축', '반여4-재건축')).toBe(true);
+    expect(isReconstruction('광안5구역', '광안5-재개발')).toBe(false);
+    const r = stageSection({ stage: 'union_established', isRedev: true, recon: true })!;
+    expect(r).toContain(MEMBER_PHRASE_RECON);
+    expect(r).not.toContain('토지 또는 건축물');
+    expect(stageSection({ stage: 'union_established', isRedev: true })).toContain('토지 또는 건축물');
+  });
+});

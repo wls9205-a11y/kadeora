@@ -21,6 +21,12 @@ const IDX: Record<string, number> = Object.fromEntries(REDEV_STEPS.map((s, i) =>
 
 /** 조합원 자격 — 이 문형만 쓴다(세입자·거주자 조합원 단정 금지). */
 export const MEMBER_PHRASE = '재개발 조합원은 정비구역 안의 토지 또는 건축물 소유자(토지등소유자)이며, 구체적인 자격과 분양 신청 요건은 조합 정관과 관리처분계획에서 정해집니다.';
+/** 재건축 조합원 — 도시정비법 제2조 제9호 나목 · 제39조 제1항(2026-07-01 시행판 DRF 원문 대조, 2026-09-19).
+ *  재개발 문형(토지 «또는» 건축물)을 재건축에 쓰면 틀린다: 건축물 «및» 부속토지 소유자 중 동의자만. */
+export const MEMBER_PHRASE_RECON = '재건축 조합원은 정비구역 안의 건축물 및 그 부속토지 소유자 가운데 재건축사업에 동의한 사람이며, 구체적인 자격과 분양 신청 요건은 조합 정관과 관리처분계획에서 정해집니다.';
+
+/** 재건축 여부 — 현장명·slug 로 판정(site_type 은 재개발·재건축을 가르지 않는다). */
+export const isReconstruction = (...names: Array<string | null | undefined>) => names.some((n) => /재건축/.test(String(n ?? '')));
 
 /** 받침 여부로 이/가. 마지막 글자가 한글이 아니면 가. */
 export function josaIGa(word: string): string {
@@ -30,7 +36,7 @@ export function josaIGa(word: string): string {
   return code % 28 === 0 ? '가' : '이';
 }
 
-export interface StageInput { stage: string | null | undefined; builder?: string | null; isRedev: boolean }
+export interface StageInput { stage: string | null | undefined; builder?: string | null; isRedev: boolean; recon?: boolean }
 
 /** 현재 단계 표시명(정비사업만). 모르면 null. */
 export function stageName(stage: string | null | undefined): string | null {
@@ -56,7 +62,7 @@ const SITE_STAGE: Record<string, string> = {
   move_in_started: '입주가 시작된 단계입니다. 입주 지정 기간과 절차는 입주 안내를 기준으로 확인해야 합니다.',
 };
 
-export function stageSection({ stage, builder, isRedev }: StageInput): string | null {
+export function stageSection({ stage, builder, isRedev, recon }: StageInput): string | null {
   if (!isRedev) return stage && SITE_STAGE[stage] ? SITE_STAGE[stage] : null;
   const i = stage ? IDX[stage] : undefined;
   if (i === undefined) return null;
@@ -72,7 +78,7 @@ export function stageSection({ stage, builder, isRedev }: StageInput): string | 
   const rest = REDEV_STEPS.slice(next).map((s) => s.name);
   if (rest.length > 0) lines.push(`남은 절차는 ${rest.join(' → ')} 순서로 진행됩니다.`);
   lines.push('각 단계의 시기는 인가·총회 결과에 따라 정해지며, 분양 일정은 입주자모집공고 후 확정됩니다.');
-  lines.push(MEMBER_PHRASE);
+  lines.push(recon ? MEMBER_PHRASE_RECON : MEMBER_PHRASE);
   return lines.join(' ');
 }
 

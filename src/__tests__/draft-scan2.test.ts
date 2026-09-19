@@ -160,3 +160,12 @@ describe('BN-C — 출처 문장', () => {
     expect(scan('중위 거래가는 다양한 수준에서 형성됩니다').map((d) => d.rule)).toEqual(['fact']);
   });
 });
+
+describe('BN-C 7차 판독 — 조합 미구성 변형', () => {
+  const REDEV = SITE + '\n- 사업 단계(확정): 사업시행계획인가 — 이 단계와 다른 단계·조합 구성 여부를 쓰지 않는다';
+  const f = (c: string) => scanDraft2({ title: '', content: c, siteContext: REDEV, constantsBlock: '', compact: true }).map((d) => d.rule);
+  it('「조합 구성과」「조합 설립 단계에서」', () => {
+    expect(f('조합 구성과 후속 행정절차를 거친 뒤 분양이 진행됩니다.')).toContain('fact');
+    expect(f('조합 구성은 사업 공고 및 조합 설립 단계에서 확정됩니다.')).toContain('fact');
+  });
+});

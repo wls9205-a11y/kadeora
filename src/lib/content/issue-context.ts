@@ -10,7 +10,7 @@ import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
 import { stripSyntheticPrice } from '@/lib/apt/synthetic-price';
 import { buildAllow, verifyNumbers, yearsIn } from '@/lib/content/number-verify';
 import { extractArticleText } from '@/lib/content/article-text';
-import { stageName, stageSection, dataSection } from '@/lib/content/stage-phrase';
+import { stageName, stageSection, dataSection, isReconstruction } from '@/lib/content/stage-phrase';
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const MODEL = 'claude-haiku-4-5-20251001';
@@ -312,11 +312,11 @@ export async function loadIssueContext(sb: any, issue: any): Promise<IssueContex
   let stageText: string | null = null;
   let siteSlug: string | null = null;
   if (compact && issue.apt_site_id) {
-    const { data: st } = await (sb as any).from('apt_sites').select('slug, lifecycle_stage, builder, builder_normalized, site_type, source_ids').eq('id', issue.apt_site_id).maybeSingle();
+    const { data: st } = await (sb as any).from('apt_sites').select('slug, name, lifecycle_stage, builder, builder_normalized, site_type, source_ids').eq('id', issue.apt_site_id).maybeSingle();
     // 시공사는 정규화명(「디엘이엔씨」 → 「DL이앤씨」, 112554)
     const bn = Array.isArray(st?.builder_normalized) && st.builder_normalized.length > 0 ? st.builder_normalized.join(', ') : st?.builder;
     siteSlug = st?.slug ?? null;
-    if (st) stageText = stageSection({ stage: st.lifecycle_stage, builder: bn, isRedev: st.site_type === 'redevelopment' || !!st.source_ids?.redev_id });
+    if (st) stageText = stageSection({ stage: st.lifecycle_stage, builder: bn, isRedev: st.site_type === 'redevelopment' || !!st.source_ids?.redev_id, recon: isReconstruction(st.name, st.slug) });
   }
   const dataText = compact ? dataSection(siteContext) : null;
   return { siteContext, sourceText, constantsBlock, bigEventContext, compact, stageText, dataText, siteSlug };
