@@ -156,6 +156,14 @@ export function scanDraft2({ title, content, siteContext, constantsBlock, compac
     let h: RegExpExecArray | null;
     COMPACT_FORBIDDEN_H2.lastIndex = 0;
     while ((h = COMPACT_FORBIDDEN_H2.exec(body)) !== null) defects.push({ rule: 'section', text: h[0].slice(0, 60) });
+    // BN-B4 ③ — 「데이터 없는 데이터 섹션」: 주변 거래 섹션에 숫자가 하나도 없으면(112554·112555 수치 소거)
+    const dh = /^##\s+[^\n]*주변\s*거래[^\n]*$/m.exec(body);
+    if (dh) {
+      const st = dh.index + dh[0].length;
+      const nx = body.slice(st).search(/\n##\s/);
+      const sec = body.slice(st, nx === -1 ? body.length : st + nx);
+      if (!/\d/.test(stripUrls(sec)) && !/집계가 충분하지 않아/.test(sec)) defects.push({ rule: 'section', text: '## 주변 거래 데이터(수치 없음)' });
+    }
     // 목차 규격 밖 H2(「분양가 및 계약 조건」「현장 입지와 교통」「정비사업 특성과 리스크」 — 3회차 5편). 「## 관련 정보」 이후 보강 블록은 제외.
     const cut = body.indexOf('\n## 관련 정보');
     const main = cut > 0 ? body.slice(0, cut) : body;
@@ -281,4 +289,53 @@ export function enforceTitleSpec(title: string, rawData: any): { title: string; 
   const head = `${cn} — ${zone}`;
   if ((title ?? '').trim().startsWith(head)) return { title, replaced: null };
   return { title: `${head} 현재 상황·일정 총정리`, replaced: title };
+}
+
+/**
+ * BN-B4 ① — 축약 규격 섹션 절제기(LLM 0 · 섹션 단위). Node 승인분.
+ * - 목차 화이트리스트 밖 H2 블록을 통째로 잘라낸다(「## 관련 정보」 이후 보강 블록은 건드리지 않는다).
+ * - 메타 표(「| 대상 | … | 카테고리 | … | 분석 시점 |」)를 지운다 — 글감 메타가 표로 렌더된 것(D 계보).
+ * - FAQ 7번째 문항부터 잘라낸다(규격 4~6).
+ * 잘라낸 것은 목록으로 돌려준다(raw_data.scan2.sections_removed — 판독 입력).
+ */
+export function exciseCompact(content: string, title: string): { content: string; removed: string[] } {
+  const removed: string[] = [];
+  let body = String(content ?? '');
+  const cut = body.indexOf('\n## 관련 정보');
+  let main = cut > 0 ? body.slice(0, cut) : body;
+  const tail = cut > 0 ? body.slice(cut) : '';
+
+  // 메타 표
+  const meta = /\n?\|\s*항목\s*\|\s*내용\s*\|\n\|[-| :]+\|\n(?:\|[^\n]*\|\n?)*/g;
+  main = main.replace(meta, (blk) => (/분석\s*시점|카테고리|핵심\s*키워드/.test(blk) ? (removed.push('meta_table'), '\n') : blk));
+
+  // 목차 밖 H2 블록
+  const [cnPart, zonePart] = String(title ?? '').split(' — ');
+  const zoneCore = /([가-힣A-Za-z0-9-]+구역)/.exec(zonePart ?? '')?.[1] ?? '';
+  const echoes = (t: string) => (!!cnPart && cnPart.trim().length >= 3 && t.includes(cnPart.trim())) || (!!zoneCore && t.includes(zoneCore));
+  const parts = main.split(/(?=^##\s)/m);
+  main = parts.filter((p) => {
+    const h = /^##\s+([^\n]+)/.exec(p);
+    if (!h) return true;
+    const ok = (COMPACT_ALLOWED_H2.test(h[1]) || echoes(h[1])) && !new RegExp(COMPACT_FORBIDDEN_H2.source, 'm').test(p.split('\n')[0]);
+    if (!ok) removed.push(`## ${h[1]}`.slice(0, 60));
+    return ok;
+  }).join('');
+
+  // FAQ 7번째부터
+  const faqHead = /^##\s+[^\n]*자주\s*묻는\s*질문[^\n]*$/m.exec(main);
+  if (faqHead) {
+    const start = faqHead.index + faqHead[0].length;
+    const nx = main.slice(start).search(/\n##\s/);
+    const end = nx === -1 ? main.length : start + nx;
+    const faq = main.slice(start, end);
+    const qs = [...faq.matchAll(/^(?:#{3,4}\s*)?(?:\*\*)?Q[.0-9]/gm)];
+    if (qs.length > 6) {
+      const cutAt = qs[6].index!;
+      removed.push(`faq_${qs.length - 6}_trimmed`);
+      main = main.slice(0, start) + faq.slice(0, cutAt).replace(/\s+$/, '\n\n') + main.slice(end).replace(/^\n+/, '');
+    }
+  }
+  body = main + tail;
+  return { content: body, removed };
 }

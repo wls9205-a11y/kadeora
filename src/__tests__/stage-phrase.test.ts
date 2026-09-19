@@ -70,3 +70,43 @@ describe('주입 문형은 스캔2 fact 를 스스로 어기지 않는다', () =
     expect(s('힐스테이트 르네센트는 현재 초기 개발 단계에 있습니다.')).toBe(1);
   });
 });
+
+// BN-B4 — 거래 데이터 문형 · 절제기
+import { dataSection, injectDataSection } from '@/lib/content/stage-phrase';
+import { exciseCompact } from '@/lib/content/draft-scan2';
+
+describe('dataSection', () => {
+  const SITE = '- 지역: 부산 동래구\n- 같은 시군구 아파트 실거래(2026-04~2026-09, 1000건+): 중위 4억 8,800만원 — 단지를 특정하지 않은 시군구 전체 집계. 인용할 때 …';
+  it('블록 값을 수식어 없이', () => {
+    expect(dataSection(SITE)).toBe('부산 동래구 아파트 실거래(2026-04~2026-09, 1,000건 이상 집계)의 중위 거래가는 4억 8,800만원입니다. 단지를 특정하지 않은 시군구 전체 집계이므로 개별 단지의 가격과는 다를 수 있습니다.');
+  });
+  it('실거래 줄 없음 → 수치 없는 한 문장', () => {
+    expect(dataSection('- 지역: 부산 동래구')).toMatch(/집계가 충분하지 않아/);
+  });
+  it('주입 — 기존 섹션 교체', () => {
+    expect(injectDataSection('## 사업 단계\n가\n\n## 주변 거래 데이터\n중위 거래액은 상당 수준입니다.\n\n## 자주 묻는 질문\nQ.', 'X'))
+      .toBe('## 사업 단계\n가\n\n## 주변 거래 데이터\n\nX\n\n## 자주 묻는 질문\nQ.');
+  });
+});
+
+describe('exciseCompact', () => {
+  const T = '자이 더 센터니티 — 부곡2구역 재개발 현재 상황·일정 총정리';
+  it('메타 표 · 목차 밖 H2 · FAQ 7+ 절제, 관련 정보 이후 보존', () => {
+    const faq = Array.from({ length: 8 }, (_, i) => `**Q${i + 1}. 질문?**\nA. 답.`).join('\n\n');
+    const c = `## 현장 개요\n\n| 항목 | 내용 |\n|---|---|\n| 대상 | 부곡2 |\n| 카테고리 | 부동산 |\n| 분석 시점 | 2026-09-19 |\n\n본문\n\n## 투자 판단 시 주의사항\n일반론\n\n## 자주 묻는 질문\n\n${faq}\n\n## 관련 정보\n\n- [x](/apt)`;
+    const r = exciseCompact(c, T);
+    expect(r.removed).toEqual(['meta_table', '## 투자 판단 시 주의사항', 'faq_2_trimmed']);
+    expect(r.content).not.toContain('분석 시점');
+    expect(r.content).not.toContain('투자 판단');
+    expect(r.content).toContain('Q6.');
+    expect(r.content).not.toContain('Q7.');
+    expect(r.content).toContain('## 관련 정보');
+  });
+});
+
+describe('scan2 — 데이터 없는 데이터 섹션', () => {
+  it('숫자 0 → section', () => {
+    const d = scanDraft2({ title: '', content: '## 주변 거래 데이터\n중위 거래액은 상당 수준입니다.\n\n## 자주 묻는 질문', siteContext: '', constantsBlock: '', compact: true });
+    expect(d.map((x) => x.text)).toContain('## 주변 거래 데이터(수치 없음)');
+  });
+});

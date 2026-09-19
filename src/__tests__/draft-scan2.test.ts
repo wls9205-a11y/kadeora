@@ -139,7 +139,7 @@ describe('BN 3회차 — 비현장 경로 · 축약 금지 섹션', () => {
 
 describe('BN 3회차 — 축약 목차 화이트리스트', () => {
   it('규격 밖 H2 는 section, 규격 H2·관련 정보 이후 보강은 통과', () => {
-    const c = '## 현장 개요\n## 사업 단계\n## 현장 입지와 교통\n## 주변 거래 데이터\n## 자주 묻는 질문\n## 관심 고객 안내\n## 면책 조항\n\n## 관련 정보\n## 데이터 출처';
+    const c = '## 현장 개요\n## 사업 단계\n## 현장 입지와 교통\n## 주변 거래 데이터\n중위 4억 8,800만원\n## 자주 묻는 질문\n## 관심 고객 안내\n## 면책 조항\n\n## 관련 정보\n## 데이터 출처';
     const d = scanDraft2({ title: '', content: c, siteContext: SITE, constantsBlock: '', compact: true });
     expect(d.map((x) => x.text)).toEqual(['## 현장 입지와 교통']);
   });

@@ -20,7 +20,7 @@ const REDEV_STEPS = [
 const IDX: Record<string, number> = Object.fromEntries(REDEV_STEPS.map((s, i) => [s.key, i]));
 
 /** 조합원 자격 — 이 문형만 쓴다(세입자·거주자 조합원 단정 금지). */
-export const MEMBER_PHRASE = '재개발 조합원은 정비구역 안의 토지 또는 건축물 소유자(토지등소유자)이며, 구체적인 자격과 분양 신청 요건은 조합 정관과 관리처분계획에서 정해진다.';
+export const MEMBER_PHRASE = '재개발 조합원은 정비구역 안의 토지 또는 건축물 소유자(토지등소유자)이며, 구체적인 자격과 분양 신청 요건은 조합 정관과 관리처분계획에서 정해집니다.';
 
 export interface StageInput { stage: string | null | undefined; builder?: string | null; isRedev: boolean }
 
@@ -75,4 +75,40 @@ export function injectStageSection(content: string, section: string | null): str
   const nx = body.slice(after).search(/\n##\s/);
   const at = nx === -1 ? body.length : after + nx;
   return `${body.slice(0, at).replace(/\n+$/, '')}\n\n## 사업 단계${block}${body.slice(at).replace(/^\n+/, '')}`;
+}
+
+/**
+ * BN-B4 ② — 「주변 거래 데이터」 섹션도 확정 문형으로 채운다.
+ * 모델이 중위가에 「약·수준·~대」를 붙이면 RULES#149 추정 규칙이 막고 감산 편집이 숫자를 지워
+ * 「중위 거래액은 상당 수준」 같은 공허 문장이 남았다(112554·112555). 블록 값을 수식어 없이 그대로 싣는다.
+ * 블록에 실거래 줄이 없으면 수치 없이 «집계 부족» 한 문장.
+ */
+export function dataSection(siteContext: string): string {
+  const region = /^- 지역: ([^\n]+)/m.exec(siteContext ?? '')?.[1]?.trim() ?? '';
+  const m = /^- 같은 시군구 아파트 실거래\((\d{4})-(\d{2})~(\d{4})-(\d{2}), ([\d,]+)건(\+?)\): 중위 ([^—\n]+?)\s*—/m.exec(siteContext ?? '');
+  if (!m) return `${region ? `${region} ` : ''}아파트 실거래 집계가 충분하지 않아 이 글에는 거래가 수치를 싣지 않습니다. 단지별 시세는 현장 상세 페이지에서 확인할 수 있습니다.`;
+  const [, y1, m1, y2, m2, cnt, plus, median] = m;
+  const count = `${Number(cnt.replace(/,/g, '')).toLocaleString('ko-KR')}건${plus ? ' 이상' : ''}`;
+  return `${region ? `${region} ` : ''}아파트 실거래(${y1}-${m1}~${y2}-${m2}, ${count} 집계)의 중위 거래가는 ${median.trim()}입니다. `
+    + '단지를 특정하지 않은 시군구 전체 집계이므로 개별 단지의 가격과는 다를 수 있습니다.';
+}
+
+/** 「## 주변 거래 …」 섹션 본문을 교체. 섹션이 없으면 「## 사업 단계」 뒤(없으면 현장 개요 뒤)에 넣는다. */
+export function injectDataSection(content: string, section: string | null): string {
+  if (!section) return content;
+  const body = content ?? '';
+  const head = /^##\s+[^\n]*주변\s*거래[^\n]*$/m.exec(body);
+  const block = `\n\n${section}\n\n`;
+  if (head) {
+    const start = head.index + head[0].length;
+    const nx = body.slice(start).search(/\n##\s/);
+    const end = nx === -1 ? body.length : start + nx;
+    return body.slice(0, start) + block + body.slice(end).replace(/^\n+/, '');
+  }
+  const anchor = /^##\s+[^\n]*사업\s*단계[^\n]*$/m.exec(body) ?? /^##\s+[^\n]*현장\s*개요[^\n]*$/m.exec(body);
+  if (!anchor) return body;
+  const after = anchor.index + anchor[0].length;
+  const nx = body.slice(after).search(/\n##\s/);
+  const at = nx === -1 ? body.length : after + nx;
+  return `${body.slice(0, at).replace(/\n+$/, '')}\n\n## 주변 거래 데이터${block}${body.slice(at).replace(/^\n+/, '')}`;
 }

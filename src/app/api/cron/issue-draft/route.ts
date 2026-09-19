@@ -18,8 +18,8 @@ import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
 import { sortForGeneration } from '@/lib/content/realestate-priority';
 import { isLeadEligible } from '@/lib/apt/lead-eligibility';
 import { reviewHoldOf, reviewSwitches, isReviewHoldReason } from '@/lib/content/review-hold';
-import { injectStageSection } from '@/lib/content/stage-phrase';
-import { scanDraft2, enforceTitleSpec, PROMPT_LEAK_MARKER, extractInternalLinks, HARD_HOLD_RULES, LOCAL_EDIT_RULES, type Scan2Defect } from '@/lib/content/draft-scan2';
+import { injectStageSection, injectDataSection } from '@/lib/content/stage-phrase';
+import { exciseCompact, scanDraft2, enforceTitleSpec, PROMPT_LEAK_MARKER, extractInternalLinks, HARD_HOLD_RULES, LOCAL_EDIT_RULES, type Scan2Defect } from '@/lib/content/draft-scan2';
 
 /**
  * BN-B2 §4·§5 — 현장 글 축약 규격(raw_data.template='site_compact'). 제도 상수 블록은 싣지 않는다(loadIssueContext).
@@ -32,7 +32,7 @@ const COMPACT_SITE_RULES = `
 2. ## 현장 개요 — 단지명·시공사·사업 성격·위치(시·구·동까지만)·세대수(블록 값, 없으면 「미정」)
 3. ## 사업 단계 — 제목만 두고 본문은 한 문장 이하로 둔다(시스템이 확정 문형으로 채운다). 다른 섹션에서도 블록의 「사업 단계(확정)」와 다른 단계·조합 구성 여부를 쓰지 않는다
 ⛔ 조합원 자격은 「토지등소유자(구역 안 토지·건축물 소유자)」 문형만 — 세입자·거주자가 조합원이 된다고 쓰지 않는다.
-4. ## 주변 거래 데이터 — 블록의 시군구 실거래 줄(기간·건수·중위)만 그대로. 해석 괄호·기간 수식어 금지
+4. ## 주변 거래 데이터 — 제목만 두고 본문은 한 문장 이하(시스템이 블록 값으로 채운다). 중위 거래가는 이 섹션 밖(요약·FAQ)에서 반복하지 않는다
 5. ## 자주 묻는 질문 — 4~6문항(7문항 이상 금지), 현장 사실만
 6. 관심 고객 안내 — 현장 상세 링크로 청약·일정 알림 받기
 ⛔ 위 1~6 과 면책 외의 H2 섹션을 더하지 않는다(「분양가 및 계약 조건」「입지와 교통」「특성과 리스크」 등 금지).
@@ -141,7 +141,7 @@ async function generateArticle(issue: any, bigEventContext = '', siteContext = '
   const systemPrompt = `${bigEventContext ? bigEventContext + '\n' : ''}당신은 카더라(kadeora.app)의 수석 데이터 에디터입니다. ${isPreempt ? '분양 선점형 심층 분석' : catKo + ' 심층 분석'} 기사를 작성합니다.
 
 규칙:
-- 분량: ${compact ? '3,000~4,500자 (현장 사실 중심 — 제도 일반론을 쓰지 않는다)' : isPreempt ? '6,000~8,000자 (충분히 깊이 있게)' : '5,000~7,000자 (충분히 깊이 있게)'}
+- 분량: ${compact ? '2,300~4,500자 (현장 사실 중심 — 제도 일반론을 쓰지 않는다)' : isPreempt ? '6,000~8,000자 (충분히 깊이 있게)' : '5,000~7,000자 (충분히 깊이 있게)'}
 - H2 섹션: ${compact ? '4~6개' : '6~10개'} (## 형식)
 ${issue.category === 'apt' ? '- 마크다운 표는 «이 글의 현장» 데이터 블록에 표가 될 행이 있을 때만 만든다. 없으면 표를 만들지 않는다. 표는 많아도 5개 이하' : '- 마크다운 표(|---|): 최소 2개 (비교 분석 필수)'}
 ${compact ? '' : `- 핵심 수치 강조: **굵은 숫자**와 퍼센트를 적극 활용
@@ -356,7 +356,8 @@ function enrichVisuals(content: string, issue: any): string {
   }
 
   // 3. 테이블이 없으면 → 핵심 지표 요약 테이블 자동 삽입
-  if (!enriched.includes('|---')) {
+  // BN-B4 ⑥ — 부동산 글엔 메타 표(대상·카테고리·핵심 키워드·분석 시점)를 넣지 않는다 — 운영 메타 노출(D 계보).
+  if (!enriched.includes('|---') && category !== 'apt') {
     const catLabel: Record<string, string> = { apt: '부동산', stock: '주식/금융', finance: '재테크', economy: '경제' };
     const summaryTable = `\n\n| 항목 | 내용 |\n|---|---|\n| 대상 | ${entities} |\n| 카테고리 | ${catLabel[category] || '분석'} |\n| 핵심 키워드 | ${keywords.join(', ') || '분석, 전망'} |\n| 분석 시점 | ${new Date().toISOString().slice(0, 10)} |\n| 출처 | 카더라 데이터 분석 |\n\n`;
     const firstH2End = enriched.indexOf('\n', enriched.indexOf('\n## ') + 4);
@@ -670,6 +671,13 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
 
   // BN 4차 판독 ⑥' — 「사업 단계」 섹션 본문을 확정 문형으로 교체(축약 규격). 게이트·스캔2 가 교체본을 본다.
   if (ctx.stageText) article.content = injectStageSection(article.content, ctx.stageText);
+  // BN-B4 ②·① — 거래 데이터 문형 주입 + 섹션 절제(LLM 0). 절제 목록은 스캔2 기록으로.
+  let excised: string[] = [];
+  if (ctx.compact) {
+    article.content = injectDataSection(article.content, ctx.dataText ?? null);
+    const ex = exciseCompact(article.content, enforceTitleSpec(article.title, issue.raw_data).title);
+    article.content = ex.content; excised = ex.removed;
+  }
 
   // BN-2 ⑤ — 제목 규격(BN 글감만). 게이트가 «바뀐 제목» 을 보게 여기서 먼저.
   const titleFix = enforceTitleSpec(article.title, issue.raw_data);
@@ -694,7 +702,7 @@ async function processOneIssue(sb: any, issue: any, config: any): Promise<{ deci
   }
   if (issue.category === 'apt') {
     const s2 = await scan2Log(sb, article, ctx, titleFix.replaced);
-    const base = { gate_result: 'passed_first', first_unverified: [], checked: gate.checked };
+    const base = { gate_result: 'passed_first', first_unverified: [], checked: gate.checked, ...(excised.length ? { sections_removed: excised } : {}) };
     if (shouldScan2Edit(issue, s2.scan2.defects)) return queueScan2Edit(sb, issue, article, s2.scan2.defects, base);
     return finalizeArticle(sb, issue, config, article, { ...base, ...s2 });
   }
@@ -730,7 +738,9 @@ async function processScan2Edit(sb: any, issue: any, config: any, pending: any) 
   const revised = await editScan2Defects(article.content, defects, issue);
   if (revised) {
     const g = verifyIssueDraft(article.title, revised, allow);
-    if (g.ok) { used = { ...article, content: revised }; edited = true; }
+    // 주입 블록 보호 — LLM 편집이 확정 문형을 건드려도 다시 씌운다
+    const guarded = ctx.compact ? injectDataSection(injectStageSection(revised, ctx.stageText ?? null), ctx.dataText ?? null) : revised;
+    if (g.ok) { used = { ...article, content: guarded }; edited = true; }
   }
   const s2 = await scan2Log(sb, used, ctx, null);
   issue.raw_data = { ...(issue.raw_data ?? {}), edit_pending: undefined, scan2_edit_done: true };
@@ -776,8 +786,9 @@ async function processEditIssue(sb: any, issue: any, config: any): Promise<{ dec
     const revised = await editOutNumbers(article.content, first.bodyGate.unverified, issue);
     if (revised) {
       edited = true;
-      const second = verifyIssueDraft(article.title, revised, allow);
-      if (second.ok) article.content = revised;
+      const guarded = ctx.compact ? injectDataSection(injectStageSection(revised, ctx.stageText ?? null), ctx.dataText ?? null) : revised;
+      const second = verifyIssueDraft(article.title, guarded, allow);
+      if (second.ok) article.content = guarded;
       final = second;
     }
   }

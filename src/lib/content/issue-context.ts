@@ -10,7 +10,7 @@ import { anthropicFetch, llmCategoryOfContent } from '@/lib/llm/gateway';
 import { stripSyntheticPrice } from '@/lib/apt/synthetic-price';
 import { buildAllow, verifyNumbers, yearsIn } from '@/lib/content/number-verify';
 import { extractArticleText } from '@/lib/content/article-text';
-import { stageName, stageSection } from '@/lib/content/stage-phrase';
+import { stageName, stageSection, dataSection } from '@/lib/content/stage-phrase';
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const MODEL = 'claude-haiku-4-5-20251001';
@@ -283,7 +283,7 @@ export async function editScan2Defects(content: string, defects: Array<{ rule: s
   }
 }
 
-export interface IssueContext { siteContext: string; sourceText: string; constantsBlock: string; bigEventContext: string; compact?: boolean; stageText?: string | null }
+export interface IssueContext { siteContext: string; sourceText: string; constantsBlock: string; bigEventContext: string; compact?: boolean; stageText?: string | null; dataText?: string | null }
 
 /** 글감 1건의 입력 문맥 전부(생성 프롬프트와 게이트가 «같은 것» 을 본다). */
 export async function loadIssueContext(sb: any, issue: any): Promise<IssueContext> {
@@ -307,10 +307,13 @@ export async function loadIssueContext(sb: any, issue: any): Promise<IssueContex
   // ⑥' — 축약 규격은 「사업 단계」 섹션을 확정 문형으로 채운다(호출부가 생성 직후 주입).
   let stageText: string | null = null;
   if (compact && issue.apt_site_id) {
-    const { data: st } = await (sb as any).from('apt_sites').select('lifecycle_stage, builder, site_type, source_ids').eq('id', issue.apt_site_id).maybeSingle();
-    if (st) stageText = stageSection({ stage: st.lifecycle_stage, builder: st.builder, isRedev: st.site_type === 'redevelopment' || !!st.source_ids?.redev_id });
+    const { data: st } = await (sb as any).from('apt_sites').select('lifecycle_stage, builder, builder_normalized, site_type, source_ids').eq('id', issue.apt_site_id).maybeSingle();
+    // 시공사는 정규화명(「디엘이엔씨」 → 「DL이앤씨」, 112554)
+    const bn = Array.isArray(st?.builder_normalized) && st.builder_normalized.length > 0 ? st.builder_normalized.join(', ') : st?.builder;
+    if (st) stageText = stageSection({ stage: st.lifecycle_stage, builder: bn, isRedev: st.site_type === 'redevelopment' || !!st.source_ids?.redev_id });
   }
-  return { siteContext, sourceText, constantsBlock, bigEventContext, compact, stageText };
+  const dataText = compact ? dataSection(siteContext) : null;
+  return { siteContext, sourceText, constantsBlock, bigEventContext, compact, stageText, dataText };
 }
 
 /** 허용 목록. ⛔ raw_data 의 blocked_draft·edit_pending(지난 초안)은 넣지 않는다 — 넣으면 환각 숫자가 스스로를 허가한다. */
