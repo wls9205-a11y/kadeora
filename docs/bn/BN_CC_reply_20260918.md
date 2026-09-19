@@ -572,3 +572,38 @@ WHERE blog_post_id IN (SELECT id FROM p) RETURNING id, blog_post_id;
 - issue-draft 의 EX-B 잠금 회수(`is_processed=true` · `publish_decision IS NULL` · `blog_post_id IS NULL` · processed_at 8분~6시간)가 defer 행을 «죽은 잠금» 으로 보고 07:30Z 에 되살렸다 → 한도분 5는 다시 `CRON_TYPE_DAILY_LIMIT` 실패, 3은 옛 프롬프트로 edit_pending. **신규 글 0**(image-attach 봉인 유효).
 - 재봉인: 11행 `publish_decision='deferred'` + `fail_reason='bn_defer_limit_kst0'` (판정이 채워져 회수 대상 밖). 해제 스크립트도 publish_decision 을 함께 비운다.
 - 이전 회차 defer 가 무사했던 것은 processed_at 이 NULL 이었거나 8분 안에 풀었기 때문. **이후 defer 는 반드시 publish_decision 을 채운다.**
+
+---
+
+# 17차 — 7차 판독(BN-C 1묶음) 반영 · 판정 ①② 집행 (2026-09-19)
+
+## 판정 ① BP 13편 — 즉시 내림 + FW 규격 재생성
+- 원자 1문: `is_published=false · auto_unpublished_at=now() · auto_unpublished_reason='hold:bp_shadow_fail'` — **RETURNING 13**:
+  112434, 112435, 112437, 112438, 112439, 112440, 112441, 112442, 112443, 112445, 112446, 112447, 112448. 본문 무수정.
+- 글감 13 전환(원자 1문, RETURNING 13): source_type `bp70_hub → fw_hub` · template site_compact · raw_data 재작성(batch `FW-bp-regen`, `doc` 키 제거 → bp 판독 모드 매칭 해제, superseded_post 보존) · 제목 FW 규격 · 운영 표기 0.
+  축: presale 8(112434·435·437·441·442·443·447·448) · redev 3(112438·439·440) · move_in 2(112445·446).
+- 재생성분은 `hold:fw_review` 로 제 판독 → BN-C 와 함께 일괄 개통 대기열.
+- ⚠️ 남는 일: 내린 13편의 옛 slug 는 지금 404. 재생성분 개통 때 옛 slug → 새 slug 301 을 merged-slugs 에 같이 싣는다(개통 1문과 같은 창).
+- `부경경마공원역`·`대연역` 이 현장명에 들어간 2편: place 룰은 현장 블록에 있는 이름을 이미 제외(draft-scan2 303행) — 재생성 오탐 없음 확인.
+
+## 판정 ② FW 일 캡 30
+- app_config `fw.daily_cap = 30`(신설) · `capLeft()` 가 KST 일 창의 fw_hub 적재 수로 회전·훅 모두 제한(04d46852). count:exact 핫패스 가드 준수(limit(cap) 행 수).
+- 상향은 전환 스위치 on 창에서 이 설정값 1회.
+
+## 판독 반영 — 치환 3 + 재스캔 추가 1 (백업 blog_posts_content_backup_bn_20260919 4행)
+| id | 치환 |
+|---|---|
+| 112569 중동5 | 「조합 구성과 후속 행정절차를 거친 뒤 … 발표될 예정입니다」 → 「관리처분계획인가 → 이주·철거 → 착공 순서의 남은 절차를 거친 뒤 … 발표됩니다」 · 「해운대구 중동동」 ×2 → 「해운대구 중동」(apt_sites.dong=중동) |
+| 112573 용호2 | 「구체적 자격 기준과 조합 구성은 사업 공고 및 조합 설립 단계에서 확정됩니다」 → 주입 문형 정관 문장 「구체적인 자격과 분양 신청 요건은 조합 정관과 관리처분계획에서 정해집니다」 |
+| 112576 김해외동 | 「조합원(토지등소유자·구역 안 토지·건축물 소유자)」 → 「조합원(정비구역 안의 건축물 및 그 부속토지 소유자 가운데 재건축사업에 동의한 사람)」 |
+| **112572 광안5** (판독 통과분) | 보강 패턴 재스캔에서 적발: 조합설립인가(union_established) 현장인데 「조합 설립 및 인가 절차가 진행되고 있습니다」 → 「조합은 설립 인가를 받은 상태이며, 다음 절차는 사업시행계획인가입니다」 |
+- 재스캔: 대기열 5편(112569·112570·112572·112573·112576) **clean 5/5**.
+- 판독 참고(치환 안 함): 112576 FAQ 「조합원은 우선 청약 기회」 — 조합원 몫은 청약이 아니라 관리처분계획에 따른 분양 신청. 승인 범위 밖이라 표시만.
+
+## 레일 수리 (04d46852)
+- **잠복 결함 발견·수리:** 주입 문형 MEMBER_PHRASE 가 「재개발 조합원은 … 토지 또는 건축물 소유자」 하나뿐이라 BN-C 재건축 현장 4(남천2-3·반여4·사직1-5·반여3-1)에 재개발 정의가 들어갈 참이었다. 도시정비법(2026-07-01 시행판, DRF MST 284065) 원문 대조:
+  제2조 제9호 나목 「재건축사업의 경우에는 정비구역에 위치한 건축물 및 그 부속토지의 소유자」 · 제39조 ① 「(재건축사업의 경우에는 재건축사업에 동의한 자만 해당한다)」 → `MEMBER_PHRASE_RECON`, 현장명·slug 의 「재건축」으로 분기. 재생성 전(KST 0시 해제 전) 반영.
+- 스캔2 조합 미구성 변형 2 추가. 프롬프트 조합원 문형 규칙을 재개발/재건축 구분으로 교체.
+
+## 해제 대기 — KST 0시(15:01Z) 24건
+- `fail_reason='bn_defer_limit_kst0' · publish_decision='deferred'`: BN-C 11 + FW-bp-regen 13. 한도 60 안(뉴스 몫 36 남음).
